@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef, useCallback } from "react";
 import { motion } from "framer-motion";
 import { Progress } from "./ui/progress";
@@ -195,9 +194,9 @@ const ArticleViewer = ({ articles: initialArticles, onArticleChange }) => {
               y: isVisible && currentIndex === index ? 0 : 20,
             }}
             transition={{ duration: 0.5 }}
-            className={`relative z-10 text-white p-4 sm:p-8 max-w-3xl mx-auto h-full flex flex-col ${isMobile ? 'justify-center' : 'justify-end pb-20'}`}
+            className={`relative z-10 text-white p-4 sm:p-8 max-w-3xl mx-auto h-full flex flex-col ${isMobile ? 'justify-center' : 'justify-center items-center'}`}
           >
-            <div className={`${isMobile ? 'bg-black/40 backdrop-blur-sm rounded-lg p-4 max-h-[70vh] overflow-y-auto' : ''}`}>
+            <div className={`${isMobile ? 'bg-black/40 backdrop-blur-sm rounded-lg p-4 max-h-[70vh] overflow-y-auto' : 'text-center'}`}>
               <div className="space-y-4">
                 <h1 className="text-2xl sm:text-4xl font-bold">{article.title}</h1>
                 {isMobile ? (
@@ -205,18 +204,15 @@ const ArticleViewer = ({ articles: initialArticles, onArticleChange }) => {
                     {currentIndex === index ? displayedText : article.content}
                   </div>
                 ) : (
-                  <ScrollArea 
-                    ref={contentRef}
-                    className="flex-1 max-h-[60vh] sm:max-h-none mb-4"
-                  >
+                  <div className="max-w-2xl">
                     <p className="text-sm sm:text-lg leading-relaxed">
                       {currentIndex === index ? displayedText : article.content}
                     </p>
-                  </ScrollArea>
+                  </div>
                 )}
               </div>
             </div>
-            <div className={`flex items-center space-x-2 text-xs sm:text-sm text-gray-300 flex-shrink-0 ${isMobile ? 'mt-4' : ''}`}>
+            <div className={`flex items-center space-x-2 text-xs sm:text-sm text-gray-300 flex-shrink-0 ${isMobile ? 'mt-4' : 'mt-6'}`}>
               <span>{article.readTime} min read</span>
               <span>•</span>
               <span>{article.views.toLocaleString()} views</span>
