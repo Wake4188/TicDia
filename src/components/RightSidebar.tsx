@@ -1,6 +1,45 @@
+
+import { useState, useEffect } from "react";
 import { Bookmark, Share2, Edit, BookOpen } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/components/ui/use-toast";
+import { useNavigate } from "react-router-dom";
 
 const RightSidebar = ({ article }) => {
+  const { user } = useAuth();
+  const { toast } = useToast();
+  const navigate = useNavigate();
+  const [isSaved, setIsSaved] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Check if article is already saved when component mounts or user/article changes
+  useEffect(() => {
+    const checkIfSaved = async () => {
+      if (!user || !article) return;
+
+      try {
+        const { data, error } = await supabase
+          .from('saved_articles')
+          .select('id')
+          .eq('user_id', user.id)
+          .eq('article_id', article.id)
+          .maybeSingle();
+
+        if (error) {
+          console.error('Error checking saved status:', error);
+          return;
+        }
+
+        setIsSaved(!!data);
+      } catch (error) {
+        console.error('Error checking saved status:', error);
+      }
+    };
+
+    checkIfSaved();
+  }, [user, article]);
+
   const handleWikipediaRedirect = () => {
     const baseUrl = "https://en.wikipedia.org/wiki/";
     const articleTitle = encodeURIComponent(article.title);
@@ -22,7 +61,10 @@ const RightSidebar = ({ article }) => {
       }).catch(console.error);
     } else {
       navigator.clipboard.writeText(shareUrl).then(() => {
-        console.log('URL copied to clipboard');
+        toast({
+          title: "Link copied!",
+          description: "Article link has been copied to your clipboard.",
+        });
       }).catch(console.error);
     }
   };
@@ -33,29 +75,89 @@ const RightSidebar = ({ article }) => {
     window.open(`${baseUrl}edit/${articleTitle}`, '_blank');
   };
 
-  const handleBookmark = () => {
-    const bookmarks = JSON.parse(localStorage.getItem('wikitok-bookmarks') || '[]');
-    const isBookmarked = bookmarks.some(bookmark => bookmark.title === article.title);
-    
-    if (isBookmarked) {
-      const newBookmarks = bookmarks.filter(bookmark => bookmark.title !== article.title);
-      localStorage.setItem('wikitok-bookmarks', JSON.stringify(newBookmarks));
-    } else {
-      bookmarks.push({
-        title: article.title,
-        timestamp: new Date().toISOString()
+  const handleBookmark = async () => {
+    // If user is not logged in, prompt them to authenticate
+    if (!user) {
+      toast({
+        title: "Sign in required",
+        description: "Please sign in to save articles to your collection.",
+        action: (
+          <button
+            onClick={() => navigate('/auth')}
+            className="bg-wikitok-red text-white px-3 py-1 rounded text-sm hover:bg-wikitok-red/90"
+          >
+            Sign In
+          </button>
+        ),
       });
-      localStorage.setItem('wikitok-bookmarks', JSON.stringify(bookmarks));
+      return;
+    }
+
+    if (isLoading) return;
+    setIsLoading(true);
+
+    try {
+      if (isSaved) {
+        // Remove from saved articles
+        const { error } = await supabase
+          .from('saved_articles')
+          .delete()
+          .eq('user_id', user.id)
+          .eq('article_id', article.id);
+
+        if (error) {
+          throw error;
+        }
+
+        setIsSaved(false);
+        toast({
+          title: "Article removed",
+          description: "Article has been removed from your saved collection.",
+        });
+      } else {
+        // Add to saved articles
+        const { error } = await supabase
+          .from('saved_articles')
+          .insert({
+            user_id: user.id,
+            article_id: article.id,
+            article_title: article.title,
+            article_url: `https://en.wikipedia.org/wiki/${encodeURIComponent(article.title)}`
+          });
+
+        if (error) {
+          throw error;
+        }
+
+        setIsSaved(true);
+        toast({
+          title: "Article saved!",
+          description: "Article has been added to your saved collection.",
+        });
+      }
+    } catch (error) {
+      console.error('Error saving article:', error);
+      toast({
+        title: "Error",
+        description: "Failed to save article. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
     <div className="fixed right-4 bottom-20 flex flex-col items-center space-y-4 z-50">
       <div className="flex flex-col items-center">
-        <button className="sidebar-icon" onClick={handleBookmark}>
-          <Bookmark className="w-7 h-7" />
+        <button 
+          className={`sidebar-icon ${isSaved ? 'text-wikitok-red' : ''} ${isLoading ? 'opacity-50' : ''}`} 
+          onClick={handleBookmark}
+          disabled={isLoading}
+        >
+          <Bookmark className={`w-7 h-7 ${isSaved ? 'fill-current' : ''}`} />
         </button>
-        <span className="text-xs mt-1">Save</span>
+        <span className="text-xs mt-1">{isSaved ? 'Saved' : 'Save'}</span>
       </div>
       
       <div className="flex flex-col items-center">
@@ -76,7 +178,7 @@ const RightSidebar = ({ article }) => {
         <button className="sidebar-icon" onClick={handleWikipediaRedirect}>
           <BookOpen className="w-7 h-7" />
         </button>
-        <span className="text-xs mt-1">View</span> {/* Updated text here */}
+        <span className="text-xs mt-1">View</span>
       </div>
     </div>
   );
