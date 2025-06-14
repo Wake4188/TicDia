@@ -15,12 +15,14 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <Router>
-          <Navigation />
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/discover" element={<Discover />} />
-            <Route path="/auth" element={<Auth />} />
-          </Routes>
+          <div className="min-h-screen bg-black">
+            <Navigation />
+            <Routes>
+              <Route path="/" element={<Index />} />
+              <Route path="/discover" element={<Discover />} />
+              <Route path="/auth" element={<Auth />} />
+            </Routes>
+          </div>
         </Router>
       </AuthProvider>
     </QueryClientProvider>
