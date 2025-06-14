@@ -13,9 +13,21 @@ const ArticleViewer = ({ articles: initialArticles, onArticleChange }) => {
   const [progress, setProgress] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   const [isScrolling, setIsScrolling] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const currentArticle = articles[currentIndex];
+
+  // Detect mobile device
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   const loadMoreArticles = useCallback(async () => {
     if (isLoading) return;
@@ -65,8 +77,10 @@ const ArticleViewer = ({ articles: initialArticles, onArticleChange }) => {
     return () => clearInterval(interval);
   }, [isVisible, currentArticle?.content]);
 
-  // Enhanced touch handling for mobile
+  // Mobile-only touch handling
   useEffect(() => {
+    if (!isMobile) return;
+    
     const container = containerRef.current;
     if (!container) return;
 
@@ -100,7 +114,7 @@ const ArticleViewer = ({ articles: initialArticles, onArticleChange }) => {
       const velocity = Math.abs(deltaY) / deltaTime;
 
       // Only navigate if it's a fast swipe and not content scrolling
-      if (!isScrolling && velocity > 0.5 && Math.abs(deltaY) > 50) {
+      if (!isScrolling && velocity > 0.8 && Math.abs(deltaY) > 80) {
         if (deltaY > 0 && currentIndex < articles.length - 1) {
           // Swipe up - next article
           setCurrentIndex(currentIndex + 1);
@@ -122,10 +136,12 @@ const ArticleViewer = ({ articles: initialArticles, onArticleChange }) => {
       container.removeEventListener('touchmove', handleTouchMove);
       container.removeEventListener('touchend', handleTouchEnd);
     };
-  }, [currentIndex, articles.length, isScrolling]);
+  }, [currentIndex, articles.length, isScrolling, isMobile]);
 
-  // Desktop scroll handling
+  // Desktop-only scroll handling
   useEffect(() => {
+    if (isMobile) return;
+    
     const container = containerRef.current;
     if (!container) return;
 
@@ -151,12 +167,12 @@ const ArticleViewer = ({ articles: initialArticles, onArticleChange }) => {
     return () => {
       articleElements.forEach((article) => observer.unobserve(article));
     };
-  }, [articles]);
+  }, [articles, isMobile]);
 
   return (
     <main 
       ref={containerRef} 
-      className="h-screen w-screen overflow-y-scroll snap-y snap-mandatory md:overflow-y-scroll"
+      className={`h-screen w-screen ${isMobile ? 'overflow-hidden' : 'overflow-y-scroll'} snap-y snap-mandatory`}
     >
       {articles.map((article, index) => (
         <div 
@@ -179,20 +195,28 @@ const ArticleViewer = ({ articles: initialArticles, onArticleChange }) => {
               y: isVisible && currentIndex === index ? 0 : 20,
             }}
             transition={{ duration: 0.5 }}
-            className="relative z-10 text-white p-4 sm:p-8 max-w-3xl mx-auto h-full flex flex-col justify-end pb-20"
+            className={`relative z-10 text-white p-4 sm:p-8 max-w-3xl mx-auto h-full flex flex-col ${isMobile ? 'justify-center' : 'justify-end pb-20'}`}
           >
-            <ScrollArea 
-              ref={contentRef}
-              className="flex-1 max-h-[60vh] sm:max-h-none mb-4"
-            >
+            <div className={`${isMobile ? 'bg-black/40 backdrop-blur-sm rounded-lg p-4 max-h-[70vh] overflow-y-auto' : ''}`}>
               <div className="space-y-4">
                 <h1 className="text-2xl sm:text-4xl font-bold">{article.title}</h1>
-                <p className="text-sm sm:text-lg leading-relaxed">
-                  {currentIndex === index ? displayedText : article.content}
-                </p>
+                {isMobile ? (
+                  <div className="text-sm sm:text-lg leading-relaxed">
+                    {currentIndex === index ? displayedText : article.content}
+                  </div>
+                ) : (
+                  <ScrollArea 
+                    ref={contentRef}
+                    className="flex-1 max-h-[60vh] sm:max-h-none mb-4"
+                  >
+                    <p className="text-sm sm:text-lg leading-relaxed">
+                      {currentIndex === index ? displayedText : article.content}
+                    </p>
+                  </ScrollArea>
+                )}
               </div>
-            </ScrollArea>
-            <div className="flex items-center space-x-2 text-xs sm:text-sm text-gray-300 flex-shrink-0">
+            </div>
+            <div className={`flex items-center space-x-2 text-xs sm:text-sm text-gray-300 flex-shrink-0 ${isMobile ? 'mt-4' : ''}`}>
               <span>{article.readTime} min read</span>
               <span>•</span>
               <span>{article.views.toLocaleString()} views</span>
@@ -208,11 +232,13 @@ const ArticleViewer = ({ articles: initialArticles, onArticleChange }) => {
             </div>
           )}
           {/* Mobile navigation hint */}
-          <div className="absolute bottom-24 right-4 z-20 md:hidden">
-            <div className="text-white/60 text-xs bg-black/40 px-2 py-1 rounded">
-              Swipe up/down
+          {isMobile && (
+            <div className="absolute bottom-24 right-4 z-20">
+              <div className="text-white/60 text-xs bg-black/40 px-2 py-1 rounded">
+                Swipe up/down
+              </div>
             </div>
-          </div>
+          )}
         </div>
       ))}
       {isLoading && (
