@@ -1,7 +1,9 @@
+
 import { useState, useEffect, useRef, useCallback } from "react";
 import { motion } from "framer-motion";
 import { Progress } from "./ui/progress";
 import { getRandomArticles, getRelatedArticles } from "../services/wikipediaService";
+import { ScrollArea } from "./ui/scroll-area";
 
 const ArticleViewer = ({ articles: initialArticles, onArticleChange }) => {
   const [articles, setArticles] = useState(initialArticles);
@@ -10,7 +12,9 @@ const ArticleViewer = ({ articles: initialArticles, onArticleChange }) => {
   const [displayedText, setDisplayedText] = useState("");
   const [progress, setProgress] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
+  const [isScrolling, setIsScrolling] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
   const currentArticle = articles[currentIndex];
 
   const loadMoreArticles = useCallback(async () => {
@@ -56,11 +60,71 @@ const ArticleViewer = ({ articles: initialArticles, onArticleChange }) => {
       } else {
         clearInterval(interval);
       }
-    }, 20); // Changed from 50ms to 20ms for faster streaming
+    }, 20);
 
     return () => clearInterval(interval);
   }, [isVisible, currentArticle?.content]);
 
+  // Enhanced touch handling for mobile
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    let startY = 0;
+    let startTime = 0;
+    let isContentScrollable = false;
+
+    const handleTouchStart = (e: TouchEvent) => {
+      startY = e.touches[0].clientY;
+      startTime = Date.now();
+      
+      // Check if content is scrollable
+      const contentElement = contentRef.current;
+      if (contentElement) {
+        isContentScrollable = contentElement.scrollHeight > contentElement.clientHeight;
+      }
+      setIsScrolling(false);
+    };
+
+    const handleTouchMove = (e: TouchEvent) => {
+      if (isContentScrollable) {
+        setIsScrolling(true);
+      }
+    };
+
+    const handleTouchEnd = (e: TouchEvent) => {
+      const endY = e.changedTouches[0].clientY;
+      const endTime = Date.now();
+      const deltaY = startY - endY;
+      const deltaTime = endTime - startTime;
+      const velocity = Math.abs(deltaY) / deltaTime;
+
+      // Only navigate if it's a fast swipe and not content scrolling
+      if (!isScrolling && velocity > 0.5 && Math.abs(deltaY) > 50) {
+        if (deltaY > 0 && currentIndex < articles.length - 1) {
+          // Swipe up - next article
+          setCurrentIndex(currentIndex + 1);
+        } else if (deltaY < 0 && currentIndex > 0) {
+          // Swipe down - previous article
+          setCurrentIndex(currentIndex - 1);
+        }
+      }
+
+      setTimeout(() => setIsScrolling(false), 100);
+    };
+
+    container.addEventListener('touchstart', handleTouchStart, { passive: true });
+    container.addEventListener('touchmove', handleTouchMove, { passive: true });
+    container.addEventListener('touchend', handleTouchEnd, { passive: true });
+
+    return () => {
+      container.removeEventListener('touchstart', handleTouchStart);
+      container.removeEventListener('touchmove', handleTouchMove);
+      container.removeEventListener('touchend', handleTouchEnd);
+    };
+  }, [currentIndex, articles.length, isScrolling]);
+
+  // Desktop scroll handling
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
@@ -92,7 +156,7 @@ const ArticleViewer = ({ articles: initialArticles, onArticleChange }) => {
   return (
     <main 
       ref={containerRef} 
-      className="h-screen w-screen overflow-y-scroll snap-y snap-mandatory"
+      className="h-screen w-screen overflow-y-scroll snap-y snap-mandatory md:overflow-y-scroll"
     >
       {articles.map((article, index) => (
         <div 
@@ -106,7 +170,7 @@ const ArticleViewer = ({ articles: initialArticles, onArticleChange }) => {
               alt={article.title}
               className="w-full h-full object-cover"
             />
-            <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/30 to-black/60" />
+            <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/30 to-black/70" />
           </div>
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -115,13 +179,20 @@ const ArticleViewer = ({ articles: initialArticles, onArticleChange }) => {
               y: isVisible && currentIndex === index ? 0 : 20,
             }}
             transition={{ duration: 0.5 }}
-            className="relative z-10 text-white p-8 max-w-3xl mx-auto"
+            className="relative z-10 text-white p-4 sm:p-8 max-w-3xl mx-auto h-full flex flex-col justify-end pb-20"
           >
-            <h1 className="text-4xl font-bold mb-4">{article.title}</h1>
-            <p className="text-lg leading-relaxed mb-12">
-              {currentIndex === index ? displayedText : article.content}
-            </p>
-            <div className="flex items-center space-x-2 text-sm text-gray-300">
+            <ScrollArea 
+              ref={contentRef}
+              className="flex-1 max-h-[60vh] sm:max-h-none mb-4"
+            >
+              <div className="space-y-4">
+                <h1 className="text-2xl sm:text-4xl font-bold">{article.title}</h1>
+                <p className="text-sm sm:text-lg leading-relaxed">
+                  {currentIndex === index ? displayedText : article.content}
+                </p>
+              </div>
+            </ScrollArea>
+            <div className="flex items-center space-x-2 text-xs sm:text-sm text-gray-300 flex-shrink-0">
               <span>{article.readTime} min read</span>
               <span>•</span>
               <span>{article.views.toLocaleString()} views</span>
@@ -136,6 +207,12 @@ const ArticleViewer = ({ articles: initialArticles, onArticleChange }) => {
               />
             </div>
           )}
+          {/* Mobile navigation hint */}
+          <div className="absolute bottom-24 right-4 z-20 md:hidden">
+            <div className="text-white/60 text-xs bg-black/40 px-2 py-1 rounded">
+              Swipe up/down
+            </div>
+          </div>
         </div>
       ))}
       {isLoading && (
