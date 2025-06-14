@@ -1,4 +1,4 @@
-import { Search, Compass } from "lucide-react";
+import { Search, Compass, User } from "lucide-react";
 import {
   Command,
   CommandDialog,
@@ -13,6 +13,7 @@ import { useNavigate, useSearchParams, useLocation } from "react-router-dom";
 import { searchArticles, getRandomArticles } from "../services/wikipediaService";
 import { useQuery } from "@tanstack/react-query";
 import { useToast } from "@/components/ui/use-toast";
+import { useAuth } from "../contexts/AuthContext";
 
 const Navigation = () => {
   const [open, setOpen] = useState(false);
@@ -20,6 +21,7 @@ const Navigation = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { toast } = useToast();
+  const { user, signOut } = useAuth();
   const [searchParams] = useSearchParams();
 
   useEffect(() => {
@@ -88,6 +90,18 @@ const Navigation = () => {
     }
   };
 
+  const handleAuthClick = () => {
+    if (user) {
+      signOut();
+      toast({
+        title: "Signed out",
+        description: "You have been successfully signed out.",
+      });
+    } else {
+      navigate("/auth");
+    }
+  };
+
   const isDiscoverPage = location.pathname === "/discover";
 
   return (
@@ -112,13 +126,31 @@ const Navigation = () => {
             {searchValue || "Search articles"}
           </span>
         </div>
-        <div className="flex space-x-6">
+        <div className="flex space-x-6 items-center">
           <Compass 
             className={`w-5 h-5 cursor-pointer transition-colors ${
               location.pathname === "/discover" ? "text-wikitok-red" : "text-white"
             }`}
             onClick={handleDiscoverClick}
           />
+          <div 
+            className="flex items-center gap-2 cursor-pointer text-white hover:text-wikitok-red transition-colors"
+            onClick={handleAuthClick}
+          >
+            {user ? (
+              <>
+                <div className="w-6 h-6 bg-wikitok-red rounded-full flex items-center justify-center text-xs text-white font-bold">
+                  {user.email?.charAt(0).toUpperCase()}
+                </div>
+                <span className="text-sm hidden sm:block">Sign Out</span>
+              </>
+            ) : (
+              <>
+                <User className="w-5 h-5" />
+                <span className="text-sm hidden sm:block">Sign In</span>
+              </>
+            )}
+          </div>
         </div>
       </div>
 
