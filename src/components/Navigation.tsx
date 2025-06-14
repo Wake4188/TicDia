@@ -92,11 +92,7 @@ const Navigation = () => {
 
   const handleAuthClick = () => {
     if (user) {
-      signOut();
-      toast({
-        title: "Signed out",
-        description: "You have been successfully signed out.",
-      });
+      navigate("/profile");
     } else {
       navigate("/auth");
     }
@@ -142,7 +138,7 @@ const Navigation = () => {
                 <div className="w-6 h-6 bg-wikitok-red rounded-full flex items-center justify-center text-xs text-white font-bold">
                   {user.email?.charAt(0).toUpperCase()}
                 </div>
-                <span className="text-sm hidden sm:block">Sign Out</span>
+                <span className="text-sm hidden sm:block">Profile</span>
               </>
             ) : (
               <>

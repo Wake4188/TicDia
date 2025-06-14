@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef, useCallback } from "react";
 import { motion } from "framer-motion";
 import { Progress } from "./ui/progress";
@@ -14,9 +13,25 @@ const ArticleViewer = ({ articles: initialArticles, onArticleChange }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [isScrolling, setIsScrolling] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const [userPreferences, setUserPreferences] = useState({
+    fontFamily: 'Inter',
+    backgroundOpacity: 70
+  });
   const containerRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const currentArticle = articles[currentIndex];
+
+  // Load user preferences
+  useEffect(() => {
+    const savedPrefs = localStorage.getItem('userPreferences');
+    if (savedPrefs) {
+      const prefs = JSON.parse(savedPrefs);
+      setUserPreferences(prefs);
+      // Apply preferences immediately
+      document.documentElement.style.setProperty('--user-font-family', prefs.fontFamily);
+      document.documentElement.style.setProperty('--background-opacity', `${prefs.backgroundOpacity}%`);
+    }
+  }, []);
 
   // Detect mobile device
   useEffect(() => {
@@ -187,7 +202,12 @@ const ArticleViewer = ({ articles: initialArticles, onArticleChange }) => {
               alt={article.title}
               className="w-full h-full object-cover"
             />
-            <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/30 to-black/70" />
+            <div 
+              className="absolute inset-0 bg-black"
+              style={{ 
+                background: `linear-gradient(to bottom, transparent, rgba(0,0,0,0.3), rgba(0,0,0,${userPreferences.backgroundOpacity / 100}))` 
+              }}
+            />
           </div>
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -200,14 +220,25 @@ const ArticleViewer = ({ articles: initialArticles, onArticleChange }) => {
           >
             <div className={`${isMobile ? 'bg-black/40 backdrop-blur-sm rounded-lg p-4 max-h-[70vh] overflow-y-auto' : 'text-center'}`}>
               <div className="space-y-4">
-                <h1 className="text-2xl sm:text-4xl font-bold">{article.title}</h1>
+                <h1 
+                  className="text-2xl sm:text-4xl font-bold"
+                  style={{ fontFamily: userPreferences.fontFamily }}
+                >
+                  {article.title}
+                </h1>
                 {isMobile ? (
-                  <div className="text-sm sm:text-lg leading-relaxed">
+                  <div 
+                    className="text-sm sm:text-lg leading-relaxed"
+                    style={{ fontFamily: userPreferences.fontFamily }}
+                  >
                     {currentIndex === index ? displayedText : article.content}
                   </div>
                 ) : (
                   <div className="max-w-2xl">
-                    <p className="text-sm sm:text-lg leading-relaxed">
+                    <p 
+                      className="text-sm sm:text-lg leading-relaxed"
+                      style={{ fontFamily: userPreferences.fontFamily }}
+                    >
                       {currentIndex === index ? displayedText : article.content}
                     </p>
                   </div>
