@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useRef, useCallback } from "react";
 import { motion } from "framer-motion";
 import { Progress } from "./ui/progress";
@@ -59,19 +60,20 @@ const ArticleViewer = ({ articles: initialArticles, onArticleChange }) => {
   useEffect(() => {
     if (!isVisible || !currentArticle?.content) return;
 
-    let currentChar = 0;
     const text = currentArticle.content;
-    const totalChars = text.length;
+    const words = text.split(' ');
+    let currentWordIndex = 0;
 
     const interval = setInterval(() => {
-      if (currentChar <= totalChars) {
-        setDisplayedText(text.slice(0, currentChar));
-        setProgress((currentChar / totalChars) * 100);
-        currentChar++;
+      if (currentWordIndex < words.length) {
+        const wordsToShow = words.slice(0, currentWordIndex + 1);
+        setDisplayedText(wordsToShow.join(' '));
+        setProgress(((currentWordIndex + 1) / words.length) * 100);
+        currentWordIndex++;
       } else {
         clearInterval(interval);
       }
-    }, 20);
+    }, 80); // Slower animation - 80ms per word instead of 20ms per character
 
     return () => clearInterval(interval);
   }, [isVisible, currentArticle?.content]);
