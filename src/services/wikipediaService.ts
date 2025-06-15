@@ -1,6 +1,8 @@
+
 import { WikipediaArticle, WikipediaResponse } from './types';
 import { fetchWikipediaContent } from './wikipediaApi';
 import { transformToArticle } from './articleTransformer';
+import { sortByRelevance } from './searchUtils';
 
 const getRelatedArticles = async (article: WikipediaArticle): Promise<WikipediaArticle[]> => {
   try {
@@ -11,7 +13,7 @@ const getRelatedArticles = async (article: WikipediaArticle): Promise<WikipediaA
       origin: '*',
       list: 'categorymembers',
       cmtitle: categoryTitles,
-      cmlimit: '10', // Increased from 5 to ensure we get enough valid articles
+      cmlimit: '10',
       cmtype: 'page'
     });
 
@@ -42,7 +44,7 @@ const getRelatedArticles = async (article: WikipediaArticle): Promise<WikipediaA
 const getRandomArticles = async (count: number = 3, category?: string): Promise<WikipediaArticle[]> => {
   try {
     let titles: string[];
-    const multiplier = 3; // Request more articles to ensure we get enough valid ones
+    const multiplier = 3;
     
     if (category && category !== "All") {
       const params = new URLSearchParams({
@@ -85,7 +87,6 @@ const getRandomArticles = async (count: number = 3, category?: string): Promise<
     const articles = await Promise.all(pages.map(transformToArticle));
     const validArticles = articles.filter(article => article !== null) as WikipediaArticle[];
     
-    // If we don't have enough articles, fetch more
     if (validArticles.length < count) {
       const moreArticles = await getRandomArticles(count - validArticles.length, category);
       return [...validArticles, ...moreArticles].slice(0, count);
@@ -102,27 +103,54 @@ const searchArticles = async (query: string): Promise<WikipediaArticle[]> => {
   if (!query || query.length < 3) return [];
 
   try {
-    const params = new URLSearchParams({
+    // First, try opensearch for better suggestions
+    const opensearchParams = new URLSearchParams({
+      action: 'opensearch',
+      format: 'json',
+      origin: '*',
+      search: query,
+      limit: '10',
+      redirects: 'resolve'
+    });
+
+    const opensearchResponse = await fetch(`https://en.wikipedia.org/w/api.php?${opensearchParams}`);
+    let suggestedTitles: string[] = [];
+    
+    if (opensearchResponse.ok) {
+      const opensearchData = await opensearchResponse.json();
+      suggestedTitles = opensearchData[1] || [];
+    }
+
+    // Then do regular search
+    const searchParams = new URLSearchParams({
       action: 'query',
       format: 'json',
       origin: '*',
       list: 'search',
       srsearch: query,
-      srlimit: '20' // Increased from 10 to ensure we get enough valid articles
+      srlimit: '20',
+      srwhat: 'text'
     });
 
-    const searchResponse = await fetch(`https://en.wikipedia.org/w/api.php?${params}`);
+    const searchResponse = await fetch(`https://en.wikipedia.org/w/api.php?${searchParams}`);
     if (!searchResponse.ok) throw new Error('Search request failed');
     
     const searchData = await searchResponse.json() as WikipediaResponse;
-    if (!searchData.query?.search?.length) return [];
+    const searchTitles = searchData.query?.search?.map(result => result.title) || [];
 
-    const titles = searchData.query.search.map(result => result.title);
-    const data = await fetchWikipediaContent(titles) as WikipediaResponse;
+    // Combine and deduplicate titles, prioritizing opensearch results
+    const allTitles = [...new Set([...suggestedTitles, ...searchTitles])];
+    
+    if (!allTitles.length) return [];
+
+    const data = await fetchWikipediaContent(allTitles) as WikipediaResponse;
     const pages = Object.values(data.query?.pages || {});
     
     const articles = await Promise.all(pages.map(transformToArticle));
-    return articles.filter(article => article !== null) as WikipediaArticle[];
+    const validArticles = articles.filter(article => article !== null) as WikipediaArticle[];
+    
+    // Sort by relevance using our enhanced algorithm
+    return sortByRelevance(validArticles, query);
   } catch (error) {
     console.error('Error searching articles:', error);
     throw error;

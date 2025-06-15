@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -17,6 +18,10 @@ export default {
           blue: "#20D5EC",
           dark: "#121212",
           gray: "#F1F1F2",
+          light: "#FFFFFF",
+          lightBg: "#F8F9FA",
+          lightText: "#1A1A1A",
+          lightBorder: "#E1E5E9",
         },
         border: "hsl(var(--border))",
         background: "hsl(var(--background))",
@@ -35,10 +40,15 @@ export default {
           "0%": { opacity: "0", transform: "translateY(10px)" },
           "100%": { opacity: "1", transform: "translateY(0)" },
         },
+        "theme-transition": {
+          "0%": { opacity: "0.8" },
+          "100%": { opacity: "1" },
+        },
       },
       animation: {
         "ken-burns": "ken-burns 20s ease infinite alternate",
         "fade-up": "fade-up 0.5s ease-out forwards",
+        "theme-transition": "theme-transition 0.3s ease-in-out",
       },
     },
   },

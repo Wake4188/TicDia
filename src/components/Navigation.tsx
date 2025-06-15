@@ -1,4 +1,5 @@
-import { Search, Compass, User } from "lucide-react";
+
+import { Search, Compass, User, Sun, Moon } from "lucide-react";
 import {
   Command,
   CommandDialog,
@@ -14,6 +15,7 @@ import { searchArticles, getRandomArticles } from "../services/wikipediaService"
 import { useQuery } from "@tanstack/react-query";
 import { useToast } from "@/components/ui/use-toast";
 import { useAuth } from "../contexts/AuthContext";
+import { useTheme } from "../contexts/ThemeContext";
 
 const Navigation = () => {
   const [open, setOpen] = useState(false);
@@ -21,7 +23,8 @@ const Navigation = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { toast } = useToast();
-  const { user, signOut } = useAuth();
+  const { user } = useAuth();
+  const { theme, toggleTheme } = useTheme();
   const [searchParams] = useSearchParams();
 
   useEffect(() => {
@@ -67,7 +70,7 @@ const Navigation = () => {
   };
 
   const handleRandomArticle = async () => {
-    setSearchValue(""); // Clear search value when getting random article
+    setSearchValue("");
     toast({
       title: "Loading random article",
       description: "Finding something interesting for you...",
@@ -99,14 +102,16 @@ const Navigation = () => {
   };
 
   const isDiscoverPage = location.pathname === "/discover";
+  const navBgClass = theme === 'dark' 
+    ? (isDiscoverPage ? "bg-black" : "bg-gradient-to-b from-black/50 to-transparent")
+    : (isDiscoverPage ? "bg-white shadow-sm" : "bg-gradient-to-b from-white/90 to-transparent backdrop-blur-sm");
+  
+  const textClass = theme === 'dark' ? "text-white" : "text-wikitok-lightText";
+  const searchBgClass = theme === 'dark' ? "bg-black/20" : "bg-white/80";
 
   return (
     <>
-      <div className={`fixed top-0 left-0 right-0 h-14 z-50 flex items-center justify-between px-4 ${
-        isDiscoverPage 
-          ? "bg-black" 
-          : "bg-gradient-to-b from-black/50 to-transparent"
-      }`}>
+      <div className={`fixed top-0 left-0 right-0 h-14 z-50 flex items-center justify-between px-4 transition-all duration-300 ${navBgClass}`}>
         <div 
           className="text-xl font-bold text-wikitok-red cursor-pointer"
           onClick={handleRandomArticle}
@@ -114,23 +119,37 @@ const Navigation = () => {
           WikTok
         </div>
         <div 
-          className="flex items-center bg-black/20 backdrop-blur-sm rounded-full px-4 py-2 cursor-pointer"
+          className={`flex items-center ${searchBgClass} backdrop-blur-sm rounded-full px-4 py-2 cursor-pointer transition-all duration-300`}
           onClick={() => setOpen(true)}
         >
-          <Search className="w-4 h-4 text-white/60 mr-2" />
-          <span className="text-white/60 text-sm">
+          <Search className={`w-4 h-4 ${theme === 'dark' ? 'text-white/60' : 'text-gray-500'} mr-2`} />
+          <span className={`${theme === 'dark' ? 'text-white/60' : 'text-gray-500'} text-sm`}>
             {searchValue || "Search articles"}
           </span>
         </div>
-        <div className="flex space-x-6 items-center">
+        <div className="flex space-x-4 items-center">
+          <button
+            onClick={toggleTheme}
+            className={`p-2 rounded-full transition-colors duration-300 ${
+              theme === 'dark' 
+                ? 'text-white hover:text-wikitok-red hover:bg-white/10' 
+                : 'text-wikitok-lightText hover:text-wikitok-red hover:bg-gray-100'
+            }`}
+          >
+            {theme === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+          </button>
           <Compass 
-            className={`w-5 h-5 cursor-pointer transition-colors ${
-              location.pathname === "/discover" ? "text-wikitok-red" : "text-white"
+            className={`w-5 h-5 cursor-pointer transition-colors duration-300 ${
+              location.pathname === "/discover" 
+                ? "text-wikitok-red" 
+                : theme === 'dark' ? "text-white hover:text-wikitok-red" : "text-wikitok-lightText hover:text-wikitok-red"
             }`}
             onClick={handleDiscoverClick}
           />
           <div 
-            className="flex items-center gap-2 cursor-pointer text-white hover:text-wikitok-red transition-colors"
+            className={`flex items-center gap-2 cursor-pointer transition-colors duration-300 ${
+              theme === 'dark' ? "text-white hover:text-wikitok-red" : "text-wikitok-lightText hover:text-wikitok-red"
+            }`}
             onClick={handleAuthClick}
           >
             {user ? (
@@ -175,7 +194,7 @@ const Navigation = () => {
               <CommandEmpty>No results found.</CommandEmpty>
             )}
             {!isLoading && searchResults && searchResults.length > 0 && (
-              <CommandGroup heading="Articles">
+              <CommandGroup heading={`Articles (${searchResults.length} results)`}>
                 {searchResults.map((result) => (
                   <CommandItem
                     key={result.id}
@@ -195,6 +214,11 @@ const Navigation = () => {
                         <div className="text-sm text-muted-foreground line-clamp-2">
                           {result.content}
                         </div>
+                        {result.relevanceScore && (
+                          <div className="text-xs text-wikitok-red mt-1">
+                            Relevance: {Math.round(result.relevanceScore)}%
+                          </div>
+                        )}
                       </div>
                     </div>
                   </CommandItem>
