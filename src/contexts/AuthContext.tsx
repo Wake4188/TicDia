@@ -1,4 +1,3 @@
-
 import { createContext, useContext, useEffect, useState } from "react";
 import { User, Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
@@ -8,6 +7,8 @@ interface AuthContextType {
   session: Session | null;
   loading: boolean;
   signOut: () => Promise<void>;
+  signInWithEmail: (email: string, password: string, rememberMe?: boolean) => Promise<{ error?: any }>;
+  signUpWithEmail: (email: string, password: string) => Promise<{ error?: any }>;
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -15,6 +16,8 @@ const AuthContext = createContext<AuthContextType>({
   session: null,
   loading: true,
   signOut: async () => {},
+  signInWithEmail: async () => ({}),
+  signUpWithEmail: async () => ({}),
 });
 
 export const useAuth = () => {
@@ -54,11 +57,47 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     await supabase.auth.signOut();
   };
 
+  const signInWithEmail = async (email: string, password: string, rememberMe: boolean = false) => {
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+      options: {
+        // If rememberMe is true, set a longer session duration
+        // Otherwise, use default session duration
+        ...(rememberMe && {
+          data: {
+            remember_me: true
+          }
+        })
+      }
+    });
+
+    // Store remember me preference in localStorage
+    if (rememberMe && !error) {
+      localStorage.setItem('wikitok_remember_me', 'true');
+    } else {
+      localStorage.removeItem('wikitok_remember_me');
+    }
+
+    return { data, error };
+  };
+
+  const signUpWithEmail = async (email: string, password: string) => {
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+    });
+
+    return { data, error };
+  };
+
   const value = {
     user,
     session,
     loading,
     signOut,
+    signInWithEmail,
+    signUpWithEmail,
   };
 
   return (

@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
@@ -11,6 +12,7 @@ import { Slider } from "@/components/ui/slider";
 import { ArrowLeft, BookMarked, Eye, Trash2, Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import LittleWik from "../components/LittleWik";
+import { loadUserPreferences, saveUserPreferences, UserPreferences } from "@/services/userPreferencesService";
 
 interface SavedArticle {
   id: string;
@@ -18,12 +20,6 @@ interface SavedArticle {
   article_title: string;
   article_url: string;
   saved_at: string;
-}
-
-interface UserPreferences {
-  fontFamily: string;
-  backgroundOpacity: number;
-  progressBarColor: string;
 }
 
 const Profile = () => {
@@ -39,8 +35,9 @@ const Profile = () => {
   const [preferences, setPreferences] = useState<UserPreferences>({
     fontFamily: 'Inter',
     backgroundOpacity: 70,
-    progressBarColor: '#FE2C55'
+    highlightColor: '#FE2C55'
   });
+  const [preferencesLoading, setPreferencesLoading] = useState(true);
 
   useEffect(() => {
     if (!user) {
@@ -48,12 +45,8 @@ const Profile = () => {
       return;
     }
 
-    const savedPrefs = localStorage.getItem('userPreferences');
-    if (savedPrefs) {
-      const prefs = JSON.parse(savedPrefs);
-      setPreferences(prefs);
-    }
-
+    // Load user preferences from database
+    loadPreferences();
     fetchSavedArticles();
   }, [user, navigate]);
 
@@ -63,6 +56,46 @@ const Profile = () => {
     );
     setFilteredArticles(filtered);
   }, [savedArticles, searchTerm]);
+
+  const loadPreferences = async () => {
+    if (!user) return;
+    
+    try {
+      setPreferencesLoading(true);
+      const userPrefs = await loadUserPreferences(user.id);
+      setPreferences(userPrefs);
+      
+      // Update CSS variables immediately
+      document.documentElement.style.setProperty('--highlight-color', userPrefs.highlightColor);
+      document.documentElement.style.setProperty('--progress-bar-color', userPrefs.highlightColor);
+      
+      // Also update localStorage for backward compatibility
+      localStorage.setItem('userPreferences', JSON.stringify({
+        fontFamily: userPrefs.fontFamily,
+        backgroundOpacity: userPrefs.backgroundOpacity,
+        progressBarColor: userPrefs.highlightColor, // Keep old key for compatibility
+        highlightColor: userPrefs.highlightColor
+      }));
+    } catch (error) {
+      console.error('Error loading preferences:', error);
+      // Fallback to localStorage if database fails
+      const savedPrefs = localStorage.getItem('userPreferences');
+      if (savedPrefs) {
+        const prefs = JSON.parse(savedPrefs);
+        // Migrate old progressBarColor to highlightColor
+        if (prefs.progressBarColor && !prefs.highlightColor) {
+          prefs.highlightColor = prefs.progressBarColor;
+        }
+        setPreferences({
+          fontFamily: prefs.fontFamily || 'Inter',
+          backgroundOpacity: prefs.backgroundOpacity || 70,
+          highlightColor: prefs.highlightColor || '#FE2C55'
+        });
+      }
+    } finally {
+      setPreferencesLoading(false);
+    }
+  };
 
   const fetchSavedArticles = async () => {
     try {
@@ -85,12 +118,36 @@ const Profile = () => {
     }
   };
 
-  const updatePreferences = (newPrefs: Partial<UserPreferences>) => {
+  const updatePreferences = async (newPrefs: Partial<UserPreferences>) => {
+    if (!user) return;
+
     const updated = { ...preferences, ...newPrefs };
     setPreferences(updated);
-    localStorage.setItem('userPreferences', JSON.stringify(updated));
-    // Update CSS variable for highlight color
-    document.documentElement.style.setProperty('--highlight-color', updated.progressBarColor);
+    
+    // Update CSS variables immediately for real-time feedback
+    document.documentElement.style.setProperty('--highlight-color', updated.highlightColor);
+    document.documentElement.style.setProperty('--progress-bar-color', updated.highlightColor);
+    
+    // Update localStorage for backward compatibility
+    localStorage.setItem('userPreferences', JSON.stringify({
+      fontFamily: updated.fontFamily,
+      backgroundOpacity: updated.backgroundOpacity,
+      progressBarColor: updated.highlightColor, // Keep old key for compatibility
+      highlightColor: updated.highlightColor
+    }));
+
+    try {
+      // Save to database
+      await saveUserPreferences(user.id, updated);
+      console.log('Preferences saved to database successfully');
+    } catch (error) {
+      console.error('Error saving preferences to database:', error);
+      toast({
+        title: "Warning",
+        description: "Preferences saved locally but failed to sync to cloud",
+        variant: "destructive",
+      });
+    }
   };
 
   const removeSavedArticle = async (articleId: string) => {
@@ -308,103 +365,111 @@ const Profile = () => {
               <CardHeader className="transition-all duration-300">
                 <CardTitle>Reading Preferences</CardTitle>
                 <CardDescription>
-                  Customize your reading experience
+                  Customize your reading experience {preferencesLoading ? "(Loading...)" : "(Synced to cloud)"}
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
-                <div className="space-y-3 animate-in fade-in-50 slide-in-from-left-4 duration-500">
-                  <label className="text-sm font-medium">Article Font</label>
-                  <Select 
-                    value={preferences.fontFamily} 
-                    onValueChange={(value) => updatePreferences({ fontFamily: value })}
-                  >
-                    <SelectTrigger className="bg-gray-800/60 backdrop-blur-sm border-gray-700/50 transition-all duration-300 hover:border-gray-600/70 focus:border-wikitok-red/50">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent className="bg-gray-800/90 backdrop-blur-md border-gray-700/50">
-                      {fontOptions.map((font) => (
-                        <SelectItem key={font.value} value={font.value} className="transition-all duration-200 hover:bg-gray-700/60">
-                          <span style={{ fontFamily: font.value }}>{font.label}</span>
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
+                {preferencesLoading ? (
+                  <div className="text-center py-8">
+                    <div className="animate-pulse">Loading preferences...</div>
+                  </div>
+                ) : (
+                  <>
+                    <div className="space-y-3 animate-in fade-in-50 slide-in-from-left-4 duration-500">
+                      <label className="text-sm font-medium">Article Font</label>
+                      <Select 
+                        value={preferences.fontFamily} 
+                        onValueChange={(value) => updatePreferences({ fontFamily: value })}
+                      >
+                        <SelectTrigger className="bg-gray-800/60 backdrop-blur-sm border-gray-700/50 transition-all duration-300 hover:border-gray-600/70 focus:border-wikitok-red/50">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent className="bg-gray-800/90 backdrop-blur-md border-gray-700/50">
+                          {fontOptions.map((font) => (
+                            <SelectItem key={font.value} value={font.value} className="transition-all duration-200 hover:bg-gray-700/60">
+                              <span style={{ fontFamily: font.value }}>{font.label}</span>
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
 
-                <div className="space-y-3 animate-in fade-in-50 slide-in-from-left-4 duration-500" style={{ animationDelay: "100ms" }}>
-                  <label className="text-sm font-medium">Progress Bar & Highlight Color</label>
-                  <Select 
-                    value={preferences.progressBarColor} 
-                    onValueChange={(value) => updatePreferences({ progressBarColor: value })}
-                  >
-                    <SelectTrigger className="bg-gray-800/60 backdrop-blur-sm border-gray-700/50 transition-all duration-300 hover:border-gray-600/70 focus:border-wikitok-red/50">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent className="bg-gray-800/90 backdrop-blur-md border-gray-700/50">
-                      {colorOptions.map((color) => (
-                        <SelectItem key={color.value} value={color.value} className="transition-all duration-200 hover:bg-gray-700/60">
-                          <div className="flex items-center gap-2">
-                            <div 
-                              className="w-4 h-4 rounded transition-transform duration-200 hover:scale-110"
-                              style={{ backgroundColor: color.color }}
-                            />
-                            <span>{color.label}</span>
-                          </div>
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
+                    <div className="space-y-3 animate-in fade-in-50 slide-in-from-left-4 duration-500" style={{ animationDelay: "100ms" }}>
+                      <label className="text-sm font-medium">Highlight Color</label>
+                      <Select 
+                        value={preferences.highlightColor} 
+                        onValueChange={(value) => updatePreferences({ highlightColor: value })}
+                      >
+                        <SelectTrigger className="bg-gray-800/60 backdrop-blur-sm border-gray-700/50 transition-all duration-300 hover:border-gray-600/70 focus:border-wikitok-red/50">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent className="bg-gray-800/90 backdrop-blur-md border-gray-700/50">
+                          {colorOptions.map((color) => (
+                            <SelectItem key={color.value} value={color.value} className="transition-all duration-200 hover:bg-gray-700/60">
+                              <div className="flex items-center gap-2">
+                                <div 
+                                  className="w-4 h-4 rounded transition-transform duration-200 hover:scale-110"
+                                  style={{ backgroundColor: color.color }}
+                                />
+                                <span>{color.label}</span>
+                              </div>
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
 
-                <div className="space-y-3 animate-in fade-in-50 slide-in-from-left-4 duration-500" style={{ animationDelay: "200ms" }}>
-                  <label className="text-sm font-medium">
-                    Background Image Opacity: {preferences.backgroundOpacity}%
-                  </label>
-                  <Slider
-                    value={[preferences.backgroundOpacity]}
-                    onValueChange={(value) => updatePreferences({ backgroundOpacity: value[0] })}
-                    max={100}
-                    min={10}
-                    step={5}
-                    className="w-full transition-all duration-300"
-                  />
-                  <p className="text-xs text-gray-400">
-                    Lower values make the background image less visible, improving text readability
-                  </p>
-                </div>
+                    <div className="space-y-3 animate-in fade-in-50 slide-in-from-left-4 duration-500" style={{ animationDelay: "200ms" }}>
+                      <label className="text-sm font-medium">
+                        Background Image Opacity: {preferences.backgroundOpacity}%
+                      </label>
+                      <Slider
+                        value={[preferences.backgroundOpacity]}
+                        onValueChange={(value) => updatePreferences({ backgroundOpacity: value[0] })}
+                        max={100}
+                        min={10}
+                        step={5}
+                        className="w-full transition-all duration-300"
+                      />
+                      <p className="text-xs text-gray-400">
+                        Lower values make the background image less visible, improving text readability
+                      </p>
+                    </div>
 
-                <div className="p-4 bg-gray-800/60 backdrop-blur-sm rounded-lg border border-gray-700/30 transition-all duration-500 hover:border-gray-600/50 animate-in fade-in-50 slide-in-from-bottom-4" style={{ animationDelay: "300ms" }}>
-                  <h4 className="text-sm font-medium mb-2">Preview</h4>
-                  <div 
-                    className="relative p-4 rounded bg-cover bg-center overflow-hidden transition-all duration-500"
-                    style={{
-                      backgroundImage: "url('https://images.unsplash.com/photo-1506905925346-21bda4d32df4?ixlib=rb-4.0.3')",
-                    }}
-                  >
-                    <div 
-                      className="absolute inset-0 bg-black rounded transition-all duration-500"
-                      style={{ opacity: preferences.backgroundOpacity / 100 }}
-                    />
-                    <p 
-                      className="relative z-10 text-white mb-4 transition-all duration-300"
-                      style={{ fontFamily: preferences.fontFamily }}
-                    >
-                      This is how your articles will look with the current settings.
-                    </p>
-                    <div className="relative z-10">
-                      <p className="text-xs text-gray-300 mb-1">Progress bar preview:</p>
-                      <div className="h-1 bg-black/20 rounded overflow-hidden">
+                    <div className="p-4 bg-gray-800/60 backdrop-blur-sm rounded-lg border border-gray-700/30 transition-all duration-500 hover:border-gray-600/50 animate-in fade-in-50 slide-in-from-bottom-4" style={{ animationDelay: "300ms" }}>
+                      <h4 className="text-sm font-medium mb-2">Preview</h4>
+                      <div 
+                        className="relative p-4 rounded bg-cover bg-center overflow-hidden transition-all duration-500"
+                        style={{
+                          backgroundImage: "url('https://images.unsplash.com/photo-1506905925346-21bda4d32df4?ixlib=rb-4.0.3')",
+                        }}
+                      >
                         <div 
-                          className="h-full rounded transition-all duration-500 ease-out"
-                          style={{ 
-                            backgroundColor: preferences.progressBarColor,
-                            width: '60%'
-                          }}
+                          className="absolute inset-0 bg-black rounded transition-all duration-500"
+                          style={{ opacity: preferences.backgroundOpacity / 100 }}
                         />
+                        <p 
+                          className="relative z-10 text-white mb-4 transition-all duration-300"
+                          style={{ fontFamily: preferences.fontFamily }}
+                        >
+                          This is how your articles will look with the current settings.
+                        </p>
+                        <div className="relative z-10">
+                          <p className="text-xs text-gray-300 mb-1">Progress bar and highlight preview:</p>
+                          <div className="h-1 bg-black/20 rounded overflow-hidden">
+                            <div 
+                              className="h-full rounded transition-all duration-500 ease-out"
+                              style={{ 
+                                backgroundColor: preferences.highlightColor,
+                                width: '60%'
+                              }}
+                            />
+                          </div>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                </div>
+                  </>
+                )}
               </CardContent>
             </Card>
           </TabsContent>

@@ -36,6 +36,63 @@ export type Database = {
         }
         Relationships: []
       }
+      today_articles: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          is_admin_added: boolean
+          title: string
+          url: string | null
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          is_admin_added?: boolean
+          title: string
+          url?: string | null
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          is_admin_added?: boolean
+          title?: string
+          url?: string | null
+        }
+        Relationships: []
+      }
+      user_preferences: {
+        Row: {
+          background_opacity: number
+          created_at: string
+          font_family: string
+          highlight_color: string
+          id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          background_opacity?: number
+          created_at?: string
+          font_family?: string
+          highlight_color?: string
+          id?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          background_opacity?: number
+          created_at?: string
+          font_family?: string
+          highlight_color?: string
+          id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

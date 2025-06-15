@@ -1,9 +1,13 @@
+
 import { useState, useEffect, useRef, useCallback } from "react";
 import { motion } from "framer-motion";
 import { Progress } from "./ui/progress";
 import { getRandomArticles, getRelatedArticles } from "../services/wikipediaService";
+import { useAuth } from "@/contexts/AuthContext";
+import { loadUserPreferences, getDefaultPreferences, UserPreferences } from "@/services/userPreferencesService";
 
 const ArticleViewer = ({ articles: initialArticles, onArticleChange }) => {
+  const { user } = useAuth();
   const [articles, setArticles] = useState(initialArticles);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isVisible, setIsVisible] = useState(false);
@@ -12,39 +16,67 @@ const ArticleViewer = ({ articles: initialArticles, onArticleChange }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [isScrolling, setIsScrolling] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
-  const [userPreferences, setUserPreferences] = useState({
-    fontFamily: 'Inter',
-    backgroundOpacity: 70,
-    highlightColor: '#FE2C55'
-  });
+  const [userPreferences, setUserPreferences] = useState<UserPreferences>(getDefaultPreferences());
   const containerRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const currentArticle = articles[currentIndex];
 
-  // Load user preferences and update CSS variables
+  // Load user preferences from database
   useEffect(() => {
-    const savedPrefs = localStorage.getItem('userPreferences');
-    if (savedPrefs) {
-      const prefs = JSON.parse(savedPrefs);
-      // Migrate old progressBarColor to highlightColor
-      if (prefs.progressBarColor && !prefs.highlightColor) {
-        prefs.highlightColor = prefs.progressBarColor;
-        delete prefs.progressBarColor;
+    const loadPrefs = async () => {
+      if (user) {
+        try {
+          const prefs = await loadUserPreferences(user.id);
+          setUserPreferences(prefs);
+          
+          // Update CSS variables
+          document.documentElement.style.setProperty('--progress-bar-color', prefs.highlightColor);
+          document.documentElement.style.setProperty('--highlight-color', prefs.highlightColor);
+        } catch (error) {
+          console.error('Error loading user preferences:', error);
+          // Fallback to localStorage
+          const savedPrefs = localStorage.getItem('userPreferences');
+          if (savedPrefs) {
+            const prefs = JSON.parse(savedPrefs);
+            // Migrate old progressBarColor to highlightColor
+            if (prefs.progressBarColor && !prefs.highlightColor) {
+              prefs.highlightColor = prefs.progressBarColor;
+            }
+            setUserPreferences({
+              fontFamily: prefs.fontFamily || 'Inter',
+              backgroundOpacity: prefs.backgroundOpacity || 70,
+              highlightColor: prefs.highlightColor || '#FE2C55'
+            });
+            
+            // Update CSS variables
+            document.documentElement.style.setProperty('--progress-bar-color', prefs.highlightColor || '#FE2C55');
+            document.documentElement.style.setProperty('--highlight-color', prefs.highlightColor || '#FE2C55');
+          }
+        }
+      } else {
+        // Not logged in, use localStorage
+        const savedPrefs = localStorage.getItem('userPreferences');
+        if (savedPrefs) {
+          const prefs = JSON.parse(savedPrefs);
+          // Migrate old progressBarColor to highlightColor
+          if (prefs.progressBarColor && !prefs.highlightColor) {
+            prefs.highlightColor = prefs.progressBarColor;
+          }
+          setUserPreferences({
+            fontFamily: prefs.fontFamily || 'Inter',
+            backgroundOpacity: prefs.backgroundOpacity || 70,
+            highlightColor: prefs.highlightColor || '#FE2C55'
+          });
+          
+          // Update CSS variables
+          document.documentElement.style.setProperty('--progress-bar-color', prefs.highlightColor || '#FE2C55');
+          document.documentElement.style.setProperty('--highlight-color', prefs.highlightColor || '#FE2C55');
+        }
       }
-      setUserPreferences(prefs);
-      
-      // Update CSS variables
-      document.documentElement.style.setProperty('--progress-bar-color', prefs.highlightColor);
-      document.documentElement.style.setProperty('--highlight-color', prefs.highlightColor);
-    }
-  }, []);
+    };
 
-  // Save preferences when they change
-  useEffect(() => {
-    localStorage.setItem('userPreferences', JSON.stringify(userPreferences));
-    document.documentElement.style.setProperty('--progress-bar-color', userPreferences.highlightColor);
-    document.documentElement.style.setProperty('--highlight-color', userPreferences.highlightColor);
-  }, [userPreferences]);
+    loadPrefs();
+  }, [user]);
 
   // Detect mobile device
   useEffect(() => {
