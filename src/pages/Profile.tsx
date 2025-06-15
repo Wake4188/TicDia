@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
@@ -45,7 +46,12 @@ const Profile = () => {
     // Load saved preferences from localStorage
     const savedPrefs = localStorage.getItem('userPreferences');
     if (savedPrefs) {
-      setPreferences(JSON.parse(savedPrefs));
+      const prefs = JSON.parse(savedPrefs);
+      setPreferences(prefs);
+      // Apply preferences immediately
+      document.documentElement.style.setProperty('--user-font-family', prefs.fontFamily);
+      document.documentElement.style.setProperty('--background-opacity', `${prefs.backgroundOpacity}%`);
+      document.documentElement.style.setProperty('--progress-bar-color', prefs.progressBarColor);
     }
 
     fetchSavedArticles();
