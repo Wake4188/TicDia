@@ -34,7 +34,7 @@ const Profile = () => {
   const [preferences, setPreferences] = useState<UserPreferences>({
     fontFamily: 'Inter',
     backgroundOpacity: 70,
-    progressBarColor: '#FE2C55' // Default wikitok red
+    progressBarColor: '#FE2C55'
   });
 
   useEffect(() => {
@@ -43,15 +43,10 @@ const Profile = () => {
       return;
     }
 
-    // Load saved preferences from localStorage
     const savedPrefs = localStorage.getItem('userPreferences');
     if (savedPrefs) {
       const prefs = JSON.parse(savedPrefs);
       setPreferences(prefs);
-      // Apply preferences immediately
-      document.documentElement.style.setProperty('--user-font-family', prefs.fontFamily);
-      document.documentElement.style.setProperty('--background-opacity', `${prefs.backgroundOpacity}%`);
-      document.documentElement.style.setProperty('--progress-bar-color', prefs.progressBarColor);
     }
 
     fetchSavedArticles();
@@ -82,11 +77,6 @@ const Profile = () => {
     const updated = { ...preferences, ...newPrefs };
     setPreferences(updated);
     localStorage.setItem('userPreferences', JSON.stringify(updated));
-    
-    // Apply preferences globally
-    document.documentElement.style.setProperty('--user-font-family', updated.fontFamily);
-    document.documentElement.style.setProperty('--background-opacity', `${updated.backgroundOpacity}%`);
-    document.documentElement.style.setProperty('--progress-bar-color', updated.progressBarColor);
   };
 
   const removeSavedArticle = async (articleId: string) => {
@@ -147,30 +137,36 @@ const Profile = () => {
             variant="ghost" 
             size="icon"
             onClick={() => navigate("/")}
-            className="text-white hover:bg-white/10"
+            className="text-white hover:bg-white/10 transition-all duration-300 hover:scale-105"
           >
             <ArrowLeft className="w-5 h-5" />
           </Button>
-          <div>
+          <div className="transition-all duration-500 ease-out">
             <h1 className="text-3xl font-bold">Profile</h1>
             <p className="text-gray-400">{user.email}</p>
           </div>
         </div>
 
         <Tabs defaultValue="saved" className="space-y-6">
-          <TabsList className="bg-gray-800 border-gray-700">
-            <TabsTrigger value="saved" className="data-[state=active]:bg-wikitok-red">
-              <BookMarked className="w-4 h-4 mr-2" />
+          <TabsList className="bg-gray-800/50 backdrop-blur-md border border-gray-700/50 p-1 rounded-xl shadow-2xl">
+            <TabsTrigger 
+              value="saved" 
+              className="data-[state=active]:bg-wikitok-red/20 data-[state=active]:backdrop-blur-md data-[state=active]:border data-[state=active]:border-wikitok-red/30 data-[state=active]:shadow-lg transition-all duration-500 ease-out rounded-lg"
+            >
+              <BookMarked className="w-4 h-4 mr-2 transition-transform duration-300" />
               Saved Articles
             </TabsTrigger>
-            <TabsTrigger value="settings" className="data-[state=active]:bg-wikitok-red">
+            <TabsTrigger 
+              value="settings" 
+              className="data-[state=active]:bg-wikitok-red/20 data-[state=active]:backdrop-blur-md data-[state=active]:border data-[state=active]:border-wikitok-red/30 data-[state=active]:shadow-lg transition-all duration-500 ease-out rounded-lg"
+            >
               Settings
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="saved" className="space-y-4">
-            <Card className="bg-gray-900 border-gray-800">
-              <CardHeader>
+          <TabsContent value="saved" className="space-y-4 animate-in fade-in-50 slide-in-from-bottom-4 duration-700">
+            <Card className="bg-gray-900/80 backdrop-blur-md border-gray-800/50 shadow-2xl transition-all duration-500 hover:shadow-wikitok-red/10 hover:shadow-xl">
+              <CardHeader className="transition-all duration-300">
                 <CardTitle>Your Saved Articles</CardTitle>
                 <CardDescription>
                   {savedArticles.length} article{savedArticles.length !== 1 ? 's' : ''} saved
@@ -178,17 +174,23 @@ const Profile = () => {
               </CardHeader>
               <CardContent>
                 {loading ? (
-                  <div className="text-center py-8">Loading...</div>
+                  <div className="text-center py-8">
+                    <div className="animate-pulse">Loading...</div>
+                  </div>
                 ) : savedArticles.length === 0 ? (
                   <div className="text-center py-8 text-gray-400">
-                    <BookMarked className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                    <BookMarked className="w-12 h-12 mx-auto mb-4 opacity-50 animate-pulse" />
                     <p>No saved articles yet</p>
                     <p className="text-sm">Start saving articles to see them here</p>
                   </div>
                 ) : (
                   <div className="space-y-3">
-                    {savedArticles.map((article) => (
-                      <div key={article.id} className="flex items-center justify-between p-4 bg-gray-800 rounded-lg">
+                    {savedArticles.map((article, index) => (
+                      <div 
+                        key={article.id} 
+                        className="flex items-center justify-between p-4 bg-gray-800/60 backdrop-blur-sm rounded-lg border border-gray-700/30 transition-all duration-300 hover:bg-gray-700/60 hover:border-gray-600/50 hover:scale-[1.02] animate-in fade-in-50 slide-in-from-left-4"
+                        style={{ animationDelay: `${index * 100}ms` }}
+                      >
                         <div className="flex-1">
                           <h3 className="font-medium">{article.article_title}</h3>
                           <p className="text-sm text-gray-400">
@@ -199,6 +201,7 @@ const Profile = () => {
                           variant="destructive"
                           size="sm"
                           onClick={() => removeSavedArticle(article.id)}
+                          className="transition-all duration-300 hover:scale-105"
                         >
                           Remove
                         </Button>
@@ -210,27 +213,27 @@ const Profile = () => {
             </Card>
           </TabsContent>
 
-          <TabsContent value="settings" className="space-y-6">
-            <Card className="bg-gray-900 border-gray-800">
-              <CardHeader>
+          <TabsContent value="settings" className="space-y-6 animate-in fade-in-50 slide-in-from-bottom-4 duration-700">
+            <Card className="bg-gray-900/80 backdrop-blur-md border-gray-800/50 shadow-2xl transition-all duration-500 hover:shadow-wikitok-red/10 hover:shadow-xl">
+              <CardHeader className="transition-all duration-300">
                 <CardTitle>Reading Preferences</CardTitle>
                 <CardDescription>
                   Customize your reading experience
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
-                <div className="space-y-3">
+                <div className="space-y-3 animate-in fade-in-50 slide-in-from-left-4 duration-500">
                   <label className="text-sm font-medium">Article Font</label>
                   <Select 
                     value={preferences.fontFamily} 
                     onValueChange={(value) => updatePreferences({ fontFamily: value })}
                   >
-                    <SelectTrigger className="bg-gray-800 border-gray-700">
+                    <SelectTrigger className="bg-gray-800/60 backdrop-blur-sm border-gray-700/50 transition-all duration-300 hover:border-gray-600/70 focus:border-wikitok-red/50">
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent className="bg-gray-800 border-gray-700">
+                    <SelectContent className="bg-gray-800/90 backdrop-blur-md border-gray-700/50">
                       {fontOptions.map((font) => (
-                        <SelectItem key={font.value} value={font.value}>
+                        <SelectItem key={font.value} value={font.value} className="transition-all duration-200 hover:bg-gray-700/60">
                           <span style={{ fontFamily: font.value }}>{font.label}</span>
                         </SelectItem>
                       ))}
@@ -238,21 +241,21 @@ const Profile = () => {
                   </Select>
                 </div>
 
-                <div className="space-y-3">
+                <div className="space-y-3 animate-in fade-in-50 slide-in-from-left-4 duration-500" style={{ animationDelay: "100ms" }}>
                   <label className="text-sm font-medium">Progress Bar Color</label>
                   <Select 
                     value={preferences.progressBarColor} 
                     onValueChange={(value) => updatePreferences({ progressBarColor: value })}
                   >
-                    <SelectTrigger className="bg-gray-800 border-gray-700">
+                    <SelectTrigger className="bg-gray-800/60 backdrop-blur-sm border-gray-700/50 transition-all duration-300 hover:border-gray-600/70 focus:border-wikitok-red/50">
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent className="bg-gray-800 border-gray-700">
+                    <SelectContent className="bg-gray-800/90 backdrop-blur-md border-gray-700/50">
                       {colorOptions.map((color) => (
-                        <SelectItem key={color.value} value={color.value}>
+                        <SelectItem key={color.value} value={color.value} className="transition-all duration-200 hover:bg-gray-700/60">
                           <div className="flex items-center gap-2">
                             <div 
-                              className="w-4 h-4 rounded"
+                              className="w-4 h-4 rounded transition-transform duration-200 hover:scale-110"
                               style={{ backgroundColor: color.color }}
                             />
                             <span>{color.label}</span>
@@ -263,7 +266,7 @@ const Profile = () => {
                   </Select>
                 </div>
 
-                <div className="space-y-3">
+                <div className="space-y-3 animate-in fade-in-50 slide-in-from-left-4 duration-500" style={{ animationDelay: "200ms" }}>
                   <label className="text-sm font-medium">
                     Background Image Opacity: {preferences.backgroundOpacity}%
                   </label>
@@ -273,27 +276,27 @@ const Profile = () => {
                     max={100}
                     min={10}
                     step={5}
-                    className="w-full"
+                    className="w-full transition-all duration-300"
                   />
                   <p className="text-xs text-gray-400">
                     Lower values make the background image less visible, improving text readability
                   </p>
                 </div>
 
-                <div className="p-4 bg-gray-800 rounded-lg">
+                <div className="p-4 bg-gray-800/60 backdrop-blur-sm rounded-lg border border-gray-700/30 transition-all duration-500 hover:border-gray-600/50 animate-in fade-in-50 slide-in-from-bottom-4" style={{ animationDelay: "300ms" }}>
                   <h4 className="text-sm font-medium mb-2">Preview</h4>
                   <div 
-                    className="relative p-4 rounded bg-cover bg-center"
+                    className="relative p-4 rounded bg-cover bg-center overflow-hidden transition-all duration-500"
                     style={{
                       backgroundImage: "url('https://images.unsplash.com/photo-1506905925346-21bda4d32df4?ixlib=rb-4.0.3')",
                     }}
                   >
                     <div 
-                      className="absolute inset-0 bg-black rounded"
+                      className="absolute inset-0 bg-black rounded transition-all duration-500"
                       style={{ opacity: preferences.backgroundOpacity / 100 }}
                     />
                     <p 
-                      className="relative z-10 text-white mb-4"
+                      className="relative z-10 text-white mb-4 transition-all duration-300"
                       style={{ fontFamily: preferences.fontFamily }}
                     >
                       This is how your articles will look with the current settings.
@@ -302,7 +305,7 @@ const Profile = () => {
                       <p className="text-xs text-gray-300 mb-1">Progress bar preview:</p>
                       <div className="h-1 bg-black/20 rounded overflow-hidden">
                         <div 
-                          className="h-full rounded transition-all duration-300"
+                          className="h-full rounded transition-all duration-500 ease-out"
                           style={{ 
                             backgroundColor: preferences.progressBarColor,
                             width: '60%'
