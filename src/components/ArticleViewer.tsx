@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useRef, useCallback } from "react";
 import { motion } from "framer-motion";
 import { Progress } from "./ui/progress";
@@ -15,7 +16,8 @@ const ArticleViewer = ({ articles: initialArticles, onArticleChange }) => {
   const [isMobile, setIsMobile] = useState(false);
   const [userPreferences, setUserPreferences] = useState({
     fontFamily: 'Inter',
-    backgroundOpacity: 70
+    backgroundOpacity: 70,
+    progressBarColor: '#FE2C55'
   });
   const containerRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
@@ -30,6 +32,7 @@ const ArticleViewer = ({ articles: initialArticles, onArticleChange }) => {
       // Apply preferences immediately
       document.documentElement.style.setProperty('--user-font-family', prefs.fontFamily);
       document.documentElement.style.setProperty('--background-opacity', `${prefs.backgroundOpacity}%`);
+      document.documentElement.style.setProperty('--progress-bar-color', prefs.progressBarColor || '#FE2C55');
     }
   }, []);
 
@@ -256,7 +259,10 @@ const ArticleViewer = ({ articles: initialArticles, onArticleChange }) => {
               <Progress 
                 value={progress} 
                 className="h-1 bg-black/20"
-                indicatorClassName="bg-red-500"
+                indicatorClassName="transition-colors duration-300"
+                style={{ 
+                  '--progress-color': userPreferences.progressBarColor 
+                } as React.CSSProperties}
               />
             </div>
           )}

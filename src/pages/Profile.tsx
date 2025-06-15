@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
@@ -22,6 +21,7 @@ interface SavedArticle {
 interface UserPreferences {
   fontFamily: string;
   backgroundOpacity: number;
+  progressBarColor: string;
 }
 
 const Profile = () => {
@@ -32,7 +32,8 @@ const Profile = () => {
   const [loading, setLoading] = useState(true);
   const [preferences, setPreferences] = useState<UserPreferences>({
     fontFamily: 'Inter',
-    backgroundOpacity: 70
+    backgroundOpacity: 70,
+    progressBarColor: '#FE2C55' // Default wikitok red
   });
 
   useEffect(() => {
@@ -76,9 +77,10 @@ const Profile = () => {
     setPreferences(updated);
     localStorage.setItem('userPreferences', JSON.stringify(updated));
     
-    // Apply font globally
+    // Apply preferences globally
     document.documentElement.style.setProperty('--user-font-family', updated.fontFamily);
     document.documentElement.style.setProperty('--background-opacity', `${updated.backgroundOpacity}%`);
+    document.documentElement.style.setProperty('--progress-bar-color', updated.progressBarColor);
   };
 
   const removeSavedArticle = async (articleId: string) => {
@@ -114,6 +116,19 @@ const Profile = () => {
     { value: 'Verdana', label: 'Verdana' },
     { value: 'Open Sans', label: 'Open Sans' },
     { value: 'Roboto', label: 'Roboto' },
+  ];
+
+  const colorOptions = [
+    { value: '#FE2C55', label: 'WikTok Red (Default)', color: '#FE2C55' },
+    { value: '#20D5EC', label: 'WikTok Blue', color: '#20D5EC' },
+    { value: '#FF6B6B', label: 'Coral Red', color: '#FF6B6B' },
+    { value: '#4ECDC4', label: 'Turquoise', color: '#4ECDC4' },
+    { value: '#45B7D1', label: 'Sky Blue', color: '#45B7D1' },
+    { value: '#96CEB4', label: 'Mint Green', color: '#96CEB4' },
+    { value: '#FFEAA7', label: 'Warm Yellow', color: '#FFEAA7' },
+    { value: '#DDA0DD', label: 'Plum', color: '#DDA0DD' },
+    { value: '#98D8C8', label: 'Seafoam', color: '#98D8C8' },
+    { value: '#F7DC6F', label: 'Gold', color: '#F7DC6F' },
   ];
 
   if (!user) return null;
@@ -218,6 +233,31 @@ const Profile = () => {
                 </div>
 
                 <div className="space-y-3">
+                  <label className="text-sm font-medium">Progress Bar Color</label>
+                  <Select 
+                    value={preferences.progressBarColor} 
+                    onValueChange={(value) => updatePreferences({ progressBarColor: value })}
+                  >
+                    <SelectTrigger className="bg-gray-800 border-gray-700">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent className="bg-gray-800 border-gray-700">
+                      {colorOptions.map((color) => (
+                        <SelectItem key={color.value} value={color.value}>
+                          <div className="flex items-center gap-2">
+                            <div 
+                              className="w-4 h-4 rounded"
+                              style={{ backgroundColor: color.color }}
+                            />
+                            <span>{color.label}</span>
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-3">
                   <label className="text-sm font-medium">
                     Background Image Opacity: {preferences.backgroundOpacity}%
                   </label>
@@ -247,11 +287,23 @@ const Profile = () => {
                       style={{ opacity: preferences.backgroundOpacity / 100 }}
                     />
                     <p 
-                      className="relative z-10 text-white"
+                      className="relative z-10 text-white mb-4"
                       style={{ fontFamily: preferences.fontFamily }}
                     >
                       This is how your articles will look with the current settings.
                     </p>
+                    <div className="relative z-10">
+                      <p className="text-xs text-gray-300 mb-1">Progress bar preview:</p>
+                      <div className="h-1 bg-black/20 rounded overflow-hidden">
+                        <div 
+                          className="h-full rounded transition-all duration-300"
+                          style={{ 
+                            backgroundColor: preferences.progressBarColor,
+                            width: '60%'
+                          }}
+                        />
+                      </div>
+                    </div>
                   </div>
                 </div>
               </CardContent>
