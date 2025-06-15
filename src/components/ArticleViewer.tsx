@@ -1,8 +1,8 @@
+
 import { useState, useEffect, useRef, useCallback } from "react";
 import { motion } from "framer-motion";
 import { Progress } from "./ui/progress";
 import { getRandomArticles, getRelatedArticles } from "../services/wikipediaService";
-import { ScrollArea } from "./ui/scroll-area";
 
 const ArticleViewer = ({ articles: initialArticles, onArticleChange }) => {
   const [articles, setArticles] = useState(initialArticles);
@@ -28,6 +28,8 @@ const ArticleViewer = ({ articles: initialArticles, onArticleChange }) => {
     if (savedPrefs) {
       const prefs = JSON.parse(savedPrefs);
       setUserPreferences(prefs);
+      // Set CSS variable for highlight color
+      document.documentElement.style.setProperty('--highlight-color', prefs.progressBarColor);
     }
   }, []);
 
@@ -47,7 +49,6 @@ const ArticleViewer = ({ articles: initialArticles, onArticleChange }) => {
     
     try {
       setIsLoading(true);
-      // Get related articles based on the current article
       const newArticles = currentArticle 
         ? await getRelatedArticles(currentArticle)
         : await getRandomArticles(3);
@@ -86,12 +87,12 @@ const ArticleViewer = ({ articles: initialArticles, onArticleChange }) => {
       } else {
         clearInterval(interval);
       }
-    }, 80); // Slower animation - 80ms per word instead of 20ms per character
+    }, 80);
 
     return () => clearInterval(interval);
   }, [isVisible, currentArticle?.content]);
 
-  // Mobile-only touch handling
+  // Mobile-only touch handling with improved scrolling
   useEffect(() => {
     if (!isMobile) return;
     
@@ -101,22 +102,35 @@ const ArticleViewer = ({ articles: initialArticles, onArticleChange }) => {
     let startY = 0;
     let startTime = 0;
     let isContentScrollable = false;
+    let initialScrollTop = 0;
 
     const handleTouchStart = (e: TouchEvent) => {
       startY = e.touches[0].clientY;
       startTime = Date.now();
       
-      // Check if content is scrollable
       const contentElement = contentRef.current;
       if (contentElement) {
         isContentScrollable = contentElement.scrollHeight > contentElement.clientHeight;
+        initialScrollTop = contentElement.scrollTop;
       }
       setIsScrolling(false);
     };
 
     const handleTouchMove = (e: TouchEvent) => {
-      if (isContentScrollable) {
-        setIsScrolling(true);
+      const contentElement = contentRef.current;
+      if (contentElement && isContentScrollable) {
+        const currentY = e.touches[0].clientY;
+        const deltaY = startY - currentY;
+        
+        // Allow content scrolling
+        const newScrollTop = initialScrollTop + deltaY;
+        const maxScroll = contentElement.scrollHeight - contentElement.clientHeight;
+        
+        if (newScrollTop >= 0 && newScrollTop <= maxScroll) {
+          setIsScrolling(true);
+          contentElement.scrollTop = newScrollTop;
+          e.preventDefault();
+        }
       }
     };
 
@@ -130,10 +144,8 @@ const ArticleViewer = ({ articles: initialArticles, onArticleChange }) => {
       // Only navigate if it's a fast swipe and not content scrolling
       if (!isScrolling && velocity > 0.8 && Math.abs(deltaY) > 80) {
         if (deltaY > 0 && currentIndex < articles.length - 1) {
-          // Swipe up - next article
           setCurrentIndex(currentIndex + 1);
         } else if (deltaY < 0 && currentIndex > 0) {
-          // Swipe down - previous article
           setCurrentIndex(currentIndex - 1);
         }
       }
@@ -141,9 +153,9 @@ const ArticleViewer = ({ articles: initialArticles, onArticleChange }) => {
       setTimeout(() => setIsScrolling(false), 100);
     };
 
-    container.addEventListener('touchstart', handleTouchStart, { passive: true });
-    container.addEventListener('touchmove', handleTouchMove, { passive: true });
-    container.addEventListener('touchend', handleTouchEnd, { passive: true });
+    container.addEventListener('touchstart', handleTouchStart, { passive: false });
+    container.addEventListener('touchmove', handleTouchMove, { passive: false });
+    container.addEventListener('touchend', handleTouchEnd, { passive: false });
 
     return () => {
       container.removeEventListener('touchstart', handleTouchStart);
@@ -216,7 +228,7 @@ const ArticleViewer = ({ articles: initialArticles, onArticleChange }) => {
             transition={{ duration: 0.5 }}
             className={`relative z-10 text-white p-4 sm:p-8 max-w-3xl mx-auto h-full flex flex-col ${isMobile ? 'justify-center' : 'justify-center items-center'}`}
           >
-            <div className={`${isMobile ? 'bg-black/40 backdrop-blur-sm rounded-lg p-4 max-h-[70vh] overflow-y-auto' : 'text-center'}`}>
+            <div className={`${isMobile ? 'bg-black/40 backdrop-blur-sm rounded-lg p-4 max-h-[70vh]' : 'text-center'}`}>
               <div className="space-y-4">
                 <h1 
                   className="text-2xl sm:text-4xl font-bold"
@@ -226,7 +238,8 @@ const ArticleViewer = ({ articles: initialArticles, onArticleChange }) => {
                 </h1>
                 {isMobile ? (
                   <div 
-                    className="text-sm sm:text-lg leading-relaxed"
+                    ref={contentRef}
+                    className="text-sm sm:text-lg leading-relaxed overflow-y-auto max-h-[50vh] scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-transparent"
                     style={{ fontFamily: userPreferences.fontFamily }}
                   >
                     {currentIndex === index ? displayedText : article.content}
@@ -256,12 +269,11 @@ const ArticleViewer = ({ articles: initialArticles, onArticleChange }) => {
                 className="h-1 bg-black/20"
                 indicatorClassName="transition-colors duration-300"
                 style={{ 
-                  '--progress-color': userPreferences.progressBarColor 
+                  '--progress-bar-color': userPreferences.progressBarColor 
                 } as React.CSSProperties}
               />
             </div>
           )}
-          {/* Mobile navigation hint */}
           {isMobile && (
             <div className="absolute bottom-24 right-4 z-20">
               <div className="text-white/60 text-xs bg-black/40 px-2 py-1 rounded">

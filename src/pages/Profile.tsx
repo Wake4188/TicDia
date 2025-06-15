@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
@@ -9,7 +8,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
-import { ArrowLeft, BookMarked } from "lucide-react";
+import { ArrowLeft, BookMarked, Eye, Trash2, Search } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import LittleWik from "../components/LittleWik";
 
 interface SavedArticle {
   id: string;
@@ -30,7 +31,11 @@ const Profile = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [savedArticles, setSavedArticles] = useState<SavedArticle[]>([]);
+  const [filteredArticles, setFilteredArticles] = useState<SavedArticle[]>([]);
   const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedArticle, setSelectedArticle] = useState<SavedArticle | null>(null);
+  const [isLittleWikOpen, setIsLittleWikOpen] = useState(false);
   const [preferences, setPreferences] = useState<UserPreferences>({
     fontFamily: 'Inter',
     backgroundOpacity: 70,
@@ -51,6 +56,13 @@ const Profile = () => {
 
     fetchSavedArticles();
   }, [user, navigate]);
+
+  useEffect(() => {
+    const filtered = savedArticles.filter(article =>
+      article.article_title.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+    setFilteredArticles(filtered);
+  }, [savedArticles, searchTerm]);
 
   const fetchSavedArticles = async () => {
     try {
@@ -77,6 +89,8 @@ const Profile = () => {
     const updated = { ...preferences, ...newPrefs };
     setPreferences(updated);
     localStorage.setItem('userPreferences', JSON.stringify(updated));
+    // Update CSS variable for highlight color
+    document.documentElement.style.setProperty('--highlight-color', updated.progressBarColor);
   };
 
   const removeSavedArticle = async (articleId: string) => {
@@ -101,6 +115,39 @@ const Profile = () => {
         variant: "destructive",
       });
     }
+  };
+
+  const removeAllSavedArticles = async () => {
+    try {
+      const { error } = await supabase
+        .from('saved_articles')
+        .delete()
+        .eq('user_id', user!.id);
+
+      if (error) throw error;
+      
+      setSavedArticles([]);
+      toast({
+        title: "Cleared",
+        description: "All saved articles have been removed",
+      });
+    } catch (error) {
+      console.error('Error clearing articles:', error);
+      toast({
+        title: "Error",
+        description: "Failed to clear articles",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleArticleClick = (article: SavedArticle) => {
+    setSelectedArticle(article);
+    setIsLittleWikOpen(true);
+  };
+
+  const handleOpenFull = (title: string) => {
+    navigate(`/?q=${encodeURIComponent(title)}`);
   };
 
   const fontOptions = [
@@ -167,29 +214,56 @@ const Profile = () => {
           <TabsContent value="saved" className="space-y-4 animate-in fade-in-50 slide-in-from-bottom-4 duration-700">
             <Card className="bg-gray-900/80 backdrop-blur-md border-gray-800/50 shadow-2xl transition-all duration-500 hover:shadow-wikitok-red/10 hover:shadow-xl">
               <CardHeader className="transition-all duration-300">
-                <CardTitle>Your Saved Articles</CardTitle>
-                <CardDescription>
-                  {savedArticles.length} article{savedArticles.length !== 1 ? 's' : ''} saved
-                </CardDescription>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle>Your Saved Articles</CardTitle>
+                    <CardDescription>
+                      {savedArticles.length} article{savedArticles.length !== 1 ? 's' : ''} saved
+                    </CardDescription>
+                  </div>
+                  {savedArticles.length > 0 && (
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      onClick={removeAllSavedArticles}
+                      className="transition-all duration-300 hover:scale-105"
+                    >
+                      <Trash2 className="w-4 h-4 mr-2" />
+                      Clear All
+                    </Button>
+                  )}
+                </div>
+                {savedArticles.length > 0 && (
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                    <Input
+                      placeholder="Search saved articles..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="pl-10 bg-gray-800/60 border-gray-700/50 text-white"
+                    />
+                  </div>
+                )}
               </CardHeader>
               <CardContent>
                 {loading ? (
                   <div className="text-center py-8">
                     <div className="animate-pulse">Loading...</div>
                   </div>
-                ) : savedArticles.length === 0 ? (
+                ) : filteredArticles.length === 0 ? (
                   <div className="text-center py-8 text-gray-400">
                     <BookMarked className="w-12 h-12 mx-auto mb-4 opacity-50 animate-pulse" />
-                    <p>No saved articles yet</p>
-                    <p className="text-sm">Start saving articles to see them here</p>
+                    <p>{searchTerm ? 'No articles match your search' : 'No saved articles yet'}</p>
+                    <p className="text-sm">{searchTerm ? 'Try a different search term' : 'Start saving articles to see them here'}</p>
                   </div>
                 ) : (
                   <div className="space-y-3">
-                    {savedArticles.map((article, index) => (
+                    {filteredArticles.map((article, index) => (
                       <div 
                         key={article.id} 
-                        className="flex items-center justify-between p-4 bg-gray-800/60 backdrop-blur-sm rounded-lg border border-gray-700/30 transition-all duration-300 hover:bg-gray-700/60 hover:border-gray-600/50 hover:scale-[1.02] animate-in fade-in-50 slide-in-from-left-4"
+                        className="flex items-center justify-between p-4 bg-gray-800/60 backdrop-blur-sm rounded-lg border border-gray-700/30 transition-all duration-300 hover:bg-gray-700/60 hover:border-gray-600/50 hover:scale-[1.02] animate-in fade-in-50 slide-in-from-left-4 cursor-pointer"
                         style={{ animationDelay: `${index * 100}ms` }}
+                        onClick={() => handleArticleClick(article)}
                       >
                         <div className="flex-1">
                           <h3 className="font-medium">{article.article_title}</h3>
@@ -197,14 +271,30 @@ const Profile = () => {
                             Saved on {new Date(article.saved_at).toLocaleDateString()}
                           </p>
                         </div>
-                        <Button
-                          variant="destructive"
-                          size="sm"
-                          onClick={() => removeSavedArticle(article.id)}
-                          className="transition-all duration-300 hover:scale-105"
-                        >
-                          Remove
-                        </Button>
+                        <div className="flex gap-2">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleArticleClick(article);
+                            }}
+                            className="transition-all duration-300 hover:scale-105"
+                          >
+                            <Eye className="w-4 h-4" />
+                          </Button>
+                          <Button
+                            variant="destructive"
+                            size="sm"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              removeSavedArticle(article.id);
+                            }}
+                            className="transition-all duration-300 hover:scale-105"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -242,7 +332,7 @@ const Profile = () => {
                 </div>
 
                 <div className="space-y-3 animate-in fade-in-50 slide-in-from-left-4 duration-500" style={{ animationDelay: "100ms" }}>
-                  <label className="text-sm font-medium">Progress Bar Color</label>
+                  <label className="text-sm font-medium">Progress Bar & Highlight Color</label>
                   <Select 
                     value={preferences.progressBarColor} 
                     onValueChange={(value) => updatePreferences({ progressBarColor: value })}
@@ -320,6 +410,13 @@ const Profile = () => {
           </TabsContent>
         </Tabs>
       </div>
+
+      <LittleWik
+        isOpen={isLittleWikOpen}
+        onClose={() => setIsLittleWikOpen(false)}
+        article={selectedArticle}
+        onOpenFull={handleOpenFull}
+      />
     </div>
   );
 };
