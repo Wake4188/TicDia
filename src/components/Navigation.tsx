@@ -7,22 +7,23 @@ import { useQuery } from "@tanstack/react-query";
 import { useToast } from "@/components/ui/use-toast";
 import { useAuth } from "../contexts/AuthContext";
 import { useTheme } from "../contexts/ThemeContext";
+
 const Navigation = () => {
   const [open, setOpen] = useState(false);
   const [searchValue, setSearchValue] = useState("");
   const navigate = useNavigate();
   const location = useLocation();
-  const {
-    toast
-  } = useToast();
-  const {
-    user
-  } = useAuth();
-  const {
-    theme,
-    toggleTheme
-  } = useTheme();
+  const { toast } = useToast();
+  const { user } = useAuth();
+  const { theme, toggleTheme } = useTheme();
   const [searchParams] = useSearchParams();
+
+  // Get today's date for the button
+  const today = new Date().toLocaleDateString('en-US', { 
+    month: 'short', 
+    day: 'numeric' 
+  });
+
   useEffect(() => {
     const query = searchParams.get("q");
     if (query && location.pathname !== "/discover") {
@@ -30,6 +31,7 @@ const Navigation = () => {
       setSearchValue(decodedQuery);
     }
   }, [searchParams, location.pathname]);
+  
   const {
     data: searchResults,
     isLoading
@@ -40,6 +42,7 @@ const Navigation = () => {
     gcTime: 1000 * 60 * 5,
     staleTime: 0
   });
+
   const handleArticleSelect = (title: string, selectedArticle: any) => {
     setOpen(false);
     setSearchValue(title);
@@ -55,12 +58,14 @@ const Navigation = () => {
       }
     });
   };
+
   const handleOpenChange = (newOpen: boolean) => {
     setOpen(newOpen);
     if (!newOpen) {
       setSearchValue("");
     }
   };
+
   const handleRandomArticle = async () => {
     setSearchValue("");
     toast({
@@ -77,6 +82,7 @@ const Navigation = () => {
       });
     }
   };
+
   const handleDiscoverClick = () => {
     setSearchValue("");
     if (location.pathname === "/discover") {
@@ -85,6 +91,7 @@ const Navigation = () => {
       navigate("/discover");
     }
   };
+
   const handleAuthClick = () => {
     if (user) {
       navigate("/profile");
@@ -92,34 +99,70 @@ const Navigation = () => {
       navigate("/auth");
     }
   };
+
+  const handleTodayClick = () => {
+    navigate("/today");
+  };
+
   const isDiscoverPage = location.pathname === "/discover";
   const navBgClass = theme === 'dark' ? isDiscoverPage ? "bg-black" : "bg-gradient-to-b from-black/50 to-transparent" : isDiscoverPage ? "bg-white shadow-sm" : "bg-gradient-to-b from-white/90 to-transparent backdrop-blur-sm";
   const textClass = theme === 'dark' ? "text-white" : "text-wikitok-lightText";
   const searchBgClass = theme === 'dark' ? "bg-black/20" : "bg-white/80";
-  return <>
+
+  return (
+    <>
       <div className={`fixed top-0 left-0 right-0 h-14 z-50 flex items-center justify-between px-4 transition-all duration-300 ${navBgClass}`}>
-        <div className="text-xl font-bold text-wikitok-red cursor-pointer" onClick={handleRandomArticle}>
-          WikTok
+        <div className="flex items-center gap-4">
+          <div className="text-xl font-bold text-wikitok-red cursor-pointer" onClick={handleRandomArticle}>
+            WikTok
+          </div>
+          <div 
+            className="bg-wikitok-red text-white px-3 py-1 rounded-full text-sm font-medium cursor-pointer hover:bg-red-600 transition-colors"
+            onClick={handleTodayClick}
+          >
+            {today}
+          </div>
         </div>
+
         <div className={`flex items-center ${searchBgClass} backdrop-blur-sm rounded-full px-4 py-2 cursor-pointer transition-all duration-300`} onClick={() => setOpen(true)}>
           <Search className={`w-4 h-4 ${theme === 'dark' ? 'text-white/60' : 'text-gray-500'} mr-2`} />
           <span className={`${theme === 'dark' ? 'text-white/60' : 'text-gray-500'} text-sm`}>
             {searchValue || "Search articles"}
           </span>
         </div>
+
         <div className="flex space-x-4 items-center">
-          
-          <Compass className={`w-5 h-5 cursor-pointer transition-colors duration-300 ${location.pathname === "/discover" ? "text-wikitok-red" : theme === 'dark' ? "text-white hover:text-wikitok-red" : "text-wikitok-lightText hover:text-wikitok-red"}`} onClick={handleDiscoverClick} />
-          <div className={`flex items-center gap-2 cursor-pointer transition-colors duration-300 ${theme === 'dark' ? "text-white hover:text-wikitok-red" : "text-wikitok-lightText hover:text-wikitok-red"}`} onClick={handleAuthClick}>
-            {user ? <>
+          <Compass 
+            className={`w-5 h-5 cursor-pointer transition-colors duration-300 ${
+              location.pathname === "/discover" 
+                ? "text-wikitok-red" 
+                : theme === 'dark' 
+                  ? "text-white hover:text-wikitok-red" 
+                  : "text-wikitok-lightText hover:text-wikitok-red"
+            }`} 
+            onClick={handleDiscoverClick} 
+          />
+          <div 
+            className={`flex items-center gap-2 cursor-pointer transition-colors duration-300 ${
+              theme === 'dark' 
+                ? "text-white hover:text-wikitok-red" 
+                : "text-wikitok-lightText hover:text-wikitok-red"
+            }`} 
+            onClick={handleAuthClick}
+          >
+            {user ? (
+              <>
                 <div className="w-6 h-6 bg-wikitok-red rounded-full flex items-center justify-center text-xs text-white font-bold">
                   {user.email?.charAt(0).toUpperCase()}
                 </div>
                 <span className="text-sm hidden sm:block">Profile</span>
-              </> : <>
+              </>
+            ) : (
+              <>
                 <User className="w-5 h-5" />
                 <span className="text-sm hidden sm:block">Sign In</span>
-              </>}
+              </>
+            )}
           </div>
         </div>
       </div>
@@ -151,6 +194,8 @@ const Navigation = () => {
           </CommandList>
         </Command>
       </CommandDialog>
-    </>;
+    </>
+  );
 };
+
 export default Navigation;

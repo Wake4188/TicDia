@@ -8,6 +8,7 @@ import Index from "./pages/Index";
 import Discover from "./pages/Discover";
 import Auth from "./pages/Auth";
 import Profile from "./pages/Profile";
+import Today from "./pages/Today";
 
 // Create a client
 const queryClient = new QueryClient();
@@ -24,6 +25,7 @@ function App() {
               <Route path="/discover" element={<Discover />} />
               <Route path="/auth" element={<Auth />} />
               <Route path="/profile" element={<Profile />} />
+              <Route path="/today" element={<Today />} />
             </Routes>
             <Toaster />
           </div>
