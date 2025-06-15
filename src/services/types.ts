@@ -12,6 +12,7 @@ export interface WikipediaArticle {
     title: string;
     image: string;
   }[];
+  relevanceScore?: number;
 }
 
 export interface WikipediaImageInfo {
