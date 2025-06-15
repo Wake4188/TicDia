@@ -10,16 +10,59 @@
     --border: 217.2 32.6% 17.5%;
     --primary: 210 40% 98%;
     --primary-foreground: 222.2 84% 4.9%;
+    --progress-bar-color: #FE2C55;
+    --highlight-color: var(--progress-bar-color);
   }
 
   body {
     @apply bg-wikitok-dark text-white;
   }
+
+  /* Apply highlight color to various elements */
+  .text-wikitok-red {
+    color: var(--highlight-color) !important;
+  }
+
+  .bg-wikitok-red {
+    background-color: var(--highlight-color) !important;
+  }
+
+  .hover\:bg-wikitok-red\/90:hover {
+    background-color: color-mix(in srgb, var(--highlight-color) 90%, transparent) !important;
+  }
+
+  .hover\:text-wikitok-red:hover {
+    color: var(--highlight-color) !important;
+  }
+
+  .border-wikitok-red {
+    border-color: var(--highlight-color) !important;
+  }
+
+  /* Selection highlight */
+  ::selection {
+    background-color: var(--highlight-color);
+    color: white;
+  }
+
+  /* Scrollbar styling */
+  .scrollbar-thumb-wikitok-red::-webkit-scrollbar-thumb {
+    background-color: var(--highlight-color);
+  }
+
+  /* Focus ring styling */
+  .focus\:ring-wikitok-red:focus {
+    --tw-ring-color: var(--highlight-color);
+  }
 }
 
 @layer components {
   .sidebar-icon {
-    @apply w-10 h-10 flex items-center justify-center transition-colors duration-300 text-white hover:text-wikitok-red;
+    @apply w-10 h-10 flex items-center justify-center transition-colors duration-300 text-white;
+  }
+  
+  .sidebar-icon:hover {
+    color: var(--highlight-color);
   }
   
   .article-container {

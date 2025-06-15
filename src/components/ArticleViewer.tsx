@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef, useCallback } from "react";
 import { motion } from "framer-motion";
 import { Progress } from "./ui/progress";
@@ -16,22 +15,36 @@ const ArticleViewer = ({ articles: initialArticles, onArticleChange }) => {
   const [userPreferences, setUserPreferences] = useState({
     fontFamily: 'Inter',
     backgroundOpacity: 70,
-    progressBarColor: '#FE2C55'
+    highlightColor: '#FE2C55'
   });
   const containerRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const currentArticle = articles[currentIndex];
 
-  // Load user preferences
+  // Load user preferences and update CSS variables
   useEffect(() => {
     const savedPrefs = localStorage.getItem('userPreferences');
     if (savedPrefs) {
       const prefs = JSON.parse(savedPrefs);
+      // Migrate old progressBarColor to highlightColor
+      if (prefs.progressBarColor && !prefs.highlightColor) {
+        prefs.highlightColor = prefs.progressBarColor;
+        delete prefs.progressBarColor;
+      }
       setUserPreferences(prefs);
-      // Set CSS variable for highlight color
-      document.documentElement.style.setProperty('--highlight-color', prefs.progressBarColor);
+      
+      // Update CSS variables
+      document.documentElement.style.setProperty('--progress-bar-color', prefs.highlightColor);
+      document.documentElement.style.setProperty('--highlight-color', prefs.highlightColor);
     }
   }, []);
+
+  // Save preferences when they change
+  useEffect(() => {
+    localStorage.setItem('userPreferences', JSON.stringify(userPreferences));
+    document.documentElement.style.setProperty('--progress-bar-color', userPreferences.highlightColor);
+    document.documentElement.style.setProperty('--highlight-color', userPreferences.highlightColor);
+  }, [userPreferences]);
 
   // Detect mobile device
   useEffect(() => {
@@ -269,7 +282,7 @@ const ArticleViewer = ({ articles: initialArticles, onArticleChange }) => {
                 className="h-1 bg-black/20"
                 indicatorClassName="transition-colors duration-300"
                 style={{ 
-                  '--progress-bar-color': userPreferences.progressBarColor 
+                  '--progress-bar-color': userPreferences.highlightColor 
                 } as React.CSSProperties}
               />
             </div>
