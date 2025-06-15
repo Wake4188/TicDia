@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef, useCallback } from "react";
 import { motion } from "framer-motion";
 import { Progress } from "./ui/progress";
@@ -29,10 +28,6 @@ const ArticleViewer = ({ articles: initialArticles, onArticleChange }) => {
     if (savedPrefs) {
       const prefs = JSON.parse(savedPrefs);
       setUserPreferences(prefs);
-      // Apply preferences immediately
-      document.documentElement.style.setProperty('--user-font-family', prefs.fontFamily);
-      document.documentElement.style.setProperty('--background-opacity', `${prefs.backgroundOpacity}%`);
-      document.documentElement.style.setProperty('--progress-bar-color', prefs.progressBarColor || '#FE2C55');
     }
   }, []);
 
@@ -208,7 +203,7 @@ const ArticleViewer = ({ articles: initialArticles, onArticleChange }) => {
             <div 
               className="absolute inset-0 bg-black"
               style={{ 
-                background: `linear-gradient(to bottom, transparent, rgba(0,0,0,0.3), rgba(0,0,0,${userPreferences.backgroundOpacity / 100}))` 
+                opacity: userPreferences.backgroundOpacity / 100
               }}
             />
           </div>
