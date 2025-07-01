@@ -1,5 +1,4 @@
 
-
 import { useState, useEffect, useRef, useCallback } from "react";
 import { motion } from "framer-motion";
 import { Progress } from "./ui/progress";
@@ -17,6 +16,7 @@ const ArticleViewer = ({ articles: initialArticles, onArticleChange }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [userPreferences, setUserPreferences] = useState<UserPreferences>(getDefaultPreferences());
+  const [visibleArticles, setVisibleArticles] = useState(new Set<number>());
   const containerRef = useRef<HTMLDivElement>(null);
   const currentArticle = articles[currentIndex];
 
@@ -92,10 +92,12 @@ const ArticleViewer = ({ articles: initialArticles, onArticleChange }) => {
     if (isLoading) return;
     
     try {
+      console.log('Loading more articles...');
       setIsLoading(true);
       const newArticles = currentArticle 
         ? await getRelatedArticles(currentArticle)
         : await getRandomArticles(3);
+      console.log('Loaded new articles:', newArticles.length);
       setArticles(prev => [...prev, ...newArticles]);
     } catch (error) {
       console.error("Failed to load more articles", error);
@@ -104,102 +106,42 @@ const ArticleViewer = ({ articles: initialArticles, onArticleChange }) => {
     }
   }, [isLoading, currentArticle]);
 
+  // Handle intersection observer for both mobile and desktop
   useEffect(() => {
-    setIsVisible(true);
-    setDisplayedText("");
-    setProgress(0);
-    onArticleChange(currentArticle);
-
-    if (currentIndex >= articles.length - 2) {
-      loadMoreArticles();
-    }
-  }, [currentIndex, currentArticle, onArticleChange, articles.length, loadMoreArticles]);
-
-  useEffect(() => {
-    if (!isVisible || !currentArticle?.content) return;
-
-    const text = currentArticle.content;
-    const words = text.split(' ');
-    let currentWordIndex = 0;
-
-    const interval = setInterval(() => {
-      if (currentWordIndex < words.length) {
-        const wordsToShow = words.slice(0, currentWordIndex + 1);
-        setDisplayedText(wordsToShow.join(' '));
-        setProgress(((currentWordIndex + 1) / words.length) * 100);
-        currentWordIndex++;
-      } else {
-        clearInterval(interval);
-      }
-    }, 80);
-
-    return () => clearInterval(interval);
-  }, [isVisible, currentArticle?.content]);
-
-  // Simplified mobile touch handling for navigation only
-  useEffect(() => {
-    if (!isMobile) return;
-    
-    const container = containerRef.current;
-    if (!container) return;
-
-    let startY = 0;
-    let startTime = 0;
-
-    const handleTouchStart = (e: TouchEvent) => {
-      startY = e.touches[0].clientY;
-      startTime = Date.now();
-    };
-
-    const handleTouchEnd = (e: TouchEvent) => {
-      const endY = e.changedTouches[0].clientY;
-      const endTime = Date.now();
-      const deltaY = startY - endY;
-      const deltaTime = endTime - startTime;
-      
-      // Only navigate if it's a fast swipe with significant distance
-      const velocity = Math.abs(deltaY) / deltaTime;
-      const distance = Math.abs(deltaY);
-      
-      if (velocity > 1.2 && distance > 100) {
-        if (deltaY > 0 && currentIndex < articles.length - 1) {
-          // Swipe up - next article
-          setCurrentIndex(currentIndex + 1);
-        } else if (deltaY < 0 && currentIndex > 0) {
-          // Swipe down - previous article
-          setCurrentIndex(currentIndex - 1);
-        }
-      }
-    };
-
-    container.addEventListener('touchstart', handleTouchStart, { passive: true });
-    container.addEventListener('touchend', handleTouchEnd, { passive: true });
-
-    return () => {
-      container.removeEventListener('touchstart', handleTouchStart);
-      container.removeEventListener('touchend', handleTouchEnd);
-    };
-  }, [currentIndex, articles.length, isMobile]);
-
-  // Desktop-only scroll handling
-  useEffect(() => {
-    if (isMobile) return;
-    
     const container = containerRef.current;
     if (!container) return;
 
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
+          const index = parseInt(entry.target.getAttribute("data-index") || "0");
+          
           if (entry.isIntersecting) {
-            const index = parseInt(entry.target.getAttribute("data-index") || "0");
-            setCurrentIndex(index);
-            setIsVisible(true);
+            console.log('Article visible:', index);
+            setVisibleArticles(prev => new Set([...prev, index]));
+            
+            // Update current index when article becomes visible
+            if (entry.intersectionRatio > 0.7) {
+              setCurrentIndex(index);
+              onArticleChange(articles[index]);
+            }
+            
+            // Load more articles when approaching the end
+            if (index >= articles.length - 2) {
+              console.log('Near end, loading more articles...');
+              loadMoreArticles();
+            }
+          } else {
+            setVisibleArticles(prev => {
+              const newSet = new Set(prev);
+              newSet.delete(index);
+              return newSet;
+            });
           }
         });
       },
       {
-        threshold: 0.7,
+        threshold: [0.1, 0.7],
         root: null,
       }
     );
@@ -210,12 +152,49 @@ const ArticleViewer = ({ articles: initialArticles, onArticleChange }) => {
     return () => {
       articleElements.forEach((article) => observer.unobserve(article));
     };
-  }, [articles, isMobile]);
+  }, [articles, loadMoreArticles, onArticleChange]);
+
+  // Text animation effect for visible articles
+  useEffect(() => {
+    visibleArticles.forEach((index) => {
+      const article = articles[index];
+      if (!article?.content) return;
+
+      const text = article.content;
+      const words = text.split(' ');
+      let currentWordIndex = 0;
+
+      const interval = setInterval(() => {
+        if (currentWordIndex < words.length && visibleArticles.has(index)) {
+          const wordsToShow = words.slice(0, currentWordIndex + 1);
+          // Update displayedText for the specific article
+          if (index === currentIndex) {
+            setDisplayedText(wordsToShow.join(' '));
+            setProgress(((currentWordIndex + 1) / words.length) * 100);
+          }
+          currentWordIndex++;
+        } else {
+          clearInterval(interval);
+        }
+      }, 80);
+
+      return () => clearInterval(interval);
+    });
+  }, [visibleArticles, articles, currentIndex]);
+
+  // Initialize first article as visible
+  useEffect(() => {
+    if (articles.length > 0) {
+      setVisibleArticles(new Set([0]));
+      setCurrentIndex(0);
+      onArticleChange(articles[0]);
+    }
+  }, [articles, onArticleChange]);
 
   return (
     <main 
       ref={containerRef} 
-      className={`h-screen w-screen ${isMobile ? 'overflow-y-auto' : 'overflow-y-scroll'} snap-y snap-mandatory`}
+      className="h-screen w-screen overflow-y-auto snap-y snap-mandatory"
     >
       {articles.map((article, index) => (
         <div 
@@ -239,8 +218,8 @@ const ArticleViewer = ({ articles: initialArticles, onArticleChange }) => {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{
-              opacity: isVisible && currentIndex === index ? 1 : 0,
-              y: isVisible && currentIndex === index ? 0 : 20,
+              opacity: visibleArticles.has(index) ? 1 : 0,
+              y: visibleArticles.has(index) ? 0 : 20,
             }}
             transition={{ duration: 0.5 }}
             className="relative z-10 text-white p-4 sm:p-8 max-w-3xl mx-auto h-full flex flex-col justify-center"
@@ -258,7 +237,7 @@ const ArticleViewer = ({ articles: initialArticles, onArticleChange }) => {
                     className="text-sm sm:text-lg leading-relaxed"
                     style={{ fontFamily: userPreferences.fontFamily }}
                   >
-                    {currentIndex === index ? displayedText : article.content}
+                    {currentIndex === index && displayedText ? displayedText : article.content}
                   </p>
                 </div>
               </div>
@@ -284,7 +263,7 @@ const ArticleViewer = ({ articles: initialArticles, onArticleChange }) => {
           {isMobile && (
             <div className="absolute bottom-24 right-4 z-20">
               <div className="text-white/60 text-xs bg-black/40 px-2 py-1 rounded">
-                Swipe up/down
+                Scroll to navigate
               </div>
             </div>
           )}
@@ -300,4 +279,3 @@ const ArticleViewer = ({ articles: initialArticles, onArticleChange }) => {
 };
 
 export default ArticleViewer;
-
