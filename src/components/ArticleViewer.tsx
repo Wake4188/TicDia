@@ -1,4 +1,5 @@
 
+
 import { useState, useEffect, useRef, useCallback } from "react";
 import { motion } from "framer-motion";
 import { Progress } from "./ui/progress";
@@ -14,11 +15,9 @@ const ArticleViewer = ({ articles: initialArticles, onArticleChange }) => {
   const [displayedText, setDisplayedText] = useState("");
   const [progress, setProgress] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
-  const [isScrolling, setIsScrolling] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [userPreferences, setUserPreferences] = useState<UserPreferences>(getDefaultPreferences());
   const containerRef = useRef<HTMLDivElement>(null);
-  const contentRef = useRef<HTMLDivElement>(null);
   const currentArticle = articles[currentIndex];
 
   // Load user preferences from database
@@ -137,7 +136,7 @@ const ArticleViewer = ({ articles: initialArticles, onArticleChange }) => {
     return () => clearInterval(interval);
   }, [isVisible, currentArticle?.content]);
 
-  // Mobile-only touch handling with improved scrolling
+  // Simplified mobile touch handling for navigation only
   useEffect(() => {
     if (!isMobile) return;
     
@@ -146,37 +145,10 @@ const ArticleViewer = ({ articles: initialArticles, onArticleChange }) => {
 
     let startY = 0;
     let startTime = 0;
-    let isContentScrollable = false;
-    let initialScrollTop = 0;
 
     const handleTouchStart = (e: TouchEvent) => {
       startY = e.touches[0].clientY;
       startTime = Date.now();
-      
-      const contentElement = contentRef.current;
-      if (contentElement) {
-        isContentScrollable = contentElement.scrollHeight > contentElement.clientHeight;
-        initialScrollTop = contentElement.scrollTop;
-      }
-      setIsScrolling(false);
-    };
-
-    const handleTouchMove = (e: TouchEvent) => {
-      const contentElement = contentRef.current;
-      if (contentElement && isContentScrollable) {
-        const currentY = e.touches[0].clientY;
-        const deltaY = startY - currentY;
-        
-        // Allow content scrolling
-        const newScrollTop = initialScrollTop + deltaY;
-        const maxScroll = contentElement.scrollHeight - contentElement.clientHeight;
-        
-        if (newScrollTop >= 0 && newScrollTop <= maxScroll) {
-          setIsScrolling(true);
-          contentElement.scrollTop = newScrollTop;
-          e.preventDefault();
-        }
-      }
     };
 
     const handleTouchEnd = (e: TouchEvent) => {
@@ -184,30 +156,30 @@ const ArticleViewer = ({ articles: initialArticles, onArticleChange }) => {
       const endTime = Date.now();
       const deltaY = startY - endY;
       const deltaTime = endTime - startTime;
+      
+      // Only navigate if it's a fast swipe with significant distance
       const velocity = Math.abs(deltaY) / deltaTime;
-
-      // Only navigate if it's a fast swipe and not content scrolling
-      if (!isScrolling && velocity > 0.8 && Math.abs(deltaY) > 80) {
+      const distance = Math.abs(deltaY);
+      
+      if (velocity > 1.2 && distance > 100) {
         if (deltaY > 0 && currentIndex < articles.length - 1) {
+          // Swipe up - next article
           setCurrentIndex(currentIndex + 1);
         } else if (deltaY < 0 && currentIndex > 0) {
+          // Swipe down - previous article
           setCurrentIndex(currentIndex - 1);
         }
       }
-
-      setTimeout(() => setIsScrolling(false), 100);
     };
 
-    container.addEventListener('touchstart', handleTouchStart, { passive: false });
-    container.addEventListener('touchmove', handleTouchMove, { passive: false });
-    container.addEventListener('touchend', handleTouchEnd, { passive: false });
+    container.addEventListener('touchstart', handleTouchStart, { passive: true });
+    container.addEventListener('touchend', handleTouchEnd, { passive: true });
 
     return () => {
       container.removeEventListener('touchstart', handleTouchStart);
-      container.removeEventListener('touchmove', handleTouchMove);
       container.removeEventListener('touchend', handleTouchEnd);
     };
-  }, [currentIndex, articles.length, isScrolling, isMobile]);
+  }, [currentIndex, articles.length, isMobile]);
 
   // Desktop-only scroll handling
   useEffect(() => {
@@ -243,7 +215,7 @@ const ArticleViewer = ({ articles: initialArticles, onArticleChange }) => {
   return (
     <main 
       ref={containerRef} 
-      className={`h-screen w-screen ${isMobile ? 'overflow-hidden' : 'overflow-y-scroll'} snap-y snap-mandatory`}
+      className={`h-screen w-screen ${isMobile ? 'overflow-y-auto' : 'overflow-y-scroll'} snap-y snap-mandatory`}
     >
       {articles.map((article, index) => (
         <div 
@@ -271,9 +243,9 @@ const ArticleViewer = ({ articles: initialArticles, onArticleChange }) => {
               y: isVisible && currentIndex === index ? 0 : 20,
             }}
             transition={{ duration: 0.5 }}
-            className={`relative z-10 text-white p-4 sm:p-8 max-w-3xl mx-auto h-full flex flex-col ${isMobile ? 'justify-center' : 'justify-center items-center'}`}
+            className="relative z-10 text-white p-4 sm:p-8 max-w-3xl mx-auto h-full flex flex-col justify-center"
           >
-            <div className={`${isMobile ? 'bg-black/40 backdrop-blur-sm rounded-lg p-4 max-h-[70vh]' : 'text-center'}`}>
+            <div className={`${isMobile ? 'bg-black/40 backdrop-blur-sm rounded-lg p-4 max-h-[70vh] overflow-y-auto' : 'text-center'}`}>
               <div className="space-y-4">
                 <h1 
                   className="text-2xl sm:text-4xl font-bold"
@@ -281,27 +253,17 @@ const ArticleViewer = ({ articles: initialArticles, onArticleChange }) => {
                 >
                   {article.title}
                 </h1>
-                {isMobile ? (
-                  <div 
-                    ref={contentRef}
-                    className="text-sm sm:text-lg leading-relaxed overflow-y-auto max-h-[50vh] scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-transparent"
+                <div className="max-w-2xl">
+                  <p 
+                    className="text-sm sm:text-lg leading-relaxed"
                     style={{ fontFamily: userPreferences.fontFamily }}
                   >
                     {currentIndex === index ? displayedText : article.content}
-                  </div>
-                ) : (
-                  <div className="max-w-2xl">
-                    <p 
-                      className="text-sm sm:text-lg leading-relaxed"
-                      style={{ fontFamily: userPreferences.fontFamily }}
-                    >
-                      {currentIndex === index ? displayedText : article.content}
-                    </p>
-                  </div>
-                )}
+                  </p>
+                </div>
               </div>
             </div>
-            <div className={`flex items-center space-x-2 text-xs sm:text-sm text-gray-300 flex-shrink-0 ${isMobile ? 'mt-4' : 'mt-6'}`}>
+            <div className="flex items-center space-x-2 text-xs sm:text-sm text-gray-300 flex-shrink-0 mt-4">
               <span>{article.readTime} min read</span>
               <span>•</span>
               <span>{article.views.toLocaleString()} views</span>
@@ -338,3 +300,4 @@ const ArticleViewer = ({ articles: initialArticles, onArticleChange }) => {
 };
 
 export default ArticleViewer;
+
