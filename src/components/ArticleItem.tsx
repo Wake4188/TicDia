@@ -6,7 +6,6 @@ import { UserPreferences } from "@/services/userPreferencesService";
 interface ArticleItemProps {
   article: any;
   index: number;
-  isVisible: boolean;
   isCurrent: boolean;
   displayedText: string;
   progress: number;
@@ -17,7 +16,6 @@ interface ArticleItemProps {
 const ArticleItem = ({
   article,
   index,
-  isVisible,
   isCurrent,
   displayedText,
   progress,
@@ -44,12 +42,9 @@ const ArticleItem = ({
       </div>
       
       <motion.div
-        initial={false}
-        animate={{
-          opacity: isVisible ? 1 : 0,
-          y: isVisible ? 0 : 20,
-        }}
-        transition={{ duration: 0.3, ease: "easeOut" }}
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, ease: "easeOut" }}
         className="relative z-10 text-white p-4 sm:p-8 max-w-3xl mx-auto h-full flex flex-col justify-center"
       >
         <div className={`${isMobile ? 'bg-black/40 backdrop-blur-sm rounded-lg p-4 max-h-[70vh] overflow-y-auto' : 'text-center'}`}>
@@ -65,7 +60,7 @@ const ArticleItem = ({
                 className="text-sm sm:text-lg leading-relaxed"
                 style={{ fontFamily: userPreferences.fontFamily }}
               >
-                {isCurrent && displayedText ? displayedText : article.content}
+                {displayedText || article.content}
               </p>
             </div>
           </div>
@@ -77,7 +72,7 @@ const ArticleItem = ({
         </div>
       </motion.div>
       
-      {isCurrent && (
+      {isCurrent && progress > 0 && (
         <div className="absolute bottom-0 left-0 right-0 z-20">
           <Progress 
             value={progress} 

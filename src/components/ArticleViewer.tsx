@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useCallback } from "react";
 import { getRandomArticles, getRelatedArticles } from "../services/wikipediaService";
 import { useAuth } from "@/contexts/AuthContext";
@@ -13,14 +14,12 @@ const ArticleViewer = ({ articles: initialArticles, onArticleChange }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [userPreferences, setUserPreferences] = useState<UserPreferences>(getDefaultPreferences());
-  const [visibleArticles, setVisibleArticles] = useState(new Set<number>([0]));
 
   const currentArticle = articles[currentIndex];
-  const isCurrentVisible = visibleArticles.has(currentIndex);
   
   const { displayedText, progress } = useTextAnimation(
     currentArticle?.content || '',
-    isCurrentVisible,
+    true, // Always active for current article
     80
   );
 
@@ -100,12 +99,9 @@ const ArticleViewer = ({ articles: initialArticles, onArticleChange }) => {
     }
   }, [isLoading, currentArticle]);
 
-  const handleVisibilityChange = useCallback((newVisibleArticles: Set<number>) => {
-    setVisibleArticles(newVisibleArticles);
-  }, []);
-
   const handleCurrentIndexChange = useCallback((newIndex: number) => {
     if (newIndex !== currentIndex) {
+      console.log('Article changed to index:', newIndex);
       setCurrentIndex(newIndex);
       onArticleChange(articles[newIndex]);
     }
@@ -113,15 +109,14 @@ const ArticleViewer = ({ articles: initialArticles, onArticleChange }) => {
 
   const containerRef = useArticleIntersection({
     articles,
-    onVisibilityChange: handleVisibilityChange,
+    onVisibilityChange: () => {}, // Simplified - no longer needed
     onCurrentIndexChange: handleCurrentIndexChange,
     onLoadMore: loadMoreArticles
   });
 
-  // Initialize first article as visible
+  // Initialize first article
   useEffect(() => {
     if (articles.length > 0) {
-      setVisibleArticles(new Set([0]));
       setCurrentIndex(0);
       onArticleChange(articles[0]);
     }
@@ -134,19 +129,18 @@ const ArticleViewer = ({ articles: initialArticles, onArticleChange }) => {
     >
       {articles.map((article, index) => (
         <ArticleItem
-          key={article.id}
+          key={`${article.id}-${index}`}
           article={article}
           index={index}
-          isVisible={visibleArticles.has(index)}
           isCurrent={currentIndex === index}
-          displayedText={displayedText}
-          progress={progress}
+          displayedText={currentIndex === index ? displayedText : ''}
+          progress={currentIndex === index ? progress : 0}
           userPreferences={userPreferences}
           isMobile={isMobile}
         />
       ))}
       {isLoading && (
-        <div className="h-screen w-screen flex items-center justify-center">
+        <div className="h-screen w-screen flex items-center justify-center bg-black">
           <div className="text-white">Loading more articles...</div>
         </div>
       )}
