@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback } from "react";
 import { getRandomArticles, getRelatedArticles } from "../services/wikipediaService";
 import { useAuth } from "@/contexts/AuthContext";
@@ -19,7 +18,7 @@ const ArticleViewer = ({ articles: initialArticles, onArticleChange }) => {
   
   const { displayedText, progress } = useTextAnimation(
     currentArticle?.content || '',
-    true, // Always active for current article
+    true, // Always active to prevent flashing
     80
   );
 
@@ -100,8 +99,8 @@ const ArticleViewer = ({ articles: initialArticles, onArticleChange }) => {
   }, [isLoading, currentArticle]);
 
   const handleCurrentIndexChange = useCallback((newIndex: number) => {
-    if (newIndex !== currentIndex) {
-      console.log('Article changed to index:', newIndex);
+    if (newIndex !== currentIndex && newIndex >= 0 && newIndex < articles.length) {
+      console.log('Article changed to index:', newIndex, 'Article:', articles[newIndex]?.title);
       setCurrentIndex(newIndex);
       onArticleChange(articles[newIndex]);
     }
@@ -109,15 +108,14 @@ const ArticleViewer = ({ articles: initialArticles, onArticleChange }) => {
 
   const containerRef = useArticleIntersection({
     articles,
-    onVisibilityChange: () => {}, // Simplified - no longer needed
+    onVisibilityChange: () => {},
     onCurrentIndexChange: handleCurrentIndexChange,
     onLoadMore: loadMoreArticles
   });
 
   // Initialize first article
   useEffect(() => {
-    if (articles.length > 0) {
-      setCurrentIndex(0);
+    if (articles.length > 0 && currentIndex === 0) {
       onArticleChange(articles[0]);
     }
   }, [articles, onArticleChange]);

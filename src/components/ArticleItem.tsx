@@ -22,6 +22,9 @@ const ArticleItem = ({
   userPreferences,
   isMobile
 }: ArticleItemProps) => {
+  // Always show full content, only animate when current
+  const contentToShow = isCurrent && displayedText ? displayedText : article.content;
+
   return (
     <div 
       data-index={index}
@@ -60,7 +63,7 @@ const ArticleItem = ({
                 className="text-sm sm:text-lg leading-relaxed"
                 style={{ fontFamily: userPreferences.fontFamily }}
               >
-                {displayedText || article.content}
+                {contentToShow}
               </p>
             </div>
           </div>
