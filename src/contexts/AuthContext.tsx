@@ -1,3 +1,4 @@
+
 import { createContext, useContext, useEffect, useState } from "react";
 import { User, Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
@@ -61,15 +62,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
-      options: {
-        // If rememberMe is true, set a longer session duration
-        // Otherwise, use default session duration
-        ...(rememberMe && {
-          data: {
-            remember_me: true
-          }
-        })
-      }
     });
 
     // Store remember me preference in localStorage
@@ -83,9 +75,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   const signUpWithEmail = async (email: string, password: string) => {
+    const redirectUrl = `${window.location.origin}/`;
+    
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
+      options: {
+        emailRedirectTo: redirectUrl
+      }
     });
 
     return { data, error };
