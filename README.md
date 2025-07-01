@@ -26,3 +26,9 @@ This project is built with .
 ## 🌐 Language Support
 
 If you're visiting from a browser set to a different language, like English, Chrome and other browsers should automatically offer to translate the French content.
+
+## 🌐 Internet Support
+
+Thanks to Versel, I has able to put this here : https://wiktoc.vercel.app/.
+It _should_be on google with these search keys : w-810277 versel.
+I'm work on getting it to bing and qwant.
