@@ -23,4 +23,6 @@ This project is built with .
 - shadcn-ui
 - Tailwind CSS
 
+## 🌐 Language Support
 
+If you're visiting from a browser set to a different language, like English, Chrome and other browsers should automatically offer to translate the French content.
