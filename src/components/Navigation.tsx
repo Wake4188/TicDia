@@ -1,4 +1,4 @@
-import { Search, Compass, User, Sun, Moon } from "lucide-react";
+import { Search, Compass, User } from "lucide-react";
 import { Command, CommandDialog, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams, useLocation } from "react-router-dom";
@@ -8,7 +8,9 @@ import { useToast } from "@/components/ui/use-toast";
 import { useAuth } from "../contexts/AuthContext";
 import { useTheme } from "../contexts/ThemeContext";
 import { useLanguage } from "../contexts/LanguageContext";
+import { getTranslations, formatDate } from "../services/translations";
 import LanguageSelector from "./LanguageSelector";
+import MobileMenu from "./MobileMenu";
 
 const Navigation = () => {
   const [open, setOpen] = useState(false);
@@ -17,15 +19,14 @@ const Navigation = () => {
   const location = useLocation();
   const { toast } = useToast();
   const { user } = useAuth();
-  const { theme, toggleTheme } = useTheme();
+  const { theme } = useTheme();
   const { currentLanguage } = useLanguage();
   const [searchParams] = useSearchParams();
+  const t = getTranslations(currentLanguage);
 
   // Get today's date for the button
-  const today = new Date().toLocaleDateString('en-US', { 
-    month: 'short', 
-    day: 'numeric' 
-  });
+  const today = new Date();
+  const dateString = formatDate(today, currentLanguage);
 
   useEffect(() => {
     const query = searchParams.get("q");
@@ -115,7 +116,8 @@ const Navigation = () => {
   return (
     <>
       <div className={`fixed top-0 left-0 right-0 h-14 z-50 flex items-center justify-between px-4 transition-all duration-300 ${navBgClass}`}>
-        <div className="flex items-center gap-4">
+        {/* Desktop Navigation */}
+        <div className="hidden md:flex items-center gap-4">
           <div className="text-xl font-bold text-wikitok-red cursor-pointer" onClick={handleRandomArticle}>
             WikTok
           </div>
@@ -123,18 +125,25 @@ const Navigation = () => {
             className="bg-wikitok-red text-white px-3 py-1 rounded-full text-sm font-medium cursor-pointer hover:bg-red-600 transition-colors"
             onClick={handleTodayClick}
           >
-            {today}
+            {dateString}
           </div>
         </div>
 
-        <div className={`flex items-center ${searchBgClass} backdrop-blur-sm rounded-full px-4 py-2 cursor-pointer transition-all duration-300`} onClick={() => setOpen(true)}>
+        {/* Mobile Logo */}
+        <div className="md:hidden text-xl font-bold text-wikitok-red cursor-pointer" onClick={handleRandomArticle}>
+          WikTok
+        </div>
+
+        {/* Desktop Search */}
+        <div className={`hidden md:flex items-center ${searchBgClass} backdrop-blur-sm rounded-full px-4 py-2 cursor-pointer transition-all duration-300`} onClick={() => setOpen(true)}>
           <Search className={`w-4 h-4 ${theme === 'dark' ? 'text-white/60' : 'text-gray-500'} mr-2`} />
           <span className={`${theme === 'dark' ? 'text-white/60' : 'text-gray-500'} text-sm`}>
-            {searchValue || "Search articles"}
+            {searchValue || t.search}
           </span>
         </div>
 
-        <div className="flex space-x-4 items-center">
+        {/* Desktop Right Navigation */}
+        <div className="hidden md:flex space-x-4 items-center">
           <LanguageSelector />
           <Compass 
             className={`w-5 h-5 cursor-pointer transition-colors duration-300 ${
@@ -159,21 +168,26 @@ const Navigation = () => {
                 <div className="w-6 h-6 bg-wikitok-red rounded-full flex items-center justify-center text-xs text-white font-bold">
                   {user.email?.charAt(0).toUpperCase()}
                 </div>
-                <span className="text-sm hidden sm:block">Profile</span>
+                <span className="text-sm hidden sm:block">{t.profile}</span>
               </>
             ) : (
               <>
                 <User className="w-5 h-5" />
-                <span className="text-sm hidden sm:block">Sign In</span>
+                <span className="text-sm hidden sm:block">{t.signIn}</span>
               </>
             )}
           </div>
+        </div>
+
+        {/* Mobile Menu */}
+        <div className="md:hidden">
+          <MobileMenu onSearchClick={() => setOpen(true)} searchValue={searchValue} />
         </div>
       </div>
 
       <CommandDialog open={open} onOpenChange={handleOpenChange}>
         <Command shouldFilter={false}>
-          <CommandInput placeholder="Search articles..." value={searchValue} onValueChange={setSearchValue} className="border-none focus:ring-0" />
+          <CommandInput placeholder={t.search} value={searchValue} onValueChange={setSearchValue} className="border-none focus:ring-0" />
           <CommandList className="max-h-[80vh] overflow-y-auto">
             {isLoading && <CommandEmpty>Searching...</CommandEmpty>}
             {!isLoading && !searchResults && searchValue.length > 0 && <CommandEmpty>No results found.</CommandEmpty>}

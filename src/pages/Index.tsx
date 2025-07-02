@@ -8,6 +8,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { useSearchParams, useLocation, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { useLanguage } from "../contexts/LanguageContext";
+import { getTranslations } from "../services/translations";
 
 const Index = () => {
   const { toast } = useToast();
@@ -15,6 +16,7 @@ const Index = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { currentLanguage, isLoading: languageLoading } = useLanguage();
+  const t = getTranslations(currentLanguage);
   const searchQuery = searchParams.get("q");
   const [currentArticle, setCurrentArticle] = useState(null);
 
@@ -52,7 +54,7 @@ const Index = () => {
   if (isLoading || languageLoading) {
     return (
       <div className="h-screen w-screen flex items-center justify-center bg-wikitok-dark text-white">
-        <div>Loading amazing articles...</div>
+        <div>{t.loading}</div>
       </div>
     );
   }
@@ -60,7 +62,7 @@ const Index = () => {
   if (error || !articles || articles.length === 0) {
     return (
       <div className="h-screen w-screen flex items-center justify-center bg-wikitok-dark text-white">
-        <div>Something went wrong. Please try again.</div>
+        <div>{t.error}</div>
       </div>
     );
   }

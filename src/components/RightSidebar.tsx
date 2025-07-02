@@ -1,15 +1,18 @@
-
 import { useState, useEffect } from "react";
 import { Bookmark, Share2, Edit, BookOpen } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
 import { useNavigate } from "react-router-dom";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { getTranslations } from "@/services/translations";
 
 const RightSidebar = ({ article }) => {
   const { user } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
+  const { currentLanguage } = useLanguage();
+  const t = getTranslations(currentLanguage);
   const [isSaved, setIsSaved] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -41,7 +44,8 @@ const RightSidebar = ({ article }) => {
   }, [user, article]);
 
   const handleWikipediaRedirect = () => {
-    const baseUrl = "https://en.wikipedia.org/wiki/";
+    const language = currentLanguage;
+    const baseUrl = `https://${language.wikipediaDomain}/wiki/`;
     const articleTitle = encodeURIComponent(article.title);
     window.open(`${baseUrl}${articleTitle}`, '_blank');
   };
@@ -70,7 +74,8 @@ const RightSidebar = ({ article }) => {
   };
 
   const handleEdit = () => {
-    const baseUrl = "https://en.wikipedia.org/wiki/";
+    const language = currentLanguage;
+    const baseUrl = `https://${language.wikipediaDomain}/wiki/`;
     const articleTitle = encodeURIComponent(article.title);
     window.open(`${baseUrl}edit/${articleTitle}`, '_blank');
   };
@@ -86,7 +91,7 @@ const RightSidebar = ({ article }) => {
             onClick={() => navigate('/auth')}
             className="bg-wikitok-red text-white px-3 py-1 rounded text-sm hover:bg-wikitok-red/90"
           >
-            Sign In
+            {t.signIn}
           </button>
         ),
       });
@@ -116,13 +121,14 @@ const RightSidebar = ({ article }) => {
         });
       } else {
         // Add to saved articles
+        const language = currentLanguage;
         const { error } = await supabase
           .from('saved_articles')
           .insert({
             user_id: user.id,
             article_id: article.id,
             article_title: article.title,
-            article_url: `https://en.wikipedia.org/wiki/${encodeURIComponent(article.title)}`
+            article_url: `https://${language.wikipediaDomain}/wiki/${encodeURIComponent(article.title)}`
           });
 
         if (error) {
@@ -157,28 +163,28 @@ const RightSidebar = ({ article }) => {
         >
           <Bookmark className={`w-7 h-7 ${isSaved ? 'fill-current' : ''}`} />
         </button>
-        <span className="text-xs mt-1">{isSaved ? 'Saved' : 'Save'}</span>
+        <span className="text-xs mt-1">{isSaved ? t.saved : t.save}</span>
       </div>
       
       <div className="flex flex-col items-center">
         <button className="sidebar-icon" onClick={handleShare}>
           <Share2 className="w-7 h-7" />
         </button>
-        <span className="text-xs mt-1">Share</span>
+        <span className="text-xs mt-1">{t.share}</span>
       </div>
       
       <div className="flex flex-col items-center">
         <button className="sidebar-icon" onClick={handleEdit}>
           <Edit className="w-7 h-7" />
         </button>
-        <span className="text-xs mt-1">Edit</span>
+        <span className="text-xs mt-1">{t.edit}</span>
       </div>
       
       <div className="flex flex-col items-center">
         <button className="sidebar-icon" onClick={handleWikipediaRedirect}>
           <BookOpen className="w-7 h-7" />
         </button>
-        <span className="text-xs mt-1">View</span>
+        <span className="text-xs mt-1">{t.view}</span>
       </div>
     </div>
   );
