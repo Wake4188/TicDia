@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { getRandomArticles, WikipediaArticle } from "@/services/wikipediaService";
 import { useInView } from "react-intersection-observer";
@@ -6,19 +7,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useNavigate } from "react-router-dom";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { useToast } from "@/components/ui/use-toast";
-
-const categories = [
-  "All",
-  "Science",
-  "History",
-  "Technology",
-  "Arts",
-  "Sports",
-  "Nature",
-  "Philosophy",
-  "Politics",
-  "Literature",
-];
+import { useLanguage } from "@/contexts/LanguageContext";
+import { getTranslations } from "@/services/translations";
 
 const Discover = () => {
   const [selectedCategory, setSelectedCategory] = useState("All");
@@ -26,11 +16,39 @@ const Discover = () => {
   const { ref, inView } = useInView();
   const queryClient = useQueryClient();
   const { toast } = useToast();
+  const { currentLanguage } = useLanguage();
+  const t = getTranslations(currentLanguage);
+
+  const categories = [
+    t.categories.all,
+    t.categories.science,
+    t.categories.history,
+    t.categories.technology,
+    t.categories.arts,
+    t.categories.sports,
+    t.categories.nature,
+    t.categories.philosophy,
+    t.categories.politics,
+    t.categories.literature,
+  ];
+
+  const categoryMapping = {
+    [t.categories.all]: "All",
+    [t.categories.science]: "Science",
+    [t.categories.history]: "History",
+    [t.categories.technology]: "Technology",
+    [t.categories.arts]: "Arts",
+    [t.categories.sports]: "Sports",
+    [t.categories.nature]: "Nature",
+    [t.categories.philosophy]: "Philosophy",
+    [t.categories.politics]: "Politics",
+    [t.categories.literature]: "Literature",
+  };
 
   const preloadNextPage = async (category: string) => {
     try {
-      const nextData = await getRandomArticles(12, category);
-      // Filter out articles without images and prefetch remaining images
+      const englishCategory = categoryMapping[category] || category;
+      const nextData = await getRandomArticles(12, englishCategory, currentLanguage);
       const articlesWithImages = nextData.filter(article => article.image);
       articlesWithImages.forEach(article => {
         const img = new Image();
@@ -44,9 +62,10 @@ const Discover = () => {
   };
 
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading, refetch } = useInfiniteQuery({
-    queryKey: ["discover", selectedCategory],
+    queryKey: ["discover", selectedCategory, currentLanguage.code],
     queryFn: async ({ pageParam }) => {
-      const articles = await getRandomArticles(12, selectedCategory);
+      const englishCategory = categoryMapping[selectedCategory] || selectedCategory;
+      const articles = await getRandomArticles(12, englishCategory, currentLanguage);
       return articles.filter(article => article.image);
     },
     initialPageParam: 1,
@@ -68,17 +87,17 @@ const Discover = () => {
   }, [inView, fetchNextPage, hasNextPage]);
 
   const handleCategoryChange = async (category: string) => {
-    await queryClient.cancelQueries({ queryKey: ["discover", selectedCategory] });
-    await queryClient.cancelQueries({ queryKey: ["discover", category] });
+    await queryClient.cancelQueries({ queryKey: ["discover", selectedCategory, currentLanguage.code] });
+    await queryClient.cancelQueries({ queryKey: ["discover", category, currentLanguage.code] });
     
-    queryClient.removeQueries({ queryKey: ["discover", selectedCategory] });
-    queryClient.removeQueries({ queryKey: ["discover", category] });
+    queryClient.removeQueries({ queryKey: ["discover", selectedCategory, currentLanguage.code] });
+    queryClient.removeQueries({ queryKey: ["discover", category, currentLanguage.code] });
     
     setSelectedCategory(category);
     
     toast({
-      title: `Loading ${category} articles`,
-      description: "Please wait while we fetch the content...",
+      title: `${t.loading} ${category} ${t.articles}`,
+      description: t.loadingDescription,
       duration: 2000,
     });
 
@@ -139,7 +158,7 @@ const Discover = () => {
               <div className="absolute bottom-0 p-3 w-full">
                 <h3 className="text-sm font-semibold line-clamp-2">{article.title}</h3>
                 <p className="text-xs text-gray-300 mt-1">
-                  {article.views.toLocaleString()} views
+                  {article.views.toLocaleString()} {t.views}
                 </p>
               </div>
             </div>

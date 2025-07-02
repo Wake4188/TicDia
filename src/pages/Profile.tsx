@@ -13,6 +13,8 @@ import { ArrowLeft, BookMarked, Eye, Trash2, Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import LittleWik from "../components/LittleWik";
 import { loadUserPreferences, saveUserPreferences, UserPreferences } from "@/services/userPreferencesService";
+import { useLanguage } from "../contexts/LanguageContext";
+import { getTranslations } from "../services/translations";
 
 interface SavedArticle {
   id: string;
@@ -26,6 +28,8 @@ const Profile = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { currentLanguage } = useLanguage();
+  const t = getTranslations(currentLanguage);
   const [savedArticles, setSavedArticles] = useState<SavedArticle[]>([]);
   const [filteredArticles, setFilteredArticles] = useState<SavedArticle[]>([]);
   const [loading, setLoading] = useState(true);
@@ -45,7 +49,6 @@ const Profile = () => {
       return;
     }
 
-    // Load user preferences from database
     loadPreferences();
     fetchSavedArticles();
   }, [user, navigate]);
@@ -65,24 +68,20 @@ const Profile = () => {
       const userPrefs = await loadUserPreferences(user.id);
       setPreferences(userPrefs);
       
-      // Update CSS variables immediately
       document.documentElement.style.setProperty('--highlight-color', userPrefs.highlightColor);
       document.documentElement.style.setProperty('--progress-bar-color', userPrefs.highlightColor);
       
-      // Also update localStorage for backward compatibility
       localStorage.setItem('userPreferences', JSON.stringify({
         fontFamily: userPrefs.fontFamily,
         backgroundOpacity: userPrefs.backgroundOpacity,
-        progressBarColor: userPrefs.highlightColor, // Keep old key for compatibility
+        progressBarColor: userPrefs.highlightColor,
         highlightColor: userPrefs.highlightColor
       }));
     } catch (error) {
       console.error('Error loading preferences:', error);
-      // Fallback to localStorage if database fails
       const savedPrefs = localStorage.getItem('userPreferences');
       if (savedPrefs) {
         const prefs = JSON.parse(savedPrefs);
-        // Migrate old progressBarColor to highlightColor
         if (prefs.progressBarColor && !prefs.highlightColor) {
           prefs.highlightColor = prefs.progressBarColor;
         }
@@ -109,8 +108,8 @@ const Profile = () => {
     } catch (error) {
       console.error('Error fetching saved articles:', error);
       toast({
-        title: "Error",
-        description: "Failed to load saved articles",
+        title: t.error,
+        description: t.savedArticles.errorLoading,
         variant: "destructive",
       });
     } finally {
@@ -124,27 +123,24 @@ const Profile = () => {
     const updated = { ...preferences, ...newPrefs };
     setPreferences(updated);
     
-    // Update CSS variables immediately for real-time feedback
     document.documentElement.style.setProperty('--highlight-color', updated.highlightColor);
     document.documentElement.style.setProperty('--progress-bar-color', updated.highlightColor);
     
-    // Update localStorage for backward compatibility
     localStorage.setItem('userPreferences', JSON.stringify({
       fontFamily: updated.fontFamily,
       backgroundOpacity: updated.backgroundOpacity,
-      progressBarColor: updated.highlightColor, // Keep old key for compatibility
+      progressBarColor: updated.highlightColor,
       highlightColor: updated.highlightColor
     }));
 
     try {
-      // Save to database
       await saveUserPreferences(user.id, updated);
       console.log('Preferences saved to database successfully');
     } catch (error) {
       console.error('Error saving preferences to database:', error);
       toast({
-        title: "Warning",
-        description: "Preferences saved locally but failed to sync to cloud",
+        title: t.settings.preferencesWarning,
+        description: t.settings.preferencesWarningDesc,
         variant: "destructive",
       });
     }
@@ -161,14 +157,14 @@ const Profile = () => {
       
       setSavedArticles(prev => prev.filter(article => article.id !== articleId));
       toast({
-        title: "Removed",
-        description: "Article removed from saved articles",
+        title: t.savedArticles.removed,
+        description: t.savedArticles.removedDesc,
       });
     } catch (error) {
       console.error('Error removing article:', error);
       toast({
-        title: "Error",
-        description: "Failed to remove article",
+        title: t.error,
+        description: t.savedArticles.errorRemoving,
         variant: "destructive",
       });
     }
@@ -185,14 +181,14 @@ const Profile = () => {
       
       setSavedArticles([]);
       toast({
-        title: "Cleared",
-        description: "All saved articles have been removed",
+        title: t.savedArticles.cleared,
+        description: t.savedArticles.clearedDesc,
       });
     } catch (error) {
       console.error('Error clearing articles:', error);
       toast({
-        title: "Error",
-        description: "Failed to clear articles",
+        title: t.error,
+        description: t.savedArticles.errorClearing,
         variant: "destructive",
       });
     }
@@ -208,10 +204,10 @@ const Profile = () => {
   };
 
   const fontOptions = [
-    { value: 'Inter', label: 'Inter (Default)' },
-    { value: 'Georgia', label: 'Georgia (Serif)' },
+    { value: 'Inter', label: `Inter (${t.settings.default})` },
+    { value: 'Georgia', label: `Georgia (${t.settings.serif})` },
     { value: 'Times New Roman', label: 'Times New Roman' },
-    { value: 'Arial', label: 'Arial (Sans-serif)' },
+    { value: 'Arial', label: `Arial (${t.settings.sansSerif})` },
     { value: 'Helvetica', label: 'Helvetica' },
     { value: 'Verdana', label: 'Verdana' },
     { value: 'Open Sans', label: 'Open Sans' },
@@ -219,7 +215,7 @@ const Profile = () => {
   ];
 
   const colorOptions = [
-    { value: '#FE2C55', label: 'WikTok Red (Default)', color: '#FE2C55' },
+    { value: '#FE2C55', label: `WikTok Red (${t.settings.default})`, color: '#FE2C55' },
     { value: '#20D5EC', label: 'WikTok Blue', color: '#20D5EC' },
     { value: '#FF6B6B', label: 'Coral Red', color: '#FF6B6B' },
     { value: '#4ECDC4', label: 'Turquoise', color: '#4ECDC4' },
@@ -246,7 +242,7 @@ const Profile = () => {
             <ArrowLeft className="w-5 h-5" />
           </Button>
           <div className="transition-all duration-500 ease-out">
-            <h1 className="text-3xl font-bold">Profile</h1>
+            <h1 className="text-3xl font-bold">{t.profile}</h1>
             <p className="text-gray-400">{user.email}</p>
           </div>
         </div>
@@ -258,13 +254,13 @@ const Profile = () => {
               className="data-[state=active]:bg-wikitok-red/20 data-[state=active]:backdrop-blur-md data-[state=active]:border data-[state=active]:border-wikitok-red/30 data-[state=active]:shadow-lg transition-all duration-500 ease-out rounded-lg"
             >
               <BookMarked className="w-4 h-4 mr-2 transition-transform duration-300" />
-              Saved Articles
+              {t.savedArticles.title}
             </TabsTrigger>
             <TabsTrigger 
               value="settings" 
               className="data-[state=active]:bg-wikitok-red/20 data-[state=active]:backdrop-blur-md data-[state=active]:border data-[state=active]:border-wikitok-red/30 data-[state=active]:shadow-lg transition-all duration-500 ease-out rounded-lg"
             >
-              Settings
+              {t.settings.title}
             </TabsTrigger>
           </TabsList>
 
@@ -273,9 +269,9 @@ const Profile = () => {
               <CardHeader className="transition-all duration-300">
                 <div className="flex items-center justify-between">
                   <div>
-                    <CardTitle>Your Saved Articles</CardTitle>
+                    <CardTitle>{t.savedArticles.yourSaved}</CardTitle>
                     <CardDescription>
-                      {savedArticles.length} article{savedArticles.length !== 1 ? 's' : ''} saved
+                      {savedArticles.length} {savedArticles.length !== 1 ? t.articles : t.article} {t.saved}
                     </CardDescription>
                   </div>
                   {savedArticles.length > 0 && (
@@ -286,7 +282,7 @@ const Profile = () => {
                       className="transition-all duration-300 hover:scale-105"
                     >
                       <Trash2 className="w-4 h-4 mr-2" />
-                      Clear All
+                      {t.savedArticles.clearAll}
                     </Button>
                   )}
                 </div>
@@ -294,7 +290,7 @@ const Profile = () => {
                   <div className="relative">
                     <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                     <Input
-                      placeholder="Search saved articles..."
+                      placeholder={t.savedArticles.searchPlaceholder}
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
                       className="pl-10 bg-gray-800/60 border-gray-700/50 text-white"
@@ -305,13 +301,13 @@ const Profile = () => {
               <CardContent>
                 {loading ? (
                   <div className="text-center py-8">
-                    <div className="animate-pulse">Loading...</div>
+                    <div className="animate-pulse">{t.loading}...</div>
                   </div>
                 ) : filteredArticles.length === 0 ? (
                   <div className="text-center py-8 text-gray-400">
                     <BookMarked className="w-12 h-12 mx-auto mb-4 opacity-50 animate-pulse" />
-                    <p>{searchTerm ? 'No articles match your search' : 'No saved articles yet'}</p>
-                    <p className="text-sm">{searchTerm ? 'Try a different search term' : 'Start saving articles to see them here'}</p>
+                    <p>{searchTerm ? t.savedArticles.noMatch : t.savedArticles.noSaved}</p>
+                    <p className="text-sm">{searchTerm ? t.savedArticles.tryDifferent : t.savedArticles.startSaving}</p>
                   </div>
                 ) : (
                   <div className="space-y-3">
@@ -325,7 +321,7 @@ const Profile = () => {
                         <div className="flex-1">
                           <h3 className="font-medium">{article.article_title}</h3>
                           <p className="text-sm text-gray-400">
-                            Saved on {new Date(article.saved_at).toLocaleDateString()}
+                            {t.savedArticles.savedOn} {new Date(article.saved_at).toLocaleDateString()}
                           </p>
                         </div>
                         <div className="flex gap-2">
@@ -363,20 +359,20 @@ const Profile = () => {
           <TabsContent value="settings" className="space-y-6 animate-in fade-in-50 slide-in-from-bottom-4 duration-700">
             <Card className="bg-gray-900/80 backdrop-blur-md border-gray-800/50 shadow-2xl transition-all duration-500 hover:shadow-wikitok-red/10 hover:shadow-xl">
               <CardHeader className="transition-all duration-300">
-                <CardTitle>Reading Preferences</CardTitle>
+                <CardTitle>{t.settings.readingPreferences}</CardTitle>
                 <CardDescription>
-                  Customize your reading experience {preferencesLoading ? "(Loading...)" : "(Synced to cloud)"}
+                  {t.settings.customize} {preferencesLoading ? `(${t.loading}...)` : `(${t.settings.syncedToCloud})`}
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
                 {preferencesLoading ? (
                   <div className="text-center py-8">
-                    <div className="animate-pulse">Loading preferences...</div>
+                    <div className="animate-pulse">{t.settings.loadingPreferences}...</div>
                   </div>
                 ) : (
                   <>
                     <div className="space-y-3 animate-in fade-in-50 slide-in-from-left-4 duration-500">
-                      <label className="text-sm font-medium">Article Font</label>
+                      <label className="text-sm font-medium">{t.settings.articleFont}</label>
                       <Select 
                         value={preferences.fontFamily} 
                         onValueChange={(value) => updatePreferences({ fontFamily: value })}
@@ -395,7 +391,7 @@ const Profile = () => {
                     </div>
 
                     <div className="space-y-3 animate-in fade-in-50 slide-in-from-left-4 duration-500" style={{ animationDelay: "100ms" }}>
-                      <label className="text-sm font-medium">Highlight Color</label>
+                      <label className="text-sm font-medium">{t.settings.highlightColor}</label>
                       <Select 
                         value={preferences.highlightColor} 
                         onValueChange={(value) => updatePreferences({ highlightColor: value })}
@@ -421,7 +417,7 @@ const Profile = () => {
 
                     <div className="space-y-3 animate-in fade-in-50 slide-in-from-left-4 duration-500" style={{ animationDelay: "200ms" }}>
                       <label className="text-sm font-medium">
-                        Background Image Opacity: {preferences.backgroundOpacity}%
+                        {t.settings.backgroundOpacity}: {preferences.backgroundOpacity}%
                       </label>
                       <Slider
                         value={[preferences.backgroundOpacity]}
@@ -432,12 +428,12 @@ const Profile = () => {
                         className="w-full transition-all duration-300"
                       />
                       <p className="text-xs text-gray-400">
-                        Lower values make the background image less visible, improving text readability
+                        {t.settings.backgroundOpacityDesc}
                       </p>
                     </div>
 
                     <div className="p-4 bg-gray-800/60 backdrop-blur-sm rounded-lg border border-gray-700/30 transition-all duration-500 hover:border-gray-600/50 animate-in fade-in-50 slide-in-from-bottom-4" style={{ animationDelay: "300ms" }}>
-                      <h4 className="text-sm font-medium mb-2">Preview</h4>
+                      <h4 className="text-sm font-medium mb-2">{t.settings.preview}</h4>
                       <div 
                         className="relative p-4 rounded bg-cover bg-center overflow-hidden transition-all duration-500"
                         style={{
@@ -452,10 +448,10 @@ const Profile = () => {
                           className="relative z-10 text-white mb-4 transition-all duration-300"
                           style={{ fontFamily: preferences.fontFamily }}
                         >
-                          This is how your articles will look with the current settings.
+                          {t.settings.previewText}
                         </p>
                         <div className="relative z-10">
-                          <p className="text-xs text-gray-300 mb-1">Progress bar and highlight preview:</p>
+                          <p className="text-xs text-gray-300 mb-1">{t.settings.progressPreview}:</p>
                           <div className="h-1 bg-black/20 rounded overflow-hidden">
                             <div 
                               className="h-full rounded transition-all duration-500 ease-out"

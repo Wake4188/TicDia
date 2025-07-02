@@ -1,4 +1,4 @@
-import { Search, Compass, User } from "lucide-react";
+
 import { Command, CommandDialog, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams, useLocation } from "react-router-dom";
@@ -8,9 +8,9 @@ import { useToast } from "@/components/ui/use-toast";
 import { useAuth } from "../contexts/AuthContext";
 import { useTheme } from "../contexts/ThemeContext";
 import { useLanguage } from "../contexts/LanguageContext";
-import { getTranslations, formatDate } from "../services/translations";
-import LanguageSelector from "./LanguageSelector";
+import { getTranslations } from "../services/translations";
 import MobileMenu from "./MobileMenu";
+import NavigationDesktop from "./NavigationDesktop";
 
 const Navigation = () => {
   const [open, setOpen] = useState(false);
@@ -24,10 +24,6 @@ const Navigation = () => {
   const [searchParams] = useSearchParams();
   const t = getTranslations(currentLanguage);
 
-  // Get today's date for the button
-  const today = new Date();
-  const dateString = formatDate(today, currentLanguage);
-
   useEffect(() => {
     const query = searchParams.get("q");
     if (query && location.pathname !== "/discover") {
@@ -36,10 +32,7 @@ const Navigation = () => {
     }
   }, [searchParams, location.pathname]);
   
-  const {
-    data: searchResults,
-    isLoading
-  } = useQuery({
+  const { data: searchResults, isLoading } = useQuery({
     queryKey: ["search", searchValue, currentLanguage.code],
     queryFn: () => searchArticles(searchValue, currentLanguage),
     enabled: searchValue.length > 0,
@@ -51,15 +44,13 @@ const Navigation = () => {
     setOpen(false);
     setSearchValue(title);
     toast({
-      title: "Loading articles",
-      description: `Loading articles about ${title}...`,
+      title: t.loading,
+      description: `${t.loading} ${title}...`,
       duration: 2000
     });
     const reorderedResults = [selectedArticle, ...(searchResults || []).filter(article => article.id !== selectedArticle.id)];
     navigate(`/?q=${encodeURIComponent(title)}`, {
-      state: {
-        reorderedResults
-      }
+      state: { reorderedResults }
     });
   };
 
@@ -73,34 +64,15 @@ const Navigation = () => {
   const handleRandomArticle = async () => {
     setSearchValue("");
     toast({
-      title: "Loading random article",
-      description: "Finding something interesting for you...",
+      title: t.loading,
+      description: t.loadingDescription,
       duration: 2000
     });
     const randomArticles = await getRandomArticles(3, undefined, currentLanguage);
     if (randomArticles.length > 0) {
       navigate(`/?q=${encodeURIComponent(randomArticles[0].title)}`, {
-        state: {
-          reorderedResults: randomArticles
-        }
+        state: { reorderedResults: randomArticles }
       });
-    }
-  };
-
-  const handleDiscoverClick = () => {
-    setSearchValue("");
-    if (location.pathname === "/discover") {
-      navigate("/");
-    } else {
-      navigate("/discover");
-    }
-  };
-
-  const handleAuthClick = () => {
-    if (user) {
-      navigate("/profile");
-    } else {
-      navigate("/auth");
     }
   };
 
@@ -109,77 +81,24 @@ const Navigation = () => {
   };
 
   const isDiscoverPage = location.pathname === "/discover";
-  const navBgClass = theme === 'dark' ? isDiscoverPage ? "bg-black" : "bg-gradient-to-b from-black/50 to-transparent" : isDiscoverPage ? "bg-white shadow-sm" : "bg-gradient-to-b from-white/90 to-transparent backdrop-blur-sm";
-  const textClass = theme === 'dark' ? "text-white" : "text-wikitok-lightText";
-  const searchBgClass = theme === 'dark' ? "bg-black/20" : "bg-white/80";
+  const navBgClass = theme === 'dark' 
+    ? isDiscoverPage ? "bg-black" : "bg-gradient-to-b from-black/50 to-transparent" 
+    : isDiscoverPage ? "bg-white shadow-sm" : "bg-gradient-to-b from-white/90 to-transparent backdrop-blur-sm";
 
   return (
     <>
       <div className={`fixed top-0 left-0 right-0 h-14 z-50 flex items-center justify-between px-4 transition-all duration-300 ${navBgClass}`}>
-        {/* Desktop Navigation */}
-        <div className="hidden md:flex items-center gap-4">
-          <div className="text-xl font-bold text-wikitok-red cursor-pointer" onClick={handleRandomArticle}>
-            WikTok
-          </div>
-          <div 
-            className="bg-wikitok-red text-white px-3 py-1 rounded-full text-sm font-medium cursor-pointer hover:bg-red-600 transition-colors"
-            onClick={handleTodayClick}
-          >
-            {dateString}
-          </div>
-        </div>
+        <NavigationDesktop 
+          searchValue={searchValue}
+          onSearchClick={() => setOpen(true)}
+          onRandomClick={handleRandomArticle}
+          onTodayClick={handleTodayClick}
+        />
 
-        {/* Mobile Logo */}
+        {/* Mobile */}
         <div className="md:hidden text-xl font-bold text-wikitok-red cursor-pointer" onClick={handleRandomArticle}>
           WikTok
         </div>
-
-        {/* Desktop Search */}
-        <div className={`hidden md:flex items-center ${searchBgClass} backdrop-blur-sm rounded-full px-4 py-2 cursor-pointer transition-all duration-300`} onClick={() => setOpen(true)}>
-          <Search className={`w-4 h-4 ${theme === 'dark' ? 'text-white/60' : 'text-gray-500'} mr-2`} />
-          <span className={`${theme === 'dark' ? 'text-white/60' : 'text-gray-500'} text-sm`}>
-            {searchValue || t.search}
-          </span>
-        </div>
-
-        {/* Desktop Right Navigation */}
-        <div className="hidden md:flex space-x-4 items-center">
-          <LanguageSelector />
-          <Compass 
-            className={`w-5 h-5 cursor-pointer transition-colors duration-300 ${
-              location.pathname === "/discover" 
-                ? "text-wikitok-red" 
-                : theme === 'dark' 
-                  ? "text-white hover:text-wikitok-red" 
-                  : "text-wikitok-lightText hover:text-wikitok-red"
-            }`} 
-            onClick={handleDiscoverClick} 
-          />
-          <div 
-            className={`flex items-center gap-2 cursor-pointer transition-colors duration-300 ${
-              theme === 'dark' 
-                ? "text-white hover:text-wikitok-red" 
-                : "text-wikitok-lightText hover:text-wikitok-red"
-            }`} 
-            onClick={handleAuthClick}
-          >
-            {user ? (
-              <>
-                <div className="w-6 h-6 bg-wikitok-red rounded-full flex items-center justify-center text-xs text-white font-bold">
-                  {user.email?.charAt(0).toUpperCase()}
-                </div>
-                <span className="text-sm hidden sm:block">{t.profile}</span>
-              </>
-            ) : (
-              <>
-                <User className="w-5 h-5" />
-                <span className="text-sm hidden sm:block">{t.signIn}</span>
-              </>
-            )}
-          </div>
-        </div>
-
-        {/* Mobile Menu */}
         <div className="md:hidden">
           <MobileMenu onSearchClick={() => setOpen(true)} searchValue={searchValue} />
         </div>
@@ -189,12 +108,14 @@ const Navigation = () => {
         <Command shouldFilter={false}>
           <CommandInput placeholder={t.search} value={searchValue} onValueChange={setSearchValue} className="border-none focus:ring-0" />
           <CommandList className="max-h-[80vh] overflow-y-auto">
-            {isLoading && <CommandEmpty>Searching...</CommandEmpty>}
-            {!isLoading && !searchResults && searchValue.length > 0 && <CommandEmpty>No results found.</CommandEmpty>}
-            {!isLoading && !searchValue && <CommandEmpty>Start typing to search articles</CommandEmpty>}
-            {!isLoading && searchResults && searchResults.length === 0 && <CommandEmpty>No results found.</CommandEmpty>}
-            {!isLoading && searchResults && searchResults.length > 0 && <CommandGroup heading={`Articles (${searchResults.length} results)`}>
-                {searchResults.map(result => <CommandItem key={result.id} onSelect={() => handleArticleSelect(result.title, result)} className="flex items-center p-2 cursor-pointer hover:bg-accent rounded-lg">
+            {isLoading && <CommandEmpty>{t.loading}...</CommandEmpty>}
+            {!isLoading && !searchResults && searchValue.length > 0 && <CommandEmpty>{t.error}</CommandEmpty>}
+            {!isLoading && !searchValue && <CommandEmpty>{t.search}</CommandEmpty>}
+            {!isLoading && searchResults && searchResults.length === 0 && <CommandEmpty>{t.error}</CommandEmpty>}
+            {!isLoading && searchResults && searchResults.length > 0 && 
+              <CommandGroup heading={`${t.articles} (${searchResults.length})`}>
+                {searchResults.map(result => 
+                  <CommandItem key={result.id} onSelect={() => handleArticleSelect(result.title, result)} className="flex items-center p-2 cursor-pointer hover:bg-accent rounded-lg">
                     <div className="flex items-center w-full gap-3">
                       {result.image && <img src={result.image} alt={result.title} className="w-16 h-16 object-cover rounded-md flex-shrink-0" />}
                       <div className="flex-1 min-w-0">
@@ -202,13 +123,17 @@ const Navigation = () => {
                         <div className="text-sm text-muted-foreground line-clamp-2">
                           {result.content}
                         </div>
-                        {result.relevanceScore && <div className="text-xs text-wikitok-red mt-1">
+                        {result.relevanceScore && 
+                          <div className="text-xs text-wikitok-red mt-1">
                             Relevance: {Math.round(result.relevanceScore)}%
-                          </div>}
+                          </div>
+                        }
                       </div>
                     </div>
-                  </CommandItem>)}
-              </CommandGroup>}
+                  </CommandItem>
+                )}
+              </CommandGroup>
+            }
           </CommandList>
         </Command>
       </CommandDialog>
