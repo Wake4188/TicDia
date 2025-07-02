@@ -25,7 +25,7 @@ This project is built with .
 
 ## 🌐 Language Support
 
-If you're visiting from a browser set to a different language, like English, Chrome and other browsers should automatically offer to translate the French content.
+You should be able to akes the app in over 10 languages now. Sence I only speak English, French and a litle German, if you spot false translation tell me.
 
 ## 🌐 Internet Support
 
