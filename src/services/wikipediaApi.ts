@@ -1,7 +1,10 @@
-const WIKIPEDIA_API_BASE = "https://en.wikipedia.org/w/api.php";
-const PAGEVIEWS_API_BASE = "https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/en.wikipedia/all-access/all-agents";
 
-export const getPageViews = async (title: string): Promise<number> => {
+import { Language } from './languageConfig';
+
+const getWikipediaApiBase = (language: Language) => `https://${language.wikipediaDomain}/w/api.php`;
+const getPageviewsApiBase = (language: Language) => `https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/${language.wikipediaDomain}/all-access/all-agents`;
+
+export const getPageViews = async (title: string, language: Language): Promise<number> => {
   try {
     const endDate = new Date();
     const startDate = new Date();
@@ -10,23 +13,23 @@ export const getPageViews = async (title: string): Promise<number> => {
     const formatDate = (date: Date) => date.toISOString().slice(0, 10).replace(/-/g, '');
 
     const response = await fetch(
-      `${PAGEVIEWS_API_BASE}/${encodeURIComponent(title)}/daily/${formatDate(startDate)}/${formatDate(endDate)}`
+      `${getPageviewsApiBase(language)}/${encodeURIComponent(title)}/daily/${formatDate(startDate)}/${formatDate(endDate)}`
     );
     
     if (!response.ok) {
-      console.warn(`Failed to fetch pageviews for ${title}`);
+      console.warn(`Failed to fetch pageviews for ${title} in ${language.name}`);
       return 0;
     }
 
     const data = await response.json();
     return data.items?.reduce((sum: number, item: any) => sum + item.views, 0) || 0;
   } catch (error) {
-    console.warn(`Failed to fetch pageviews for ${title}:`, error);
+    console.warn(`Failed to fetch pageviews for ${title} in ${language.name}:`, error);
     return 0;
   }
 };
 
-export const fetchWikipediaContent = async (titles: string[]) => {
+export const fetchWikipediaContent = async (titles: string[], language: Language) => {
   const titlesString = titles.join("|");
   const params = new URLSearchParams({
     action: 'query',
@@ -41,8 +44,8 @@ export const fetchWikipediaContent = async (titles: string[]) => {
     inprop: 'protection'
   });
 
-  const response = await fetch(`${WIKIPEDIA_API_BASE}?${params}`);
-  if (!response.ok) throw new Error('Failed to fetch Wikipedia content');
+  const response = await fetch(`${getWikipediaApiBase(language)}?${params}`);
+  if (!response.ok) throw new Error(`Failed to fetch Wikipedia content in ${language.name}`);
   
   return response.json();
 };

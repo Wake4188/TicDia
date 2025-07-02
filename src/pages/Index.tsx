@@ -7,31 +7,34 @@ import { getRandomArticles, searchArticles } from "../services/wikipediaService"
 import { useToast } from "@/components/ui/use-toast";
 import { useSearchParams, useLocation, useNavigate } from "react-router-dom";
 import { useState } from "react";
+import { useLanguage } from "../contexts/LanguageContext";
 
 const Index = () => {
   const { toast } = useToast();
   const [searchParams] = useSearchParams();
   const location = useLocation();
   const navigate = useNavigate();
+  const { currentLanguage, isLoading: languageLoading } = useLanguage();
   const searchQuery = searchParams.get("q");
   const [currentArticle, setCurrentArticle] = useState(null);
 
   const { data: articles, isLoading, error } = useQuery({
-    queryKey: ["articles", searchQuery],
+    queryKey: ["articles", searchQuery, currentLanguage.code],
     queryFn: async () => {
       let fetchedArticles;
       if (searchQuery) {
         if (location.state?.reorderedResults) {
           fetchedArticles = location.state.reorderedResults;
         } else {
-          fetchedArticles = await searchArticles(searchQuery);
+          fetchedArticles = await searchArticles(searchQuery, currentLanguage);
         }
       } else {
-        fetchedArticles = await getRandomArticles(3);
+        fetchedArticles = await getRandomArticles(3, undefined, currentLanguage);
       }
       return fetchedArticles.filter(article => article.image);
     },
     retry: 1,
+    enabled: !languageLoading,
   });
 
   const handleTagClick = (tag: string) => {
@@ -46,7 +49,7 @@ const Index = () => {
     });
   }
 
-  if (isLoading) {
+  if (isLoading || languageLoading) {
     return (
       <div className="h-screen w-screen flex items-center justify-center bg-wikitok-dark text-white">
         <div>Loading amazing articles...</div>

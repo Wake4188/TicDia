@@ -1,9 +1,11 @@
+
 import { WikipediaPage, WikipediaArticle } from './types';
 import { getPageViews } from './wikipediaApi';
 import { getArticleImage } from './imageService';
+import { Language } from './languageConfig';
 
-export const transformToArticle = async (page: WikipediaPage): Promise<WikipediaArticle> => {
-  const views = await getPageViews(page.title);
+export const transformToArticle = async (page: WikipediaPage, language: Language): Promise<WikipediaArticle> => {
+  const views = await getPageViews(page.title, language);
   const image = await getArticleImage(page);
   
   // Skip articles with placeholder images or no images
@@ -21,5 +23,6 @@ export const transformToArticle = async (page: WikipediaPage): Promise<Wikipedia
     views,
     tags: page.categories?.slice(0, 4).map(cat => cat.title.replace("Category:", "")) || [],
     relatedArticles: [],
+    language: language.code,
   };
 };

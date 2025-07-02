@@ -13,6 +13,7 @@ export interface WikipediaArticle {
     image: string;
   }[];
   relevanceScore?: number;
+  language?: string;
 }
 
 export interface WikipediaImageInfo {

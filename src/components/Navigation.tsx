@@ -7,6 +7,8 @@ import { useQuery } from "@tanstack/react-query";
 import { useToast } from "@/components/ui/use-toast";
 import { useAuth } from "../contexts/AuthContext";
 import { useTheme } from "../contexts/ThemeContext";
+import { useLanguage } from "../contexts/LanguageContext";
+import LanguageSelector from "./LanguageSelector";
 
 const Navigation = () => {
   const [open, setOpen] = useState(false);
@@ -16,6 +18,7 @@ const Navigation = () => {
   const { toast } = useToast();
   const { user } = useAuth();
   const { theme, toggleTheme } = useTheme();
+  const { currentLanguage } = useLanguage();
   const [searchParams] = useSearchParams();
 
   // Get today's date for the button
@@ -36,8 +39,8 @@ const Navigation = () => {
     data: searchResults,
     isLoading
   } = useQuery({
-    queryKey: ["search", searchValue],
-    queryFn: () => searchArticles(searchValue),
+    queryKey: ["search", searchValue, currentLanguage.code],
+    queryFn: () => searchArticles(searchValue, currentLanguage),
     enabled: searchValue.length > 0,
     gcTime: 1000 * 60 * 5,
     staleTime: 0
@@ -73,7 +76,7 @@ const Navigation = () => {
       description: "Finding something interesting for you...",
       duration: 2000
     });
-    const randomArticles = await getRandomArticles(3);
+    const randomArticles = await getRandomArticles(3, undefined, currentLanguage);
     if (randomArticles.length > 0) {
       navigate(`/?q=${encodeURIComponent(randomArticles[0].title)}`, {
         state: {
@@ -132,6 +135,7 @@ const Navigation = () => {
         </div>
 
         <div className="flex space-x-4 items-center">
+          <LanguageSelector />
           <Compass 
             className={`w-5 h-5 cursor-pointer transition-colors duration-300 ${
               location.pathname === "/discover" 

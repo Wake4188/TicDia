@@ -3,8 +3,11 @@ import { WikipediaArticle, WikipediaResponse } from './types';
 import { fetchWikipediaContent } from './wikipediaApi';
 import { transformToArticle } from './articleTransformer';
 import { sortByRelevance } from './searchUtils';
+import { Language, DEFAULT_LANGUAGE } from './languageConfig';
 
-const getRelatedArticles = async (article: WikipediaArticle): Promise<WikipediaArticle[]> => {
+const getWikipediaApiBase = (language: Language) => `https://${language.wikipediaDomain}/w/api.php`;
+
+const getRelatedArticles = async (article: WikipediaArticle, language: Language = DEFAULT_LANGUAGE): Promise<WikipediaArticle[]> => {
   try {
     const categoryTitles = article.tags.map(tag => `Category:${tag}`).join('|');
     const params = new URLSearchParams({
@@ -17,31 +20,31 @@ const getRelatedArticles = async (article: WikipediaArticle): Promise<WikipediaA
       cmtype: 'page'
     });
 
-    const categoryResponse = await fetch(`https://en.wikipedia.org/w/api.php?${params}`);
+    const categoryResponse = await fetch(`${getWikipediaApiBase(language)}?${params}`);
     if (!categoryResponse.ok) throw new Error('Failed to fetch category articles');
     
     const categoryData = await categoryResponse.json() as WikipediaResponse;
     const relatedTitles = categoryData.query?.categorymembers
-      ?.filter(article => article.title !== article.title)
-      ?.map(article => article.title)
+      ?.filter(relatedArticle => relatedArticle.title !== article.title)
+      ?.map(relatedArticle => relatedArticle.title)
       ?.slice(0, 10) || [];
 
     if (relatedTitles.length === 0) {
-      return getRandomArticles(3);
+      return getRandomArticles(3, undefined, language);
     }
 
-    const data = await fetchWikipediaContent(relatedTitles) as WikipediaResponse;
+    const data = await fetchWikipediaContent(relatedTitles, language) as WikipediaResponse;
     const pages = Object.values(data.query?.pages || {});
     
-    const articles = await Promise.all(pages.map(transformToArticle));
+    const articles = await Promise.all(pages.map(page => transformToArticle(page, language)));
     return articles.filter(article => article !== null) as WikipediaArticle[];
   } catch (error) {
     console.error('Error fetching related articles:', error);
-    return getRandomArticles(3);
+    return getRandomArticles(3, undefined, language);
   }
 };
 
-const getRandomArticles = async (count: number = 3, category?: string): Promise<WikipediaArticle[]> => {
+const getRandomArticles = async (count: number = 3, category?: string, language: Language = DEFAULT_LANGUAGE): Promise<WikipediaArticle[]> => {
   try {
     let titles: string[];
     const multiplier = 3;
@@ -57,7 +60,7 @@ const getRandomArticles = async (count: number = 3, category?: string): Promise<
         cmtype: 'page'
       });
 
-      const categoryResponse = await fetch(`https://en.wikipedia.org/w/api.php?${params}`);
+      const categoryResponse = await fetch(`${getWikipediaApiBase(language)}?${params}`);
       if (!categoryResponse.ok) throw new Error('Failed to fetch category articles');
       
       const categoryData = await categoryResponse.json() as WikipediaResponse;
@@ -72,7 +75,7 @@ const getRandomArticles = async (count: number = 3, category?: string): Promise<
         rnlimit: (count * multiplier).toString()
       });
 
-      const randomResponse = await fetch(`https://en.wikipedia.org/w/api.php?${params}`);
+      const randomResponse = await fetch(`${getWikipediaApiBase(language)}?${params}`);
       if (!randomResponse.ok) throw new Error('Failed to fetch random articles');
       
       const randomData = await randomResponse.json() as WikipediaResponse;
@@ -81,14 +84,14 @@ const getRandomArticles = async (count: number = 3, category?: string): Promise<
 
     if (!titles.length) throw new Error('No articles found');
 
-    const data = await fetchWikipediaContent(titles) as WikipediaResponse;
+    const data = await fetchWikipediaContent(titles, language) as WikipediaResponse;
     const pages = Object.values(data.query?.pages || {});
     
-    const articles = await Promise.all(pages.map(transformToArticle));
+    const articles = await Promise.all(pages.map(page => transformToArticle(page, language)));
     const validArticles = articles.filter(article => article !== null) as WikipediaArticle[];
     
     if (validArticles.length < count) {
-      const moreArticles = await getRandomArticles(count - validArticles.length, category);
+      const moreArticles = await getRandomArticles(count - validArticles.length, category, language);
       return [...validArticles, ...moreArticles].slice(0, count);
     }
     
@@ -99,7 +102,7 @@ const getRandomArticles = async (count: number = 3, category?: string): Promise<
   }
 };
 
-const searchArticles = async (query: string): Promise<WikipediaArticle[]> => {
+const searchArticles = async (query: string, language: Language = DEFAULT_LANGUAGE): Promise<WikipediaArticle[]> => {
   if (!query || query.length < 3) return [];
 
   try {
@@ -113,7 +116,7 @@ const searchArticles = async (query: string): Promise<WikipediaArticle[]> => {
       redirects: 'resolve'
     });
 
-    const opensearchResponse = await fetch(`https://en.wikipedia.org/w/api.php?${opensearchParams}`);
+    const opensearchResponse = await fetch(`${getWikipediaApiBase(language)}?${opensearchParams}`);
     let suggestedTitles: string[] = [];
     
     if (opensearchResponse.ok) {
@@ -132,7 +135,7 @@ const searchArticles = async (query: string): Promise<WikipediaArticle[]> => {
       srwhat: 'text'
     });
 
-    const searchResponse = await fetch(`https://en.wikipedia.org/w/api.php?${searchParams}`);
+    const searchResponse = await fetch(`${getWikipediaApiBase(language)}?${searchParams}`);
     if (!searchResponse.ok) throw new Error('Search request failed');
     
     const searchData = await searchResponse.json() as WikipediaResponse;
@@ -143,10 +146,10 @@ const searchArticles = async (query: string): Promise<WikipediaArticle[]> => {
     
     if (!allTitles.length) return [];
 
-    const data = await fetchWikipediaContent(allTitles) as WikipediaResponse;
+    const data = await fetchWikipediaContent(allTitles, language) as WikipediaResponse;
     const pages = Object.values(data.query?.pages || {});
     
-    const articles = await Promise.all(pages.map(transformToArticle));
+    const articles = await Promise.all(pages.map(page => transformToArticle(page, language)));
     const validArticles = articles.filter(article => article !== null) as WikipediaArticle[];
     
     // Sort by relevance using our enhanced algorithm
