@@ -20,18 +20,18 @@ const Navigation = () => {
   }
 
   const handleSearchClick = () => {
-    // Handle search click
+    // TODO: Implement search functionality
     console.log("Search clicked");
   };
 
   const handleRandomClick = () => {
-    // Handle random click
-    console.log("Random clicked");
+    // Refresh to show random article
+    window.location.reload();
   };
 
   const handleTodayClick = () => {
-    // Handle today click
-    console.log("Today clicked");
+    // Navigate to today page
+    window.location.href = '/today';
   };
 
   if (isMobile) {
