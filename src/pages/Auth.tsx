@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
 import { LogIn, User, Eye, EyeOff } from "lucide-react";
+import { validateEmail, validatePassword, sanitizeErrorMessage } from "@/utils/security";
 
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -29,19 +30,57 @@ const Auth = () => {
     checkUser();
   }, [navigate]);
 
+  const validateForm = (): boolean => {
+    if (!validateEmail(email)) {
+      toast({
+        title: "Invalid Email",
+        description: "Please enter a valid email address.",
+        variant: "destructive",
+      });
+      return false;
+    }
+
+    const passwordValidation = validatePassword(password);
+    if (!passwordValidation.isValid) {
+      toast({
+        title: "Invalid Password",
+        description: passwordValidation.message,
+        variant: "destructive",
+      });
+      return false;
+    }
+
+    if (!isLogin && password !== confirmPassword) {
+      toast({
+        title: "Password Mismatch",
+        description: "Passwords do not match. Please try again.",
+        variant: "destructive",
+      });
+      return false;
+    }
+
+    return true;
+  };
+
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!validateForm()) {
+      return;
+    }
+
     setLoading(true);
 
     try {
       if (isLogin) {
         const { error } = await supabase.auth.signInWithPassword({
-          email,
+          email: email.trim(),
           password,
         });
 
         if (error) {
-          if (error.message.includes("Invalid login credentials")) {
+          const errorMessage = sanitizeErrorMessage(error);
+          if (errorMessage.includes("Invalid login credentials")) {
             toast({
               title: "Login Failed",
               description: "Invalid email or password. Please try again.",
@@ -50,7 +89,7 @@ const Auth = () => {
           } else {
             toast({
               title: "Login Failed",
-              description: error.message,
+              description: "Unable to sign in. Please try again.",
               variant: "destructive",
             });
           }
@@ -62,30 +101,10 @@ const Auth = () => {
           navigate("/");
         }
       } else {
-        if (password !== confirmPassword) {
-          toast({
-            title: "Password Mismatch",
-            description: "Passwords do not match. Please try again.",
-            variant: "destructive",
-          });
-          setLoading(false);
-          return;
-        }
-
-        if (password.length < 6) {
-          toast({
-            title: "Password Too Short",
-            description: "Password must be at least 6 characters long.",
-            variant: "destructive",
-          });
-          setLoading(false);
-          return;
-        }
-
         const redirectUrl = `${window.location.origin}/`;
         
         const { error } = await supabase.auth.signUp({
-          email,
+          email: email.trim(),
           password,
           options: {
             emailRedirectTo: redirectUrl
@@ -93,7 +112,8 @@ const Auth = () => {
         });
 
         if (error) {
-          if (error.message.includes("User already registered")) {
+          const errorMessage = sanitizeErrorMessage(error);
+          if (errorMessage.includes("User already registered")) {
             toast({
               title: "Account Exists",
               description: "An account with this email already exists. Try logging in instead.",
@@ -102,7 +122,7 @@ const Auth = () => {
           } else {
             toast({
               title: "Sign Up Failed",
-              description: error.message,
+              description: "Unable to create account. Please try again.",
               variant: "destructive",
             });
           }
@@ -153,6 +173,7 @@ const Auth = () => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
+                maxLength={254}
                 className="bg-white/5 border-white/20 text-white placeholder:text-white/40"
                 placeholder="Enter your email"
               />
@@ -169,6 +190,7 @@ const Auth = () => {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
+                  maxLength={128}
                   className="bg-white/5 border-white/20 text-white placeholder:text-white/40 pr-10"
                   placeholder="Enter your password"
                 />
@@ -193,6 +215,7 @@ const Auth = () => {
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   required
+                  maxLength={128}
                   className="bg-white/5 border-white/20 text-white placeholder:text-white/40"
                   placeholder="Confirm your password"
                 />

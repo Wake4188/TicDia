@@ -1,5 +1,6 @@
 
 import { supabase } from "@/integrations/supabase/client";
+import { validateFontFamily, validateBackgroundOpacity, validateHexColor, sanitizeErrorMessage } from "@/utils/security";
 
 export interface UserPreferences {
   fontFamily: string;
@@ -16,7 +17,7 @@ export const loadUserPreferences = async (userId: string): Promise<UserPreferenc
       .maybeSingle();
 
     if (error) {
-      console.error('Error loading user preferences:', error);
+      console.error('Error loading user preferences:', sanitizeErrorMessage(error));
       return getDefaultPreferences();
     }
 
@@ -27,38 +28,46 @@ export const loadUserPreferences = async (userId: string): Promise<UserPreferenc
       return defaultPrefs;
     }
 
+    // Validate and sanitize the loaded preferences
     return {
-      fontFamily: data.font_family,
-      backgroundOpacity: data.background_opacity,
-      highlightColor: data.highlight_color,
+      fontFamily: validateFontFamily(data.font_family),
+      backgroundOpacity: validateBackgroundOpacity(data.background_opacity),
+      highlightColor: validateHexColor(data.highlight_color),
     };
   } catch (error) {
-    console.error('Error loading user preferences:', error);
+    console.error('Error loading user preferences:', sanitizeErrorMessage(error));
     return getDefaultPreferences();
   }
 };
 
 export const saveUserPreferences = async (userId: string, preferences: UserPreferences): Promise<void> => {
   try {
+    // Validate preferences before saving
+    const validatedPreferences = {
+      fontFamily: validateFontFamily(preferences.fontFamily),
+      backgroundOpacity: validateBackgroundOpacity(preferences.backgroundOpacity),
+      highlightColor: validateHexColor(preferences.highlightColor),
+    };
+
     const { error } = await supabase
       .from('user_preferences')
       .upsert({
         user_id: userId,
-        font_family: preferences.fontFamily,
-        background_opacity: preferences.backgroundOpacity,
-        highlight_color: preferences.highlightColor,
+        font_family: validatedPreferences.fontFamily,
+        background_opacity: validatedPreferences.backgroundOpacity,
+        highlight_color: validatedPreferences.highlightColor,
         updated_at: new Date().toISOString(),
       }, {
         onConflict: 'user_id'
       });
 
     if (error) {
-      console.error('Error saving user preferences:', error);
-      throw error;
+      console.error('Error saving user preferences:', sanitizeErrorMessage(error));
+      throw new Error('Failed to save preferences');
     }
   } catch (error) {
-    console.error('Error saving user preferences:', error);
-    throw error;
+    console.error('Error saving user preferences:', sanitizeErrorMessage(error));
+    throw new Error('Failed to save preferences');
   }
 };
 

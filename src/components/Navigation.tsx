@@ -9,6 +9,7 @@ import { useAuth } from "../contexts/AuthContext";
 import { useTheme } from "../contexts/ThemeContext";
 import { useLanguage } from "../contexts/LanguageContext";
 import { getTranslations } from "../services/translations";
+import { sanitizeSearchQuery, sanitizeErrorMessage } from "../utils/security";
 import MobileMenu from "./MobileMenu";
 import NavigationDesktop from "./NavigationDesktop";
 
@@ -28,11 +29,12 @@ const Navigation = () => {
     const query = searchParams.get("q");
     if (query && location.pathname !== "/discover") {
       const decodedQuery = decodeURIComponent(query);
-      setSearchValue(decodedQuery);
+      const sanitizedQuery = sanitizeSearchQuery(decodedQuery);
+      setSearchValue(sanitizedQuery);
     }
   }, [searchParams, location.pathname]);
   
-  const { data: searchResults, isLoading } = useQuery({
+  const { data: searchResults, isLoading, error } = useQuery({
     queryKey: ["search", searchValue, currentLanguage.code],
     queryFn: () => searchArticles(searchValue, currentLanguage),
     enabled: searchValue.length > 0,
@@ -40,18 +42,41 @@ const Navigation = () => {
     staleTime: 0
   });
 
+  // Handle search errors
+  useEffect(() => {
+    if (error) {
+      console.error('Search error:', sanitizeErrorMessage(error));
+      toast({
+        title: "Search Error",
+        description: "Unable to perform search. Please try again.",
+        variant: "destructive",
+      });
+    }
+  }, [error, toast]);
+
   const handleArticleSelect = (title: string, selectedArticle: any) => {
     setOpen(false);
-    setSearchValue(title);
-    toast({
-      title: t.loading,
-      description: `${t.loading} ${title}...`,
-      duration: 2000
-    });
-    const reorderedResults = [selectedArticle, ...(searchResults || []).filter(article => article.id !== selectedArticle.id)];
-    navigate(`/?q=${encodeURIComponent(title)}`, {
-      state: { reorderedResults }
-    });
+    const sanitizedTitle = sanitizeSearchQuery(title);
+    setSearchValue(sanitizedTitle);
+    
+    try {
+      toast({
+        title: t.loading,
+        description: `${t.loading} ${sanitizedTitle}...`,
+        duration: 2000
+      });
+      const reorderedResults = [selectedArticle, ...(searchResults || []).filter(article => article.id !== selectedArticle.id)];
+      navigate(`/?q=${encodeURIComponent(sanitizedTitle)}`, {
+        state: { reorderedResults }
+      });
+    } catch (error) {
+      console.error('Navigation error:', sanitizeErrorMessage(error));
+      toast({
+        title: "Error",
+        description: "Unable to load article. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleOpenChange = (newOpen: boolean) => {
@@ -61,17 +86,32 @@ const Navigation = () => {
     }
   };
 
+  const handleSearchValueChange = (value: string) => {
+    const sanitizedValue = sanitizeSearchQuery(value);
+    setSearchValue(sanitizedValue);
+  };
+
   const handleRandomArticle = async () => {
-    setSearchValue("");
-    toast({
-      title: t.loading,
-      description: t.loadingDescription,
-      duration: 2000
-    });
-    const randomArticles = await getRandomArticles(3, undefined, currentLanguage);
-    if (randomArticles.length > 0) {
-      navigate(`/?q=${encodeURIComponent(randomArticles[0].title)}`, {
-        state: { reorderedResults: randomArticles }
+    try {
+      setSearchValue("");
+      toast({
+        title: t.loading,
+        description: t.loadingDescription,
+        duration: 2000
+      });
+      const randomArticles = await getRandomArticles(3, undefined, currentLanguage);
+      if (randomArticles.length > 0) {
+        const sanitizedTitle = sanitizeSearchQuery(randomArticles[0].title);
+        navigate(`/?q=${encodeURIComponent(sanitizedTitle)}`, {
+          state: { reorderedResults: randomArticles }
+        });
+      }
+    } catch (error) {
+      console.error('Random article error:', sanitizeErrorMessage(error));
+      toast({
+        title: "Error",
+        description: "Unable to load random article. Please try again.",
+        variant: "destructive",
       });
     }
   };
@@ -106,7 +146,13 @@ const Navigation = () => {
 
       <CommandDialog open={open} onOpenChange={handleOpenChange}>
         <Command shouldFilter={false}>
-          <CommandInput placeholder={t.search} value={searchValue} onValueChange={setSearchValue} className="border-none focus:ring-0" />
+          <CommandInput 
+            placeholder={t.search} 
+            value={searchValue} 
+            onValueChange={handleSearchValueChange} 
+            className="border-none focus:ring-0" 
+            maxLength={200}
+          />
           <CommandList className="max-h-[80vh] overflow-y-auto">
             {isLoading && <CommandEmpty>{t.loading}...</CommandEmpty>}
             {!isLoading && !searchResults && searchValue.length > 0 && <CommandEmpty>{t.error}</CommandEmpty>}
