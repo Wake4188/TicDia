@@ -1,90 +1,115 @@
 
-// Input validation and sanitization utilities
-
-export const validateEmail = (email: string): boolean => {
-  if (!email || typeof email !== 'string') return false;
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  return emailRegex.test(email) && email.length <= 254;
-};
-
-export const validatePassword = (password: string): boolean => {
-  if (!password || typeof password !== 'string') return false;
-  return password.length >= 6 && password.length <= 128;
-};
+// Security utility functions for input validation and sanitization
 
 export const sanitizeSearchQuery = (query: string): string => {
-  if (!query || typeof query !== 'string') return '';
+  if (!query || typeof query !== 'string') {
+    return '';
+  }
   
-  // Remove HTML tags and limit length
-  const sanitized = query
+  // Remove potentially dangerous characters and HTML tags
+  return query
     .replace(/<[^>]*>/g, '') // Remove HTML tags
-    .replace(/[<>&"']/g, (match) => {  // Escape dangerous characters
-      const escapeMap: { [key: string]: string } = {
+    .replace(/[<>'"&]/g, (char) => {
+      const entities: { [key: string]: string } = {
         '<': '&lt;',
         '>': '&gt;',
-        '&': '&amp;',
         '"': '&quot;',
-        "'": '&#x27;'
+        "'": '&#x27;',
+        '&': '&amp;'
       };
-      return escapeMap[match] || match;
+      return entities[char] || char;
     })
     .trim()
-    .substring(0, 200); // Limit length
-  
-  return sanitized;
+    .slice(0, 200); // Limit length to prevent abuse
 };
 
 export const validateFontFamily = (fontFamily: string): string => {
-  if (!fontFamily || typeof fontFamily !== 'string') return 'Inter';
-  
   const allowedFonts = [
-    'Inter', 'Georgia', 'Times New Roman', 'Arial', 
-    'Helvetica', 'Verdana', 'Open Sans', 'Roboto'
+    'Inter',
+    'Arial',
+    'Helvetica',
+    'Georgia',
+    'Times New Roman',
+    'Courier New',
+    'Verdana',
+    'Trebuchet MS',
+    'Palatino',
+    'Garamond'
   ];
   
-  return allowedFonts.includes(fontFamily) ? fontFamily : 'Inter';
+  if (!fontFamily || typeof fontFamily !== 'string') {
+    return 'Inter';
+  }
+  
+  const sanitized = fontFamily.trim();
+  return allowedFonts.includes(sanitized) ? sanitized : 'Inter';
 };
 
 export const validateBackgroundOpacity = (opacity: number): number => {
-  if (typeof opacity !== 'number' || isNaN(opacity)) return 70;
-  return Math.max(10, Math.min(100, Math.round(opacity)));
+  if (typeof opacity !== 'number' || isNaN(opacity)) {
+    return 70;
+  }
+  
+  // Ensure opacity is between 0 and 100
+  return Math.max(0, Math.min(100, Math.round(opacity)));
 };
 
 export const validateHexColor = (color: string): string => {
-  if (!color || typeof color !== 'string') return '#FE2C55';
+  if (!color || typeof color !== 'string') {
+    return '#FE2C55';
+  }
   
-  const hexRegex = /^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/;
-  return hexRegex.test(color) ? color : '#FE2C55';
+  // Remove any whitespace and ensure it starts with #
+  const sanitized = color.trim();
+  
+  // Check if it's a valid hex color (3 or 6 digits after #)
+  const hexPattern = /^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/;
+  
+  if (hexPattern.test(sanitized)) {
+    return sanitized;
+  }
+  
+  // Return default color if invalid
+  return '#FE2C55';
 };
 
 export const sanitizeErrorMessage = (error: any): string => {
-  if (!error) return 'An unknown error occurred';
+  if (!error) {
+    return 'An unexpected error occurred';
+  }
   
   if (typeof error === 'string') {
-    return error.substring(0, 200);
+    return error.replace(/\b(password|token|key|secret)\b/gi, '[REDACTED]');
   }
   
-  if (error.message && typeof error.message === 'string') {
-    // Remove potential sensitive information
-    const sanitized = error.message
-      .replace(/\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b/g, '[IP]') // IP addresses
-      .replace(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g, '[EMAIL]') // Email addresses
-      .replace(/\b[A-Za-z0-9]{20,}\b/g, '[TOKEN]') // Potential tokens
-      .substring(0, 200);
-    
-    return sanitized || 'An error occurred';
+  if (error.message) {
+    return String(error.message).replace(/\b(password|token|key|secret)\b/gi, '[REDACTED]');
   }
   
-  return 'An error occurred';
+  return 'An unexpected error occurred';
 };
 
-export const validateUrl = (url: string): boolean => {
-  if (!url || typeof url !== 'string') return false;
-  
-  try {
-    const parsedUrl = new URL(url);
-    return ['http:', 'https:'].includes(parsedUrl.protocol);
-  } catch {
+export const validateEmail = (email: string): boolean => {
+  if (!email || typeof email !== 'string') {
     return false;
   }
+  
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(email.trim()) && email.length <= 254;
+};
+
+export const validatePassword = (password: string): { isValid: boolean; message?: string } => {
+  if (!password || typeof password !== 'string') {
+    return { isValid: false, message: 'Password is required' };
+  }
+  
+  if (password.length < 6) {
+    return { isValid: false, message: 'Password must be at least 6 characters long' };
+  }
+  
+  if (password.length > 128) {
+    return { isValid: false, message: 'Password is too long' };
+  }
+  
+  return { isValid: true };
 };
