@@ -4,11 +4,13 @@ import { useLocation } from "react-router-dom";
 import { useMobileDetection } from "../hooks/useMobileDetection";
 import NavigationDesktop from "./NavigationDesktop";
 import MobileMenu from "./MobileMenu";
+import SearchModal from "./SearchModal";
 
 const Navigation = () => {
   const location = useLocation();
   const isMobile = useMobileDetection();
   const [searchValue, setSearchValue] = useState("");
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
 
   useEffect(() => {
     // Reset any mobile menu state when location changes
@@ -20,8 +22,11 @@ const Navigation = () => {
   }
 
   const handleSearchClick = () => {
-    // TODO: Implement search functionality
-    console.log("Search clicked");
+    setIsSearchOpen(true);
+  };
+
+  const handleSearchClose = () => {
+    setIsSearchOpen(false);
   };
 
   const handleRandomClick = () => {
@@ -34,22 +39,27 @@ const Navigation = () => {
     window.location.href = '/today';
   };
 
-  if (isMobile) {
-    return (
-      <MobileMenu 
-        searchValue={searchValue}
-        onSearchClick={handleSearchClick}
-      />
-    );
-  }
-
   return (
-    <NavigationDesktop 
-      searchValue={searchValue}
-      onSearchClick={handleSearchClick}
-      onRandomClick={handleRandomClick}
-      onTodayClick={handleTodayClick}
-    />
+    <>
+      {isMobile ? (
+        <MobileMenu 
+          searchValue={searchValue}
+          onSearchClick={handleSearchClick}
+        />
+      ) : (
+        <NavigationDesktop 
+          searchValue={searchValue}
+          onSearchClick={handleSearchClick}
+          onRandomClick={handleRandomClick}
+          onTodayClick={handleTodayClick}
+        />
+      )}
+      
+      <SearchModal 
+        isOpen={isSearchOpen} 
+        onClose={handleSearchClose} 
+      />
+    </>
   );
 };
 
