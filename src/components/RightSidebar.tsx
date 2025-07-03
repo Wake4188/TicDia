@@ -1,11 +1,18 @@
 import { useState, useEffect } from "react";
-import { Bookmark, Share2, Edit, BookOpen } from "lucide-react";
+import { Bookmark, Share2, Edit, BookOpen, MoreVertical } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
 import { useNavigate } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getTranslations } from "@/services/translations";
+import { useMobileDetection } from "@/hooks/useMobileDetection";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 const RightSidebar = ({ article }) => {
   const { user } = useAuth();
@@ -15,6 +22,7 @@ const RightSidebar = ({ article }) => {
   const t = getTranslations(currentLanguage);
   const [isSaved, setIsSaved] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const isMobile = useMobileDetection();
 
   // Check if article is already saved when component mounts or user/article changes
   useEffect(() => {
@@ -152,6 +160,54 @@ const RightSidebar = ({ article }) => {
       setIsLoading(false);
     }
   };
+
+  if (isMobile) {
+    return (
+      <div className="fixed right-4 bottom-20 z-50">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button className="bg-black/20 backdrop-blur-sm border border-white/20 rounded-full p-3 text-white hover:bg-black/30 transition-all">
+              <MoreVertical className="w-6 h-6" />
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent 
+            align="end" 
+            className="bg-black/80 backdrop-blur-sm border border-white/20 text-white"
+          >
+            <DropdownMenuItem 
+              onClick={handleBookmark} 
+              disabled={isLoading}
+              className="hover:bg-white/10 focus:bg-white/10"
+            >
+              <Bookmark className={`w-4 h-4 mr-2 ${isSaved ? 'fill-current text-wikitok-red' : ''}`} />
+              {isSaved ? t.saved : t.save}
+            </DropdownMenuItem>
+            <DropdownMenuItem 
+              onClick={handleShare}
+              className="hover:bg-white/10 focus:bg-white/10"
+            >
+              <Share2 className="w-4 h-4 mr-2" />
+              {t.share}
+            </DropdownMenuItem>
+            <DropdownMenuItem 
+              onClick={handleEdit}
+              className="hover:bg-white/10 focus:bg-white/10"
+            >
+              <Edit className="w-4 h-4 mr-2" />
+              {t.edit}
+            </DropdownMenuItem>
+            <DropdownMenuItem 
+              onClick={handleWikipediaRedirect}
+              className="hover:bg-white/10 focus:bg-white/10"
+            >
+              <BookOpen className="w-4 h-4 mr-2" />
+              {t.view}
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+    );
+  }
 
   return (
     <div className="fixed right-4 bottom-20 flex flex-col items-center space-y-4 z-50">
