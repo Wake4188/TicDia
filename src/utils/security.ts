@@ -1,4 +1,3 @@
-
 // Input validation and sanitization utilities
 
 export const validateEmail = (email: string): boolean => {
@@ -7,9 +6,20 @@ export const validateEmail = (email: string): boolean => {
   return emailRegex.test(email) && email.length <= 254;
 };
 
-export const validatePassword = (password: string): boolean => {
-  if (!password || typeof password !== 'string') return false;
-  return password.length >= 6 && password.length <= 128;
+export const validatePassword = (password: string): { isValid: boolean; message: string } => {
+  if (!password || typeof password !== 'string') {
+    return { isValid: false, message: 'Password is required' };
+  }
+  
+  if (password.length < 6) {
+    return { isValid: false, message: 'Password must be at least 6 characters long' };
+  }
+  
+  if (password.length > 128) {
+    return { isValid: false, message: 'Password must be less than 128 characters' };
+  }
+  
+  return { isValid: true, message: 'Password is valid' };
 };
 
 export const sanitizeSearchQuery = (query: string): string => {
