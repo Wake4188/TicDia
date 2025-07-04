@@ -12,6 +12,7 @@ import { Trash2, Plus, ExternalLink, Calendar } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import LittleWik from "@/components/LittleWik";
 import { useNavigate } from "react-router-dom";
+import { useUserPreferences } from "@/hooks/useUserPreferences";
 
 interface TodayArticle {
   id: string;
@@ -32,6 +33,9 @@ const Today = () => {
   const { user } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
+  
+  // Load user preferences to apply highlight color
+  useUserPreferences();
   const [isAddingArticle, setIsAddingArticle] = useState(false);
   const [newArticle, setNewArticle] = useState({ title: "", content: "", url: "" });
   const [wikipediaArticles, setWikipediaArticles] = useState<WikipediaArticle[]>([]);
