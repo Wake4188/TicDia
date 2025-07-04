@@ -114,7 +114,7 @@ const Discover = () => {
 
   return (
     <div className="h-screen overflow-y-auto pt-14 pb-20">
-      <div className="sticky top-0 z-10 bg-black">
+      <div className="sticky top-0 z-10 bg-black/70 backdrop-blur-sm">
         <ScrollArea className="w-full whitespace-nowrap">
           <div className="flex space-x-4 px-4 py-2">
             {categories.map((category) => (
