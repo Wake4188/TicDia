@@ -82,7 +82,7 @@ const SearchModal = ({ isOpen, onClose }: SearchModalProps) => {
       <div className={`relative w-full max-w-2xl mx-4 ${
         theme === 'dark' ? 'bg-black/80' : 'bg-white/90'
       } backdrop-blur-md rounded-2xl border border-white/20 shadow-2xl`}>
-        <form onSubmit={handleSearch} className="p-6 pb-0">
+        <form onSubmit={handleSearch} className="p-6 pt-4 pb-0">
           <div className="flex items-center gap-4">
             <Search className={`w-6 h-6 ${theme === 'dark' ? 'text-white/60' : 'text-gray-500'}`} />
             <input
