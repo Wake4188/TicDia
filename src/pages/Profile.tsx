@@ -9,7 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
-import { ArrowLeft, BookMarked, Eye, Trash2, Search } from "lucide-react";
+import { ArrowLeft, BookMarked, Eye, Trash2, Search, Mail, Lock, Key } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import LittleWik from "../components/LittleWik";
 import { loadUserPreferences, saveUserPreferences, UserPreferences } from "@/services/userPreferencesService";
@@ -46,6 +46,15 @@ const Profile = () => {
     highlightColor: '#FE2C55'
   });
   const [preferencesLoading, setPreferencesLoading] = useState(true);
+  
+  // Account Security states
+  const [newEmail, setNewEmail] = useState("");
+  const [emailLoading, setEmailLoading] = useState(false);
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [passwordLoading, setPasswordLoading] = useState(false);
+  const [resetEmail, setResetEmail] = useState(user?.email || "");
+  const [resetLoading, setResetLoading] = useState(false);
 
   useEffect(() => {
     if (!user) {
@@ -53,6 +62,7 @@ const Profile = () => {
       return;
     }
 
+    setResetEmail(user.email || "");
     loadPreferences();
     fetchSavedArticles();
   }, [user, navigate]);
@@ -207,6 +217,139 @@ const Profile = () => {
     navigate(`/?q=${encodeURIComponent(title)}`);
   };
 
+  // Account security functions
+  const handleEmailChange = async () => {
+    if (!newEmail.trim()) {
+      toast({
+        title: "Error",
+        description: "Please enter a new email address",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (newEmail === user?.email) {
+      toast({
+        title: "Error", 
+        description: "New email must be different from current email",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setEmailLoading(true);
+    try {
+      const { error } = await supabase.auth.updateUser({ 
+        email: newEmail 
+      });
+      
+      if (error) throw error;
+      
+      toast({
+        title: "Email Update Initiated",
+        description: "Please check both your old and new email addresses for confirmation links.",
+      });
+      setNewEmail("");
+    } catch (error: any) {
+      console.error('Error updating email:', error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to update email",
+        variant: "destructive",
+      });
+    } finally {
+      setEmailLoading(false);
+    }
+  };
+
+  const handlePasswordChange = async () => {
+    if (!newPassword || !confirmPassword) {
+      toast({
+        title: "Error",
+        description: "Please fill in both password fields",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (newPassword !== confirmPassword) {
+      toast({
+        title: "Error",
+        description: "Passwords do not match",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (newPassword.length < 6) {
+      toast({
+        title: "Error",
+        description: "Password must be at least 6 characters long",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setPasswordLoading(true);
+    try {
+      const { error } = await supabase.auth.updateUser({ 
+        password: newPassword 
+      });
+      
+      if (error) throw error;
+      
+      toast({
+        title: "Password Updated",
+        description: "Your password has been successfully changed.",
+      });
+      setNewPassword("");
+      setConfirmPassword("");
+    } catch (error: any) {
+      console.error('Error updating password:', error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to update password",
+        variant: "destructive",
+      });
+    } finally {
+      setPasswordLoading(false);
+    }
+  };
+
+  const handlePasswordReset = async () => {
+    if (!resetEmail.trim()) {
+      toast({
+        title: "Error",
+        description: "Please enter an email address",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setResetLoading(true);
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(resetEmail, {
+        redirectTo: `${window.location.origin}/auth`,
+      });
+      
+      if (error) throw error;
+      
+      toast({
+        title: "Password Reset Sent",
+        description: "Please check your email for password reset instructions.",
+      });
+    } catch (error: any) {
+      console.error('Error sending password reset:', error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to send password reset email",
+        variant: "destructive",
+      });
+    } finally {
+      setResetLoading(false);
+    }
+  };
+
   const fontOptions = [
     { value: 'Inter', label: `Inter (${t.settings.default})` },
     { value: 'Georgia', label: `Georgia (${t.settings.serif})` },
@@ -265,6 +408,13 @@ const Profile = () => {
               className="data-[state=active]:bg-wikitok-red/20 data-[state=active]:backdrop-blur-md data-[state=active]:border data-[state=active]:border-wikitok-red/30 data-[state=active]:shadow-lg transition-all duration-500 ease-out rounded-lg"
             >
               {t.settings.title}
+            </TabsTrigger>
+            <TabsTrigger 
+              value="security" 
+              className="data-[state=active]:bg-wikitok-red/20 data-[state=active]:backdrop-blur-md data-[state=active]:border data-[state=active]:border-wikitok-red/30 data-[state=active]:shadow-lg transition-all duration-500 ease-out rounded-lg"
+            >
+              <Lock className="w-4 h-4 mr-2 transition-transform duration-300" />
+              Account Security
             </TabsTrigger>
           </TabsList>
 
@@ -472,6 +622,126 @@ const Profile = () => {
                 )}
               </CardContent>
             </Card>
+          </TabsContent>
+
+          <TabsContent value="security" className="space-y-6 animate-in fade-in-50 slide-in-from-bottom-4 duration-700">
+            <div className="grid gap-6">
+              {/* Email Change Section */}
+              <Card className="bg-gray-900/80 backdrop-blur-md border-gray-800/50 shadow-2xl transition-all duration-500 hover:shadow-wikitok-red/10 hover:shadow-xl">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Mail className="w-5 h-5" />
+                    Change Email Address
+                  </CardTitle>
+                  <CardDescription>
+                    Current email: {user.email}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">New Email Address</label>
+                    <Input
+                      type="email"
+                      placeholder="Enter new email address"
+                      value={newEmail}
+                      onChange={(e) => setNewEmail(e.target.value)}
+                      className="bg-gray-800/60 border-gray-700/50 text-white"
+                    />
+                  </div>
+                  <Button 
+                    onClick={handleEmailChange}
+                    disabled={emailLoading || !newEmail.trim()}
+                    className="w-full bg-wikitok-red hover:bg-wikitok-red/80 transition-all duration-300"
+                  >
+                    {emailLoading ? "Updating..." : "Update Email"}
+                  </Button>
+                  <p className="text-xs text-gray-400">
+                    You will need to confirm the change in both your old and new email addresses.
+                  </p>
+                </CardContent>
+              </Card>
+
+              {/* Password Change Section */}
+              <Card className="bg-gray-900/80 backdrop-blur-md border-gray-800/50 shadow-2xl transition-all duration-500 hover:shadow-wikitok-red/10 hover:shadow-xl">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Lock className="w-5 h-5" />
+                    Change Password
+                  </CardTitle>
+                  <CardDescription>
+                    Update your account password for security
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">New Password</label>
+                    <Input
+                      type="password"
+                      placeholder="Enter new password"
+                      value={newPassword}
+                      onChange={(e) => setNewPassword(e.target.value)}
+                      className="bg-gray-800/60 border-gray-700/50 text-white"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Confirm New Password</label>
+                    <Input
+                      type="password"
+                      placeholder="Confirm new password"
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      className="bg-gray-800/60 border-gray-700/50 text-white"
+                    />
+                  </div>
+                  <Button 
+                    onClick={handlePasswordChange}
+                    disabled={passwordLoading || !newPassword || !confirmPassword}
+                    className="w-full bg-wikitok-red hover:bg-wikitok-red/80 transition-all duration-300"
+                  >
+                    {passwordLoading ? "Updating..." : "Update Password"}
+                  </Button>
+                  <p className="text-xs text-gray-400">
+                    Password must be at least 6 characters long.
+                  </p>
+                </CardContent>
+              </Card>
+
+              {/* Password Reset Section */}
+              <Card className="bg-gray-900/80 backdrop-blur-md border-gray-800/50 shadow-2xl transition-all duration-500 hover:shadow-wikitok-red/10 hover:shadow-xl">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Key className="w-5 h-5" />
+                    Reset Password via Email
+                  </CardTitle>
+                  <CardDescription>
+                    Send a password reset link to your email address
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Email Address</label>
+                    <Input
+                      type="email"
+                      placeholder="Enter email address"
+                      value={resetEmail}
+                      onChange={(e) => setResetEmail(e.target.value)}
+                      className="bg-gray-800/60 border-gray-700/50 text-white"
+                    />
+                  </div>
+                  <Button 
+                    onClick={handlePasswordReset}
+                    disabled={resetLoading || !resetEmail.trim()}
+                    variant="outline"
+                    className="w-full border-gray-600 text-white hover:bg-gray-800 transition-all duration-300"
+                  >
+                    {resetLoading ? "Sending..." : "Send Password Reset Email"}
+                  </Button>
+                  <p className="text-xs text-gray-400">
+                    You will receive an email with instructions to reset your password.
+                  </p>
+                </CardContent>
+              </Card>
+            </div>
           </TabsContent>
         </Tabs>
 
