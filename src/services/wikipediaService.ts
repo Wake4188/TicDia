@@ -37,17 +37,24 @@ const getRelatedArticles = async (article: WikipediaArticle, language: Language 
     const pages = Object.values(data.query?.pages || {});
     
     const articles = await Promise.all(pages.map(page => transformToArticle(page, language)));
-    return articles.filter(article => article !== null) as WikipediaArticle[];
+    return articles.filter(Boolean) as WikipediaArticle[];
   } catch (error) {
     console.error('Error fetching related articles:', error);
     return getRandomArticles(3, undefined, language);
   }
 };
 
+const fetchArticles = async (titles: string[], language: Language): Promise<WikipediaArticle[]> => {
+  const data = await fetchWikipediaContent(titles, language) as WikipediaResponse;
+  const pages = Object.values(data.query?.pages || {});
+  const articles = await Promise.all(pages.map(page => transformToArticle(page, language)));
+  return articles.filter(Boolean) as WikipediaArticle[];
+};
+
 const getRandomArticles = async (count: number = 3, category?: string, language: Language = DEFAULT_LANGUAGE): Promise<WikipediaArticle[]> => {
   try {
-    let titles: string[];
     const multiplier = 3;
+    let titles: string[];
     
     if (category && category !== "All") {
       const params = new URLSearchParams({
@@ -60,11 +67,11 @@ const getRandomArticles = async (count: number = 3, category?: string, language:
         cmtype: 'page'
       });
 
-      const categoryResponse = await fetch(`${getWikipediaApiBase(language)}?${params}`);
-      if (!categoryResponse.ok) throw new Error('Failed to fetch category articles');
+      const response = await fetch(`${getWikipediaApiBase(language)}?${params}`);
+      if (!response.ok) throw new Error('Failed to fetch category articles');
       
-      const categoryData = await categoryResponse.json() as WikipediaResponse;
-      titles = categoryData.query?.categorymembers?.map(article => article.title) || [];
+      const data = await response.json() as WikipediaResponse;
+      titles = data.query?.categorymembers?.map(article => article.title) || [];
     } else {
       const params = new URLSearchParams({
         action: 'query',
@@ -75,20 +82,16 @@ const getRandomArticles = async (count: number = 3, category?: string, language:
         rnlimit: (count * multiplier).toString()
       });
 
-      const randomResponse = await fetch(`${getWikipediaApiBase(language)}?${params}`);
-      if (!randomResponse.ok) throw new Error('Failed to fetch random articles');
+      const response = await fetch(`${getWikipediaApiBase(language)}?${params}`);
+      if (!response.ok) throw new Error('Failed to fetch random articles');
       
-      const randomData = await randomResponse.json() as WikipediaResponse;
-      titles = randomData.query?.random?.map(article => article.title) || [];
+      const data = await response.json() as WikipediaResponse;
+      titles = data.query?.random?.map(article => article.title) || [];
     }
 
     if (!titles.length) throw new Error('No articles found');
 
-    const data = await fetchWikipediaContent(titles, language) as WikipediaResponse;
-    const pages = Object.values(data.query?.pages || {});
-    
-    const articles = await Promise.all(pages.map(page => transformToArticle(page, language)));
-    const validArticles = articles.filter(article => article !== null) as WikipediaArticle[];
+    const validArticles = await fetchArticles(titles, language);
     
     if (validArticles.length < count) {
       const moreArticles = await getRandomArticles(count - validArticles.length, category, language);
@@ -106,7 +109,7 @@ const searchArticles = async (query: string, language: Language = DEFAULT_LANGUA
   if (!query || query.length < 3) return [];
 
   try {
-    // First, try opensearch for better suggestions
+    // Opensearch for suggestions
     const opensearchParams = new URLSearchParams({
       action: 'opensearch',
       format: 'json',
@@ -116,43 +119,34 @@ const searchArticles = async (query: string, language: Language = DEFAULT_LANGUA
       redirects: 'resolve'
     });
 
-    const opensearchResponse = await fetch(`${getWikipediaApiBase(language)}?${opensearchParams}`);
+    const [opensearchResponse, searchResponse] = await Promise.all([
+      fetch(`${getWikipediaApiBase(language)}?${opensearchParams}`),
+      fetch(`${getWikipediaApiBase(language)}?${new URLSearchParams({
+        action: 'query',
+        format: 'json',
+        origin: '*',
+        list: 'search',
+        srsearch: query,
+        srlimit: '20',
+        srwhat: 'text'
+      })}`)
+    ]);
+
     let suggestedTitles: string[] = [];
-    
     if (opensearchResponse.ok) {
       const opensearchData = await opensearchResponse.json();
       suggestedTitles = opensearchData[1] || [];
     }
 
-    // Then do regular search
-    const searchParams = new URLSearchParams({
-      action: 'query',
-      format: 'json',
-      origin: '*',
-      list: 'search',
-      srsearch: query,
-      srlimit: '20',
-      srwhat: 'text'
-    });
-
-    const searchResponse = await fetch(`${getWikipediaApiBase(language)}?${searchParams}`);
     if (!searchResponse.ok) throw new Error('Search request failed');
     
     const searchData = await searchResponse.json() as WikipediaResponse;
     const searchTitles = searchData.query?.search?.map(result => result.title) || [];
 
-    // Combine and deduplicate titles, prioritizing opensearch results
     const allTitles = [...new Set([...suggestedTitles, ...searchTitles])];
-    
     if (!allTitles.length) return [];
 
-    const data = await fetchWikipediaContent(allTitles, language) as WikipediaResponse;
-    const pages = Object.values(data.query?.pages || {});
-    
-    const articles = await Promise.all(pages.map(page => transformToArticle(page, language)));
-    const validArticles = articles.filter(article => article !== null) as WikipediaArticle[];
-    
-    // Sort by relevance using our enhanced algorithm
+    const validArticles = await fetchArticles(allTitles, language);
     return sortByRelevance(validArticles, query);
   } catch (error) {
     console.error('Error searching articles:', error);

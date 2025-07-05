@@ -1,12 +1,12 @@
 
 import { useQuery } from "@tanstack/react-query";
+import { useSearchParams, useLocation, useNavigate } from "react-router-dom";
+import { useState } from "react";
 import ArticleViewer from "../components/ArticleViewer";
 import RightSidebar from "../components/RightSidebar";
 import LeftSidebar from "../components/LeftSidebar";
 import { getRandomArticles, searchArticles } from "../services/wikipediaService";
 import { useToast } from "@/components/ui/use-toast";
-import { useSearchParams, useLocation, useNavigate } from "react-router-dom";
-import { useState } from "react";
 import { useLanguage } from "../contexts/LanguageContext";
 import { getTranslations } from "../services/translations";
 
@@ -23,20 +23,14 @@ const Index = () => {
   const { data: articles, isLoading, error } = useQuery({
     queryKey: ["articles", searchQuery, currentLanguage.code],
     queryFn: async () => {
-      let fetchedArticles;
       if (searchQuery) {
-        if (location.state?.reorderedResults) {
-          fetchedArticles = location.state.reorderedResults;
-        } else {
-          fetchedArticles = await searchArticles(searchQuery, currentLanguage);
-        }
-      } else {
-        fetchedArticles = await getRandomArticles(3, undefined, currentLanguage);
+        return location.state?.reorderedResults || await searchArticles(searchQuery, currentLanguage);
       }
-      return fetchedArticles.filter(article => article.image);
+      return await getRandomArticles(3, undefined, currentLanguage);
     },
     retry: 1,
     enabled: !languageLoading,
+    select: (data) => data.filter(article => article.image)
   });
 
   const handleTagClick = (tag: string) => {
@@ -67,15 +61,14 @@ const Index = () => {
     );
   }
 
+  const currentDisplayArticle = currentArticle || articles[0];
+
   return (
     <div className="h-screen w-screen relative overflow-hidden bg-wikitok-dark">
       <div className="flex h-full">
-        <LeftSidebar article={currentArticle || articles[0]} onTagClick={handleTagClick} />
-        <ArticleViewer 
-          articles={articles} 
-          onArticleChange={setCurrentArticle}
-        />
-        <RightSidebar article={currentArticle || articles[0]} />
+        <LeftSidebar article={currentDisplayArticle} onTagClick={handleTagClick} />
+        <ArticleViewer articles={articles} onArticleChange={setCurrentArticle} />
+        <RightSidebar article={currentDisplayArticle} />
       </div>
     </div>
   );

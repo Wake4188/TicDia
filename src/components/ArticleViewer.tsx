@@ -21,11 +21,7 @@ const ArticleViewer = ({ articles: initialArticles, onArticleChange }) => {
     handleCurrentIndexChange
   } = useArticleManagement(initialArticles, onArticleChange);
 
-  const { displayedText, progress } = useTextAnimation(
-    currentArticle?.content || '',
-    true, // Always active to prevent flashing
-    80
-  );
+  const { displayedText, progress } = useTextAnimation(currentArticle?.content || '', true, 80);
 
   const containerRef = useArticleIntersection({
     articles,
@@ -34,7 +30,6 @@ const ArticleViewer = ({ articles: initialArticles, onArticleChange }) => {
     onLoadMore: loadMoreArticles
   });
 
-  // Initialize first article
   useEffect(() => {
     if (articles.length > 0 && currentIndex === 0) {
       onArticleChange(articles[0]);
@@ -42,10 +37,7 @@ const ArticleViewer = ({ articles: initialArticles, onArticleChange }) => {
   }, [articles, onArticleChange]);
 
   return (
-    <main 
-      ref={containerRef} 
-      className="h-screen w-screen overflow-y-auto snap-y snap-mandatory"
-    >
+    <main ref={containerRef} className="h-screen w-screen overflow-y-auto snap-y snap-mandatory">
       {articles.map((article, index) => (
         <ArticleItem
           key={`${article.id}-${index}`}

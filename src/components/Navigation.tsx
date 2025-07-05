@@ -16,48 +16,26 @@ const Navigation = () => {
     // Reset any mobile menu state when location changes
   }, [location]);
 
-  // Hide navigation on auth page
-  if (location.pathname === '/auth') {
-    return null;
-  }
+  if (location.pathname === '/auth') return null;
 
-  const handleSearchClick = () => {
-    setIsSearchOpen(true);
-  };
-
-  const handleSearchClose = () => {
-    setIsSearchOpen(false);
-  };
-
-  const handleRandomClick = () => {
-    // Refresh to show random article
-    window.location.reload();
-  };
-
-  const handleTodayClick = () => {
-    // Navigate to today page
-    window.location.href = '/today';
+  const navigationProps = {
+    searchValue,
+    onSearchClick: () => setIsSearchOpen(true),
+    onRandomClick: () => window.location.reload(),
+    onTodayClick: () => window.location.href = '/today'
   };
 
   return (
     <>
       {isMobile ? (
-        <MobileMenu 
-          searchValue={searchValue}
-          onSearchClick={handleSearchClick}
-        />
+        <MobileMenu {...navigationProps} />
       ) : (
-        <NavigationDesktop 
-          searchValue={searchValue}
-          onSearchClick={handleSearchClick}
-          onRandomClick={handleRandomClick}
-          onTodayClick={handleTodayClick}
-        />
+        <NavigationDesktop {...navigationProps} />
       )}
       
       <SearchModal 
         isOpen={isSearchOpen} 
-        onClose={handleSearchClose} 
+        onClose={() => setIsSearchOpen(false)} 
       />
     </>
   );

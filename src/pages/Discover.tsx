@@ -20,16 +20,9 @@ const Discover = () => {
   const t = getTranslations(currentLanguage);
 
   const categories = [
-    t.categories.all,
-    t.categories.science,
-    t.categories.history,
-    t.categories.technology,
-    t.categories.arts,
-    t.categories.sports,
-    t.categories.nature,
-    t.categories.philosophy,
-    t.categories.politics,
-    t.categories.literature,
+    t.categories.all, t.categories.science, t.categories.history, t.categories.technology,
+    t.categories.arts, t.categories.sports, t.categories.nature, t.categories.philosophy,
+    t.categories.politics, t.categories.literature,
   ];
 
   const categoryMapping = {
@@ -45,40 +38,16 @@ const Discover = () => {
     [t.categories.literature]: "Literature",
   };
 
-  const preloadNextPage = async (category: string) => {
-    try {
-      const englishCategory = categoryMapping[category] || category;
-      const nextData = await getRandomArticles(12, englishCategory, currentLanguage);
-      const articlesWithImages = nextData.filter(article => article.image);
-      articlesWithImages.forEach(article => {
-        const img = new Image();
-        img.src = article.image;
-      });
-      return articlesWithImages;
-    } catch (error) {
-      console.error('Error preloading data:', error);
-      return [];
-    }
-  };
-
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading, refetch } = useInfiniteQuery({
     queryKey: ["discover", selectedCategory, currentLanguage.code],
-    queryFn: async ({ pageParam }) => {
+    queryFn: async () => {
       const englishCategory = categoryMapping[selectedCategory] || selectedCategory;
       const articles = await getRandomArticles(12, englishCategory, currentLanguage);
       return articles.filter(article => article.image);
     },
     initialPageParam: 1,
-    getNextPageParam: (lastPage, allPages) => {
-      return allPages.length < 3 ? allPages.length + 1 : undefined;
-    },
+    getNextPageParam: (lastPage, allPages) => allPages.length < 3 ? allPages.length + 1 : undefined,
   });
-
-  const handleCategoryHover = async (category: string) => {
-    if (category !== selectedCategory) {
-      await preloadNextPage(category);
-    }
-  };
 
   useEffect(() => {
     if (inView && hasNextPage) {
@@ -88,10 +57,7 @@ const Discover = () => {
 
   const handleCategoryChange = async (category: string) => {
     await queryClient.cancelQueries({ queryKey: ["discover", selectedCategory, currentLanguage.code] });
-    await queryClient.cancelQueries({ queryKey: ["discover", category, currentLanguage.code] });
-    
     queryClient.removeQueries({ queryKey: ["discover", selectedCategory, currentLanguage.code] });
-    queryClient.removeQueries({ queryKey: ["discover", category, currentLanguage.code] });
     
     setSelectedCategory(category);
     
@@ -121,7 +87,6 @@ const Discover = () => {
               <button
                 key={category}
                 onClick={() => handleCategoryChange(category)}
-                onMouseEnter={() => handleCategoryHover(category)}
                 className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${
                   selectedCategory === category
                     ? "bg-wikitok-red text-white"
