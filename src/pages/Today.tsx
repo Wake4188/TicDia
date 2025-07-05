@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -11,6 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Trash2, Plus, ExternalLink, Calendar } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import LittleWik from "@/components/LittleWik";
+import NYTNewsFeed from "@/components/NYTNewsFeed";
 import { useNavigate } from "react-router-dom";
 import { useUserPreferences } from "@/hooks/useUserPreferences";
 
@@ -260,7 +260,10 @@ const Today = () => {
           )}
         </div>
 
-        <div className="space-y-6">
+        <div className="space-y-8">
+          {/* NYT News Feed Section */}
+          <NYTNewsFeed />
+
           {/* Wikipedia Articles Section */}
           <div>
             <h2 className="text-xl font-semibold mb-4 text-gray-300">From Wikipedia</h2>
