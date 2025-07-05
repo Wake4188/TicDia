@@ -378,43 +378,46 @@ const Profile = () => {
 
   return (
     <div className="min-h-screen bg-black text-white">
-      <div className="container mx-auto px-4 pt-20 pb-8">
-        <div className="flex items-center gap-4 mb-8">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-8 max-w-7xl">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 mb-6 sm:mb-8">
           <Button 
             variant="ghost" 
             size="icon"
             onClick={() => navigate("/")}
-            className="text-white hover:bg-white/10 transition-all duration-300 hover:scale-105"
+            className="text-white hover:bg-white/10 transition-all duration-300 hover:scale-105 self-start sm:self-auto"
           >
             <ArrowLeft className="w-5 h-5" />
           </Button>
-          <div className="transition-all duration-500 ease-out">
-            <h1 className="text-3xl font-bold">{t.profile}</h1>
-            <p className="text-gray-400">{user.email}</p>
+          <div className="transition-all duration-500 ease-out text-center sm:text-left w-full sm:w-auto">
+            <h1 className="text-2xl sm:text-3xl font-bold">{t.profile}</h1>
+            <p className="text-gray-400 text-sm sm:text-base break-all sm:break-normal">{user.email}</p>
           </div>
         </div>
 
-        <Tabs defaultValue="saved" className="space-y-6">
-          <TabsList className="bg-gray-800/50 backdrop-blur-md border border-gray-700/50 p-1 rounded-xl shadow-2xl">
+        <Tabs defaultValue="saved" className="space-y-4 sm:space-y-6">
+          <TabsList className="bg-gray-800/50 backdrop-blur-md border border-gray-700/50 p-1 rounded-xl shadow-2xl w-full sm:w-auto grid grid-cols-3 sm:flex">
             <TabsTrigger 
               value="saved" 
-              className="data-[state=active]:bg-wikitok-red/20 data-[state=active]:backdrop-blur-md data-[state=active]:border data-[state=active]:border-wikitok-red/30 data-[state=active]:shadow-lg transition-all duration-500 ease-out rounded-lg"
+              className="data-[state=active]:bg-wikitok-red/20 data-[state=active]:backdrop-blur-md data-[state=active]:border data-[state=active]:border-wikitok-red/30 data-[state=active]:shadow-lg transition-all duration-500 ease-out rounded-lg text-xs sm:text-sm px-2 sm:px-4"
             >
-              <BookMarked className="w-4 h-4 mr-2 transition-transform duration-300" />
-              {t.savedArticles.title}
+              <BookMarked className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2 transition-transform duration-300" />
+              <span className="hidden sm:inline">{t.savedArticles.title}</span>
+              <span className="sm:hidden">Saved</span>
             </TabsTrigger>
             <TabsTrigger 
               value="settings" 
-              className="data-[state=active]:bg-wikitok-red/20 data-[state=active]:backdrop-blur-md data-[state=active]:border data-[state=active]:border-wikitok-red/30 data-[state=active]:shadow-lg transition-all duration-500 ease-out rounded-lg"
+              className="data-[state=active]:bg-wikitok-red/20 data-[state=active]:backdrop-blur-md data-[state=active]:border data-[state=active]:border-wikitok-red/30 data-[state=active]:shadow-lg transition-all duration-500 ease-out rounded-lg text-xs sm:text-sm px-2 sm:px-4"
             >
-              {t.settings.title}
+              <span className="hidden sm:inline">{t.settings.title}</span>
+              <span className="sm:hidden">Settings</span>
             </TabsTrigger>
             <TabsTrigger 
               value="security" 
-              className="data-[state=active]:bg-wikitok-red/20 data-[state=active]:backdrop-blur-md data-[state=active]:border data-[state=active]:border-wikitok-red/30 data-[state=active]:shadow-lg transition-all duration-500 ease-out rounded-lg"
+              className="data-[state=active]:bg-wikitok-red/20 data-[state=active]:backdrop-blur-md data-[state=active]:border data-[state=active]:border-wikitok-red/30 data-[state=active]:shadow-lg transition-all duration-500 ease-out rounded-lg text-xs sm:text-sm px-2 sm:px-4"
             >
-              <Lock className="w-4 h-4 mr-2 transition-transform duration-300" />
-              Account Security
+              <Lock className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2 transition-transform duration-300" />
+              <span className="hidden sm:inline">Account Security</span>
+              <span className="sm:hidden">Security</span>
             </TabsTrigger>
           </TabsList>
 
@@ -468,17 +471,17 @@ const Profile = () => {
                     {filteredArticles.map((article, index) => (
                       <div 
                         key={article.id} 
-                        className="flex items-center justify-between p-4 bg-gray-800/60 backdrop-blur-sm rounded-lg border border-gray-700/30 transition-all duration-300 hover:bg-gray-700/60 hover:border-gray-600/50 hover:scale-[1.02] animate-in fade-in-50 slide-in-from-left-4 cursor-pointer"
+                        className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-3 sm:p-4 bg-gray-800/60 backdrop-blur-sm rounded-lg border border-gray-700/30 transition-all duration-300 hover:bg-gray-700/60 hover:border-gray-600/50 hover:scale-[1.02] animate-in fade-in-50 slide-in-from-left-4 cursor-pointer space-y-3 sm:space-y-0"
                         style={{ animationDelay: `${index * 100}ms` }}
                         onClick={() => handleArticleClick(article)}
                       >
-                        <div className="flex-1">
-                          <h3 className="font-medium">{article.article_title}</h3>
-                          <p className="text-sm text-gray-400">
+                        <div className="flex-1 w-full sm:w-auto">
+                          <h3 className="font-medium text-sm sm:text-base break-words">{article.article_title}</h3>
+                          <p className="text-xs sm:text-sm text-gray-400">
                             {t.savedArticles.savedOn} {new Date(article.saved_at).toLocaleDateString()}
                           </p>
                         </div>
-                        <div className="flex gap-2">
+                        <div className="flex gap-2 w-full sm:w-auto justify-end sm:justify-start">
                           <Button
                             variant="ghost"
                             size="sm"
@@ -486,9 +489,10 @@ const Profile = () => {
                               e.stopPropagation();
                               handleArticleClick(article);
                             }}
-                            className="transition-all duration-300 hover:scale-105"
+                            className="transition-all duration-300 hover:scale-105 flex-1 sm:flex-none"
                           >
-                            <Eye className="w-4 h-4" />
+                            <Eye className="w-4 h-4 mr-2 sm:mr-0" />
+                            <span className="sm:hidden">View</span>
                           </Button>
                           <Button
                             variant="destructive"
@@ -497,9 +501,10 @@ const Profile = () => {
                               e.stopPropagation();
                               removeSavedArticle(article.id);
                             }}
-                            className="transition-all duration-300 hover:scale-105"
+                            className="transition-all duration-300 hover:scale-105 flex-1 sm:flex-none"
                           >
-                            <Trash2 className="w-4 h-4" />
+                            <Trash2 className="w-4 h-4 mr-2 sm:mr-0" />
+                            <span className="sm:hidden">Delete</span>
                           </Button>
                         </div>
                       </div>
@@ -624,38 +629,38 @@ const Profile = () => {
             </Card>
           </TabsContent>
 
-          <TabsContent value="security" className="space-y-6 animate-in fade-in-50 slide-in-from-bottom-4 duration-700">
-            <div className="grid gap-6">
+          <TabsContent value="security" className="space-y-4 sm:space-y-6 animate-in fade-in-50 slide-in-from-bottom-4 duration-700">
+            <div className="grid gap-4 sm:gap-6">
               {/* Email Change Section */}
               <Card className="bg-gray-900/80 backdrop-blur-md border-gray-800/50 shadow-2xl transition-all duration-500 hover:shadow-wikitok-red/10 hover:shadow-xl">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Mail className="w-5 h-5" />
-                    Change Email Address
+                <CardHeader className="pb-3 sm:pb-6">
+                  <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
+                    <Mail className="w-4 h-4 sm:w-5 sm:h-5" />
+                    <span className="text-sm sm:text-base">Change Email Address</span>
                   </CardTitle>
-                  <CardDescription>
-                    Current email: {user.email}
+                  <CardDescription className="text-xs sm:text-sm">
+                    Current email: <span className="break-all">{user.email}</span>
                   </CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">New Email Address</label>
+                <CardContent className="space-y-3 sm:space-y-4">
+                  <div className="space-y-1 sm:space-y-2">
+                    <label className="text-xs sm:text-sm font-medium">New Email Address</label>
                     <Input
                       type="email"
                       placeholder="Enter new email address"
                       value={newEmail}
                       onChange={(e) => setNewEmail(e.target.value)}
-                      className="bg-gray-800/60 border-gray-700/50 text-white"
+                      className="bg-gray-800/60 border-gray-700/50 text-white text-sm sm:text-base"
                     />
                   </div>
                   <Button 
                     onClick={handleEmailChange}
                     disabled={emailLoading || !newEmail.trim()}
-                    className="w-full bg-wikitok-red hover:bg-wikitok-red/80 transition-all duration-300"
+                    className="w-full bg-wikitok-red hover:bg-wikitok-red/80 transition-all duration-300 text-sm sm:text-base py-2 sm:py-3"
                   >
                     {emailLoading ? "Updating..." : "Update Email"}
                   </Button>
-                  <p className="text-xs text-gray-400">
+                  <p className="text-xs text-gray-400 leading-relaxed">
                     You will need to confirm the change in both your old and new email addresses.
                   </p>
                 </CardContent>
@@ -663,44 +668,44 @@ const Profile = () => {
 
               {/* Password Change Section */}
               <Card className="bg-gray-900/80 backdrop-blur-md border-gray-800/50 shadow-2xl transition-all duration-500 hover:shadow-wikitok-red/10 hover:shadow-xl">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Lock className="w-5 h-5" />
-                    Change Password
+                <CardHeader className="pb-3 sm:pb-6">
+                  <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
+                    <Lock className="w-4 h-4 sm:w-5 sm:h-5" />
+                    <span className="text-sm sm:text-base">Change Password</span>
                   </CardTitle>
-                  <CardDescription>
+                  <CardDescription className="text-xs sm:text-sm">
                     Update your account password for security
                   </CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">New Password</label>
+                <CardContent className="space-y-3 sm:space-y-4">
+                  <div className="space-y-1 sm:space-y-2">
+                    <label className="text-xs sm:text-sm font-medium">New Password</label>
                     <Input
                       type="password"
                       placeholder="Enter new password"
                       value={newPassword}
                       onChange={(e) => setNewPassword(e.target.value)}
-                      className="bg-gray-800/60 border-gray-700/50 text-white"
+                      className="bg-gray-800/60 border-gray-700/50 text-white text-sm sm:text-base"
                     />
                   </div>
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">Confirm New Password</label>
+                  <div className="space-y-1 sm:space-y-2">
+                    <label className="text-xs sm:text-sm font-medium">Confirm New Password</label>
                     <Input
                       type="password"
                       placeholder="Confirm new password"
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
-                      className="bg-gray-800/60 border-gray-700/50 text-white"
+                      className="bg-gray-800/60 border-gray-700/50 text-white text-sm sm:text-base"
                     />
                   </div>
                   <Button 
                     onClick={handlePasswordChange}
                     disabled={passwordLoading || !newPassword || !confirmPassword}
-                    className="w-full bg-wikitok-red hover:bg-wikitok-red/80 transition-all duration-300"
+                    className="w-full bg-wikitok-red hover:bg-wikitok-red/80 transition-all duration-300 text-sm sm:text-base py-2 sm:py-3"
                   >
                     {passwordLoading ? "Updating..." : "Update Password"}
                   </Button>
-                  <p className="text-xs text-gray-400">
+                  <p className="text-xs text-gray-400 leading-relaxed">
                     Password must be at least 6 characters long.
                   </p>
                 </CardContent>
@@ -708,35 +713,35 @@ const Profile = () => {
 
               {/* Password Reset Section */}
               <Card className="bg-gray-900/80 backdrop-blur-md border-gray-800/50 shadow-2xl transition-all duration-500 hover:shadow-wikitok-red/10 hover:shadow-xl">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Key className="w-5 h-5" />
-                    Reset Password via Email
+                <CardHeader className="pb-3 sm:pb-6">
+                  <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
+                    <Key className="w-4 h-4 sm:w-5 sm:h-5" />
+                    <span className="text-sm sm:text-base">Reset Password via Email</span>
                   </CardTitle>
-                  <CardDescription>
+                  <CardDescription className="text-xs sm:text-sm">
                     Send a password reset link to your email address
                   </CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">Email Address</label>
+                <CardContent className="space-y-3 sm:space-y-4">
+                  <div className="space-y-1 sm:space-y-2">
+                    <label className="text-xs sm:text-sm font-medium">Email Address</label>
                     <Input
                       type="email"
                       placeholder="Enter email address"
                       value={resetEmail}
                       onChange={(e) => setResetEmail(e.target.value)}
-                      className="bg-gray-800/60 border-gray-700/50 text-white"
+                      className="bg-gray-800/60 border-gray-700/50 text-white text-sm sm:text-base"
                     />
                   </div>
                   <Button 
                     onClick={handlePasswordReset}
                     disabled={resetLoading || !resetEmail.trim()}
                     variant="outline"
-                    className="w-full border-gray-600 text-white hover:bg-gray-800 transition-all duration-300"
+                    className="w-full border-gray-600 text-white hover:bg-gray-800 transition-all duration-300 text-sm sm:text-base py-2 sm:py-3"
                   >
                     {resetLoading ? "Sending..." : "Send Password Reset Email"}
                   </Button>
-                  <p className="text-xs text-gray-400">
+                  <p className="text-xs text-gray-400 leading-relaxed">
                     You will receive an email with instructions to reset your password.
                   </p>
                 </CardContent>
