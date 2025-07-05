@@ -474,6 +474,44 @@ const Profile = () => {
             </Card>
           </TabsContent>
         </Tabs>
+
+        {/* Footer */}
+        <div className="mt-12 pt-8 border-t border-gray-800/50">
+          <div className="text-center space-y-4">
+            <div className="text-sm text-gray-400">
+              <h4 className="font-medium mb-2">Site Map</h4>
+              <div className="flex flex-wrap justify-center gap-4">
+                <button 
+                  onClick={() => navigate("/")}
+                  className="text-gray-400 hover:text-white transition-colors"
+                >
+                  Home
+                </button>
+                <button 
+                  onClick={() => navigate("/discover")}
+                  className="text-gray-400 hover:text-white transition-colors"
+                >
+                  Discover
+                </button>
+                <button 
+                  onClick={() => navigate("/today")}
+                  className="text-gray-400 hover:text-white transition-colors"
+                >
+                  Today
+                </button>
+                <button 
+                  onClick={() => navigate("/profile")}
+                  className="text-gray-400 hover:text-white transition-colors"
+                >
+                  Profile
+                </button>
+              </div>
+            </div>
+            <p className="text-xs text-gray-500">
+              Made with love in France by Noa Wilhide
+            </p>
+          </div>
+        </div>
       </div>
 
       <LittleWik
