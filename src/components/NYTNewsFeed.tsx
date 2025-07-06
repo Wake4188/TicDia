@@ -1,9 +1,8 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ExternalLink, Calendar, Clock, BookOpen } from "lucide-react";
+import { ExternalLink, Calendar, Clock } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
-import ArticleModal from "./ArticleModal";
 interface NYTArticle {
   title: string;
   abstract: string;
@@ -24,11 +23,7 @@ interface NYTArticle {
 const NYTNewsFeed = () => {
   const [articles, setArticles] = useState<NYTArticle[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedArticle, setSelectedArticle] = useState<NYTArticle | null>(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const {
-    toast
-  } = useToast();
+  const { toast } = useToast();
   const NYT_API_KEY = "CgNmskY4a1yqFpXiTyLDXLVLNmfHV1D1";
   useEffect(() => {
     fetchNews();
@@ -73,11 +68,6 @@ const NYTNewsFeed = () => {
   const getImageUrl = (article: NYTArticle) => {
     const image = article.multimedia?.find(media => media.format === "mediumThreeByTwo440" || media.format === "superJumbo");
     return image?.url;
-  };
-
-  const handleReadFullArticle = (article: NYTArticle) => {
-    setSelectedArticle(article);
-    setIsModalOpen(true);
   };
   if (loading) {
     return <div className="space-y-4">
@@ -135,22 +125,11 @@ const NYTNewsFeed = () => {
                           </span>}
                       </div>
                       
-                      <div className="flex items-center gap-2">
-                        <Button 
-                          variant="ghost" 
-                          size="sm" 
-                          onClick={() => handleReadFullArticle(article)}
-                          className="text-blue-400 hover:text-blue-300 hover:bg-blue-900/10 text-xs"
-                        >
-                          <BookOpen className="w-3 h-3 mr-1" />
-                          Read Full Article
-                        </Button>
-                        <Button variant="ghost" size="sm" asChild className="text-wikitok-red hover:text-wikitok-red/80 hover:bg-wikitok-red/10">
-                          <a href={article.url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-xs">
-                            NYT Site <ExternalLink className="w-3 h-3" />
-                          </a>
-                        </Button>
-                      </div>
+                      <Button variant="ghost" size="sm" asChild className="text-wikitok-red hover:text-wikitok-red/80 hover:bg-wikitok-red/10">
+                        <a href={article.url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-xs">
+                          Read on NYT <ExternalLink className="w-3 h-3" />
+                        </a>
+                      </Button>
                     </div>
                 </div>
               </div>
@@ -158,14 +137,6 @@ const NYTNewsFeed = () => {
           </Card>)}
       </div>
 
-      {selectedArticle && (
-        <ArticleModal
-          isOpen={isModalOpen}
-          onClose={() => setIsModalOpen(false)}
-          articleUrl={selectedArticle.url}
-          articleTitle={selectedArticle.title}
-        />
-      )}
     </div>;
 };
 export default NYTNewsFeed;

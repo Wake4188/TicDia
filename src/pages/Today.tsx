@@ -10,7 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Trash2, Plus, ExternalLink, Calendar } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import LittleWik from "@/components/LittleWik";
-import NYTNewsFeed from "@/components/NYTNewsFeed";
+import NewsFeed from "@/components/NewsFeed";
 import { useNavigate } from "react-router-dom";
 import { useUserPreferences } from "@/hooks/useUserPreferences";
 
@@ -261,8 +261,8 @@ const Today = () => {
         </div>
 
         <div className="space-y-8">
-          {/* NYT News Feed Section */}
-          <NYTNewsFeed />
+          {/* News Feed Section */}
+          <NewsFeed />
 
           {/* Wikipedia Articles Section */}
           <div>
