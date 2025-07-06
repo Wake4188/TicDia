@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ExternalLink, Calendar, Clock } from "lucide-react";
+import { ExternalLink, Calendar, Clock, BookOpen } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
+import ArticleModal from "./ArticleModal";
 interface NYTArticle {
   title: string;
   abstract: string;
@@ -23,6 +24,8 @@ interface NYTArticle {
 const NYTNewsFeed = () => {
   const [articles, setArticles] = useState<NYTArticle[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedArticle, setSelectedArticle] = useState<NYTArticle | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const {
     toast
   } = useToast();
@@ -71,6 +74,11 @@ const NYTNewsFeed = () => {
     const image = article.multimedia?.find(media => media.format === "mediumThreeByTwo440" || media.format === "superJumbo");
     return image?.url;
   };
+
+  const handleReadFullArticle = (article: NYTArticle) => {
+    setSelectedArticle(article);
+    setIsModalOpen(true);
+  };
   if (loading) {
     return <div className="space-y-4">
         <h2 className="text-xl font-semibold mb-4 text-gray-300">Latest News</h2>
@@ -116,28 +124,48 @@ const NYTNewsFeed = () => {
                     {article.abstract}
                   </p>
                   
-                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 text-xs text-gray-500">
-                    <div className="flex items-center gap-3">
-                      <span className="flex items-center gap-1">
-                        <Calendar className="w-3 h-3" />
-                        {formatDate(article.published_date)}
-                      </span>
-                      {article.section && <span className="px-2 py-1 bg-wikitok-red/20 text-wikitok-red rounded text-xs font-medium">
-                          {article.section}
-                        </span>}
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                      <div className="flex items-center gap-3 text-xs text-gray-500">
+                        <span className="flex items-center gap-1">
+                          <Calendar className="w-3 h-3" />
+                          {formatDate(article.published_date)}
+                        </span>
+                        {article.section && <span className="px-2 py-1 bg-wikitok-red/20 text-wikitok-red rounded text-xs font-medium">
+                            {article.section}
+                          </span>}
+                      </div>
+                      
+                      <div className="flex items-center gap-2">
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          onClick={() => handleReadFullArticle(article)}
+                          className="text-blue-400 hover:text-blue-300 hover:bg-blue-900/10 text-xs"
+                        >
+                          <BookOpen className="w-3 h-3 mr-1" />
+                          Read Full Article
+                        </Button>
+                        <Button variant="ghost" size="sm" asChild className="text-wikitok-red hover:text-wikitok-red/80 hover:bg-wikitok-red/10">
+                          <a href={article.url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-xs">
+                            NYT Site <ExternalLink className="w-3 h-3" />
+                          </a>
+                        </Button>
+                      </div>
                     </div>
-                    
-                    <Button variant="ghost" size="sm" asChild className="text-wikitok-red hover:text-wikitok-red/80 hover:bg-wikitok-red/10 self-start sm:self-auto">
-                      <a href={article.url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-xs">
-                        Read more <ExternalLink className="w-3 h-3" />
-                      </a>
-                    </Button>
-                  </div>
                 </div>
               </div>
             </CardContent>
           </Card>)}
       </div>
+
+      {selectedArticle && (
+        <ArticleModal
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          articleUrl={selectedArticle.url}
+          articleTitle={selectedArticle.title}
+        />
+      )}
     </div>;
 };
 export default NYTNewsFeed;
