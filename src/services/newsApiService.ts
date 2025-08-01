@@ -1,3 +1,4 @@
+
 export interface NewsApiArticle {
   title: string;
   description: string;
@@ -25,10 +26,11 @@ export const fetchNewsApiHeadlines = async (): Promise<NewsApiArticle[]> => {
     );
     
     if (!response.ok) {
-      throw new Error('Failed to fetch NewsAPI headlines');
+      throw new Error(`NewsAPI Error: ${response.status}`);
     }
     
     const data: NewsApiResponse = await response.json();
+    console.log('NewsAPI response:', data);
     return data.articles || [];
   } catch (error) {
     console.error('Error fetching NewsAPI headlines:', error);

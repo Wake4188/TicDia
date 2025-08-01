@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -13,6 +14,8 @@ import LittleWik from "@/components/LittleWik";
 import NewsFeed from "@/components/NewsFeed";
 import { useNavigate } from "react-router-dom";
 import { useUserPreferences } from "@/hooks/useUserPreferences";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { getTranslation } from "@/services/translations";
 
 interface TodayArticle {
   id: string;
@@ -33,6 +36,10 @@ const Today = () => {
   const { user } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
+  const { currentLanguage } = useLanguage();
+  
+  const t = (key: string, params?: Record<string, string | number>) => 
+    getTranslation(key, currentLanguage.code, params);
   
   // Load user preferences to apply highlight color
   useUserPreferences();
@@ -47,7 +54,7 @@ const Today = () => {
 
   // Get today's date
   const today = new Date();
-  const dateString = today.toLocaleDateString('en-US', { 
+  const dateString = today.toLocaleDateString(currentLanguage.code, { 
     weekday: 'long', 
     year: 'numeric', 
     month: 'long', 
@@ -71,30 +78,31 @@ const Today = () => {
   // Fetch Wikipedia articles on component mount
   useEffect(() => {
     fetchWikipediaArticles();
-  }, []);
+  }, [currentLanguage]);
 
   const fetchWikipediaArticles = async () => {
     try {
-      // Get current events from Wikipedia
+      // Get current events from Wikipedia in the selected language
       const currentDate = new Date();
-      const month = currentDate.toLocaleString('en-US', { month: 'long' });
+      const month = currentDate.toLocaleString(currentLanguage.code, { month: 'long' });
       const day = currentDate.getDate();
       
+      const wikipediaDomain = currentLanguage.wikipediaDomain;
       const response = await fetch(
-        `https://en.wikipedia.org/api/rest_v1/page/summary/${month}_${day}`
+        `https://${wikipediaDomain}/api/rest_v1/page/summary/${month}_${day}`
       );
       
       if (!response.ok) {
         // Fallback to "Current events" page
         const fallbackResponse = await fetch(
-          'https://en.wikipedia.org/api/rest_v1/page/summary/Current_events'
+          `https://${wikipediaDomain}/api/rest_v1/page/summary/Current_events`
         );
         if (fallbackResponse.ok) {
           const data = await fallbackResponse.json();
           setWikipediaArticles([{
             title: data.title,
             extract: data.extract,
-            fullurl: data.content_urls?.desktop?.page || `https://en.wikipedia.org/wiki/${encodeURIComponent(data.title)}`
+            fullurl: data.content_urls?.desktop?.page || `https://${wikipediaDomain}/wiki/${encodeURIComponent(data.title)}`
           }]);
         }
         return;
@@ -104,12 +112,12 @@ const Today = () => {
       setWikipediaArticles([{
         title: data.title,
         extract: data.extract,
-        fullurl: data.content_urls?.desktop?.page || `https://en.wikipedia.org/wiki/${encodeURIComponent(data.title)}`
+        fullurl: data.content_urls?.desktop?.page || `https://${wikipediaDomain}/wiki/${encodeURIComponent(data.title)}`
       }]);
       
       // Try to get more current events
       const eventsResponse = await fetch(
-        'https://en.wikipedia.org/w/api.php?action=query&format=json&prop=extracts&exintro=true&explaintext=true&titles=Portal:Current_events&origin=*'
+        `https://${wikipediaDomain}/w/api.php?action=query&format=json&prop=extracts&exintro=true&explaintext=true&titles=Portal:Current_events&origin=*`
       );
       
       if (eventsResponse.ok) {
@@ -123,7 +131,7 @@ const Today = () => {
               setWikipediaArticles(prev => [...prev, {
                 title: page.title,
                 extract: page.extract,
-                fullurl: `https://en.wikipedia.org/wiki/${encodeURIComponent(page.title)}`
+                fullurl: `https://${wikipediaDomain}/wiki/${encodeURIComponent(page.title)}`
               }]);
             }
           });
@@ -137,7 +145,7 @@ const Today = () => {
   const handleAddArticle = async () => {
     if (!newArticle.title || !newArticle.content) {
       toast({
-        title: "Error",
+        title: t('error'),
         description: "Please fill in all required fields.",
         variant: "destructive",
       });
@@ -166,7 +174,7 @@ const Today = () => {
       refetch();
     } catch (error) {
       toast({
-        title: "Error",
+        title: t('error'),
         description: "Failed to add article.",
         variant: "destructive",
       });
@@ -190,7 +198,7 @@ const Today = () => {
       refetch();
     } catch (error) {
       toast({
-        title: "Error",
+        title: t('error'),
         description: "Failed to delete article.",
         variant: "destructive",
       });
@@ -214,7 +222,7 @@ const Today = () => {
       <div className="max-w-4xl mx-auto p-6">
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-wikitok-red mb-2">Today's Highlights</h1>
+            <h1 className="text-3xl font-bold text-tictok-red mb-2">{t('todayHighlights')}</h1>
             <p className="text-gray-400 flex items-center gap-2">
               <Calendar className="w-4 h-4" />
               {dateString}
@@ -223,36 +231,36 @@ const Today = () => {
           {isAdmin && (
             <Dialog open={isAddingArticle} onOpenChange={setIsAddingArticle}>
               <DialogTrigger asChild>
-                <Button className="bg-wikitok-red hover:bg-wikitok-red/90">
+                <Button className="bg-tictok-red hover:bg-tictok-red/90">
                   <Plus className="w-4 h-4 mr-2" />
-                  Add Article
+                  {t('addArticle')}
                 </Button>
               </DialogTrigger>
               <DialogContent className="bg-gray-900 border-gray-800">
                 <DialogHeader>
-                  <DialogTitle>Add New Article</DialogTitle>
+                  <DialogTitle>{t('addNewArticle')}</DialogTitle>
                 </DialogHeader>
                 <div className="space-y-4">
                   <Input
-                    placeholder="Article Title"
+                    placeholder={t('articleTitle')}
                     value={newArticle.title}
                     onChange={(e) => setNewArticle(prev => ({ ...prev, title: e.target.value }))}
                     className="bg-gray-800 border-gray-700"
                   />
                   <Textarea
-                    placeholder="Article Content"
+                    placeholder={t('articleContent')}
                     value={newArticle.content}
                     onChange={(e) => setNewArticle(prev => ({ ...prev, content: e.target.value }))}
                     className="bg-gray-800 border-gray-700 min-h-32"
                   />
                   <Input
-                    placeholder="Article URL (optional)"
+                    placeholder={t('articleUrl')}
                     value={newArticle.url}
                     onChange={(e) => setNewArticle(prev => ({ ...prev, url: e.target.value }))}
                     className="bg-gray-800 border-gray-700"
                   />
-                  <Button onClick={handleAddArticle} className="w-full bg-wikitok-red hover:bg-wikitok-red/90">
-                    Add Article
+                  <Button onClick={handleAddArticle} className="w-full bg-tictok-red hover:bg-tictok-red/90">
+                    {t('addArticle')}
                   </Button>
                 </div>
               </DialogContent>
@@ -266,7 +274,7 @@ const Today = () => {
 
           {/* Wikipedia Articles Section */}
           <div>
-            <h2 className="text-xl font-semibold mb-4 text-gray-300">From Wikipedia</h2>
+            <h2 className="text-xl font-semibold mb-4 text-gray-300">{t('fromWikipedia')}</h2>
             <div className="grid gap-4">
               {wikipediaArticles.map((article, index) => (
                 <Card key={index} className="bg-gray-900/50 border-gray-800 hover:bg-gray-800/50 transition-colors cursor-pointer">
@@ -287,7 +295,7 @@ const Today = () => {
           {/* Admin Articles Section */}
           {adminArticles && adminArticles.length > 0 && (
             <div>
-              <h2 className="text-xl font-semibold mb-4 text-gray-300">Editorial Highlights</h2>
+              <h2 className="text-xl font-semibold mb-4 text-gray-300">{t('editorialHighlights')}</h2>
               <div className="grid gap-4">
                 {adminArticles.map((article) => (
                   <Card key={article.id} className="bg-gray-900/50 border-gray-800">
@@ -313,9 +321,9 @@ const Today = () => {
                           href={article.url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-wikitok-red hover:text-wikitok-red/80 text-sm flex items-center gap-1"
+                          className="text-tictok-red hover:text-tictok-red/80 text-sm flex items-center gap-1"
                         >
-                          Read more <ExternalLink className="w-3 h-3" />
+                          {t('readMore')} <ExternalLink className="w-3 h-3" />
                         </a>
                       )}
                     </CardContent>

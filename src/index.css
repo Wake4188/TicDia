@@ -15,27 +15,27 @@
   }
 
   body {
-    @apply bg-wikitok-dark text-white;
+    @apply bg-tictok-dark text-white;
   }
 
   /* Apply highlight color to various elements */
-  .text-wikitok-red {
+  .text-tictok-red {
     color: var(--highlight-color) !important;
   }
 
-  .bg-wikitok-red {
+  .bg-tictok-red {
     background-color: var(--highlight-color) !important;
   }
 
-  .hover\:bg-wikitok-red\/90:hover {
+  .hover\:bg-tictok-red\/90:hover {
     background-color: color-mix(in srgb, var(--highlight-color) 90%, transparent) !important;
   }
 
-  .hover\:text-wikitok-red:hover {
+  .hover\:text-tictok-red:hover {
     color: var(--highlight-color) !important;
   }
 
-  .border-wikitok-red {
+  .border-tictok-red {
     border-color: var(--highlight-color) !important;
   }
 
@@ -46,12 +46,12 @@
   }
 
   /* Scrollbar styling */
-  .scrollbar-thumb-wikitok-red::-webkit-scrollbar-thumb {
+  .scrollbar-thumb-tictok-red::-webkit-scrollbar-thumb {
     background-color: var(--highlight-color);
   }
 
   /* Focus ring styling */
-  .focus\:ring-wikitok-red:focus {
+  .focus\:ring-tictok-red:focus {
     --tw-ring-color: var(--highlight-color);
   }
 }

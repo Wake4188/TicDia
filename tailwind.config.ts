@@ -13,7 +13,7 @@ export default {
   theme: {
     extend: {
       colors: {
-        wikitok: {
+        tictok: {
           red: "#FE2C55",
           blue: "#20D5EC",
           dark: "#121212",
