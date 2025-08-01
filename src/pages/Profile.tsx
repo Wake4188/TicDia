@@ -123,7 +123,7 @@ const Profile = () => {
       console.error('Error fetching saved articles:', error);
       toast({
         title: t.error,
-        description: t.savedArticles.errorLoading,
+        description: t.errorLoading,
         variant: "destructive",
       });
     } finally {
@@ -153,8 +153,8 @@ const Profile = () => {
     } catch (error) {
       console.error('Error saving preferences to database:', error);
       toast({
-        title: t.settings.preferencesWarning,
-        description: t.settings.preferencesWarningDesc,
+        title: t.preferencesWarning,
+        description: t.preferencesWarningDesc,
         variant: "destructive",
       });
     }
@@ -171,14 +171,14 @@ const Profile = () => {
       
       setSavedArticles(prev => prev.filter(article => article.id !== articleId));
       toast({
-        title: t.savedArticles.removed,
-        description: t.savedArticles.removedDesc,
+        title: t.removed,
+        description: t.removedDesc,
       });
     } catch (error) {
       console.error('Error removing article:', error);
       toast({
         title: t.error,
-        description: t.savedArticles.errorRemoving,
+        description: t.errorRemoving,
         variant: "destructive",
       });
     }
@@ -195,14 +195,14 @@ const Profile = () => {
       
       setSavedArticles([]);
       toast({
-        title: t.savedArticles.cleared,
-        description: t.savedArticles.clearedDesc,
+        title: t.cleared,
+        description: t.clearedDesc,
       });
     } catch (error) {
       console.error('Error clearing articles:', error);
       toast({
         title: t.error,
-        description: t.savedArticles.errorClearing,
+        description: t.errorClearing,
         variant: "destructive",
       });
     }
@@ -351,10 +351,10 @@ const Profile = () => {
   };
 
   const fontOptions = [
-    { value: 'Inter', label: `Inter (${t.settings.default})` },
-    { value: 'Georgia', label: `Georgia (${t.settings.serif})` },
+    { value: 'Inter', label: `Inter (${t.default})` },
+    { value: 'Georgia', label: `Georgia (${t.serif})` },
     { value: 'Times New Roman', label: 'Times New Roman' },
-    { value: 'Arial', label: `Arial (${t.settings.sansSerif})` },
+    { value: 'Arial', label: `Arial (${t.sansSerif})` },
     { value: 'Helvetica', label: 'Helvetica' },
     { value: 'Verdana', label: 'Verdana' },
     { value: 'Open Sans', label: 'Open Sans' },
@@ -362,7 +362,7 @@ const Profile = () => {
   ];
 
   const colorOptions = [
-    { value: '#FE2C55', label: `WikTok Red (${t.settings.default})`, color: '#FE2C55' },
+    { value: '#FE2C55', label: `TicTok Red (${t.default})`, color: '#FE2C55' },
     { value: '#20D5EC', label: 'WikTok Blue', color: '#20D5EC' },
     { value: '#FF6B6B', label: 'Coral Red', color: '#FF6B6B' },
     { value: '#4ECDC4', label: 'Turquoise', color: '#4ECDC4' },
@@ -401,14 +401,14 @@ const Profile = () => {
               className="data-[state=active]:bg-wikitok-red/20 data-[state=active]:backdrop-blur-md data-[state=active]:border data-[state=active]:border-wikitok-red/30 data-[state=active]:shadow-lg transition-all duration-500 ease-out rounded-lg text-xs sm:text-sm px-2 sm:px-4"
             >
               <BookMarked className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2 transition-transform duration-300" />
-              <span className="hidden sm:inline">{t.savedArticles.title}</span>
+              <span className="hidden sm:inline">{t.savedArticles}</span>
               <span className="sm:hidden">Saved</span>
             </TabsTrigger>
             <TabsTrigger 
               value="settings" 
               className="data-[state=active]:bg-wikitok-red/20 data-[state=active]:backdrop-blur-md data-[state=active]:border data-[state=active]:border-wikitok-red/30 data-[state=active]:shadow-lg transition-all duration-500 ease-out rounded-lg text-xs sm:text-sm px-2 sm:px-4"
             >
-              <span className="hidden sm:inline">{t.settings.title}</span>
+              <span className="hidden sm:inline">{t.title}</span>
               <span className="sm:hidden">Settings</span>
             </TabsTrigger>
             <TabsTrigger 
@@ -426,7 +426,7 @@ const Profile = () => {
               <CardHeader className="transition-all duration-300">
                 <div className="flex items-center justify-between">
                   <div>
-                    <CardTitle>{t.savedArticles.yourSaved}</CardTitle>
+                    <CardTitle>{t.yourSaved}</CardTitle>
                     <CardDescription>
                       {savedArticles.length} {savedArticles.length !== 1 ? t.articles : t.article} {t.saved}
                     </CardDescription>
@@ -439,7 +439,7 @@ const Profile = () => {
                       className="transition-all duration-300 hover:scale-105"
                     >
                       <Trash2 className="w-4 h-4 mr-2" />
-                      {t.savedArticles.clearAll}
+                      {t.clearAll}
                     </Button>
                   )}
                 </div>
@@ -447,7 +447,7 @@ const Profile = () => {
                   <div className="relative">
                     <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                     <Input
-                      placeholder={t.savedArticles.searchPlaceholder}
+                      placeholder={t.searchPlaceholder}
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
                       className="pl-10 bg-gray-800/60 border-gray-700/50 text-white"
@@ -463,8 +463,8 @@ const Profile = () => {
                 ) : filteredArticles.length === 0 ? (
                   <div className="text-center py-8 text-gray-400">
                     <BookMarked className="w-12 h-12 mx-auto mb-4 opacity-50 animate-pulse" />
-                    <p>{searchTerm ? t.savedArticles.noMatch : t.savedArticles.noSaved}</p>
-                    <p className="text-sm">{searchTerm ? t.savedArticles.tryDifferent : t.savedArticles.startSaving}</p>
+                    <p>{searchTerm ? t.noMatch : t.noSaved}</p>
+                    <p className="text-sm">{searchTerm ? t.tryDifferent : t.startSaving}</p>
                   </div>
                 ) : (
                   <div className="space-y-3">
@@ -478,7 +478,7 @@ const Profile = () => {
                         <div className="flex-1 w-full sm:w-auto">
                           <h3 className="font-medium text-sm sm:text-base break-words">{article.article_title}</h3>
                           <p className="text-xs sm:text-sm text-gray-400">
-                            {t.savedArticles.savedOn} {new Date(article.saved_at).toLocaleDateString()}
+                            {t.savedOn} {new Date(article.saved_at).toLocaleDateString()}
                           </p>
                         </div>
                         <div className="flex gap-2 w-full sm:w-auto justify-end sm:justify-start">
@@ -518,20 +518,20 @@ const Profile = () => {
           <TabsContent value="settings" className="space-y-6 animate-in fade-in-50 slide-in-from-bottom-4 duration-700">
             <Card className="bg-gray-900/80 backdrop-blur-md border-gray-800/50 shadow-2xl transition-all duration-500 hover:shadow-wikitok-red/10 hover:shadow-xl">
               <CardHeader className="transition-all duration-300">
-                <CardTitle>{t.settings.readingPreferences}</CardTitle>
+                <CardTitle>{t.readingPreferences}</CardTitle>
                 <CardDescription>
-                  {t.settings.customize} {preferencesLoading ? `(${t.loading}...)` : `(${t.settings.syncedToCloud})`}
+                  {t.customize} {preferencesLoading ? `(${t.loading}...)` : `(${t.syncedToCloud})`}
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
                 {preferencesLoading ? (
                   <div className="text-center py-8">
-                    <div className="animate-pulse">{t.settings.loadingPreferences}...</div>
+                    <div className="animate-pulse">{t.loadingPreferences}...</div>
                   </div>
                 ) : (
                   <>
                     <div className="space-y-3 animate-in fade-in-50 slide-in-from-left-4 duration-500">
-                      <label className="text-sm font-medium">{t.settings.articleFont}</label>
+                      <label className="text-sm font-medium">{t.articleFont}</label>
                       <Select 
                         value={preferences.fontFamily} 
                         onValueChange={(value) => updatePreferences({ fontFamily: value })}
@@ -550,7 +550,7 @@ const Profile = () => {
                     </div>
 
                     <div className="space-y-3 animate-in fade-in-50 slide-in-from-left-4 duration-500" style={{ animationDelay: "100ms" }}>
-                      <label className="text-sm font-medium">{t.settings.highlightColor}</label>
+                      <label className="text-sm font-medium">{t.highlightColor}</label>
                       <Select 
                         value={preferences.highlightColor} 
                         onValueChange={(value) => updatePreferences({ highlightColor: value })}
@@ -576,7 +576,7 @@ const Profile = () => {
 
                     <div className="space-y-3 animate-in fade-in-50 slide-in-from-left-4 duration-500" style={{ animationDelay: "200ms" }}>
                       <label className="text-sm font-medium">
-                        {t.settings.backgroundOpacity}: {preferences.backgroundOpacity}%
+                        {t.backgroundOpacity}: {preferences.backgroundOpacity}%
                       </label>
                       <Slider
                         value={[preferences.backgroundOpacity]}
@@ -587,12 +587,12 @@ const Profile = () => {
                         className="w-full transition-all duration-300"
                       />
                       <p className="text-xs text-gray-400">
-                        {t.settings.backgroundOpacityDesc}
+                        {t.backgroundOpacityDesc}
                       </p>
                     </div>
 
                     <div className="p-4 bg-gray-800/60 backdrop-blur-sm rounded-lg border border-gray-700/30 transition-all duration-500 hover:border-gray-600/50 animate-in fade-in-50 slide-in-from-bottom-4" style={{ animationDelay: "300ms" }}>
-                      <h4 className="text-sm font-medium mb-2">{t.settings.preview}</h4>
+                      <h4 className="text-sm font-medium mb-2">{t.preview}</h4>
                       <div 
                         className="relative p-4 rounded bg-cover bg-center overflow-hidden transition-all duration-500"
                         style={{
@@ -607,10 +607,10 @@ const Profile = () => {
                           className="relative z-10 text-white mb-4 transition-all duration-300"
                           style={{ fontFamily: preferences.fontFamily }}
                         >
-                          {t.settings.previewText}
+                          {t.previewText}
                         </p>
                         <div className="relative z-10">
-                          <p className="text-xs text-gray-300 mb-1">{t.settings.progressPreview}:</p>
+                          <p className="text-xs text-gray-300 mb-1">{t.progressPreview}:</p>
                           <div className="h-1 bg-black/20 rounded overflow-hidden">
                             <div 
                               className="h-full rounded transition-all duration-500 ease-out"
