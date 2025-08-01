@@ -88,7 +88,10 @@ const NYTNewsFeed = () => {
   }
   return <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h2 className="text-xl font-semibold text-gray-300">Latest News From NYT</h2>
+        <div className="flex items-center gap-3">
+          <img src="/lovable-uploads/4aed9b40-7438-4b4f-b7d4-bfdc475a1d28.png" alt="NYT" className="w-6 h-6" />
+          <h2 className="text-xl font-semibold text-gray-300">Latest News From NYT</h2>
+        </div>
         <Button variant="ghost" size="sm" onClick={fetchNews} className="text-gray-400 hover:text-white">
           <Clock className="w-4 h-4 mr-1" />
           Refresh
@@ -120,12 +123,12 @@ const NYTNewsFeed = () => {
                           <Calendar className="w-3 h-3" />
                           {formatDate(article.published_date)}
                         </span>
-                        {article.section && <span className="px-2 py-1 bg-wikitok-red/20 text-wikitok-red rounded text-xs font-medium">
+                         {article.section && <span className="px-2 py-1 bg-tictok-red/20 text-tictok-red rounded text-xs font-medium">
                             {article.section}
                           </span>}
                       </div>
                       
-                      <Button variant="ghost" size="sm" asChild className="text-wikitok-red hover:text-wikitok-red/80 hover:bg-wikitok-red/10">
+                      <Button variant="ghost" size="sm" asChild className="text-tictok-red hover:text-tictok-red/80 hover:bg-tictok-red/10">
                         <a href={article.url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-xs">
                           Read on NYT <ExternalLink className="w-3 h-3" />
                         </a>

@@ -66,9 +66,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     // Store remember me preference in localStorage
     if (rememberMe && !error) {
-      localStorage.setItem('wikitok_remember_me', 'true');
+      localStorage.setItem('ticdia_remember_me', 'true');
     } else {
-      localStorage.removeItem('wikitok_remember_me');
+      localStorage.removeItem('ticdia_remember_me');
     }
 
     return { data, error };

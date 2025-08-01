@@ -20,7 +20,7 @@ export const LanguageProvider: React.FC<LanguageProviderProps> = ({ children }) 
 
   useEffect(() => {
     // Load saved language preference from localStorage
-    const savedLanguageCode = localStorage.getItem('wikitok-language');
+    const savedLanguageCode = localStorage.getItem('ticdia-language');
     if (savedLanguageCode) {
       const foundLanguage = SUPPORTED_LANGUAGES.find(lang => lang.code === savedLanguageCode);
       if (foundLanguage) {
@@ -32,7 +32,7 @@ export const LanguageProvider: React.FC<LanguageProviderProps> = ({ children }) 
   const setLanguage = (language: Language) => {
     setIsLoading(true);
     setCurrentLanguage(language);
-    localStorage.setItem('wikitok-language', language.code);
+    localStorage.setItem('ticdia-language', language.code);
     
     // Set document direction for RTL languages
     document.documentElement.dir = language.rtl ? 'rtl' : 'ltr';

@@ -73,18 +73,39 @@ const NewsFeed = () => {
       }
       
       const data = await response.json();
-      setNytArticles(data.results || []);
+      
+      // Remove duplicates and set articles
+      const articles = data.results || [];
+      const uniqueArticles = articles.filter((article: NYTArticle, index: number, self: NYTArticle[]) => 
+        index === self.findIndex(a => a.url === article.url)
+      );
+      setNytArticles(uniqueArticles);
     } catch (error) {
       console.error('Error fetching NYT news:', error);
+      toast({
+        title: t('error'),
+        description: t('failedToLoadNews'),
+        variant: "destructive"
+      });
     }
   };
 
   const fetchNewsApiNews = async () => {
     try {
       const articles = await fetchNewsApiHeadlines();
-      setNewsApiArticles(articles);
+      
+      // Remove duplicates and set articles
+      const uniqueArticles = articles.filter((article: NewsApiArticle, index: number, self: NewsApiArticle[]) => 
+        index === self.findIndex(a => a.url === article.url)
+      );
+      setNewsApiArticles(uniqueArticles);
     } catch (error) {
       console.error('Error fetching NewsAPI headlines:', error);
+      toast({
+        title: t('error'),
+        description: t('failedToLoadNews'),
+        variant: "destructive"
+      });
     }
   };
 
@@ -115,8 +136,13 @@ const NewsFeed = () => {
   };
 
   const renderNYTArticles = () => {
-    return nytArticles.map((article, index) => (
-      <Card key={`nyt-${article.url}-${index}`} className="bg-gray-900/50 border-gray-800 hover:bg-gray-800/50 transition-colors group">
+    // Remove duplicates based on URL
+    const uniqueArticles = nytArticles.filter((article, index, self) => 
+      index === self.findIndex(a => a.url === article.url)
+    );
+    
+    return uniqueArticles.map((article, index) => (
+      <Card key={`nyt-${article.url}`} className="bg-gray-900/50 border-gray-800 hover:bg-gray-800/50 transition-colors group">
         <CardContent className="p-4 sm:p-6">
           <div className="flex flex-col sm:flex-row gap-4">
             {getNYTImageUrl(article) && (
@@ -178,8 +204,13 @@ const NewsFeed = () => {
   };
 
   const renderNewsApiArticles = () => {
-    return newsApiArticles.map((article, index) => (
-      <Card key={`newsapi-${article.url}-${index}`} className="bg-gray-900/50 border-gray-800 hover:bg-gray-800/50 transition-colors group">
+    // Remove duplicates based on URL
+    const uniqueArticles = newsApiArticles.filter((article, index, self) => 
+      index === self.findIndex(a => a.url === article.url)
+    );
+    
+    return uniqueArticles.map((article, index) => (
+      <Card key={`newsapi-${article.url}`} className="bg-gray-900/50 border-gray-800 hover:bg-gray-800/50 transition-colors group">
         <CardContent className="p-4 sm:p-6">
           <div className="flex flex-col sm:flex-row gap-4">
             {article.urlToImage && (

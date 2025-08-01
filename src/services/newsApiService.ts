@@ -22,7 +22,12 @@ const NEWS_API_KEY = "ec6c13feca684e75bb63b86dfac170b7";
 export const fetchNewsApiHeadlines = async (): Promise<NewsApiArticle[]> => {
   try {
     const response = await fetch(
-      `https://newsapi.org/v2/top-headlines?country=us&apiKey=${NEWS_API_KEY}&pageSize=8`
+      `https://newsapi.org/v2/top-headlines?country=us&pageSize=8`,
+      {
+        headers: {
+          'X-Api-Key': NEWS_API_KEY
+        }
+      }
     );
     
     if (!response.ok) {
