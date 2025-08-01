@@ -296,7 +296,10 @@ const NewsFeed = () => {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between gap-4">
-        <h2 className="text-xl font-semibold text-gray-300">{t('latestNews')}</h2>
+        <h2 className="text-xl font-semibold text-gray-300 flex items-center gap-2">
+          <Newspaper className="w-5 h-5" />
+          {t('latestNews')}
+        </h2>
         
         <div className="flex items-center gap-3">
           <Select value={selectedSource} onValueChange={(value: NewsSource) => setSelectedSource(value)}>
