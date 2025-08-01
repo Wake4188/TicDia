@@ -297,7 +297,7 @@ const NewsFeed = () => {
     <div className="space-y-4">
       <div className="flex items-center justify-between gap-4">
         <h2 className="text-xl font-semibold text-gray-300 flex items-center gap-2">
-          <Newspaper className="w-5 h-5" />
+          <img src="/lovable-uploads/3a2edeb7-cd16-4493-a86a-5667a46f7870.png" alt="News" className="w-5 h-5" />
           {t('latestNews')}
         </h2>
         
