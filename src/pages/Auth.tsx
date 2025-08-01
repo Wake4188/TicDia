@@ -125,7 +125,7 @@ const Auth = () => {
         } else {
           toast({
             title: "Account Created!",
-            description: "Please check your email to verify your account."
+            description: "You can now sign in with your credentials."
           });
           setIsLogin(true);
           setPassword("");
@@ -167,6 +167,11 @@ const Auth = () => {
               <Label htmlFor="password" className="text-white">
                 Password
               </Label>
+              {!isLogin && (
+                <p className="text-xs text-white/60 mb-2">
+                  Must be 8+ characters with uppercase, lowercase, number, and special character
+                </p>
+              )}
               <div className="relative">
                 <Input id="password" type={showPassword ? "text" : "password"} value={password} onChange={e => setPassword(e.target.value)} required maxLength={128} className="bg-white/5 border-white/20 text-white placeholder:text-white/40 pr-10" placeholder="Enter your password" />
                 <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 transform -translate-y-1/2 text-white/40 hover:text-white/60">
