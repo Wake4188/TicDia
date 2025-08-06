@@ -9,6 +9,8 @@ import { getRandomArticles, searchArticles } from "../services/wikipediaService"
 import { useToast } from "@/components/ui/use-toast";
 import { useLanguage } from "../contexts/LanguageContext";
 import { getTranslations } from "../services/translations";
+import { useAnalyticsTracking } from "../hooks/useAnalyticsTracking";
+import { AnalyticsCheck } from "../components/AnalyticsCheck";
 
 const Index = () => {
   const { toast } = useToast();
@@ -19,6 +21,7 @@ const Index = () => {
   const t = getTranslations(currentLanguage);
   const searchQuery = searchParams.get("q");
   const [currentArticle, setCurrentArticle] = useState(null);
+  const { trackArticleView } = useAnalyticsTracking();
 
   const { data: articles, isLoading, error } = useQuery({
     queryKey: ["articles", searchQuery, currentLanguage.code],
@@ -65,9 +68,10 @@ const Index = () => {
 
   return (
     <div className="h-screen w-screen relative overflow-hidden bg-wikitok-dark">
+      <AnalyticsCheck />
       <div className="flex h-full">
         <LeftSidebar article={currentDisplayArticle} onTagClick={handleTagClick} />
-        <ArticleViewer articles={articles} onArticleChange={setCurrentArticle} />
+        <ArticleViewer articles={articles} onArticleChange={setCurrentArticle} onArticleView={trackArticleView} />
         <RightSidebar article={currentDisplayArticle} />
       </div>
     </div>

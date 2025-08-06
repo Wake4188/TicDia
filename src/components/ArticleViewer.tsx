@@ -8,7 +8,7 @@ import { useArticleManagement } from "../hooks/useArticleManagement";
 import ArticleItem from "./ArticleItem";
 import ArticleLoadingState from "./ArticleLoadingState";
 
-const ArticleViewer = ({ articles: initialArticles, onArticleChange }) => {
+const ArticleViewer = ({ articles: initialArticles, onArticleChange, onArticleView }) => {
   const userPreferences = useUserPreferences();
   const isMobile = useMobileDetection();
   
@@ -26,7 +26,14 @@ const ArticleViewer = ({ articles: initialArticles, onArticleChange }) => {
   const containerRef = useArticleIntersection({
     articles,
     onVisibilityChange: () => {},
-    onCurrentIndexChange: handleCurrentIndexChange,
+    onCurrentIndexChange: (index) => {
+      handleCurrentIndexChange(index);
+      // Track article view when it becomes current
+      const article = articles[index];
+      if (article && onArticleView) {
+        onArticleView(article.tags || []);
+      }
+    },
     onLoadMore: loadMoreArticles
   });
 
