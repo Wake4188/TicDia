@@ -2,6 +2,7 @@
 import { motion } from "framer-motion";
 import { Progress } from "./ui/progress";
 import { UserPreferences } from "@/services/userPreferencesService";
+import AudioPlayer from "./AudioPlayer";
 
 interface ArticleItemProps {
   article: any;
@@ -56,6 +57,15 @@ const ArticleItem = ({
                 {contentToShow}
               </p>
             </div>
+            
+            {/* Audio Player */}
+            {isCurrent && (
+              <div className="mt-4">
+                <AudioPlayer 
+                  text={article.content || ''}
+                />
+              </div>
+            )}
           </div>
         </div>
         <div className="flex items-center space-x-2 text-xs sm:text-sm text-gray-300 flex-shrink-0 mt-4">

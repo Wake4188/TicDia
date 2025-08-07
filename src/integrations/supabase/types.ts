@@ -14,6 +14,36 @@ export type Database = {
   }
   public: {
     Tables: {
+      daily_challenges: {
+        Row: {
+          category: string | null
+          challenge_date: string
+          challenge_description: string
+          challenge_target: number
+          challenge_type: string
+          created_at: string
+          id: string
+        }
+        Insert: {
+          category?: string | null
+          challenge_date?: string
+          challenge_description: string
+          challenge_target: number
+          challenge_type: string
+          created_at?: string
+          id?: string
+        }
+        Update: {
+          category?: string | null
+          challenge_date?: string
+          challenge_description?: string
+          challenge_target?: number
+          challenge_type?: string
+          created_at?: string
+          id?: string
+        }
+        Relationships: []
+      }
       saved_articles: {
         Row: {
           article_id: string
@@ -68,9 +98,40 @@ export type Database = {
         }
         Relationships: []
       }
+      user_achievements: {
+        Row: {
+          achievement_description: string
+          achievement_name: string
+          achievement_type: string
+          earned_at: string
+          id: string
+          metadata: Json | null
+          user_id: string
+        }
+        Insert: {
+          achievement_description: string
+          achievement_name: string
+          achievement_type: string
+          earned_at?: string
+          id?: string
+          metadata?: Json | null
+          user_id: string
+        }
+        Update: {
+          achievement_description?: string
+          achievement_name?: string
+          achievement_type?: string
+          earned_at?: string
+          id?: string
+          metadata?: Json | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_analytics: {
         Row: {
           articles_viewed: number
+          audio_articles_listened: number | null
           created_at: string
           current_scroll_streak: number
           daily_activity: Json | null
@@ -79,12 +140,14 @@ export type Database = {
           id: string
           last_activity_date: string
           longest_scroll_streak: number
+          total_audio_time: number | null
           total_scroll_distance: number
           updated_at: string
           user_id: string
         }
         Insert: {
           articles_viewed?: number
+          audio_articles_listened?: number | null
           created_at?: string
           current_scroll_streak?: number
           daily_activity?: Json | null
@@ -93,12 +156,14 @@ export type Database = {
           id?: string
           last_activity_date?: string
           longest_scroll_streak?: number
+          total_audio_time?: number | null
           total_scroll_distance?: number
           updated_at?: string
           user_id: string
         }
         Update: {
           articles_viewed?: number
+          audio_articles_listened?: number | null
           created_at?: string
           current_scroll_streak?: number
           daily_activity?: Json | null
@@ -107,11 +172,50 @@ export type Database = {
           id?: string
           last_activity_date?: string
           longest_scroll_streak?: number
+          total_audio_time?: number | null
           total_scroll_distance?: number
           updated_at?: string
           user_id?: string
         }
         Relationships: []
+      }
+      user_challenge_progress: {
+        Row: {
+          challenge_id: string | null
+          completed: boolean
+          completed_at: string | null
+          created_at: string
+          id: string
+          progress: number
+          user_id: string
+        }
+        Insert: {
+          challenge_id?: string | null
+          completed?: boolean
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          progress?: number
+          user_id: string
+        }
+        Update: {
+          challenge_id?: string | null
+          completed?: boolean
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          progress?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_challenge_progress_challenge_id_fkey"
+            columns: ["challenge_id"]
+            isOneToOne: false
+            referencedRelation: "daily_challenges"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_preferences: {
         Row: {

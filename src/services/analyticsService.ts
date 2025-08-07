@@ -11,6 +11,8 @@ export interface UserAnalytics {
   last_activity_date: string;
   favorite_topics: any;
   daily_activity: any;
+  audio_articles_listened: number;
+  total_audio_time: number;
   created_at?: string;
   updated_at?: string;
 }
