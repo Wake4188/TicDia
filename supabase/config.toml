@@ -1,1 +1,7 @@
 project_id = "rtuxaekhfwvpwmvmdaul"
+
+[functions.text-to-speech]
+verify_jwt = false
+
+[functions.daily-article-selection]
+verify_jwt = false
