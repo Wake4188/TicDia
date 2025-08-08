@@ -41,7 +41,7 @@ const ArticleItem = ({
         transition={{ duration: 0.5, ease: "easeOut" }}
         className="relative z-10 text-white p-4 sm:p-8 max-w-3xl mx-auto h-full flex flex-col justify-center"
       >
-        <div className={`${isMobile ? 'bg-black/40 backdrop-blur-sm rounded-lg p-4 max-h-[70vh] overflow-y-auto' : 'text-center'}`}>
+        <div className={`${isMobile ? 'bg-black/40 backdrop-blur-sm rounded-lg p-4 max-h-[70vh] overflow-y-auto' : 'text-center max-h-[80vh] overflow-y-auto'}`}>
           <div className="space-y-4">
             <h1 
               className="text-2xl sm:text-4xl font-bold" 
@@ -63,6 +63,7 @@ const ArticleItem = ({
               <div className="mt-4">
                 <AudioPlayer 
                   text={article.content || ''}
+                  autoPlay={true}
                 />
               </div>
             )}

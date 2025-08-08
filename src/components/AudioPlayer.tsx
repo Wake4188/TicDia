@@ -1,24 +1,34 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Play, Pause, Volume2, VolumeX } from "lucide-react";
 import { Slider } from "@/components/ui/slider";
 import { convertTextToSpeech, playAudioFromBase64 } from "@/services/textToSpeechService";
 import { useToast } from "@/components/ui/use-toast";
 import { useAnalyticsTracking } from "@/hooks/useAnalyticsTracking";
+import { useUserPreferences } from "@/hooks/useUserPreferences";
 
 interface AudioPlayerProps {
   text: string;
   onAudioStart?: () => void;
   onAudioEnd?: () => void;
+  autoPlay?: boolean;
 }
 
-const AudioPlayer = ({ text, onAudioStart, onAudioEnd }: AudioPlayerProps) => {
+const AudioPlayer = ({ text, onAudioStart, onAudioEnd, autoPlay = false }: AudioPlayerProps) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
   const [volume, setVolume] = useState([1]);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const { toast } = useToast();
+  const { userPreferences, updatePreferences } = useUserPreferences();
+
+  // Auto-play effect
+  useEffect(() => {
+    if (autoPlay && userPreferences?.tts_autoplay && text) {
+      handlePlayPause();
+    }
+  }, [autoPlay, userPreferences?.tts_autoplay, text]);
 
   const handlePlayPause = async () => {
     if (isPlaying) {
@@ -31,6 +41,11 @@ const AudioPlayer = ({ text, onAudioStart, onAudioEnd }: AudioPlayerProps) => {
     try {
       setIsLoading(true);
       const audioBase64 = await convertTextToSpeech(text);
+      
+      // Enable autoplay for future articles if user manually starts TTS
+      if (!userPreferences?.tts_autoplay) {
+        await updatePreferences({ tts_autoplay: true });
+      }
       
       onAudioStart?.();
       setIsPlaying(true);
@@ -68,20 +83,20 @@ const AudioPlayer = ({ text, onAudioStart, onAudioEnd }: AudioPlayerProps) => {
   };
 
   return (
-    <div className="flex items-center gap-3 p-3 bg-background/80 backdrop-blur-sm rounded-lg border border-border/50">
+    <div className="flex items-center justify-center gap-2 p-2 bg-background/60 backdrop-blur-sm rounded-lg border border-border/30 max-w-[280px] mx-auto">
       <Button
         variant="ghost"
         size="sm"
         onClick={handlePlayPause}
         disabled={isLoading}
-        className="h-8 w-8 p-0"
+        className="h-7 w-7 p-0"
       >
         {isLoading ? (
-          <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+          <div className="h-3 w-3 animate-spin rounded-full border-2 border-primary border-t-transparent" />
         ) : isPlaying ? (
-          <Pause className="h-4 w-4" />
+          <Pause className="h-3 w-3" />
         ) : (
-          <Play className="h-4 w-4" />
+          <Play className="h-3 w-3" />
         )}
       </Button>
 
@@ -89,22 +104,22 @@ const AudioPlayer = ({ text, onAudioStart, onAudioEnd }: AudioPlayerProps) => {
         variant="ghost"
         size="sm"
         onClick={toggleMute}
-        className="h-8 w-8 p-0"
+        className="h-7 w-7 p-0"
       >
-        {isMuted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
+        {isMuted ? <VolumeX className="h-3 w-3" /> : <Volume2 className="h-3 w-3" />}
       </Button>
 
-      <div className="flex items-center gap-2 min-w-[80px]">
+      <div className="flex items-center gap-1 min-w-[60px]">
         <Slider
           value={volume}
           onValueChange={handleVolumeChange}
           max={1}
           step={0.1}
-          className="flex-1"
+          className="flex-1 h-1"
         />
       </div>
 
-      <span className="text-xs text-muted-foreground">
+      <span className="text-xs text-muted-foreground/80">
         Listen
       </span>
     </div>

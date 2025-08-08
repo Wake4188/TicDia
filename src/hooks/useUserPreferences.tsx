@@ -1,11 +1,18 @@
 
 import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
-import { loadUserPreferences, getDefaultPreferences, UserPreferences } from "@/services/userPreferencesService";
+import { loadUserPreferences, getDefaultPreferences, updateUserPreferences, UserPreferences } from "@/services/userPreferencesService";
 
 export const useUserPreferences = () => {
   const { user } = useAuth();
   const [userPreferences, setUserPreferences] = useState<UserPreferences>(getDefaultPreferences());
+
+  const updatePreferences = async (updates: Partial<UserPreferences>) => {
+    if (user) {
+      await updateUserPreferences(user.id, updates);
+      setUserPreferences(prev => ({ ...prev, ...updates }));
+    }
+  };
 
   useEffect(() => {
     const loadPrefs = async () => {
@@ -53,5 +60,5 @@ export const useUserPreferences = () => {
     loadPrefs();
   }, [user]);
 
-  return userPreferences;
+  return { userPreferences, updatePreferences };
 };

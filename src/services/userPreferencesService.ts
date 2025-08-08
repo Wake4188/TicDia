@@ -6,6 +6,7 @@ export interface UserPreferences {
   fontFamily: string;
   backgroundOpacity: number;
   highlightColor: string;
+  tts_autoplay?: boolean;
 }
 
 export const loadUserPreferences = async (userId: string): Promise<UserPreferences> => {
@@ -33,6 +34,7 @@ export const loadUserPreferences = async (userId: string): Promise<UserPreferenc
       fontFamily: validateFontFamily(data.font_family),
       backgroundOpacity: validateBackgroundOpacity(data.background_opacity),
       highlightColor: validateHexColor(data.highlight_color),
+      tts_autoplay: data.tts_autoplay || false,
     };
   } catch (error) {
     console.error('Error loading user preferences:', sanitizeErrorMessage(error));
@@ -56,6 +58,7 @@ export const saveUserPreferences = async (userId: string, preferences: UserPrefe
         font_family: validatedPreferences.fontFamily,
         background_opacity: validatedPreferences.backgroundOpacity,
         highlight_color: validatedPreferences.highlightColor,
+        tts_autoplay: preferences.tts_autoplay || false,
         updated_at: new Date().toISOString(),
       }, {
         onConflict: 'user_id'
@@ -75,4 +78,16 @@ export const getDefaultPreferences = (): UserPreferences => ({
   fontFamily: 'Inter',
   backgroundOpacity: 70,
   highlightColor: '#FE2C55',
+  tts_autoplay: false,
 });
+
+export const updateUserPreferences = async (userId: string, updates: Partial<UserPreferences>): Promise<void> => {
+  try {
+    const currentPrefs = await loadUserPreferences(userId);
+    const updatedPrefs = { ...currentPrefs, ...updates };
+    await saveUserPreferences(userId, updatedPrefs);
+  } catch (error) {
+    console.error('Error updating user preferences:', sanitizeErrorMessage(error));
+    throw new Error('Failed to update preferences');
+  }
+};

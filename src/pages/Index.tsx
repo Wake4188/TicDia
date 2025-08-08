@@ -5,6 +5,7 @@ import { useState } from "react";
 import ArticleViewer from "../components/ArticleViewer";
 import RightSidebar from "../components/RightSidebar";
 import LeftSidebar from "../components/LeftSidebar";
+import Navigation from "../components/Navigation";
 import { getRandomArticles, searchArticles } from "../services/wikipediaService";
 import { useToast } from "@/components/ui/use-toast";
 import { useLanguage } from "../contexts/LanguageContext";
@@ -75,6 +76,7 @@ const Index = () => {
       <AnalyticsCheck />
       <BadgeDisplay />
       <DailyChallenges />
+      <Navigation currentArticle={currentDisplayArticle} />
       <div className="flex h-full">
         <LeftSidebar article={currentDisplayArticle} onTagClick={handleTagClick} />
         <ArticleViewer articles={articles} onArticleChange={setCurrentArticle} onArticleView={trackArticleView} />

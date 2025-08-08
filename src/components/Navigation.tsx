@@ -6,7 +6,11 @@ import NavigationDesktop from "./NavigationDesktop";
 import MobileMenu from "./MobileMenu";
 import SearchModal from "./SearchModal";
 
-const Navigation = () => {
+interface NavigationProps {
+  currentArticle?: any;
+}
+
+const Navigation = ({ currentArticle }: NavigationProps) => {
   const location = useLocation();
   const isMobile = useMobileDetection();
   const [searchValue, setSearchValue] = useState("");
@@ -28,7 +32,7 @@ const Navigation = () => {
   return (
     <>
       {isMobile ? (
-        <MobileMenu {...navigationProps} />
+        <MobileMenu {...navigationProps} currentArticle={currentArticle} />
       ) : (
         <NavigationDesktop {...navigationProps} />
       )}

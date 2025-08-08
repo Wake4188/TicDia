@@ -6,13 +6,17 @@ import { useLanguage } from '../contexts/LanguageContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { getTranslations, formatDate } from '../services/translations';
 import LanguageSelector from './LanguageSelector';
+import VoteButton from './VoteButton';
+
 interface MobileMenuProps {
   onSearchClick: () => void;
   searchValue: string;
+  currentArticle?: any;
 }
 const MobileMenu: React.FC<MobileMenuProps> = ({
   onSearchClick,
-  searchValue
+  searchValue,
+  currentArticle
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const navigate = useNavigate();
@@ -75,6 +79,19 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
                   </div> : item.icon && <item.icon className="w-5 h-5" />}
                 <span className="text-left flex-1">{item.label}</span>
               </button>)}
+
+            {/* Vote Button for Current Article */}
+            {currentArticle && (
+              <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
+                <div className={`text-sm ${isDark ? 'text-white' : 'text-gray-900'} opacity-60 mb-2`}>Vote on Article</div>
+                <VoteButton 
+                  articleId={currentArticle.id?.toString() || currentArticle.title}
+                  articleTitle={currentArticle.title}
+                  articleUrl={currentArticle.url}
+                  compact={false}
+                />
+              </div>
+            )}
 
             <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
               <div className={`text-sm ${isDark ? 'text-white' : 'text-gray-900'} opacity-60 mb-2`}>Language</div>

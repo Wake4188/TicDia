@@ -14,6 +14,39 @@ export type Database = {
   }
   public: {
     Tables: {
+      article_votes: {
+        Row: {
+          article_id: string
+          article_title: string
+          article_url: string | null
+          created_at: string
+          id: string
+          user_id: string
+          vote_type: string
+          voted_at: string
+        }
+        Insert: {
+          article_id: string
+          article_title: string
+          article_url?: string | null
+          created_at?: string
+          id?: string
+          user_id: string
+          vote_type?: string
+          voted_at?: string
+        }
+        Update: {
+          article_id?: string
+          article_title?: string
+          article_url?: string | null
+          created_at?: string
+          id?: string
+          user_id?: string
+          vote_type?: string
+          voted_at?: string
+        }
+        Relationships: []
+      }
       daily_challenges: {
         Row: {
           category: string | null
@@ -224,6 +257,7 @@ export type Database = {
           font_family: string
           highlight_color: string
           id: string
+          tts_autoplay: boolean
           updated_at: string
           user_id: string
         }
@@ -233,6 +267,7 @@ export type Database = {
           font_family?: string
           highlight_color?: string
           id?: string
+          tts_autoplay?: boolean
           updated_at?: string
           user_id: string
         }
@@ -242,6 +277,7 @@ export type Database = {
           font_family?: string
           highlight_color?: string
           id?: string
+          tts_autoplay?: boolean
           updated_at?: string
           user_id?: string
         }

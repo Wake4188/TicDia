@@ -2,6 +2,7 @@
 import { Hash } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useMobileDetection } from "../hooks/useMobileDetection";
+import VoteButton from "./VoteButton";
 
 const LeftSidebar = ({ article, onTagClick }) => {
   const navigate = useNavigate();
@@ -40,6 +41,15 @@ const LeftSidebar = ({ article, onTagClick }) => {
           </div>
         ))}
       </div>
+      
+      {/* Vote Button - Desktop only */}
+      {!isMobile && (
+        <VoteButton 
+          articleId={article.id?.toString() || article.title}
+          articleTitle={article.title}
+          articleUrl={article.url}
+        />
+      )}
     </div>
   );
 };

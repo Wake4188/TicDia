@@ -53,7 +53,7 @@ const ArticleViewer = ({ articles: initialArticles, onArticleChange, onArticleVi
           isCurrent={currentIndex === index}
           displayedText={currentIndex === index ? displayedText : ''}
           progress={currentIndex === index ? progress : 0}
-          userPreferences={userPreferences}
+          userPreferences={userPreferences.userPreferences}
           isMobile={isMobile}
         />
       ))}
