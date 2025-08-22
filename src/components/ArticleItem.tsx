@@ -69,7 +69,7 @@ const ArticleItem = ({
             )}
           </div>
         </div>
-        <div className="flex items-center space-x-2 text-xs sm:text-sm text-gray-300 flex-shrink-0 mt-4">
+        <div className="flex items-center space-x-2 text-xs sm:text-sm text-gray-300 flex-shrink-0 mt-4 ml-6">
           <span>{article.readTime} min read</span>
           <span>•</span>
           <span>{article.views.toLocaleString()} views</span>
