@@ -2,9 +2,8 @@ import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Play, Pause, Volume2, VolumeX } from "lucide-react";
 import { Slider } from "@/components/ui/slider";
-import { convertTextToSpeech, playAudioFromBase64 } from "@/services/textToSpeechService";
+import { fetchTTSBlob, createAudioFromBlob, revokeAudioObjectUrl } from "@/services/textToSpeechService";
 import { useToast } from "@/components/ui/use-toast";
-import { useAnalyticsTracking } from "@/hooks/useAnalyticsTracking";
 import { useUserPreferences } from "@/hooks/useUserPreferences";
 
 interface AudioPlayerProps {
@@ -23,11 +22,12 @@ const AudioPlayer = ({ text, onAudioStart, onAudioEnd, autoPlay = false }: Audio
   const { toast } = useToast();
   const { userPreferences, updatePreferences } = useUserPreferences();
 
-  // Auto-play effect
+  // Auto-play effect (after first manual play preference)
   useEffect(() => {
     if (autoPlay && userPreferences?.tts_autoplay && text) {
       handlePlayPause();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [autoPlay, userPreferences?.tts_autoplay, text]);
 
   const handlePlayPause = async () => {
@@ -40,20 +40,46 @@ const AudioPlayer = ({ text, onAudioStart, onAudioEnd, autoPlay = false }: Audio
 
     try {
       setIsLoading(true);
-      const audioBase64 = await convertTextToSpeech(text);
-      
+
       // Enable autoplay for future articles if user manually starts TTS
       if (!userPreferences?.tts_autoplay) {
         await updatePreferences({ tts_autoplay: true });
       }
-      
+
       onAudioStart?.();
+
+      // Cleanup existing URL if any
+      if (audioRef.current) {
+        revokeAudioObjectUrl(audioRef.current);
+      }
+
+      const blob = await fetchTTSBlob(text);
+      const audio = createAudioFromBlob(blob);
+      audioRef.current = audio;
+
+      // Apply current controls
+      audio.volume = volume[0];
+      audio.muted = isMuted;
+
+      audio.onended = () => {
+        setIsPlaying(false);
+        onAudioEnd?.();
+        revokeAudioObjectUrl(audioRef.current);
+      };
+
+      audio.onerror = () => {
+        revokeAudioObjectUrl(audioRef.current);
+        setIsPlaying(false);
+        onAudioEnd?.();
+        toast({
+          title: "Audio Error",
+          description: "Failed to play audio. Please try again.",
+          variant: "destructive",
+        });
+      };
+
       setIsPlaying(true);
-      
-      await playAudioFromBase64(audioBase64);
-      
-      setIsPlaying(false);
-      onAudioEnd?.();
+      await audio.play();
     } catch (error) {
       console.error('Audio playback failed:', error);
       toast({
@@ -69,9 +95,10 @@ const AudioPlayer = ({ text, onAudioStart, onAudioEnd, autoPlay = false }: Audio
   };
 
   const toggleMute = () => {
-    setIsMuted(!isMuted);
+    const newMuted = !isMuted;
+    setIsMuted(newMuted);
     if (audioRef.current) {
-      audioRef.current.muted = !isMuted;
+      audioRef.current.muted = newMuted;
     }
   };
 
