@@ -63,7 +63,6 @@ const ArticleItem = ({
               <div className="mt-4">
                 <AudioPlayer 
                   text={article.content || ''}
-                  autoPlay={true}
                 />
               </div>
             )}

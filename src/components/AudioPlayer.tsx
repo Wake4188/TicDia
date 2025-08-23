@@ -22,13 +22,16 @@ const AudioPlayer = ({ text, onAudioStart, onAudioEnd, autoPlay = false }: Audio
   const { toast } = useToast();
   const { userPreferences, updatePreferences } = useUserPreferences();
 
-  // Auto-play effect (after first manual play preference)
+  // Stop audio when text changes (article switch)
   useEffect(() => {
-    if (autoPlay && userPreferences?.tts_autoplay && text) {
-      handlePlayPause();
+    if (audioRef.current && isPlaying) {
+      audioRef.current.pause();
+      setIsPlaying(false);
+      onAudioEnd?.();
+      revokeAudioObjectUrl(audioRef.current);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [autoPlay, userPreferences?.tts_autoplay, text]);
+  }, [text]);
 
   const handlePlayPause = async () => {
     if (isPlaying) {
@@ -41,10 +44,6 @@ const AudioPlayer = ({ text, onAudioStart, onAudioEnd, autoPlay = false }: Audio
     try {
       setIsLoading(true);
 
-      // Enable autoplay for future articles if user manually starts TTS
-      if (!userPreferences?.tts_autoplay) {
-        await updatePreferences({ tts_autoplay: true });
-      }
 
       onAudioStart?.();
 
