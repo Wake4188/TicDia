@@ -5,37 +5,41 @@ export interface TextToSpeechOptions {
   speed?: number; // not used in streaming version yet
 }
 
-// Fetch a streaming audio Blob from Supabase Edge Function
+// Fetch a streaming audio Blob via Vercel rewrite to Supabase Edge Function
 export const fetchTTSBlob = async (
   text: string,
   options: TextToSpeechOptions = {}
 ): Promise<Blob> => {
   try {
     const res = await fetch(
-      'https://rtuxaekhfwvpwmvmdaul.supabase.co/functions/v1/tts-stream',
+      "/api/tts",
       {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
-          // Public anon key, safe to send to Supabase Edge Functions
-          'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ0dXhhZWtoZnd2cHdtdm1kYXVsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDk5MTc1NzMsImV4cCI6MjA2NTQ5MzU3M30.C6vl_5xJ69JuRIwSyK8H_uvdSU6CPEm4lYDkdhGn7lw',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({ text, voiceId: options.voice }),
       }
     );
 
     if (!res.ok) {
-      let message = 'TTS request failed';
+      let message = "TTS request failed";
       try {
-        const err = await res.json();
-        message = err?.error || message;
+        const contentType = res.headers.get("Content-Type") || "";
+        if (contentType.includes("application/json")) {
+          const err = await res.json();
+          message = err?.error || message;
+        } else {
+          const txt = await res.text();
+          message = txt || message;
+        }
       } catch {}
       throw new Error(message);
     }
 
     return await res.blob();
   } catch (error) {
-    console.error('TTS fetch failed:', error);
+    console.error("TTS fetch failed:", error);
     throw error;
   }
 };

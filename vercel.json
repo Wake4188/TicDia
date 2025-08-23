@@ -1,6 +1,9 @@
-
 {
   "rewrites": [
+    {
+      "source": "/api/tts",
+      "destination": "https://rtuxaekhfwvpwmvmdaul.functions.supabase.co/tts-stream"
+    },
     {
       "source": "/(.*)",
       "destination": "/index.html"
