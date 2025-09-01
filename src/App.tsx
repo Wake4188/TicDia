@@ -5,7 +5,6 @@ import { AuthProvider } from "./contexts/AuthContext";
 import { LanguageProvider } from "./contexts/LanguageContext";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { Toaster } from "@/components/ui/toaster";
-import Navigation from "./components/Navigation";
 import Index from "./pages/Index";
 import Discover from "./pages/Discover";
 import Auth from "./pages/Auth";
@@ -31,7 +30,6 @@ function App() {
           <AuthProvider>
             <Router>
               <div className="min-h-screen bg-black">
-                <Navigation />
                 <Routes>
                   <Route path="/" element={<Index />} />
                   <Route path="/discover" element={<Discover />} />
