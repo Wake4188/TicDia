@@ -4,7 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ExternalLink, Calendar, Clock, Newspaper } from "lucide-react";
-import { useToast } from "@/components/ui/use-toast";
+
 import { fetchNewsApiHeadlines, NewsApiArticle } from "@/services/newsApiService";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getTranslation } from "@/services/translations";
@@ -27,14 +27,24 @@ interface NYTArticle {
   section: string;
 }
 
-type NewsSource = "nyt" | "newsapi";
+type NewsSource = "nyt" | "newsapi" | "franceinfo" | "bbc";
+
+interface RSSArticle {
+  title: string;
+  description: string;
+  link: string;
+  pubDate: string;
+  image?: string;
+  sourceName: string;
+}
 
 const NewsFeed = () => {
   const [nytArticles, setNytArticles] = useState<NYTArticle[]>([]);
   const [newsApiArticles, setNewsApiArticles] = useState<NewsApiArticle[]>([]);
+  const [franceInfoArticles, setFranceInfoArticles] = useState<RSSArticle[]>([]);
+  const [bbcArticles, setBbcArticles] = useState<RSSArticle[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedSource, setSelectedSource] = useState<NewsSource>("nyt");
-  const { toast } = useToast();
   const { currentLanguage } = useLanguage();
 
   const t = (key: string, params?: Record<string, string | number>) => 
@@ -49,14 +59,14 @@ const NewsFeed = () => {
   const fetchAllNews = async () => {
     try {
       setLoading(true);
-      await Promise.all([fetchNYTNews(), fetchNewsApiNews()]);
+      await Promise.all([
+        fetchNYTNews(),
+        fetchNewsApiNews(),
+        fetchFranceInfoRSS(),
+        fetchBBCRSS(),
+      ]);
     } catch (error) {
       console.error('Error fetching news:', error);
-      toast({
-        title: t('error'),
-        description: t('failedToLoad'),
-        variant: "destructive",
-      });
     } finally {
       setLoading(false);
     }
@@ -82,11 +92,6 @@ const NewsFeed = () => {
       setNytArticles(uniqueArticles);
     } catch (error) {
       console.error('Error fetching NYT news:', error);
-      toast({
-        title: t('error'),
-        description: t('failedToLoadNews'),
-        variant: "destructive"
-      });
     }
   };
 
@@ -101,11 +106,54 @@ const NewsFeed = () => {
       setNewsApiArticles(uniqueArticles);
     } catch (error) {
       console.error('Error fetching NewsAPI headlines:', error);
-      toast({
-        title: t('error'),
-        description: t('failedToLoadNews'),
-        variant: "destructive"
-      });
+    }
+  };
+
+  const fetchRSS = async (url: string): Promise<RSSArticle[]> => {
+    const res = await fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`);
+    if (!res.ok) throw new Error('RSS fetch failed');
+    const text = await res.text();
+    const xml = new DOMParser().parseFromString(text, 'application/xml');
+    const items = Array.from(xml.querySelectorAll('item'));
+
+    const getImage = (item: Element) => {
+      const enclosure = item.querySelector('enclosure');
+      if (enclosure?.getAttribute('type')?.startsWith('image/')) {
+        return enclosure.getAttribute('url') || undefined;
+      }
+      const mediaContent = item.querySelector('media\\:content, content');
+      if (mediaContent?.getAttribute('url')) return mediaContent.getAttribute('url') || undefined;
+      const mediaThumb = item.querySelector('media\\:thumbnail');
+      if (mediaThumb?.getAttribute('url')) return mediaThumb.getAttribute('url') || undefined;
+      const imgInDesc = (item.querySelector('description')?.textContent || '').match(/<img[^>]+src="([^"]+)"/i);
+      return imgInDesc ? imgInDesc[1] : undefined;
+    };
+
+    return items.map((item) => ({
+      title: item.querySelector('title')?.textContent || 'Untitled',
+      description: (item.querySelector('description')?.textContent || '').replace(/<[^>]+>/g, '').trim(),
+      link: item.querySelector('link')?.textContent || '#',
+      pubDate: item.querySelector('pubDate')?.textContent || new Date().toISOString(),
+      image: getImage(item),
+      sourceName: '',
+    }));
+  };
+
+  const fetchFranceInfoRSS = async () => {
+    try {
+      const items = await fetchRSS('https://www.franceinfo.fr/titres.rss');
+      setFranceInfoArticles(items.map(i => ({ ...i, sourceName: 'France Info' })));
+    } catch (e) {
+      console.error('Error fetching France Info RSS:', e);
+    }
+  };
+
+  const fetchBBCRSS = async () => {
+    try {
+      const items = await fetchRSS('https://feeds.bbci.co.uk/news/world/rss.xml');
+      setBbcArticles(items.map(i => ({ ...i, sourceName: 'BBC' })));
+    } catch (e) {
+      console.error('Error fetching BBC RSS:', e);
     }
   };
 
@@ -204,12 +252,10 @@ const NewsFeed = () => {
   };
 
   const renderNewsApiArticles = () => {
-    // Remove duplicates based on URL
     const uniqueArticles = newsApiArticles.filter((article, index, self) => 
       index === self.findIndex(a => a.url === article.url)
     );
-    
-    return uniqueArticles.map((article, index) => (
+    return uniqueArticles.map((article) => (
       <Card key={`newsapi-${article.url}`} className="bg-gray-900/50 border-gray-800 hover:bg-gray-800/50 transition-colors group">
         <CardContent className="p-4 sm:p-6">
           <div className="flex flex-col sm:flex-row gap-4">
@@ -219,45 +265,62 @@ const NewsFeed = () => {
                   src={article.urlToImage} 
                   alt={article.title}
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                  onError={(e) => {
-                    e.currentTarget.style.display = 'none';
-                  }}
+                  onError={(e) => { e.currentTarget.style.display = 'none'; }}
                 />
               </div>
             )}
-            
             <div className="flex-1 min-w-0">
-              <h3 className="text-lg font-medium text-white mb-2 line-clamp-2 leading-tight">
-                {article.title}
-              </h3>
-              
-              <p className="text-gray-400 text-sm mb-3 line-clamp-2 leading-relaxed">
-                {article.description}
-              </p>
-              
+              <h3 className="text-lg font-medium text-white mb-2 line-clamp-2 leading-tight">{article.title}</h3>
+              <p className="text-gray-400 text-sm mb-3 line-clamp-2 leading-relaxed">{article.description}</p>
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                 <div className="flex items-center gap-3 text-xs text-gray-500">
                   <span className="flex items-center gap-1">
                     <Calendar className="w-3 h-3" />
                     {formatDate(article.publishedAt)}
                   </span>
-                  <span className="px-2 py-1 bg-blue-600/20 text-blue-400 rounded text-xs font-medium">
-                    {article.source.name}
-                  </span>
+                  <span className="px-2 py-1 bg-blue-600/20 text-blue-400 rounded text-xs font-medium">{article.source.name}</span>
                 </div>
-                
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  asChild 
-                  className="text-blue-400 hover:text-blue-300 hover:bg-blue-900/10"
-                >
-                  <a 
-                    href={article.url} 
-                    target="_blank" 
-                    rel="noopener noreferrer" 
-                    className="flex items-center gap-1 text-xs"
-                  >
+                <Button variant="ghost" size="sm" asChild className="text-blue-400 hover:text-blue-300 hover:bg-blue-900/10">
+                  <a href={article.url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-xs">
+                    {t('readArticle')} <ExternalLink className="w-3 h-3" />
+                  </a>
+                </Button>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    ));
+  };
+
+  const renderRSSArticles = (articles: RSSArticle[], buttonClasses: string, sourceLabel: string) => {
+    return articles.map((article) => (
+      <Card key={`rss-${sourceLabel}-${article.link}`} className="bg-gray-900/50 border-gray-800 hover:bg-gray-800/50 transition-colors group">
+        <CardContent className="p-4 sm:p-6">
+          <div className="flex flex-col sm:flex-row gap-4">
+            {article.image && (
+              <div className="w-full sm:w-32 h-32 sm:h-20 flex-shrink-0 overflow-hidden rounded">
+                <img 
+                  src={article.image} 
+                  alt={article.title}
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                  onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                />
+              </div>
+            )}
+            <div className="flex-1 min-w-0">
+              <h3 className="text-lg font-medium text-white mb-2 line-clamp-2 leading-tight">{article.title}</h3>
+              <p className="text-gray-400 text-sm mb-3 line-clamp-2 leading-relaxed">{article.description}</p>
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                <div className="flex items-center gap-3 text-xs text-gray-500">
+                  <span className="flex items-center gap-1">
+                    <Calendar className="w-3 h-3" />
+                    {formatDate(article.pubDate)}
+                  </span>
+                  <span className="px-2 py-1 bg-gray-600/20 text-gray-300 rounded text-xs font-medium">{sourceLabel}</span>
+                </div>
+                <Button variant="ghost" size="sm" asChild className={buttonClasses}>
+                  <a href={article.link} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-xs">
                     {t('readArticle')} <ExternalLink className="w-3 h-3" />
                   </a>
                 </Button>
@@ -291,7 +354,13 @@ const NewsFeed = () => {
     );
   }
 
-  const currentArticles = selectedSource === "nyt" ? nytArticles : newsApiArticles;
+  const currentArticles = selectedSource === "nyt"
+    ? nytArticles
+    : selectedSource === "newsapi"
+    ? newsApiArticles
+    : selectedSource === "franceinfo"
+    ? franceInfoArticles
+    : bbcArticles;
 
   return (
     <div className="space-y-4">
@@ -319,6 +388,18 @@ const NewsFeed = () => {
                   {t('headlines')}
                 </div>
               </SelectItem>
+              <SelectItem value="franceinfo" className="text-white focus:bg-gray-700">
+                <div className="flex items-center gap-2">
+                  <Newspaper className="w-4 h-4 text-yellow-400" />
+                  France Info
+                </div>
+              </SelectItem>
+              <SelectItem value="bbc" className="text-white focus:bg-gray-700">
+                <div className="flex items-center gap-2">
+                  <Newspaper className="w-4 h-4 text-red-400" />
+                  BBC World
+                </div>
+              </SelectItem>
             </SelectContent>
           </Select>
           
@@ -335,13 +416,20 @@ const NewsFeed = () => {
       </div>
       
       <div className="grid gap-4">
-        {selectedSource === "nyt" ? renderNYTArticles() : renderNewsApiArticles()}
+        {selectedSource === "nyt"
+          ? renderNYTArticles()
+          : selectedSource === "newsapi"
+          ? renderNewsApiArticles()
+          : selectedSource === "franceinfo"
+          ? renderRSSArticles(franceInfoArticles, "text-yellow-400 hover:text-yellow-300 hover:bg-yellow-900/10", "France Info")
+          : renderRSSArticles(bbcArticles, "text-red-400 hover:text-red-300 hover:bg-red-900/10", "BBC World")
+        }
         
         {currentArticles.length === 0 && (
           <Card className="bg-gray-900/50 border-gray-800">
             <CardContent className="p-6 text-center">
               <p className="text-gray-400">
-                {t('noArticlesAvailable', { source: selectedSource === "nyt" ? "NYT" : "NewsAPI" })}
+                {t('noArticlesAvailable', { source: selectedSource === "nyt" ? "NYT" : selectedSource === "newsapi" ? "NewsAPI" : selectedSource === "franceinfo" ? "France Info" : "BBC World" })}
               </p>
             </CardContent>
           </Card>

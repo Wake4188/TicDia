@@ -2,7 +2,7 @@
   "rewrites": [
     {
       "source": "/api/tts",
-      "destination": "https://rtuxaekhfwvpwmvmdaul.functions.supabase.co/tts-stream"
+      "destination": "https://rtuxaekhfwvpwmvmdaul.functions.supabase.co/text-to-speech"
     },
     {
       "source": "/(.*)",

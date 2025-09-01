@@ -18,7 +18,7 @@ export const fetchTTSBlob = async (
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ text, voiceId: options.voice }),
+        body: JSON.stringify({ text, voice: options.voice }),
       }
     );
 
@@ -35,6 +35,21 @@ export const fetchTTSBlob = async (
         }
       } catch {}
       throw new Error(message);
+    }
+
+    // Handle JSON base64 or direct audio blob
+    const okContentType = res.headers.get("Content-Type") || "";
+    if (okContentType.includes("application/json")) {
+      const data = await res.json();
+      const base64 = data?.audioContent as string | undefined;
+      if (!base64) throw new Error(data?.error || "Invalid TTS response");
+      const byteChars = atob(base64);
+      const byteNumbers = new Array(byteChars.length);
+      for (let i = 0; i < byteChars.length; i++) {
+        byteNumbers[i] = byteChars.charCodeAt(i);
+      }
+      const byteArray = new Uint8Array(byteNumbers);
+      return new Blob([byteArray], { type: "audio/mpeg" });
     }
 
     return await res.blob();
