@@ -1,64 +1,80 @@
-
 import { useEffect } from "react";
-import { useTextAnimation } from "../hooks/useTextAnimation";
-import { useArticleIntersection } from "../hooks/useArticleIntersection";
-import { useUserPreferences } from "../hooks/useUserPreferences";
-import { useMobileDetection } from "../hooks/useMobileDetection";
-import { useArticleManagement } from "../hooks/useArticleManagement";
 import ArticleItem from "./ArticleItem";
 import ArticleLoadingState from "./ArticleLoadingState";
+import { useArticleManagement } from "../hooks/useArticleManagement";
+import { useTextAnimation } from "../hooks/useTextAnimation";
+import { useUserPreferences } from "../hooks/useUserPreferences";
+import { useMobileDetection } from "../hooks/useMobileDetection";
 
-const ArticleViewer = ({ articles: initialArticles, onArticleChange, onArticleView }) => {
-  const userPreferences = useUserPreferences();
+interface ArticleViewerProps {
+  articles: any[];
+  onArticleChange: (article: any) => void;
+  onArticleView?: (articleTags?: string[]) => void;
+}
+
+const ArticleViewer = ({ articles, onArticleChange, onArticleView }: ArticleViewerProps) => {
+  const { userPreferences } = useUserPreferences();
   const isMobile = useMobileDetection();
   
   const {
-    articles,
+    articles: managedArticles,
     currentIndex,
     currentArticle,
     isLoading,
-    loadMoreArticles,
-    handleCurrentIndexChange
-  } = useArticleManagement(initialArticles, onArticleChange);
+    containerRef,
+    handleTtsStart,
+    handleTtsStop,
+    ttsPlayingIndex
+  } = useArticleManagement(articles, onArticleChange, onArticleView);
 
-  const { displayedText, progress } = useTextAnimation(currentArticle?.content || '', true, 80);
+  const { displayedText, progress } = useTextAnimation(
+    currentArticle?.content || "",
+    true
+  );
 
-  const containerRef = useArticleIntersection({
-    articles,
-    onVisibilityChange: () => {},
-    onCurrentIndexChange: (index) => {
-      handleCurrentIndexChange(index);
-      // Track article view when it becomes current
-      const article = articles[index];
-      if (article && onArticleView) {
-        onArticleView(article.tags || []);
-      }
-    },
-    onLoadMore: loadMoreArticles
-  });
-
+  // Set up global TTS handlers for ArticleItem to use
   useEffect(() => {
-    if (articles.length > 0 && currentIndex === 0) {
-      onArticleChange(articles[0]);
+    if (typeof window !== 'undefined') {
+      (window as any).handleTtsStart = handleTtsStart;
+      (window as any).handleTtsStop = handleTtsStop;
     }
-  }, [articles, onArticleChange]);
+    
+    return () => {
+      if (typeof window !== 'undefined') {
+        delete (window as any).handleTtsStart;
+        delete (window as any).handleTtsStop;
+      }
+    };
+  }, [handleTtsStart, handleTtsStop]);
 
   return (
-    <main ref={containerRef} className="h-screen w-screen overflow-y-auto snap-y snap-mandatory">
-      {articles.map((article, index) => (
-        <ArticleItem
-          key={`${article.id}-${index}`}
-          article={article}
-          index={index}
-          isCurrent={currentIndex === index}
-          displayedText={currentIndex === index ? displayedText : ''}
-          progress={currentIndex === index ? progress : 0}
-          userPreferences={userPreferences.userPreferences}
-          isMobile={isMobile}
-        />
-      ))}
-      {isLoading && <ArticleLoadingState />}
-    </main>
+    <div className="flex-1 relative">
+      <div
+        ref={containerRef}
+        className="h-full w-full overflow-y-auto snap-y snap-mandatory"
+        style={{ 
+          scrollbarWidth: 'none', 
+          msOverflowStyle: 'none',
+          WebkitScrollbar: { display: 'none' }
+        } as any}
+      >
+        
+        {managedArticles.map((article, index) => (
+          <ArticleItem
+            key={`${article.id}-${index}`}
+            article={article}
+            index={index}
+            isCurrent={index === currentIndex}
+            displayedText={displayedText}
+            progress={progress}
+            userPreferences={userPreferences}
+            isMobile={isMobile}
+          />
+        ))}
+        
+        {isLoading && <ArticleLoadingState />}
+      </div>
+    </div>
   );
 };
 

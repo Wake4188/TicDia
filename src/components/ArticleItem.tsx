@@ -63,6 +63,18 @@ const ArticleItem = ({
               <div className="mt-4">
                 <AudioPlayer 
                   text={article.content || ''}
+                  onAudioStart={() => {
+                    // Handle TTS start for tracking purposes
+                    if (typeof window !== 'undefined' && (window as any).handleTtsStart) {
+                      (window as any).handleTtsStart(index);
+                    }
+                  }}
+                  onAudioEnd={() => {
+                    // Handle TTS end for tracking purposes
+                    if (typeof window !== 'undefined' && (window as any).handleTtsStop) {
+                      (window as any).handleTtsStop();
+                    }
+                  }}
                 />
               </div>
             )}

@@ -1,6 +1,10 @@
 {
   "rewrites": [
     {
+      "source": "/api/rss",
+      "destination": "https://rtuxaekhfwvpwmvmdaul.supabase.co/functions/v1/rss-feed"
+    },
+    {
       "source": "/api/tts",
       "destination": "https://rtuxaekhfwvpwmvmdaul.functions.supabase.co/text-to-speech"
     },

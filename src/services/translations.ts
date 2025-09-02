@@ -22,6 +22,16 @@ export const translations = {
     justNow: "Just now",
     hoursAgo: "{hours}h ago",
     
+    // New features translations
+    topArticlesToday: "Top Articles Today", 
+    dailyRankingResets: "Daily ranking resets at midnight",
+    europeParisTime: "Europe/Paris time",
+    apNews: "AP News",
+    showAll: "Show All", 
+    showLess: "Show Less",
+    more: "more",
+    backToHome: "Back to Home",
+    
     // News sources
     nytNews: "NYT News",
     headlines: "Headlines",
