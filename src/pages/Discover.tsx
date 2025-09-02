@@ -1,14 +1,16 @@
 
 import { useEffect, useState } from "react";
-import { getRandomArticles, WikipediaArticle } from "@/services/wikipediaService";
+import { Button } from "@/components/ui/button";
+import { ArrowLeft } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { useInView } from "react-intersection-observer";
 import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useNavigate } from "react-router-dom";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { useToast } from "@/components/ui/use-toast";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getTranslations } from "@/services/translations";
+import { getRandomArticles, WikipediaArticle } from "@/services/wikipediaService";
 
 const Discover = () => {
   const [selectedCategory, setSelectedCategory] = useState("All");
@@ -81,6 +83,18 @@ const Discover = () => {
   return (
     <div className="h-screen overflow-y-auto pt-14 pb-20">
       <div className="sticky top-0 z-10 bg-black/70 backdrop-blur-sm">
+        <div className="flex items-center justify-between px-4 py-2">
+          <Button
+            variant="ghost"
+            onClick={() => navigate('/')}
+            className="text-gray-400 hover:text-white"
+          >
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            ← Back to Home
+          </Button>
+          <h1 className="text-lg font-semibold text-white">{t.discover}</h1>
+          <div className="w-20"></div> {/* Spacer for centering */}
+        </div>
         <ScrollArea className="w-full whitespace-nowrap">
           <div className="flex space-x-4 px-4 py-2">
             {categories.map((category) => (

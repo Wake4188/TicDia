@@ -34,6 +34,15 @@ const AudioPlayer = ({ text, onAudioStart, onAudioEnd, autoPlay = false }: Audio
   }, [text]);
 
   const handlePlayPause = async () => {
+    if (isLoading) {
+      toast({
+        title: "In Progress",
+        description: "Audio is being generated. Please wait...",
+        variant: "default",
+      });
+      return;
+    }
+    
     if (isPlaying) {
       audioRef.current?.pause();
       setIsPlaying(false);
@@ -43,7 +52,6 @@ const AudioPlayer = ({ text, onAudioStart, onAudioEnd, autoPlay = false }: Audio
 
     try {
       setIsLoading(true);
-
 
       onAudioStart?.();
 
@@ -118,7 +126,10 @@ const AudioPlayer = ({ text, onAudioStart, onAudioEnd, autoPlay = false }: Audio
         className="h-7 w-7 p-0"
       >
         {isLoading ? (
-          <div className="h-3 w-3 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+          <div className="flex items-center">
+            <div className="h-3 w-3 animate-spin rounded-full border-2 border-primary border-t-transparent mr-1" />
+            <span className="text-xs">In Progress</span>
+          </div>
         ) : isPlaying ? (
           <Pause className="h-3 w-3" />
         ) : (

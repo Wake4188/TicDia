@@ -1,17 +1,19 @@
 
 import { useState, useEffect } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { ChevronDown, ChevronUp } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/components/ui/use-toast";
-import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Trash2, Plus, ExternalLink, Calendar } from "lucide-react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import LittleWik from "@/components/LittleWik";
 import NewsFeed from "@/components/NewsFeed";
+import VotingProgressBar from "@/components/VotingProgressBar";
 import { useNavigate } from "react-router-dom";
 import { useUserPreferences } from "@/hooks/useUserPreferences";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -32,6 +34,15 @@ interface WikipediaArticle {
   fullurl: string;
 }
 
+interface RSSArticle {
+  title: string;
+  summary: string;
+  link: string;
+  image?: string;
+  publishedAt: string;
+  source: string;
+}
+
 const Today = () => {
   const { user } = useAuth();
   const { toast } = useToast();
@@ -46,8 +57,10 @@ const Today = () => {
   const [isAddingArticle, setIsAddingArticle] = useState(false);
   const [newArticle, setNewArticle] = useState({ title: "", content: "", url: "" });
   const [wikipediaArticles, setWikipediaArticles] = useState<WikipediaArticle[]>([]);
+  const [apNewsArticles, setApNewsArticles] = useState<RSSArticle[]>([]);
   const [littleWikOpen, setLittleWikOpen] = useState(false);
   const [selectedArticle, setSelectedArticle] = useState<{ article_title: string; article_url: string } | null>(null);
+  const [showAllArticles, setShowAllArticles] = useState(false);
 
   // Check if user is admin
   const isAdmin = user?.email === "jessica.wilhide@gmail.com";
@@ -78,7 +91,20 @@ const Today = () => {
   // Fetch Wikipedia articles on component mount
   useEffect(() => {
     fetchWikipediaArticles();
+    fetchApNewsRSS();
   }, [currentLanguage]);
+
+  const fetchApNewsRSS = async () => {
+    try {
+      const response = await fetch('/api/rss?url=' + encodeURIComponent('https://rss.app/feeds/6Hnucl2wxDJEwGrt.xml') + '&source=AP News');
+      if (response.ok) {
+        const articles = await response.json();
+        setApNewsArticles(articles);
+      }
+    } catch (error) {
+      console.error('Error fetching AP News RSS:', error);
+    }
+  };
 
   const fetchWikipediaArticles = async () => {
     try {
@@ -222,6 +248,13 @@ const Today = () => {
       <div className="max-w-4xl mx-auto p-6">
         <div className="flex items-center justify-between mb-8">
           <div>
+            <Button
+              variant="ghost"
+              onClick={() => navigate('/')}
+              className="mb-4 text-gray-400 hover:text-white"
+            >
+              ← {t('backToHome')}
+            </Button>
             <h1 className="text-3xl font-bold text-tictok-red mb-2">{t('todayHighlights')}</h1>
             <p className="text-gray-400 flex items-center gap-2">
               <Calendar className="w-4 h-4" />
@@ -269,8 +302,72 @@ const Today = () => {
         </div>
 
         <div className="space-y-8">
+          {/* Voting Progress Bar */}
+          <VotingProgressBar />
+
           {/* News Feed Section */}
           <NewsFeed />
+
+          {/* AP News RSS Section */}
+          {apNewsArticles.length > 0 && (
+            <div>
+              <h2 className="text-xl font-semibold mb-4 text-gray-300">{t('apNews')}</h2>
+              <div className="grid gap-4">
+                {(showAllArticles ? apNewsArticles : apNewsArticles.slice(0, 10)).map((article, index) => (
+                  <Card key={`ap-${index}`} className="bg-gray-900/50 border-gray-800 hover:bg-gray-800/50 transition-colors">
+                    <CardContent className="p-6">
+                      <div className="flex flex-col sm:flex-row gap-4">
+                        {article.image && (
+                          <div className="w-full sm:w-32 h-32 sm:h-20 flex-shrink-0 overflow-hidden rounded">
+                            <img 
+                              src={article.image} 
+                              alt={article.title}
+                              className="w-full h-full object-cover"
+                              onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                            />
+                          </div>
+                        )}
+                        <div className="flex-1 min-w-0">
+                          <h3 className="text-lg font-medium text-white mb-2 line-clamp-2">{article.title}</h3>
+                          <p className="text-gray-400 text-sm mb-3 line-clamp-2">{article.summary}</p>
+                          <div className="flex items-center justify-between">
+                            <span className="text-xs text-gray-500">{new Date(article.publishedAt).toLocaleDateString()}</span>
+                            <a
+                              href={article.link}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-tictok-red hover:text-tictok-red/80 text-sm flex items-center gap-1"
+                            >
+                              {t('readMore')} <ExternalLink className="w-3 h-3" />
+                            </a>
+                          </div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+                {apNewsArticles.length > 10 && (
+                  <Button
+                    variant="outline"
+                    onClick={() => setShowAllArticles(!showAllArticles)}
+                    className="w-full mt-4"
+                  >
+                    {showAllArticles ? (
+                      <>
+                        <ChevronUp className="w-4 h-4 mr-2" />
+                        {t('showLess')}
+                      </>
+                    ) : (
+                      <>
+                        <ChevronDown className="w-4 h-4 mr-2" />
+                        {t('showAll')} ({apNewsArticles.length - 10} {t('more')})
+                      </>
+                    )}
+                  </Button>
+                )}
+              </div>
+            </div>
+          )}
 
           {/* Wikipedia Articles Section */}
           <div>
