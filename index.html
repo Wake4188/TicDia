@@ -5,37 +5,55 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <meta http-equiv="Content-Language" content="en" />
-  <title>TicDia</title>
-  <meta name="description" content="Experience Wikipedia articles in a TikTok-style vertical feed, ad-free. Learn while you scroll!" />
-  <meta name="author" content="psykhi" />
-  <meta property="og:image" content="/og-image.svg" />
+  
+  <!-- PWA and App Identity -->
+  <title>WikiTok - Discover Wikipedia</title>
+  <meta name="description" content="Discover Wikipedia articles in a modern, engaging TikTok-style format. Learn something new every day with WikiTok - ad-free educational content." />
+  <meta name="author" content="WikiTok" />
+  <link rel="manifest" href="/manifest.json" />
   <meta name="robots" content="index, follow" />
   <link rel="canonical" href="https://w-810266.vercel.app/" />
-
+  
+  <!-- SEO and Social Media -->
+  <meta name="keywords" content="wikipedia, learning, education, articles, discovery, knowledge, tiktok-style, vertical feed" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://w-810266.vercel.app/" />
+  <meta property="og:title" content="WikiTok - Discover Wikipedia in TikTok Style" />
+  <meta property="og:description" content="Experience Wikipedia articles in a TikTok-style vertical feed. Educational, fast, and distraction-free learning." />
+  <meta property="og:image" content="/og-image.svg" />
+  
+  <!-- Twitter Cards -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="WikiTok - Discover Wikipedia" />
+  <meta name="twitter:description" content="Learn while you scroll with TikTok-style Wikipedia articles." />
+  
   <!-- Mobile app meta tags -->
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <meta name="theme-color" content="#000000" />
+  <meta name="theme-color" content="#FE2C55" />
 
-  <!-- Icons for mobile -->
+  <!-- Icons for mobile and desktop -->
   <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
   <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
   <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+  <link rel="icon" href="/favicon.ico" />
+  
+  <!-- Performance optimization preconnects -->
+  <link rel="preconnect" href="https://api.nytimes.com" />
+  <link rel="preconnect" href="https://newsapi.org" />
+  <link rel="dns-prefetch" href="https://en.wikipedia.org" />
+  <link rel="dns-prefetch" href="https://supabase.co" />
 </head>
 
 <body>
   <div id="root"></div>
   <noscript>
-    <h1>TicDia — Learn While You Scroll</h1>
-    <p>Discover Wikipedia articles in a TikTok-style vertical feed. Educational, fast, and distraction-free.</p>
+    <h1>WikiTok — Discover Wikipedia</h1>
+    <p>Discover Wikipedia articles in a TikTok-style vertical feed. Educational, fast, and distraction-free learning experience.</p>
   </noscript>
   <script src="https://cdn.gpteng.co/gptengineer.js" type="module"></script>
   <script type="module" src="/src/main.tsx"></script>
 </body>
 
 </html>
-
-<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
-<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
-<link rel="icon" href="/favicon.ico" />

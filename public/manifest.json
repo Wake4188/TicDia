@@ -1,0 +1,48 @@
+{
+  "name": "WikiTok - Discover Wikipedia",
+  "short_name": "WikiTok",
+  "description": "Discover Wikipedia articles in a modern, engaging format",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#000000",
+  "theme_color": "#FE2C55",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/favicon-32x32.png",
+      "sizes": "32x32",
+      "type": "image/png"
+    },
+    {
+      "src": "/favicon-16x16.png", 
+      "sizes": "16x16",
+      "type": "image/png"
+    }
+  ],
+  "categories": ["education", "reference", "news"],
+  "lang": "en",
+  "shortcuts": [
+    {
+      "name": "Today's Highlights",
+      "short_name": "Today",
+      "url": "/today",
+      "icons": [
+        {
+          "src": "/favicon-32x32.png",
+          "sizes": "32x32"
+        }
+      ]
+    },
+    {
+      "name": "Discover",
+      "short_name": "Discover", 
+      "url": "/discover",
+      "icons": [
+        {
+          "src": "/favicon-32x32.png",
+          "sizes": "32x32"
+        }
+      ]
+    }
+  ]
+}
