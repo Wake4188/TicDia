@@ -9,7 +9,6 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { useToast } from "@/components/ui/use-toast";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { getTranslations } from "@/services/translations";
 import { getRandomArticles, WikipediaArticle } from "@/services/wikipediaService";
 
 const Discover = () => {
@@ -18,8 +17,8 @@ const Discover = () => {
   const { ref, inView } = useInView();
   const queryClient = useQueryClient();
   const { toast } = useToast();
-  const { currentLanguage } = useLanguage();
-  const t = getTranslations(currentLanguage);
+  const { currentLanguage, translations } = useLanguage();
+  const t = translations;
 
   const categories = [
     t.categories.all, t.categories.science, t.categories.history, t.categories.technology,

@@ -5,7 +5,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
 import { useNavigate } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { getTranslations } from "@/services/translations";
 import { useMobileDetection } from "@/hooks/useMobileDetection";
 import {
   DropdownMenu,
@@ -18,8 +17,8 @@ const RightSidebar = ({ article }) => {
   const { user } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
-  const { currentLanguage } = useLanguage();
-  const t = getTranslations(currentLanguage);
+  const { currentLanguage, translations } = useLanguage();
+  const t = translations;
   const [isSaved, setIsSaved] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const isMobile = useMobileDetection();

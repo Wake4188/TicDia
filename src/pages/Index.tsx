@@ -9,7 +9,6 @@ import Navigation from "../components/Navigation";
 import { getRandomArticles, searchArticles } from "../services/wikipediaService";
 import { useToast } from "@/components/ui/use-toast";
 import { useLanguage } from "../contexts/LanguageContext";
-import { getTranslations } from "../services/translations";
 import { useAnalyticsTracking } from "../hooks/useAnalyticsTracking";
 import { useChallengeTracking } from "../hooks/useChallengeTracking";
 import { AnalyticsCheck } from "../components/AnalyticsCheck";
@@ -21,8 +20,8 @@ const Index = () => {
   const [searchParams] = useSearchParams();
   const location = useLocation();
   const navigate = useNavigate();
-  const { currentLanguage, isLoading: languageLoading } = useLanguage();
-  const t = getTranslations(currentLanguage);
+  const { currentLanguage, isLoading: languageLoading, translations } = useLanguage();
+  const t = translations;
   const searchQuery = searchParams.get("q");
   const [currentArticle, setCurrentArticle] = useState(null);
   const { trackArticleView } = useAnalyticsTracking();

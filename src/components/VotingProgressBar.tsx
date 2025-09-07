@@ -6,7 +6,6 @@ import { Trophy, TrendingUp } from "lucide-react";
 import { getTopVotedArticles } from "@/services/votingService";
 import { useQuery } from "@tanstack/react-query";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { getTranslation } from "@/services/translations";
 
 interface TopArticle {
   id: string;
@@ -16,9 +15,22 @@ interface TopArticle {
 }
 
 const VotingProgressBar = () => {
-  const { currentLanguage } = useLanguage();
-  const t = (key: string, params?: Record<string, string | number>) => 
-    getTranslation(key, currentLanguage.code, params);
+  const { currentLanguage, translations } = useLanguage();
+  const t = (key: string, params?: Record<string, string | number>) => {
+    const keys = key.split('.');
+    let value = translations;
+    for (const k of keys) {
+      value = value?.[k];
+      if (value === undefined) break;
+    }
+    let result = value || key;
+    if (params && typeof result === 'string') {
+      Object.entries(params).forEach(([param, val]) => {
+        result = result.replace(`{${param}}`, String(val));
+      });
+    }
+    return result;
+  };
 
   const { data: topArticles = [], isLoading } = useQuery({
     queryKey: ["topVotedArticles"],

@@ -14,7 +14,6 @@ import { Input } from "@/components/ui/input";
 import LittleWik from "../components/LittleWik";
 import { loadUserPreferences, saveUserPreferences, UserPreferences } from "@/services/userPreferencesService";
 import { useLanguage } from "../contexts/LanguageContext";
-import { getTranslations } from "../services/translations";
 import { useUserPreferences } from "@/hooks/useUserPreferences";
 
 interface SavedArticle {
@@ -29,8 +28,8 @@ const Profile = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { currentLanguage } = useLanguage();
-  const t = getTranslations(currentLanguage);
+  const { currentLanguage, translations } = useLanguage();
+  const t = translations;
   
   // Load user preferences to apply highlight color throughout the app
   useUserPreferences();

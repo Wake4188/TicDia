@@ -7,7 +7,6 @@ import { ExternalLink, Calendar, Clock, Newspaper } from "lucide-react";
 
 import { fetchNewsApiHeadlines, NewsApiArticle } from "@/services/newsApiService";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { getTranslation } from "@/services/translations";
 
 interface NYTArticle {
   title: string;
@@ -45,10 +44,23 @@ const NewsFeed = () => {
   const [bbcArticles, setBbcArticles] = useState<RSSArticle[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedSource, setSelectedSource] = useState<NewsSource>("nyt");
-  const { currentLanguage } = useLanguage();
+  const { currentLanguage, translations } = useLanguage();
 
-  const t = (key: string, params?: Record<string, string | number>) => 
-    getTranslation(key, currentLanguage.code, params);
+  const t = (key: string, params?: Record<string, string | number>) => {
+    const keys = key.split('.');
+    let value = translations;
+    for (const k of keys) {
+      value = value?.[k];
+      if (value === undefined) break;
+    }
+    let result = value || key;
+    if (params && typeof result === 'string') {
+      Object.entries(params).forEach(([param, val]) => {
+        result = result.replace(`{${param}}`, String(val));
+      });
+    }
+    return result;
+  };
 
   const NYT_API_KEY = "CgNmskY4a1yqFpXiTyLDXLVLNmfHV1D1";
 

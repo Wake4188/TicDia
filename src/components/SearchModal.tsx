@@ -3,7 +3,6 @@ import { useState, useEffect, useCallback } from "react";
 import { Search, X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useLanguage } from "../contexts/LanguageContext";
-import { getTranslations } from "../services/translations";
 import { useTheme } from "../contexts/ThemeContext";
 import { searchArticles } from "../services/wikipediaService";
 import { WikipediaArticle } from "../services/types";
@@ -18,9 +17,9 @@ const SearchModal = ({ isOpen, onClose }: SearchModalProps) => {
   const [previewResults, setPreviewResults] = useState<WikipediaArticle[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
-  const { currentLanguage } = useLanguage();
+  const { currentLanguage, translations } = useLanguage();
   const { theme } = useTheme();
-  const t = getTranslations(currentLanguage);
+  const t = translations;
 
   // Debounced search for preview
   const debouncedSearch = useCallback(

@@ -17,7 +17,6 @@ import VotingProgressBar from "@/components/VotingProgressBar";
 import { useNavigate } from "react-router-dom";
 import { useUserPreferences } from "@/hooks/useUserPreferences";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { getTranslation } from "@/services/translations";
 
 interface TodayArticle {
   id: string;
@@ -47,10 +46,23 @@ const Today = () => {
   const { user } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
-  const { currentLanguage } = useLanguage();
+  const { currentLanguage, translations } = useLanguage();
   
-  const t = (key: string, params?: Record<string, string | number>) => 
-    getTranslation(key, currentLanguage.code, params);
+  const t = (key: string, params?: Record<string, string | number>) => {
+    const keys = key.split('.');
+    let value = translations;
+    for (const k of keys) {
+      value = value?.[k];
+      if (value === undefined) break;
+    }
+    let result = value || key;
+    if (params && typeof result === 'string') {
+      Object.entries(params).forEach(([param, val]) => {
+        result = result.replace(`{${param}}`, String(val));
+      });
+    }
+    return result;
+  };
   
   // Load user preferences to apply highlight color
   useUserPreferences();

@@ -4,7 +4,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useTheme } from '../contexts/ThemeContext';
-import { getTranslations, formatDate } from '../services/translations';
+import { formatDate } from '../services/translations';
 import LanguageSelector from './LanguageSelector';
 import VoteButton from './VoteButton';
 
@@ -25,12 +25,13 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
     user
   } = useAuth();
   const {
-    currentLanguage
+    currentLanguage,
+    translations
   } = useLanguage();
   const {
     theme
   } = useTheme();
-  const t = getTranslations(currentLanguage);
+  const t = translations;
   const dateString = formatDate(new Date(), currentLanguage);
   const isDark = theme === 'dark';
   const handleNavigation = (path: string, action?: () => void) => {

@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { useTheme } from "../contexts/ThemeContext";
 import { useLanguage } from "../contexts/LanguageContext";
-import { getTranslations, formatDate } from "../services/translations";
+import { formatDate } from "../services/translations";
 import LanguageSelector from "./LanguageSelector";
 interface NavigationDesktopProps {
   searchValue: string;
@@ -26,9 +26,10 @@ const NavigationDesktop = ({
     theme
   } = useTheme();
   const {
-    currentLanguage
+    currentLanguage,
+    translations
   } = useLanguage();
-  const t = getTranslations(currentLanguage);
+  const t = translations;
   const dateString = formatDate(new Date(), currentLanguage);
   const isDiscoverPage = location.pathname === "/discover";
   const isDark = theme === 'dark';
