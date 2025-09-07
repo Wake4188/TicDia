@@ -55,7 +55,7 @@ const Index = () => {
 
   if (isLoading || languageLoading) {
     return (
-      <div className="h-screen w-screen flex items-center justify-center bg-wikitok-dark text-white">
+      <div className="h-screen w-screen flex items-center justify-center bg-tictok-dark text-white">
         <div>{t.loading}</div>
       </div>
     );
@@ -63,7 +63,7 @@ const Index = () => {
 
   if (error || !articles || articles.length === 0) {
     return (
-      <div className="h-screen w-screen flex items-center justify-center bg-wikitok-dark text-white">
+      <div className="h-screen w-screen flex items-center justify-center bg-tictok-dark text-white">
         <div>{t.error}</div>
       </div>
     );
@@ -72,7 +72,7 @@ const Index = () => {
   const currentDisplayArticle = currentArticle || articles[0];
 
   return (
-    <div className="h-screen w-screen relative overflow-hidden bg-wikitok-dark">
+    <div className="h-screen w-screen relative overflow-hidden bg-tictok-dark">
       <AnalyticsCheck />
       <BadgeDisplay />
       <DailyChallenges />
