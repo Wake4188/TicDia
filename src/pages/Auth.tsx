@@ -148,7 +148,7 @@ const Auth = () => {
   return <div className="min-h-screen bg-wikitok-dark flex items-center justify-center px-4">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-wikitok-red mb-2">TicDia</h1>
+          <h1 className="text-3xl font-bold text-tictok-red mb-2">TikDia</h1>
           <p className="text-white/60">
             {isLogin ? "Welcome back!" : "Join the community"}
           </p>
@@ -187,7 +187,7 @@ const Auth = () => {
                 <Input id="confirmPassword" type="password" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} required maxLength={128} className="bg-white/5 border-white/20 text-white placeholder:text-white/40" placeholder="Confirm your password" />
               </div>}
 
-            <Button type="submit" disabled={loading} className="w-full bg-wikitok-red hover:bg-wikitok-red/90 text-white">
+            <Button type="submit" disabled={loading} className="w-full bg-tictok-red hover:bg-tictok-red/90 text-white">
               {loading ? <div className="flex items-center gap-2">
                   <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin" />
                   {isLogin ? "Signing In..." : "Creating Account..."}

@@ -71,7 +71,7 @@ const NavigationDesktop = ({
           <div className="bg-wikitok-red text-white px-3 py-1 rounded-full text-sm font-medium cursor-pointer hover:bg-red-600 transition-colors" onClick={onTodayClick}>
             {dateString}
           </div>
-          <div className="text-xl font-bold text-wikitok-red cursor-pointer" onClick={() => navigate("/")}>TicDia</div>
+          <div className="text-xl font-bold text-tictok-red cursor-pointer" onClick={() => navigate("/")}>TikDia</div>
         </div>
       </div>
     </div>;
