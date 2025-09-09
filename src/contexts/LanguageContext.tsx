@@ -16,12 +16,12 @@ interface LanguageProviderProps {
   children: ReactNode;
 }
 
-import { getTranslations } from '../services/translations';
+import { getTranslations, translations as baseTranslations } from '../services/translations';
 
 export const LanguageProvider: React.FC<LanguageProviderProps> = ({ children }) => {
   const [currentLanguage, setCurrentLanguage] = useState<Language>(DEFAULT_LANGUAGE);
   const [isLoading, setIsLoading] = useState(false);
-  const [translations, setTranslations] = useState<any>({});
+  const [translations, setTranslations] = useState<any>(baseTranslations.en);
 
   const loadTranslations = async (language: Language) => {
     try {
