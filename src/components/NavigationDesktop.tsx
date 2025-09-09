@@ -44,9 +44,9 @@ const NavigationDesktop = ({
         {/* Left Section */}
         <div className="flex items-center gap-4">
           <LanguageSelector />
-          <div className={`flex items-center gap-2 cursor-pointer transition-colors duration-300 text-white hover:text-wikitok-red`} onClick={handleAuthClick}>
+          <div className={`flex items-center gap-2 cursor-pointer transition-colors duration-300 text-white hover:text-tictok-red`} onClick={handleAuthClick}>
             {user ? <>
-                <div className="w-6 h-6 bg-wikitok-red rounded-full flex items-center justify-center text-xs text-white font-bold">
+                <div className="w-6 h-6 bg-tictok-red rounded-full flex items-center justify-center text-xs text-white font-bold">
                   {user.email?.charAt(0).toUpperCase()}
                 </div>
                 <span className="text-sm hidden sm:block">{t.profile}</span>
@@ -67,11 +67,11 @@ const NavigationDesktop = ({
 
         {/* Right Section */}
         <div className="flex items-center gap-4">
-          <Compass className={`w-5 h-5 cursor-pointer transition-colors duration-300 ${isDiscoverPage ? "text-wikitok-red" : "text-white hover:text-wikitok-red"}`} onClick={handleDiscoverClick} />
-          <div className="bg-wikitok-red text-white px-3 py-1 rounded-full text-sm font-medium cursor-pointer hover:bg-red-600 transition-colors" onClick={onTodayClick}>
+          <Compass className={`w-5 h-5 cursor-pointer transition-colors duration-300 ${isDiscoverPage ? "text-tictok-red" : "text-white hover:text-tictok-red"}`} onClick={handleDiscoverClick} />
+          <div className="bg-tictok-red text-white px-3 py-1 rounded-full text-sm font-medium cursor-pointer hover:bg-red-600 transition-colors" onClick={onTodayClick}>
             {dateString}
           </div>
-          <div className="text-xl font-bold text-tictok-red cursor-pointer" onClick={() => navigate("/")}>TikDia</div>
+          <div className="text-xl font-bold text-white cursor-pointer hover:text-white/80 transition-colors drop-shadow-[0_0_8px_rgba(255,255,255,0.5)]" onClick={() => navigate("/")}>TikDia</div>
         </div>
       </div>
     </div>;
