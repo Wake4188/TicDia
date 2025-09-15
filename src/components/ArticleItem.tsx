@@ -1,8 +1,10 @@
 
+import { useState } from "react";
 import { motion } from "framer-motion";
 import { Progress } from "./ui/progress";
 import { UserPreferences } from "@/services/userPreferencesService";
 import AudioPlayer from "./AudioPlayer";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface ArticleItemProps {
   article: any;
@@ -23,6 +25,10 @@ const ArticleItem = ({
   userPreferences,
   isMobile
 }: ArticleItemProps) => {
+  const { user } = useAuth();
+  const [hideTts, setHideTts] = useState<boolean>(() => {
+    try { return localStorage.getItem('ticdia_hide_tts') === 'true'; } catch { return false; }
+  });
   const contentToShow = isCurrent && displayedText ? displayedText : article.content;
   
   return (
@@ -53,14 +59,27 @@ const ArticleItem = ({
               <p 
                 className="text-sm sm:text-lg leading-relaxed" 
                 style={{ fontFamily: userPreferences.fontFamily }}
+                translate="yes"
               >
                 {contentToShow}
               </p>
             </div>
             
             {/* Audio Player */}
-            {isCurrent && (
+            {isCurrent && user && !hideTts && (
               <div className="mt-4">
+                <div className="flex items-center justify-between mb-2 text-xs opacity-70">
+                  <span>Text to Speech</span>
+                  <button
+                    onClick={() => {
+                      try { localStorage.setItem('ticdia_hide_tts', 'true'); } catch {}
+                      setHideTts(true);
+                    }}
+                    className="underline hover:opacity-100"
+                  >
+                    Hide
+                  </button>
+                </div>
                 <AudioPlayer 
                   text={article.content || ''}
                   onAudioStart={() => {

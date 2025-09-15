@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import ArticleItem from "./ArticleItem";
 import ArticleLoadingState from "./ArticleLoadingState";
 import { useArticleManagement } from "../hooks/useArticleManagement";
@@ -27,9 +27,24 @@ const ArticleViewer = ({ articles, onArticleChange, onArticleView }: ArticleView
     ttsPlayingIndex
   } = useArticleManagement(articles, onArticleChange, onArticleView);
 
+
+  const [animationActive, setAnimationActive] = useState(true);
+
+  useEffect(() => {
+    const checkTranslated = () => {
+      const cls = document.documentElement.className || "";
+      const translated = cls.includes("translated-ltr") || cls.includes("translated-rtl");
+      setAnimationActive(!translated);
+    };
+    checkTranslated();
+    const observer = new MutationObserver(() => checkTranslated());
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ["class"] });
+    return () => observer.disconnect();
+  }, []);
+
   const { displayedText, progress } = useTextAnimation(
     currentArticle?.content || "",
-    true
+    animationActive
   );
 
   // Set up global TTS handlers for ArticleItem to use

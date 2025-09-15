@@ -2,6 +2,7 @@
 import { useState, useCallback } from "react";
 import { getRandomArticles, getRelatedArticles } from "../services/wikipediaService";
 import { useImprovedArticleIntersection } from "./useImprovedArticleIntersection";
+import { useLanguage } from "../contexts/LanguageContext";
 
 export const useArticleManagement = (
   initialArticles: any[], 
@@ -11,6 +12,8 @@ export const useArticleManagement = (
   const [articles, setArticles] = useState(initialArticles);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
+  
+  const { currentLanguage } = useLanguage();
 
   const currentArticle = articles[currentIndex];
 
@@ -21,8 +24,8 @@ export const useArticleManagement = (
       console.log('Loading more articles...');
       setIsLoading(true);
       const newArticles = currentArticle 
-        ? await getRelatedArticles(currentArticle)
-        : await getRandomArticles(3);
+        ? await getRelatedArticles(currentArticle, currentLanguage)
+        : await getRandomArticles(3, undefined, currentLanguage);
       console.log('Loaded new articles:', newArticles.length);
       setArticles(prev => [...prev, ...newArticles]);
     } catch (error) {
@@ -30,7 +33,7 @@ export const useArticleManagement = (
     } finally {
       setIsLoading(false);
     }
-  }, [isLoading, currentArticle]);
+  }, [isLoading, currentArticle, currentLanguage]);
 
   const handleCurrentIndexChange = useCallback((newIndex: number) => {
     if (newIndex !== currentIndex && newIndex >= 0 && newIndex < articles.length) {
