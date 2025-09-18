@@ -31,3 +31,4 @@ Thanks to Versel, I has able to put this here : (https://ticdia.vercel.app/).
 
 ## Tip 
 you can tip me here : 
+ko_fi: ko-fi.com/ticdia
