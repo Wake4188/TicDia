@@ -23,10 +23,11 @@ This project is built with .
 
 ## 🌐 Language Support
 
-You should be able to akes the app in over 10 languages now. Sence I only speak English, French and a litle German, if you spot false translation tell me.
+You should be able to akes the app in over 10 languages now.
 
 ## 🌐 Internet Support
 
-Thanks to Versel, I has able to put this here : https://wiktoc.vercel.app/.
-It _should_be on google with these search keys : w-810277 versel.
-I'm work on getting it to bing and qwant.
+Thanks to Versel, I has able to put this here : (https://ticdia.vercel.app/).
+
+## Tip 
+you can tip me here : 
