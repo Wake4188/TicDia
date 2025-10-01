@@ -148,7 +148,7 @@ const Auth = () => {
   return <div className="min-h-screen bg-wikitok-dark flex items-center justify-center px-4">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-tictok-red mb-2">TikDia</h1>
+          <h1 className="text-3xl font-bold text-tictok-red mb-2">TicDia</h1>
           <p className="text-white/60">
             {isLogin ? "Welcome back!" : "Join the community"}
           </p>

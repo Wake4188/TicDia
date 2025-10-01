@@ -11,3 +11,9 @@ verify_jwt = false
 
 [functions.translate]
 verify_jwt = false
+
+[functions.rss-feed]
+verify_jwt = false
+
+[functions.explain-article]
+verify_jwt = false

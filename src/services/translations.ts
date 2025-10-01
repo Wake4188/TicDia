@@ -52,6 +52,10 @@ export const translations = {
     edit: "Edit",
     share: "Share",
     view: "View",
+    upvote: "Upvote",
+    explainWithAI: "Explain with AI",
+    explaining: "Explaining...",
+    aiExplanation: "AI Explanation",
     
     // Categories
     categories: {

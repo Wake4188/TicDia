@@ -37,7 +37,7 @@ const Recap = () => {
   const shareRecap = async () => {
     if (!analytics) return;
 
-    const text = `🎉 My TikDia Year in Review!\n\n📚 ${analytics.articles_viewed} articles read\n📏 ${Math.round(analytics.total_scroll_distance / 1000)}km scrolled\n🔥 ${analytics.longest_scroll_streak} day streak\n\nJoin me on TikDia!`;
+    const text = `🎉 My TicDia Year in Review!\n\n📚 ${analytics.articles_viewed} articles read\n📏 ${Math.round(analytics.total_scroll_distance / 1000)}km scrolled\n🔥 ${analytics.longest_scroll_streak} day streak\n\nJoin me on TicDia!`;
     
     if (navigator.share) {
       try {
@@ -65,10 +65,10 @@ const Recap = () => {
       <div className="min-h-screen bg-black flex items-center justify-center p-4">
         <Card className="bg-white/5 border-white/10 p-8 text-center max-w-md">
           <Calendar className="w-16 h-16 text-primary mx-auto mb-4" />
-          <h2 className="text-2xl font-bold text-white mb-4">Not Yet Available</h2>
-          <p className="text-white/60 mb-4">
-            Your personalized recap will be available after you've been using TikDia for 365 days.
-          </p>
+        <h2 className="text-2xl font-bold text-white mb-4">Not Yet Available</h2>
+        <p className="text-white/60 mb-4">
+          Your personalized recap will be available after you've been using TicDia for 365 days.
+        </p>
           {analytics && (
             <p className="text-white/40 text-sm">
               Days since joining: {getDaysSinceFirstVisit(analytics.first_visit_date)}
@@ -97,10 +97,10 @@ const Recap = () => {
           className="text-6xl md:text-8xl font-bold mb-8 bg-gradient-to-r from-primary via-purple-500 to-pink-500 bg-clip-text text-transparent"
           initial={{ scale: 0.5 }}
           animate={{ scale: 1 }}
-          transition={{ delay: 0.5, duration: 0.8 }}
-        >
-          Your TikDia
-        </motion.h1>
+        transition={{ delay: 0.5, duration: 0.8 }}
+      >
+        Your TicDia
+      </motion.h1>
         <motion.h2 
           className="text-4xl md:text-6xl font-bold mb-4"
           initial={{ y: 50, opacity: 0 }}
@@ -218,7 +218,7 @@ const Recap = () => {
           viewport={{ once: true }}
         >
           <Card className="bg-gradient-to-br from-primary/20 to-purple-500/20 border-primary/30 p-8 max-w-md w-full text-center">
-            <div className="text-2xl font-bold mb-4">TikDia</div>
+            <div className="text-2xl font-bold mb-4">TicDia</div>
             <div className="text-lg font-semibold mb-6">
               {user?.email?.split('@')[0]}'s Year in Review
             </div>

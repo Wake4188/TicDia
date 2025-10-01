@@ -62,10 +62,10 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
         <div className="flex items-center justify-between px-4 py-2">
           <div
             className="text-lg font-bold text-white cursor-pointer hover:text-white/80 transition-colors drop-shadow-[0_0_8px_rgba(255,255,255,0.5)]"
-            onClick={() => navigate('/')}
-          >
-            TikDia
-          </div>
+          onClick={() => navigate('/')}
+        >
+          TicDia
+        </div>
           <button onClick={() => setIsOpen(true)} className={`${isDark ? 'bg-black/20 text-white' : 'bg-white/80 text-gray-700'} p-2 rounded-full`}>
             <Menu className="w-5 h-5" />
           </button>
@@ -75,10 +75,10 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
       {isOpen && <div className="fixed inset-0 bg-black/50 z-50" onClick={() => setIsOpen(false)} />}
 
       <div className={`fixed top-0 right-0 h-full w-80 ${isDark ? 'bg-black/95' : 'bg-white/95'} backdrop-blur-md z-50 transform transition-transform duration-300 ${isOpen ? 'translate-x-0' : 'translate-x-full'}`}>
-        <div className="p-4">
-          <div className="flex items-center justify-between mb-6">
-            <div className="text-xl font-bold text-tictok-red">TikDia</div>
-            <button onClick={() => setIsOpen(false)} className={`p-2 rounded-full ${isDark ? 'hover:bg-white/10' : 'hover:bg-gray-100'}`}>
+      <div className="p-4 h-full overflow-y-auto">
+        <div className="flex items-center justify-between mb-6">
+          <div className="text-xl font-bold text-tictok-red">TicDia</div>
+          <button onClick={() => setIsOpen(false)} className={`p-2 rounded-full ${isDark ? 'hover:bg-white/10' : 'hover:bg-gray-100'}`}>
               <X className={`w-5 h-5 ${isDark ? 'text-white' : 'text-gray-900'}`} />
             </button>
           </div>
@@ -99,7 +99,6 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
                   articleId={currentArticle.id?.toString() || currentArticle.title}
                   articleTitle={currentArticle.title}
                   articleUrl={currentArticle.url}
-                  compact={false}
                 />
               </div>
             )}

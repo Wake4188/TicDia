@@ -46,7 +46,7 @@ export const AnalyticsCheck = () => {
     >
       <Card className="bg-gradient-to-r from-primary/20 to-purple-500/20 border-primary/30 p-4 text-center max-w-sm">
         <Gift className="w-8 h-8 text-primary mx-auto mb-2" />
-        <h3 className="text-white font-bold mb-1">Your TikDia Recap is Ready! 🎉</h3>
+        <h3 className="text-white font-bold mb-1">Your TicDia Recap is Ready! 🎉</h3>
         <p className="text-white/60 text-sm mb-3">
           {daysSinceJoining} days of knowledge await you
         </p>
