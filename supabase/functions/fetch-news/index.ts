@@ -6,14 +6,16 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
-// Rate limiting
+// Rate limiting: Store request timestamps per user
 const rateLimitStore = new Map<string, number[]>()
 const RATE_LIMIT_WINDOW = 60000 // 1 minute
-const MAX_REQUESTS_PER_WINDOW = 20
+const MAX_REQUESTS_PER_WINDOW = 10
 
 function checkRateLimit(userId: string): boolean {
   const now = Date.now()
   const userRequests = rateLimitStore.get(userId) || []
+  
+  // Filter out old requests
   const recentRequests = userRequests.filter(timestamp => now - timestamp < RATE_LIMIT_WINDOW)
   
   if (recentRequests.length >= MAX_REQUESTS_PER_WINDOW) {
@@ -31,7 +33,7 @@ serve(async (req) => {
   }
 
   try {
-    // Authenticate user
+    // Get authenticated user
     const authHeader = req.headers.get('Authorization')
     if (!authHeader) {
       return new Response(
@@ -62,69 +64,62 @@ serve(async (req) => {
       )
     }
 
-    const { text, voice } = await req.json()
+    const { source } = await req.json()
 
-    if (!text) {
-      throw new Error('Text is required')
-    }
+    if (source === 'newsapi') {
+      const NEWS_API_KEY = Deno.env.get('NEWS_API_KEY')
+      if (!NEWS_API_KEY) {
+        throw new Error('NEWS_API_KEY not configured')
+      }
 
-    const ELEVENLABS_API_KEY = Deno.env.get('ELEVENLABS_API_KEY')
-    if (!ELEVENLABS_API_KEY) {
-      throw new Error('ElevenLabs API key not configured')
-    }
-
-    // Generate speech from text using ElevenLabs
-    const response = await fetch('https://api.elevenlabs.io/v1/text-to-speech/' + (voice || 'pNInz6obpgDQGcFmaJgB'), {
-      method: 'POST',
-      headers: {
-        'Accept': 'audio/mpeg',
-        'Content-Type': 'application/json',
-        'xi-api-key': ELEVENLABS_API_KEY,
-      },
-      body: JSON.stringify({
-        text: text.slice(0, 2500), // Limit text length for better performance
-        model_id: 'eleven_turbo_v2_5',
-        voice_settings: {
-          stability: 0.5,
-          similarity_boost: 0.8,
-          style: 0.0,
-          use_speaker_boost: true
+      const response = await fetch(
+        `https://newsapi.org/v2/top-headlines?country=us&pageSize=8`,
+        {
+          headers: {
+            'X-Api-Key': NEWS_API_KEY
+          }
         }
-      }),
-    })
+      )
 
-    if (!response.ok) {
-      const error = await response.text()
-      throw new Error(`ElevenLabs API error: ${error}`)
+      if (!response.ok) {
+        throw new Error(`NewsAPI Error: ${response.status}`)
+      }
+
+      const data = await response.json()
+      return new Response(
+        JSON.stringify(data.articles || []),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    } else if (source === 'nyt') {
+      const NYT_API_KEY = Deno.env.get('NYT_API_KEY')
+      if (!NYT_API_KEY) {
+        throw new Error('NYT_API_KEY not configured')
+      }
+
+      const response = await fetch(
+        `https://api.nytimes.com/svc/news/v3/content/all/all.json?api-key=${NYT_API_KEY}&limit=8`
+      )
+
+      if (!response.ok) {
+        throw new Error(`NYT API Error: ${response.status}`)
+      }
+
+      const data = await response.json()
+      return new Response(
+        JSON.stringify(data.results || []),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    } else {
+      return new Response(
+        JSON.stringify({ error: 'Invalid source' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
     }
-
-    // Convert audio buffer to base64
-    const arrayBuffer = await response.arrayBuffer()
-    const uint8Array = new Uint8Array(arrayBuffer)
-    
-    // Process in chunks to avoid stack overflow
-    let binaryString = ''
-    const chunkSize = 8192
-    for (let i = 0; i < uint8Array.length; i += chunkSize) {
-      const chunk = uint8Array.slice(i, i + chunkSize)
-      binaryString += String.fromCharCode(...chunk)
-    }
-    const base64Audio = btoa(binaryString)
-
-    return new Response(
-      JSON.stringify({ audioContent: base64Audio }),
-      {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      },
-    )
   } catch (error) {
-    console.error('Text-to-speech error:', error)
+    console.error('Error fetching news:', error)
     return new Response(
       JSON.stringify({ error: error.message }),
-      {
-        status: 400,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      },
+      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
   }
 })

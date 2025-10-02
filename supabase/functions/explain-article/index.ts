@@ -1,9 +1,29 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.3'
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
+
+// Rate limiting
+const rateLimitStore = new Map<string, number[]>()
+const RATE_LIMIT_WINDOW = 60000
+const MAX_REQUESTS_PER_WINDOW = 10
+
+function checkRateLimit(userId: string): boolean {
+  const now = Date.now()
+  const userRequests = rateLimitStore.get(userId) || []
+  const recentRequests = userRequests.filter(timestamp => now - timestamp < RATE_LIMIT_WINDOW)
+  
+  if (recentRequests.length >= MAX_REQUESTS_PER_WINDOW) {
+    return false
+  }
+  
+  recentRequests.push(now)
+  rateLimitStore.set(userId, recentRequests)
+  return true
+}
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -11,6 +31,37 @@ serve(async (req) => {
   }
 
   try {
+    // Authenticate user
+    const authHeader = req.headers.get('Authorization')
+    if (!authHeader) {
+      return new Response(
+        JSON.stringify({ error: 'Authentication required' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')!
+    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+    const supabase = createClient(supabaseUrl, supabaseKey)
+
+    const token = authHeader.replace('Bearer ', '')
+    const { data: { user }, error: authError } = await supabase.auth.getUser(token)
+
+    if (authError || !user) {
+      return new Response(
+        JSON.stringify({ error: 'Invalid authentication' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+
+    // Check rate limit
+    if (!checkRateLimit(user.id)) {
+      return new Response(
+        JSON.stringify({ error: 'Rate limit exceeded. Please try again later.' }),
+        { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+
     const { articleContent, articleTitle, language } = await req.json();
     
     if (!articleContent || !articleTitle || !language) {

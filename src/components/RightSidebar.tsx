@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Bookmark, Share2, Edit, BookOpen, MoreVertical, Sparkles } from "lucide-react";
+import { Bookmark, Share2, Edit, BookOpen, MoreVertical } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
@@ -12,12 +12,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 
 const RightSidebar = ({ article }) => {
   const { user } = useAuth();
@@ -28,9 +22,6 @@ const RightSidebar = ({ article }) => {
   const [isSaved, setIsSaved] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const isMobile = useMobileDetection();
-  const [showExplanation, setShowExplanation] = useState(false);
-  const [explanation, setExplanation] = useState("");
-  const [isExplaining, setIsExplaining] = useState(false);
 
   // Check if article is already saved when component mounts or user/article changes
   useEffect(() => {
@@ -169,57 +160,6 @@ const RightSidebar = ({ article }) => {
     }
   };
 
-  const handleExplainWithAI = async () => {
-    if (!user) {
-      toast({
-        title: t.signIn + " required",
-        description: "Please sign in to use AI features.",
-        action: (
-          <button
-            onClick={() => navigate('/auth')}
-            className="bg-tictok-red text-white px-3 py-1 rounded text-sm hover:bg-tictok-red/90"
-          >
-            {t.signIn}
-          </button>
-        ),
-      });
-      return;
-    }
-
-    setIsExplaining(true);
-    setShowExplanation(true);
-    setExplanation("");
-
-    try {
-      const { data, error } = await supabase.functions.invoke('explain-article', {
-        body: {
-          articleContent: article.content,
-          articleTitle: article.title,
-          language: currentLanguage.code
-        }
-      });
-
-      if (error) {
-        throw error;
-      }
-
-      if (data?.explanation) {
-        setExplanation(data.explanation);
-      } else {
-        throw new Error("No explanation received");
-      }
-    } catch (error) {
-      console.error('Error explaining article:', error);
-      toast({
-        title: "Error",
-        description: "Failed to generate explanation. Please try again.",
-        variant: "destructive",
-      });
-      setShowExplanation(false);
-    } finally {
-      setIsExplaining(false);
-    }
-  };
 
   if (isMobile) {
     return (
@@ -263,15 +203,6 @@ const RightSidebar = ({ article }) => {
               <BookOpen className="w-4 h-4 mr-2" />
               {t.view}
             </DropdownMenuItem>
-            {user && (
-              <DropdownMenuItem 
-                onClick={handleExplainWithAI}
-                className="hover:bg-white/10 focus:bg-white/10"
-              >
-                <Sparkles className="w-4 h-4 mr-2" />
-                {t.explainWithAI}
-              </DropdownMenuItem>
-            )}
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
@@ -279,26 +210,7 @@ const RightSidebar = ({ article }) => {
   }
 
   return (
-    <>
-      <Dialog open={showExplanation} onOpenChange={setShowExplanation}>
-        <DialogContent className="bg-black/90 backdrop-blur-sm border border-white/20 text-white max-w-2xl max-h-[80vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="text-xl font-bold">{t.aiExplanation}</DialogTitle>
-          </DialogHeader>
-          <div className="mt-4">
-            {isExplaining ? (
-              <div className="flex items-center justify-center py-8">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
-                <span className="ml-3">{t.explaining}</span>
-              </div>
-            ) : (
-              <p className="text-white/90 leading-relaxed whitespace-pre-wrap">{explanation}</p>
-            )}
-          </div>
-        </DialogContent>
-      </Dialog>
-      
-      <div className="fixed right-4 bottom-20 flex flex-col items-center space-y-4 z-50">
+    <div className="fixed right-4 bottom-20 flex flex-col items-center space-y-4 z-50">
         <div className="flex flex-col items-center">
           <button 
             className={`sidebar-icon ${isSaved ? 'text-wikitok-red' : ''} ${isLoading ? 'opacity-50' : ''}`} 
@@ -330,17 +242,7 @@ const RightSidebar = ({ article }) => {
           </button>
           <span className="text-xs mt-1">{t.view}</span>
         </div>
-        
-        {user && (
-          <div className="flex flex-col items-center">
-            <button className="sidebar-icon" onClick={handleExplainWithAI}>
-              <Sparkles className="w-7 h-7" />
-            </button>
-            <span className="text-xs mt-1">{t.explainWithAI}</span>
-          </div>
-        )}
       </div>
-    </>
   );
 };
 

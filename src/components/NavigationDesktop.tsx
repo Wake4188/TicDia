@@ -1,14 +1,19 @@
-import { Search, Compass, User, LogOut, Calendar } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { Search, User, Compass, Calendar } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useLanguage } from "@/contexts/LanguageContext";
+import LanguageSelector from "./LanguageSelector";
+
 interface NavigationDesktopProps {
   searchValue: string;
   onSearchClick: () => void;
   onRandomClick: () => void;
   onTodayClick: () => void;
 }
+
 const NavigationDesktop = ({
   searchValue,
   onSearchClick,
@@ -21,6 +26,7 @@ const NavigationDesktop = ({
   const { currentLanguage, translations } = useLanguage();
   const t = translations;
   const isDark = theme === 'dark';
+  
   const handleDiscoverClick = () => {
     navigate("/discover");
   };
@@ -37,6 +43,10 @@ const NavigationDesktop = ({
           <div 
             className={`flex items-center gap-2 cursor-pointer transition-colors duration-300 text-white hover:text-tictok-red`}
             onClick={handleAuthClick}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => e.key === 'Enter' && handleAuthClick()}
+            aria-label={user ? t.profile : t.signIn}
           >
             {user ? (
               <>
@@ -58,6 +68,10 @@ const NavigationDesktop = ({
         <div 
           className={`flex items-center ${isDark ? 'bg-black/20' : 'bg-white/80'} backdrop-blur-sm rounded-full px-4 py-1.5 cursor-pointer transition-all duration-300 min-w-80`}
           onClick={onSearchClick}
+          role="button"
+          tabIndex={0}
+          onKeyDown={(e) => e.key === 'Enter' && onSearchClick()}
+          aria-label={t.search}
         >
           <Search className={`w-4 h-4 ${isDark ? 'text-white/60' : 'text-gray-500'} mr-2`} />
           <span className={`${isDark ? 'text-white/60' : 'text-gray-500'} text-sm`}>
@@ -67,20 +81,39 @@ const NavigationDesktop = ({
 
         {/* Right Section */}
         <div className="flex items-center gap-4">
-          <Compass 
-            className={`w-5 h-5 cursor-pointer transition-colors duration-300 text-white hover:text-tictok-red`}
+          <Button
+            variant="ghost"
             onClick={handleDiscoverClick}
-          />
-          <div 
-            onClick={onTodayClick}
-            className={`flex items-center space-x-2 px-3 py-1.5 rounded-lg transition-all cursor-pointer ${isDark ? 'hover:bg-white/10 text-white/70 hover:text-white' : 'hover:bg-black/5 text-gray-600 hover:text-gray-900'}`}
+            className="text-gray-400 hover:text-white hover:bg-white/5 transition-colors"
+            aria-label={t.discover}
           >
-            <Calendar className="w-4 h-4" />
-            <span>{t.today}</span>
-          </div>
-          <div className="text-xl font-bold text-white cursor-pointer hover:text-white/80 transition-colors drop-shadow-[0_0_8px_rgba(255,255,255,0.5)]" onClick={() => navigate("/")}>
+            <Compass className="w-5 h-5 mr-2" />
+            {t.discover}
+          </Button>
+
+          <Button
+            variant="ghost"
+            onClick={onTodayClick}
+            className="flex items-center gap-2 text-gray-400 hover:text-white hover:bg-white/5 transition-colors"
+            aria-label={t.today}
+          >
+            <Calendar className="w-5 h-5" />
+            {t.today}
+          </Button>
+
+          <h1 
+            onClick={() => navigate('/')}
+            className="text-2xl font-bold cursor-pointer hover:opacity-80 transition-opacity"
+            style={{ color: isDark ? '#FFFFFF' : '#000000' }}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => e.key === 'Enter' && navigate('/')}
+            aria-label="Navigate to home"
+          >
             TicDia
-          </div>
+          </h1>
+          
+          <LanguageSelector />
         </div>
       </div>
     </div>

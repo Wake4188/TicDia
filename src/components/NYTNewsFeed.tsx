@@ -3,6 +3,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ExternalLink, Calendar, Clock } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 interface NYTArticle {
   title: string;
   abstract: string;
@@ -24,19 +25,32 @@ const NYTNewsFeed = () => {
   const [articles, setArticles] = useState<NYTArticle[]>([]);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
-  const NYT_API_KEY = "CgNmskY4a1yqFpXiTyLDXLVLNmfHV1D1";
+  
   useEffect(() => {
     fetchNews();
   }, []);
+  
   const fetchNews = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`https://api.nytimes.com/svc/news/v3/content/all/all.json?api-key=${NYT_API_KEY}&limit=8`);
-      if (!response.ok) {
-        throw new Error('Failed to fetch news');
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        console.warn('User not authenticated, cannot fetch NYT news');
+        setLoading(false);
+        return;
       }
-      const data = await response.json();
-      setArticles(data.results || []);
+
+      const { data, error } = await supabase.functions.invoke('fetch-news', {
+        body: { source: 'nyt' },
+        headers: {
+          Authorization: `Bearer ${session.access_token}`
+        }
+      });
+      
+      if (error) throw error;
+      
+      setArticles(data || []);
     } catch (error) {
       console.error('Error fetching NYT news:', error);
       toast({

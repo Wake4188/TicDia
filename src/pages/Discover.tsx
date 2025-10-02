@@ -80,18 +80,20 @@ const Discover = () => {
   const articles = data?.pages.flat() ?? [];
 
   return (
-    <div className="h-screen overflow-y-auto pt-14 pb-20">
-      <div className="sticky top-0 z-10 bg-black/70 backdrop-blur-sm">
+    <div className="h-screen overflow-y-auto pb-20">
+      <div className="sticky top-0 z-10 bg-black/70 backdrop-blur-sm pt-14">
         <div className="flex items-center justify-between px-4 py-2">
           <Button
             variant="ghost"
             onClick={() => navigate('/')}
             className="text-gray-400 hover:text-white"
+            aria-label="Back to Home"
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
+            <span className="sr-only">Back to Home</span>
             ← Back to Home
           </Button>
-          <h1 className="text-lg font-semibold text-white">{t.discover}</h1>
+          <h1 className="text-lg font-semibold text-white" role="heading" aria-level={1}>{t.discover}</h1>
           <div className="w-20"></div> {/* Spacer for centering */}
         </div>
         <ScrollArea className="w-full whitespace-nowrap">
@@ -105,6 +107,8 @@ const Discover = () => {
                     ? "bg-wikitok-red text-white"
                     : "bg-white/10 hover:bg-white/20"
                 }`}
+                aria-label={`Filter by ${category}`}
+                aria-pressed={selectedCategory === category}
               >
                 {category}
               </button>
@@ -125,6 +129,10 @@ const Discover = () => {
               key={`${article.id}-${article.title}`}
               className="relative aspect-[9/16] group cursor-pointer"
               onClick={() => handleArticleClick(article)}
+              role="article"
+              tabIndex={0}
+              onKeyDown={(e) => e.key === 'Enter' && handleArticleClick(article)}
+              aria-label={`Read article: ${article.title}`}
             >
               <img
                 src={article.image}

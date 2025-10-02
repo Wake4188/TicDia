@@ -1,3 +1,4 @@
+import { supabase } from "@/integrations/supabase/client";
 
 export interface NewsApiArticle {
   title: string;
@@ -11,32 +12,28 @@ export interface NewsApiArticle {
   author?: string;
 }
 
-export interface NewsApiResponse {
-  status: string;
-  totalResults: number;
-  articles: NewsApiArticle[];
-}
-
-const NEWS_API_KEY = "ec6c13feca684e75bb63b86dfac170b7";
-
 export const fetchNewsApiHeadlines = async (): Promise<NewsApiArticle[]> => {
   try {
-    const response = await fetch(
-      `https://newsapi.org/v2/top-headlines?country=us&pageSize=8`,
-      {
-        headers: {
-          'X-Api-Key': NEWS_API_KEY
-        }
-      }
-    );
+    const { data: { session } } = await supabase.auth.getSession();
     
-    if (!response.ok) {
-      throw new Error(`NewsAPI Error: ${response.status}`);
+    if (!session) {
+      console.warn('User not authenticated, cannot fetch news');
+      return [];
+    }
+
+    const { data, error } = await supabase.functions.invoke('fetch-news', {
+      body: { source: 'newsapi' },
+      headers: {
+        Authorization: `Bearer ${session.access_token}`
+      }
+    });
+    
+    if (error) {
+      console.error('Error fetching NewsAPI headlines:', error);
+      throw error;
     }
     
-    const data: NewsApiResponse = await response.json();
-    console.log('NewsAPI response:', data);
-    return data.articles || [];
+    return data || [];
   } catch (error) {
     console.error('Error fetching NewsAPI headlines:', error);
     throw error;

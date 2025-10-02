@@ -74,8 +74,8 @@ const Today = () => {
   const [selectedArticle, setSelectedArticle] = useState<{ article_title: string; article_url: string } | null>(null);
   const [showAllArticles, setShowAllArticles] = useState(false);
 
-  // Check if user is admin
-  const isAdmin = user?.email === "jessica.wilhide@gmail.com";
+  // Check if user is admin - will work after migration is approved
+  const isAdmin = false; // TODO: Enable after user_roles migration is run
 
   // Get today's date
   const today = new Date();

@@ -4,7 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ExternalLink, Calendar, Clock, Newspaper } from "lucide-react";
-
+import { supabase } from "@/integrations/supabase/client";
 import { fetchNewsApiHeadlines, NewsApiArticle } from "@/services/newsApiService";
 import { useLanguage } from "@/contexts/LanguageContext";
 
@@ -62,8 +62,6 @@ const NewsFeed = () => {
     return result;
   };
 
-  const NYT_API_KEY = "CgNmskY4a1yqFpXiTyLDXLVLNmfHV1D1";
-
   useEffect(() => {
     fetchAllNews();
   }, []);
@@ -86,18 +84,23 @@ const NewsFeed = () => {
 
   const fetchNYTNews = async () => {
     try {
-      const response = await fetch(
-        `https://api.nytimes.com/svc/news/v3/content/all/all.json?api-key=${NYT_API_KEY}&limit=8`
-      );
+      const { data: { session } } = await supabase.auth.getSession();
       
-      if (!response.ok) {
-        throw new Error('Failed to fetch NYT news');
+      if (!session) {
+        console.warn('User not authenticated, cannot fetch NYT news');
+        return;
       }
+
+      const { data, error } = await supabase.functions.invoke('fetch-news', {
+        body: { source: 'nyt' },
+        headers: {
+          Authorization: `Bearer ${session.access_token}`
+        }
+      });
       
-      const data = await response.json();
+      if (error) throw error;
       
-      // Remove duplicates and set articles
-      const articles = data.results || [];
+      const articles = data || [];
       const uniqueArticles = articles.filter((article: NYTArticle, index: number, self: NYTArticle[]) => 
         index === self.findIndex(a => a.url === article.url)
       );
