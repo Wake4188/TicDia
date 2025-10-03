@@ -60,22 +60,48 @@ serve(async (req) => {
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     } else if (source === 'nyt') {
-      const NYT_API_KEY = Deno.env.get('NYT_API_KEY')
-      if (!NYT_API_KEY) {
-        throw new Error('NYT_API_KEY not configured')
-      }
-
-      const response = await fetch(
-        `https://api.nytimes.com/svc/news/v3/content/all/all.json?api-key=${NYT_API_KEY}&limit=8`
-      )
+      const response = await fetch('https://rss.nytimes.com/services/xml/rss/nyt/World.xml')
 
       if (!response.ok) {
-        throw new Error(`NYT API Error: ${response.status}`)
+        throw new Error(`NYT RSS Error: ${response.status}`)
       }
 
-      const data = await response.json()
+      const text = await response.text()
+      const xml = new DOMParser().parseFromString(text, 'text/xml')
+      const items = Array.from(xml.querySelectorAll('item'))
+
+      const articles = items.slice(0, 8).map((item) => {
+        const getImage = () => {
+          const mediaContent = item.querySelector('media\\:content')
+          if (mediaContent?.getAttribute('url')) return mediaContent.getAttribute('url')
+          const mediaThumbnail = item.querySelector('media\\:thumbnail')
+          if (mediaThumbnail?.getAttribute('url')) return mediaThumbnail.getAttribute('url')
+          return null
+        }
+
+        const imageUrl = getImage()
+        
+        return {
+          title: item.querySelector('title')?.textContent || 'Untitled',
+          abstract: item.querySelector('description')?.textContent?.replace(/<[^>]+>/g, '').trim() || '',
+          url: item.querySelector('link')?.textContent || '#',
+          published_date: item.querySelector('pubDate')?.textContent || new Date().toISOString(),
+          multimedia: imageUrl ? [{
+            url: imageUrl,
+            format: 'mediumThreeByTwo440',
+            height: 293,
+            width: 440,
+            type: 'image',
+            subtype: 'photo',
+            caption: ''
+          }] : [],
+          byline: item.querySelector('dc\\:creator')?.textContent || 'NYT',
+          section: 'World'
+        }
+      })
+
       return new Response(
-        JSON.stringify(data.results || []),
+        JSON.stringify(articles),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     } else {
