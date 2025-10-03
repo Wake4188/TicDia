@@ -31,13 +31,24 @@ const Index = () => {
     queryKey: ["articles", searchQuery, currentLanguage.code],
     queryFn: async () => {
       if (searchQuery) {
-        return location.state?.reorderedResults || await searchArticles(searchQuery, currentLanguage);
+        const results = location.state?.reorderedResults || await searchArticles(searchQuery, currentLanguage);
+        return results.filter(article => article.image);
       }
-      return await getRandomArticles(3, undefined, currentLanguage);
+
+      // Resilient fetching logic - retry until we find articles with images
+      let attempts = 0;
+      while (attempts < 5) {
+        const randomArticles = await getRandomArticles(10, undefined, currentLanguage);
+        const articlesWithImages = randomArticles.filter(article => article.image);
+        if (articlesWithImages.length > 0) {
+          return articlesWithImages;
+        }
+        attempts++;
+      }
+      throw new Error("Failed to find articles with images after multiple attempts.");
     },
     retry: 1,
     enabled: !languageLoading,
-    select: (data) => data.filter(article => article.image)
   });
 
   const handleTagClick = (tag: string) => {

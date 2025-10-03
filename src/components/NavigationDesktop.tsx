@@ -38,7 +38,7 @@ const NavigationDesktop = ({
   return (
     <div className="fixed top-0 left-0 right-0 z-50 bg-gradient-to-b from-black/50 to-transparent backdrop-blur-sm">
       <div className="flex items-center justify-between px-6 py-2 max-w-7xl mx-auto">
-        {/* Left Section */}
+        {/* Left Section - Sign In & Language */}
         <div className="flex items-center gap-4">
           <div 
             className={`flex items-center gap-2 cursor-pointer transition-colors duration-300 text-white hover:text-tictok-red`}
@@ -62,9 +62,11 @@ const NavigationDesktop = ({
               </>
             )}
           </div>
+          
+          <LanguageSelector />
         </div>
 
-        {/* Center Section */}
+        {/* Center Section - Search */}
         <div 
           className={`flex items-center ${isDark ? 'bg-black/20' : 'bg-white/80'} backdrop-blur-sm rounded-full px-4 py-1.5 cursor-pointer transition-all duration-300 min-w-80`}
           onClick={onSearchClick}
@@ -79,16 +81,15 @@ const NavigationDesktop = ({
           </span>
         </div>
 
-        {/* Right Section */}
+        {/* Right Section - Discover, Today, Logo */}
         <div className="flex items-center gap-4">
           <Button
             variant="ghost"
             onClick={handleDiscoverClick}
-            className="text-gray-400 hover:text-white hover:bg-white/5 transition-colors"
+            className="text-gray-400 hover:text-white hover:bg-white/5 transition-colors p-2"
             aria-label={t.discover}
           >
-            <Compass className="w-5 h-5 mr-2" />
-            {t.discover}
+            <Compass className="w-5 h-5" />
           </Button>
 
           <Button
@@ -103,7 +104,7 @@ const NavigationDesktop = ({
 
           <h1 
             onClick={() => navigate('/')}
-            className="text-2xl font-bold cursor-pointer hover:opacity-80 transition-opacity"
+            className="text-2xl font-bold cursor-pointer transition-all duration-300 hover:drop-shadow-[0_0_8px_rgba(255,255,255,0.8)]"
             style={{ color: isDark ? '#FFFFFF' : '#000000' }}
             role="button"
             tabIndex={0}
@@ -112,8 +113,6 @@ const NavigationDesktop = ({
           >
             TicDia
           </h1>
-          
-          <LanguageSelector />
         </div>
       </div>
     </div>
