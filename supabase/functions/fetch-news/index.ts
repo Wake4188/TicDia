@@ -1,12 +1,12 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.3'
+import { XMLParser } from 'https://esm.sh/fast-xml-parser@4.4.0'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
-// Rate limiting: Store request timestamps per user
+// Simple in-memory rate limiting (kept from previous version)
 const rateLimitStore = new Map<string, number[]>()
 const RATE_LIMIT_WINDOW = 60000 // 1 minute
 const MAX_REQUESTS_PER_WINDOW = 10
@@ -14,14 +14,8 @@ const MAX_REQUESTS_PER_WINDOW = 10
 function checkRateLimit(userId: string): boolean {
   const now = Date.now()
   const userRequests = rateLimitStore.get(userId) || []
-  
-  // Filter out old requests
-  const recentRequests = userRequests.filter(timestamp => now - timestamp < RATE_LIMIT_WINDOW)
-  
-  if (recentRequests.length >= MAX_REQUESTS_PER_WINDOW) {
-    return false
-  }
-  
+  const recentRequests = userRequests.filter((t) => now - t < RATE_LIMIT_WINDOW)
+  if (recentRequests.length >= MAX_REQUESTS_PER_WINDOW) return false
   recentRequests.push(now)
   rateLimitStore.set(userId, recentRequests)
   return true
@@ -33,88 +27,88 @@ serve(async (req) => {
   }
 
   try {
-    const { source } = await req.json()
+    const body = await req.json().catch(() => ({}))
+    const source = body?.source || 'nyt'
 
-    if (source === 'newsapi') {
-      const NEWS_API_KEY = Deno.env.get('NEWS_API_KEY')
-      if (!NEWS_API_KEY) {
-        throw new Error('NEWS_API_KEY not configured')
-      }
-
-      const response = await fetch(
-        `https://newsapi.org/v2/top-headlines?country=us&pageSize=8`,
-        {
-          headers: {
-            'X-Api-Key': NEWS_API_KEY
-          }
-        }
-      )
-
-      if (!response.ok) {
-        throw new Error(`NewsAPI Error: ${response.status}`)
-      }
-
-      const data = await response.json()
+    // Only NYT is supported; remove NewsAPI to avoid key errors
+    if (source !== 'nyt') {
       return new Response(
-        JSON.stringify(data.articles || []),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      )
-    } else if (source === 'nyt') {
-      const response = await fetch('https://rss.nytimes.com/services/xml/rss/nyt/World.xml')
-
-      if (!response.ok) {
-        throw new Error(`NYT RSS Error: ${response.status}`)
-      }
-
-      const text = await response.text()
-      const xml = new DOMParser().parseFromString(text, 'text/xml')
-      const items = Array.from(xml.querySelectorAll('item'))
-
-      const articles = items.slice(0, 8).map((item) => {
-        const getImage = () => {
-          const mediaContent = item.querySelector('media\\:content')
-          if (mediaContent?.getAttribute('url')) return mediaContent.getAttribute('url')
-          const mediaThumbnail = item.querySelector('media\\:thumbnail')
-          if (mediaThumbnail?.getAttribute('url')) return mediaThumbnail.getAttribute('url')
-          return null
-        }
-
-        const imageUrl = getImage()
-        
-        return {
-          title: item.querySelector('title')?.textContent || 'Untitled',
-          abstract: item.querySelector('description')?.textContent?.replace(/<[^>]+>/g, '').trim() || '',
-          url: item.querySelector('link')?.textContent || '#',
-          published_date: item.querySelector('pubDate')?.textContent || new Date().toISOString(),
-          multimedia: imageUrl ? [{
-            url: imageUrl,
-            format: 'mediumThreeByTwo440',
-            height: 293,
-            width: 440,
-            type: 'image',
-            subtype: 'photo',
-            caption: ''
-          }] : [],
-          byline: item.querySelector('dc\\:creator')?.textContent || 'NYT',
-          section: 'World'
-        }
-      })
-
-      return new Response(
-        JSON.stringify(articles),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      )
-    } else {
-      return new Response(
-        JSON.stringify({ error: 'Invalid source' }),
+        JSON.stringify({ error: 'Only NYT source is supported' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
-  } catch (error) {
+
+    const response = await fetch('https://rss.nytimes.com/services/xml/rss/nyt/World.xml')
+    if (!response.ok) throw new Error(`NYT RSS Error: ${response.status}`)
+
+    const xmlText = await response.text()
+    const parser = new XMLParser({
+      ignoreAttributes: false,
+      attributeNamePrefix: '',
+      removeNSPrefix: true,
+      trimValues: true,
+    })
+
+    const parsed = parser.parse(xmlText)
+    const itemsRaw = parsed?.rss?.channel?.item ?? []
+    const items = Array.isArray(itemsRaw) ? itemsRaw : [itemsRaw]
+
+    const pickImage = (item: any): string | null => {
+      // enclosure url
+      if (item?.enclosure?.url) return item.enclosure.url
+      // media:content or media:thumbnail (after removeNSPrefix: true => content/thumbnail)
+      const contents = item?.content
+      if (Array.isArray(contents)) {
+        const found = contents.find((c) => c?.url)
+        if (found?.url) return found.url
+      } else if (contents?.url) {
+        return contents.url
+      }
+      const thumb = item?.thumbnail
+      if (Array.isArray(thumb)) {
+        const found = thumb.find((t) => t?.url)
+        if (found?.url) return found.url
+      } else if (thumb?.url) {
+        return thumb.url
+      }
+      return null
+    }
+
+    const stripTags = (html: string) => html?.replace(/<[^>]+>/g, '').trim()
+
+    const articles = items.slice(0, 8).map((item: any) => {
+      const imageUrl = pickImage(item)
+      return {
+        title: item?.title || 'Untitled',
+        abstract: stripTags(item?.description || ''),
+        url: item?.link || '#',
+        published_date: item?.pubDate || new Date().toISOString(),
+        multimedia: imageUrl
+          ? [
+              {
+                url: imageUrl,
+                format: 'mediumThreeByTwo440',
+                height: 293,
+                width: 440,
+                type: 'image',
+                subtype: 'photo',
+                caption: '',
+              },
+            ]
+          : [],
+        byline: item?.creator || 'NYT',
+        section: 'World',
+      }
+    })
+
+    return new Response(JSON.stringify(articles), {
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    })
+  } catch (error: any) {
     console.error('Error fetching news:', error)
-    return new Response(
-      JSON.stringify({ error: error.message }),
-      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-    )
+    return new Response(JSON.stringify({ error: error?.message || 'Unknown error' }), {
+      status: 500,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    })
   }
 })
