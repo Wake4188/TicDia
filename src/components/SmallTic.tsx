@@ -5,7 +5,7 @@ import { Button } from "./ui/button";
 import { BookOpen, ExternalLink, Share2 } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 
-interface LittleWikProps {
+interface SmallTicProps {
   isOpen: boolean;
   onClose: () => void;
   article: {
@@ -15,7 +15,7 @@ interface LittleWikProps {
   onOpenFull: (title: string) => void;
 }
 
-const LittleWik = ({ isOpen, onClose, article, onOpenFull }: LittleWikProps) => {
+const SmallTic = ({ isOpen, onClose, article, onOpenFull }: SmallTicProps) => {
   const { toast } = useToast();
   const [articlePreview, setArticlePreview] = useState<string>("");
   const [isLoadingPreview, setIsLoadingPreview] = useState(false);
@@ -127,7 +127,7 @@ const LittleWik = ({ isOpen, onClose, article, onOpenFull }: LittleWikProps) => 
       <DialogContent className="bg-gray-900/95 backdrop-blur-md border-gray-800/50 text-white max-w-lg max-h-[80vh] overflow-hidden">
         <DialogHeader>
           <DialogTitle className="text-lg font-bold text-center">
-            Little Wik
+            Small Tic
           </DialogTitle>
         </DialogHeader>
         <div className="space-y-4 p-4 overflow-y-auto">
@@ -153,7 +153,7 @@ const LittleWik = ({ isOpen, onClose, article, onOpenFull }: LittleWikProps) => 
               className="bg-wikitok-red hover:bg-wikitok-red/90 text-white transition-all duration-300 hover:scale-105"
             >
               <BookOpen className="w-4 h-4 mr-2" />
-              Open in WikiTok
+              Open in TicDia
             </Button>
             
             <div className="flex gap-2">
@@ -182,4 +182,4 @@ const LittleWik = ({ isOpen, onClose, article, onOpenFull }: LittleWikProps) => 
   );
 };
 
-export default LittleWik;
+export default SmallTic;

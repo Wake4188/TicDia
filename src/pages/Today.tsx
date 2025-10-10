@@ -11,7 +11,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Trash2, Plus, ExternalLink, Calendar } from "lucide-react";
-import LittleWik from "@/components/LittleWik";
+import SmallTic from "@/components/SmallTic";
 import NewsFeed from "@/components/NewsFeed";
 import VotingProgressBar from "@/components/VotingProgressBar";
 import { useNavigate } from "react-router-dom";
@@ -70,7 +70,7 @@ const Today = () => {
   const [newArticle, setNewArticle] = useState({ title: "", content: "", url: "" });
   const [wikipediaArticles, setWikipediaArticles] = useState<WikipediaArticle[]>([]);
   const [apNewsArticles, setApNewsArticles] = useState<RSSArticle[]>([]);
-  const [littleWikOpen, setLittleWikOpen] = useState(false);
+  const [smallTicOpen, setSmallTicOpen] = useState(false);
   const [selectedArticle, setSelectedArticle] = useState<{ article_title: string; article_url: string } | null>(null);
   const [showAllArticles, setShowAllArticles] = useState(false);
 
@@ -248,7 +248,7 @@ const Today = () => {
       article_title: article.title,
       article_url: article.fullurl
     });
-    setLittleWikOpen(true);
+    setSmallTicOpen(true);
   };
 
   const handleOpenFull = (title: string) => {
@@ -444,9 +444,9 @@ const Today = () => {
         </div>
       </div>
 
-      <LittleWik
-        isOpen={littleWikOpen}
-        onClose={() => setLittleWikOpen(false)}
+      <SmallTic
+        isOpen={smallTicOpen}
+        onClose={() => setSmallTicOpen(false)}
         article={selectedArticle}
         onOpenFull={handleOpenFull}
       />

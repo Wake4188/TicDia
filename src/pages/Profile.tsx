@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Slider } from "@/components/ui/slider";
 import { ArrowLeft, BookMarked, Eye, Trash2, Search, Mail, Lock, Key } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import LittleWik from "../components/LittleWik";
+import SmallTic from "../components/SmallTic";
 import { loadUserPreferences, saveUserPreferences, UserPreferences } from "@/services/userPreferencesService";
 import { useLanguage } from "../contexts/LanguageContext";
 import { useUserPreferences } from "@/hooks/useUserPreferences";
@@ -38,7 +38,7 @@ const Profile = () => {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedArticle, setSelectedArticle] = useState<SavedArticle | null>(null);
-  const [isLittleWikOpen, setIsLittleWikOpen] = useState(false);
+  const [isSmallTicOpen, setIsSmallTicOpen] = useState(false);
   const [preferences, setPreferences] = useState<UserPreferences>({
     fontFamily: 'Inter',
     backgroundOpacity: 70,
@@ -209,7 +209,7 @@ const Profile = () => {
 
   const handleArticleClick = (article: SavedArticle) => {
     setSelectedArticle(article);
-    setIsLittleWikOpen(true);
+    setIsSmallTicOpen(true);
   };
 
   const handleOpenFull = (title: string) => {
@@ -788,9 +788,9 @@ const Profile = () => {
         </div>
       </div>
 
-      <LittleWik
-        isOpen={isLittleWikOpen}
-        onClose={() => setIsLittleWikOpen(false)}
+      <SmallTic
+        isOpen={isSmallTicOpen}
+        onClose={() => setIsSmallTicOpen(false)}
         article={selectedArticle}
         onOpenFull={handleOpenFull}
       />
