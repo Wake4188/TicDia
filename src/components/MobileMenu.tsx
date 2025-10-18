@@ -58,16 +58,19 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
     userIcon: user ? user.email?.charAt(0).toUpperCase() : undefined
   }];
   return <>
-      <div className="fixed top-0 left-0 right-0 z-50 bg-gradient-to-b from-black/50 to-transparent backdrop-blur-sm">
-        <div className="flex items-center justify-between px-4 py-2">
+      <div className="fixed top-0 left-0 right-0 z-[60] bg-gradient-to-b from-black/50 to-transparent backdrop-blur-sm pointer-events-none">
+        <div className="flex items-center justify-between px-4 py-3 pointer-events-auto">
           <div
-            className="text-lg font-bold text-white cursor-pointer hover:text-white/80 transition-colors drop-shadow-[0_0_8px_rgba(255,255,255,0.5)]"
-          onClick={() => navigate('/')}
-        >
-          TicDia
-        </div>
-          <button onClick={() => setIsOpen(true)} className={`${isDark ? 'bg-black/20 text-white' : 'bg-white/80 text-gray-700'} p-2 rounded-full`}>
-            <Menu className="w-5 h-5" />
+            className="text-xl font-bold text-white cursor-pointer hover:text-white/80 transition-all duration-300 drop-shadow-[0_0_12px_rgba(255,255,255,0.6)]"
+            onClick={() => navigate('/')}
+          >
+            TicDia
+          </div>
+          <button 
+            onClick={() => setIsOpen(true)} 
+            className="bg-black/30 backdrop-blur-sm border border-white/20 text-white p-2.5 rounded-full hover:bg-black/40 transition-all"
+          >
+            <Menu className="w-6 h-6" />
           </button>
         </div>
       </div>

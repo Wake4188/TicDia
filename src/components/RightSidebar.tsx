@@ -166,44 +166,44 @@ const RightSidebar = ({ article }) => {
       <div className="fixed right-4 bottom-20 z-50">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <button className="bg-black/20 backdrop-blur-sm border border-white/20 rounded-full p-3 text-white hover:bg-black/30 transition-all">
+            <button className="bg-black/30 backdrop-blur-sm border border-white/20 rounded-full p-4 text-white hover:bg-black/40 transition-all shadow-lg">
               <MoreVertical className="w-6 h-6" />
             </button>
           </DropdownMenuTrigger>
           <DropdownMenuContent 
             align="end"
             side="top"
-            sideOffset={8}
-            className="bg-black/90 backdrop-blur-sm border border-white/20 text-white z-[100]"
+            sideOffset={12}
+            className="bg-black/95 backdrop-blur-md border border-white/20 text-white z-[100] min-w-[200px]"
           >
             <DropdownMenuItem 
               onClick={handleBookmark} 
               disabled={isLoading}
-              className="hover:bg-white/10 focus:bg-white/10"
+              className="hover:bg-white/10 focus:bg-white/10 cursor-pointer py-3"
             >
-              <Bookmark className={`w-4 h-4 mr-2 ${isSaved ? 'fill-current text-wikitok-red' : ''}`} />
-              {isSaved ? t.saved : t.save}
+              <Bookmark className={`w-5 h-5 mr-3 ${isSaved ? 'fill-current text-wikitok-red' : ''}`} />
+              <span className="text-base">{isSaved ? t.saved : t.save}</span>
             </DropdownMenuItem>
             <DropdownMenuItem 
               onClick={handleShare}
-              className="hover:bg-white/10 focus:bg-white/10"
+              className="hover:bg-white/10 focus:bg-white/10 cursor-pointer py-3"
             >
-              <Share2 className="w-4 h-4 mr-2" />
-              {t.share}
+              <Share2 className="w-5 h-5 mr-3" />
+              <span className="text-base">{t.share}</span>
             </DropdownMenuItem>
             <DropdownMenuItem 
               onClick={handleEdit}
-              className="hover:bg-white/10 focus:bg-white/10"
+              className="hover:bg-white/10 focus:bg-white/10 cursor-pointer py-3"
             >
-              <Edit className="w-4 h-4 mr-2" />
-              {t.edit}
+              <Edit className="w-5 h-5 mr-3" />
+              <span className="text-base">{t.edit}</span>
             </DropdownMenuItem>
             <DropdownMenuItem 
               onClick={handleWikipediaRedirect}
-              className="hover:bg-white/10 focus:bg-white/10"
+              className="hover:bg-white/10 focus:bg-white/10 cursor-pointer py-3"
             >
-              <BookOpen className="w-4 h-4 mr-2" />
-              {t.view}
+              <BookOpen className="w-5 h-5 mr-3" />
+              <span className="text-base">{t.view}</span>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
