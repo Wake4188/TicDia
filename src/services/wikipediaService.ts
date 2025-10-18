@@ -95,7 +95,10 @@ const getRandomArticles = async (count: number = 3, category?: string, language:
     
     if (validArticles.length < count) {
       const moreArticles = await getRandomArticles(count - validArticles.length, category, language);
-      return [...validArticles, ...moreArticles].slice(0, count);
+      // Remove duplicates by ID before merging
+      const combined = [...validArticles, ...moreArticles];
+      const uniqueArticles = Array.from(new Map(combined.map(a => [a.id, a])).values());
+      return uniqueArticles.slice(0, count);
     }
     
     return validArticles.slice(0, count);
