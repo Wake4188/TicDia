@@ -6,6 +6,7 @@ export interface UserPreferences {
   fontFamily: string;
   backgroundOpacity: number;
   highlightColor: string;
+  fontSize: number;
   tts_autoplay?: boolean;
 }
 
@@ -34,6 +35,7 @@ export const loadUserPreferences = async (userId: string): Promise<UserPreferenc
       fontFamily: validateFontFamily(data.font_family),
       backgroundOpacity: validateBackgroundOpacity(data.background_opacity),
       highlightColor: validateHexColor(data.highlight_color),
+      fontSize: (data as any).font_size || 16,
       tts_autoplay: data.tts_autoplay || false,
     };
   } catch (error) {
@@ -58,6 +60,7 @@ export const saveUserPreferences = async (userId: string, preferences: UserPrefe
         font_family: validatedPreferences.fontFamily,
         background_opacity: validatedPreferences.backgroundOpacity,
         highlight_color: validatedPreferences.highlightColor,
+        font_size: preferences.fontSize || 16,
         tts_autoplay: preferences.tts_autoplay || false,
         updated_at: new Date().toISOString(),
       }, {
@@ -78,6 +81,7 @@ export const getDefaultPreferences = (): UserPreferences => ({
   fontFamily: 'Inter',
   backgroundOpacity: 70,
   highlightColor: '#FE2C55',
+  fontSize: 16,
   tts_autoplay: false,
 });
 

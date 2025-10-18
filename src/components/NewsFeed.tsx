@@ -322,7 +322,7 @@ const NewsFeed = () => {
             <SelectTrigger className="w-40 bg-gray-800 border-gray-700 text-white">
               <SelectValue />
             </SelectTrigger>
-            <SelectContent className="bg-gray-800 border-gray-700 z-50" position="popper" sideOffset={5}>
+            <SelectContent className="bg-gray-800 border-gray-700 z-[100]" position="popper" side="top" sideOffset={5}>
               <SelectItem value="nyt" className="text-white focus:bg-gray-700">
                 <div className="flex items-center gap-2">
                   <img src="/lovable-uploads/3a2edeb7-cd16-4493-a86a-5667a46f7870.png" alt="NYT" className="w-4 h-4" />

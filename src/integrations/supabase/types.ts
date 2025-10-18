@@ -255,6 +255,7 @@ export type Database = {
           background_opacity: number
           created_at: string
           font_family: string
+          font_size: number | null
           highlight_color: string
           id: string
           tts_autoplay: boolean
@@ -265,6 +266,7 @@ export type Database = {
           background_opacity?: number
           created_at?: string
           font_family?: string
+          font_size?: number | null
           highlight_color?: string
           id?: string
           tts_autoplay?: boolean
@@ -275,6 +277,7 @@ export type Database = {
           background_opacity?: number
           created_at?: string
           font_family?: string
+          font_size?: number | null
           highlight_color?: string
           id?: string
           tts_autoplay?: boolean

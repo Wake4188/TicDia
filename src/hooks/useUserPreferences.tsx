@@ -48,6 +48,7 @@ export const useUserPreferences = () => {
               fontFamily: prefs.fontFamily || 'Inter',
               backgroundOpacity: prefs.backgroundOpacity || 70,
               highlightColor: prefs.highlightColor || '#FE2C55',
+              fontSize: prefs.fontSize || 16,
               tts_autoplay: Boolean(prefs.tts_autoplay) || false,
             });
             document.documentElement.style.setProperty('--progress-bar-color', prefs.highlightColor || '#FE2C55');
@@ -65,6 +66,7 @@ export const useUserPreferences = () => {
             fontFamily: prefs.fontFamily || 'Inter',
             backgroundOpacity: prefs.backgroundOpacity || 70,
             highlightColor: prefs.highlightColor || '#FE2C55',
+            fontSize: prefs.fontSize || 16,
             tts_autoplay: Boolean(prefs.tts_autoplay) || false,
           });
           document.documentElement.style.setProperty('--progress-bar-color', prefs.highlightColor || '#FE2C55');

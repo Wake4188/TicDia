@@ -42,7 +42,8 @@ const Profile = () => {
   const [preferences, setPreferences] = useState<UserPreferences>({
     fontFamily: 'Inter',
     backgroundOpacity: 70,
-    highlightColor: '#FE2C55'
+    highlightColor: '#FE2C55',
+    fontSize: 16
   });
   const [preferencesLoading, setPreferencesLoading] = useState(true);
   
@@ -101,7 +102,8 @@ const Profile = () => {
         setPreferences({
           fontFamily: prefs.fontFamily || 'Inter',
           backgroundOpacity: prefs.backgroundOpacity || 70,
-          highlightColor: prefs.highlightColor || '#FE2C55'
+          highlightColor: prefs.highlightColor || '#FE2C55',
+          fontSize: prefs.fontSize || 16
         });
       }
     } finally {
@@ -352,12 +354,16 @@ const Profile = () => {
   const fontOptions = [
     { value: 'Inter', label: `Inter (${t.default})` },
     { value: 'Georgia', label: `Georgia (${t.serif})` },
+    { value: 'Merriweather', label: 'Merriweather' },
+    { value: 'Lora', label: 'Lora' },
+    { value: 'Crimson Text', label: 'Crimson Text' },
+    { value: 'PT Serif', label: 'PT Serif' },
     { value: 'Times New Roman', label: 'Times New Roman' },
+    { value: 'Open Sans', label: 'Open Sans' },
+    { value: 'Roboto', label: 'Roboto' },
     { value: 'Arial', label: `Arial (${t.sansSerif})` },
     { value: 'Helvetica', label: 'Helvetica' },
     { value: 'Verdana', label: 'Verdana' },
-    { value: 'Open Sans', label: 'Open Sans' },
-    { value: 'Roboto', label: 'Roboto' },
   ];
 
   const colorOptions = [
@@ -590,6 +596,23 @@ const Profile = () => {
                       </p>
                     </div>
 
+                    <div className="space-y-3 animate-in fade-in-50 slide-in-from-left-4 duration-500" style={{ animationDelay: "250ms" }}>
+                      <label className="text-sm font-medium">
+                        Text Size: {preferences.fontSize}px
+                      </label>
+                      <Slider
+                        value={[preferences.fontSize]}
+                        onValueChange={(value) => updatePreferences({ fontSize: value[0] })}
+                        max={24}
+                        min={12}
+                        step={1}
+                        className="w-full transition-all duration-300"
+                      />
+                      <p className="text-xs text-gray-400">
+                        Adjust the size of article text for comfortable reading
+                      </p>
+                    </div>
+
                     <div className="p-4 bg-gray-800/60 backdrop-blur-sm rounded-lg border border-gray-700/30 transition-all duration-500 hover:border-gray-600/50 animate-in fade-in-50 slide-in-from-bottom-4" style={{ animationDelay: "300ms" }}>
                       <h4 className="text-sm font-medium mb-2">{t.preview}</h4>
                       <div 
@@ -604,7 +627,10 @@ const Profile = () => {
                         />
                         <p 
                           className="relative z-10 text-white mb-4 transition-all duration-300"
-                          style={{ fontFamily: preferences.fontFamily }}
+                          style={{ 
+                            fontFamily: preferences.fontFamily,
+                            fontSize: `${preferences.fontSize}px`
+                          }}
                         >
                           {t.previewText}
                         </p>

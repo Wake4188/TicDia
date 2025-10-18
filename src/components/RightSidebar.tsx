@@ -172,8 +172,9 @@ const RightSidebar = ({ article }) => {
           </DropdownMenuTrigger>
           <DropdownMenuContent 
             align="end"
-            sideOffset={5}
-            className="bg-black/80 backdrop-blur-sm border border-white/20 text-white z-50"
+            side="top"
+            sideOffset={8}
+            className="bg-black/90 backdrop-blur-sm border border-white/20 text-white z-[100]"
           >
             <DropdownMenuItem 
               onClick={handleBookmark} 

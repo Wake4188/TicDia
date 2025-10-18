@@ -40,8 +40,8 @@ const LanguageSelector: React.FC = () => {
             className="fixed inset-0 z-40" 
             onClick={() => setIsOpen(false)}
           />
-          <div className={`absolute bottom-full mb-2 left-0 w-64 rounded-lg border shadow-lg z-50 ${dropdownBg}`}>
-            <div className="py-2 max-h-[60vh] overflow-y-auto">
+          <div className={`absolute top-full mt-2 left-0 w-64 max-w-[90vw] rounded-lg border shadow-lg z-50 ${dropdownBg}`}>
+            <div className="py-2 max-h-[50vh] overflow-y-auto">
               {SUPPORTED_LANGUAGES.map((language) => (
                 <button
                   key={language.code}
