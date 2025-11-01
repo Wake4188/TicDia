@@ -49,5 +49,22 @@ export default defineConfig(({ mode }) => ({
   },
   build: {
     cssCodeSplit: true, // Enable CSS code splitting for better caching
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'react-vendor': ['react', 'react-dom', 'react-router-dom'],
+          'ui-vendor': ['framer-motion', '@radix-ui/react-dialog', '@radix-ui/react-dropdown-menu'],
+          'query-vendor': ['@tanstack/react-query'],
+        },
+      },
+    },
+    target: 'esnext',
+    minify: 'terser',
+    terserOptions: {
+      compress: {
+        drop_console: true,
+        drop_debugger: true,
+      },
+    },
   },
 }));

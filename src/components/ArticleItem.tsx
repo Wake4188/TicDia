@@ -34,7 +34,16 @@ const ArticleItem = ({
   return (
     <div data-index={index} className="article-section h-screen w-screen snap-start snap-always relative flex items-center justify-center">
       <div className="absolute inset-0 w-screen h-screen">
-        <img src={article.image} alt={article.title} className="w-full h-full object-cover" />
+        <img 
+          src={article.image} 
+          alt={article.title} 
+          className="w-full h-full object-cover"
+          loading={index > 0 ? "lazy" : "eager"}
+          decoding="async"
+          width="1920"
+          height="1080"
+          fetchPriority={index === 0 ? "high" : "low"}
+        />
         <div 
           className="absolute inset-0 bg-black" 
           style={{ opacity: userPreferences.backgroundOpacity / 100 }} 

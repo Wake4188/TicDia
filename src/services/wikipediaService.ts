@@ -4,6 +4,7 @@ import { fetchWikipediaContent } from './wikipediaApi';
 import { transformToArticle } from './articleTransformer';
 import { sortByRelevance } from './searchUtils';
 import { Language, DEFAULT_LANGUAGE } from './languageConfig';
+import { cache } from '@/utils/performance';
 
 const getWikipediaApiBase = (language: Language) => `https://${language.wikipediaDomain}/w/api.php`;
 
@@ -51,9 +52,14 @@ const fetchArticles = async (titles: string[], language: Language): Promise<Wiki
   return articles.filter(Boolean) as WikipediaArticle[];
 };
 
-const getRandomArticles = async (count: number = 3, category?: string, language: Language = DEFAULT_LANGUAGE): Promise<WikipediaArticle[]> => {
+const getRandomArticles = async (count: number = 2, category?: string, language: Language = DEFAULT_LANGUAGE): Promise<WikipediaArticle[]> => {
+  // Check cache first
+  const cacheKey = `random_${language.code}_${count}_${category || 'all'}`;
+  const cached = cache.get<WikipediaArticle[]>(cacheKey);
+  if (cached) return cached;
+
   try {
-    const multiplier = 3;
+    const multiplier = 2; // Reduced multiplier for faster initial load
     let titles: string[];
     
     if (category && category !== "All") {
@@ -98,10 +104,14 @@ const getRandomArticles = async (count: number = 3, category?: string, language:
       // Remove duplicates by ID before merging
       const combined = [...validArticles, ...moreArticles];
       const uniqueArticles = Array.from(new Map(combined.map(a => [a.id, a])).values());
-      return uniqueArticles.slice(0, count);
+      const result = uniqueArticles.slice(0, count);
+      cache.set(cacheKey, result, 300000); // Cache for 5 minutes
+      return result;
     }
     
-    return validArticles.slice(0, count);
+    const result = validArticles.slice(0, count);
+    cache.set(cacheKey, result, 300000); // Cache for 5 minutes
+    return result;
   } catch (error) {
     console.error('Error fetching articles:', error);
     throw error;
@@ -110,6 +120,11 @@ const getRandomArticles = async (count: number = 3, category?: string, language:
 
 const searchArticles = async (query: string, language: Language = DEFAULT_LANGUAGE): Promise<WikipediaArticle[]> => {
   if (!query || query.length < 3) return [];
+
+  // Check cache first
+  const cacheKey = `search_${language.code}_${query.toLowerCase()}`;
+  const cached = cache.get<WikipediaArticle[]>(cacheKey);
+  if (cached) return cached;
 
   try {
     // Opensearch for suggestions
@@ -150,7 +165,9 @@ const searchArticles = async (query: string, language: Language = DEFAULT_LANGUA
     if (!allTitles.length) return [];
 
     const validArticles = await fetchArticles(allTitles, language);
-    return sortByRelevance(validArticles, query);
+    const result = sortByRelevance(validArticles, query);
+    cache.set(cacheKey, result, 600000); // Cache for 10 minutes
+    return result;
   } catch (error) {
     console.error('Error searching articles:', error);
     throw error;

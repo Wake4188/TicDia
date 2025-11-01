@@ -46,7 +46,7 @@ export const loadComponent = <T>(
   return importFunc().then(module => module.default);
 };
 
-// Cache utility with TTL
+// Cache utility with TTL and localStorage persistence
 interface CacheItem<T> {
   data: T;
   timestamp: number;
@@ -55,21 +55,81 @@ interface CacheItem<T> {
 
 class CacheManager {
   private cache = new Map<string, CacheItem<any>>();
+  private readonly storagePrefix = 'ticdia_cache_';
 
-  set<T>(key: string, data: T, ttl: number = 300000): void { // Default 5 minutes
-    this.cache.set(key, {
+  constructor() {
+    // Load from localStorage on initialization
+    this.loadFromStorage();
+  }
+
+  private loadFromStorage(): void {
+    if (typeof window === 'undefined') return;
+    
+    try {
+      const keys = Object.keys(localStorage);
+      keys.forEach(key => {
+        if (key.startsWith(this.storagePrefix)) {
+          const item = JSON.parse(localStorage.getItem(key) || '');
+          const cacheKey = key.replace(this.storagePrefix, '');
+          if (Date.now() - item.timestamp < item.ttl) {
+            this.cache.set(cacheKey, item);
+          } else {
+            localStorage.removeItem(key);
+          }
+        }
+      });
+    } catch (error) {
+      console.warn('Failed to load cache from storage:', error);
+    }
+  }
+
+  set<T>(key: string, data: T, ttl: number = 600000): void { // Default 10 minutes
+    const item = {
       data,
       timestamp: Date.now(),
       ttl
-    });
+    };
+    
+    this.cache.set(key, item);
+    
+    // Persist to localStorage for longer caching
+    if (typeof window !== 'undefined') {
+      try {
+        localStorage.setItem(this.storagePrefix + key, JSON.stringify(item));
+      } catch (error) {
+        console.warn('Failed to persist cache to storage:', error);
+      }
+    }
   }
 
   get<T>(key: string): T | null {
     const item = this.cache.get(key);
-    if (!item) return null;
+    if (!item) {
+      // Try to load from localStorage
+      if (typeof window !== 'undefined') {
+        try {
+          const stored = localStorage.getItem(this.storagePrefix + key);
+          if (stored) {
+            const item = JSON.parse(stored);
+            if (Date.now() - item.timestamp < item.ttl) {
+              this.cache.set(key, item);
+              return item.data;
+            } else {
+              localStorage.removeItem(this.storagePrefix + key);
+            }
+          }
+        } catch (error) {
+          console.warn('Failed to load from storage:', error);
+        }
+      }
+      return null;
+    }
 
     if (Date.now() - item.timestamp > item.ttl) {
       this.cache.delete(key);
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem(this.storagePrefix + key);
+      }
       return null;
     }
 
@@ -78,6 +138,14 @@ class CacheManager {
 
   clear(): void {
     this.cache.clear();
+    if (typeof window !== 'undefined') {
+      const keys = Object.keys(localStorage);
+      keys.forEach(key => {
+        if (key.startsWith(this.storagePrefix)) {
+          localStorage.removeItem(key);
+        }
+      });
+    }
   }
 
   size(): number {

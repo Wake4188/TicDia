@@ -8,6 +8,9 @@ interface LazyImageProps {
   fallback?: string;
   onLoad?: () => void;
   onError?: () => void;
+  width?: number;
+  height?: number;
+  priority?: boolean;
 }
 
 const LazyImage = ({ 
@@ -16,7 +19,10 @@ const LazyImage = ({
   className = '', 
   fallback = '/placeholder-image.jpg',
   onLoad,
-  onError 
+  onError,
+  width = 800,
+  height = 600,
+  priority = false
 }: LazyImageProps) => {
   const [isLoaded, setIsLoaded] = useState(false);
   const [error, setError] = useState(false);
@@ -58,7 +64,7 @@ const LazyImage = ({
       {!isLoaded && !error && (
         <Skeleton className="absolute inset-0 w-full h-full" />
       )}
-      {inView && (
+      {(inView || priority) && (
         <img
           src={error ? fallback : src}
           alt={alt}
@@ -67,7 +73,11 @@ const LazyImage = ({
           }`}
           onLoad={handleLoad}
           onError={handleError}
-          loading="lazy"
+          loading={priority ? "eager" : "lazy"}
+          decoding="async"
+          width={width}
+          height={height}
+          fetchPriority={priority ? "high" : "low"}
         />
       )}
     </div>

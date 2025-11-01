@@ -4,7 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 export const ArticleItemSkeleton = () => (
   <div className="h-screen w-screen snap-start snap-always relative flex items-center justify-center">
     <div className="absolute inset-0 w-screen h-screen">
-      <Skeleton className="w-full h-full" />
+      <Skeleton className="w-full h-full" style={{ aspectRatio: '16/9' }} />
       <div className="absolute inset-0 bg-black/40" />
     </div>
     
@@ -26,7 +26,7 @@ export const NewsCardSkeleton = () => (
   <Card className="bg-gray-900/50 border-gray-800 animate-pulse">
     <CardContent className="p-6">
       <div className="flex gap-4">
-        <Skeleton className="w-32 h-20 rounded flex-shrink-0" />
+        <Skeleton className="w-32 h-20 rounded flex-shrink-0" style={{ aspectRatio: '16/9' }} />
         <div className="flex-1 space-y-2">
           <Skeleton className="h-4 w-3/4" />
           <Skeleton className="h-3 w-full" />

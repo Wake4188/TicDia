@@ -32,6 +32,23 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="theme-color" content="#FE2C55" />
+  
+  <!-- Critical CSS for initial paint -->
+  <style>
+    body { margin: 0; padding: 0; background-color: #000; }
+    #root { min-height: 100vh; }
+    .loading-skeleton { 
+      width: 100vw; 
+      height: 100vh; 
+      background: linear-gradient(90deg, #1a1a1a 25%, #2a2a2a 50%, #1a1a1a 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.5s infinite;
+    }
+    @keyframes shimmer {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+  </style>
 
   <!-- Icons for mobile and desktop -->
   <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32px32px.png" />
@@ -39,16 +56,19 @@
   <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
   <link rel="icon" href="/favicon.ico" />
   
-  <!-- Fonts -->
+  <!-- Google Fonts - Optimized loading -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@300;400;700&family=Lora:wght@400;500;600;700&family=Open+Sans:wght@300;400;600;700&family=Roboto:wght@300;400;500;700&family=Crimson+Text:wght@400;600;700&family=PT+Serif:wght@400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Playfair+Display:wght@400;700&family=Cinzel:wght@400;700&family=Courier+Prime:wght@400;700&family=Space+Mono:wght@400;700&family=Dancing+Script:wght@400;700&family=Merriweather:wght@400;700&family=Lora:wght@400;700&family=Crimson+Text:wght@400;700&family=PT+Serif:wght@400;700&family=Open+Sans:wght@400;700&family=Roboto:wght@400;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+  <noscript>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Playfair+Display:wght@400;700&family=Cinzel:wght@400;700&family=Courier+Prime:wght@400;700&family=Space+Mono:wght@400;700&family=Dancing+Script:wght@400;700&family=Merriweather:wght@400;700&family=Lora:wght@400;700&family=Crimson+Text:wght@400;700&family=PT+Serif:wght@400;700&family=Open+Sans:wght@400;700&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+  </noscript>
   
-  <!-- Performance optimization preconnects -->
-  <link rel="preconnect" href="https://api.nytimes.com" />
-  <link rel="preconnect" href="https://newsapi.org" />
-  <link rel="dns-prefetch" href="https://en.wikipedia.org" />
-  <link rel="dns-prefetch" href="https://supabase.co" />
+  <!-- Performance: Preconnect to critical domains only -->
+  <link rel="preconnect" href="https://rtuxaekhfwvpwmvmdaul.supabase.co">
+  <link rel="dns-prefetch" href="https://en.wikipedia.org">
+  <link rel="dns-prefetch" href="https://api.nytimes.com">
+  <link rel="dns-prefetch" href="https://newsapi.org">
 </head>
 
 <body>
