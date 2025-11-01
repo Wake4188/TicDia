@@ -48,7 +48,7 @@ export default defineConfig(({ mode }) => ({
     },
   },
   build: {
-    cssCodeSplit: true, // Enable CSS code splitting for better caching
+    cssCodeSplit: true,
     rollupOptions: {
       output: {
         manualChunks: {
@@ -62,7 +62,7 @@ export default defineConfig(({ mode }) => ({
     minify: 'terser',
     terserOptions: {
       compress: {
-        drop_console: true,
+        drop_console: false, // Keep console for debugging
         drop_debugger: true,
       },
     },
