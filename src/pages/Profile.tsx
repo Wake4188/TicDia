@@ -9,12 +9,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
-import { ArrowLeft, BookMarked, Eye, Trash2, Search, Mail, Lock, Key } from "lucide-react";
+import { ArrowLeft, BookMarked, Eye, Trash2, Search, Mail, Lock, Key, BarChart3 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import SmallTic from "../components/SmallTic";
 import { loadUserPreferences, saveUserPreferences, UserPreferences } from "@/services/userPreferencesService";
 import { useLanguage } from "../contexts/LanguageContext";
 import { useUserPreferences } from "@/hooks/useUserPreferences";
+import { AnalyticsStats } from "@/components/AnalyticsStats";
+import { Footer } from "@/components/Footer";
 
 interface SavedArticle {
   id: string;
@@ -327,7 +329,7 @@ const Profile = () => {
         </div>
 
         <Tabs defaultValue="saved" className="space-y-4 sm:space-y-6">
-          <TabsList className="bg-gray-800/50 backdrop-blur-md border border-gray-700/50 p-1 rounded-xl shadow-2xl w-full sm:w-auto grid grid-cols-3 sm:flex">
+          <TabsList className="bg-gray-800/50 backdrop-blur-md border border-gray-700/50 p-1 rounded-xl shadow-2xl w-full sm:w-auto grid grid-cols-4 sm:flex">
             <TabsTrigger 
               value="saved" 
               className="data-[state=active]:bg-wikitok-red/20 data-[state=active]:backdrop-blur-md data-[state=active]:border data-[state=active]:border-wikitok-red/30 data-[state=active]:shadow-lg transition-all duration-500 ease-out rounded-lg text-xs sm:text-sm px-2 sm:px-4"
@@ -335,6 +337,14 @@ const Profile = () => {
               <BookMarked className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2 transition-transform duration-300" />
               <span className="hidden sm:inline">{t.savedArticles}</span>
               <span className="sm:hidden">Saved</span>
+            </TabsTrigger>
+            <TabsTrigger 
+              value="analytics" 
+              className="data-[state=active]:bg-wikitok-red/20 data-[state=active]:backdrop-blur-md data-[state=active]:border data-[state=active]:border-wikitok-red/30 data-[state=active]:shadow-lg transition-all duration-500 ease-out rounded-lg text-xs sm:text-sm px-2 sm:px-4"
+            >
+              <BarChart3 className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2 transition-transform duration-300" />
+              <span className="hidden sm:inline">Analytics</span>
+              <span className="sm:hidden">Stats</span>
             </TabsTrigger>
             <TabsTrigger 
               value="settings" 
@@ -445,6 +455,10 @@ const Profile = () => {
                 )}
               </CardContent>
             </Card>
+          </TabsContent>
+
+          <TabsContent value="analytics" className="space-y-6 animate-in fade-in-50 slide-in-from-bottom-4 duration-700">
+            <AnalyticsStats />
           </TabsContent>
 
           <TabsContent value="settings" className="space-y-6 animate-in fade-in-50 slide-in-from-bottom-4 duration-700">
@@ -732,6 +746,8 @@ const Profile = () => {
           </div>
         </div>
       </div>
+
+      <Footer />
 
       <SmallTic
         isOpen={isSmallTicOpen}

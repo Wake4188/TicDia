@@ -8,6 +8,7 @@ import { AuthProvider } from "./contexts/AuthContext";
 import { LanguageProvider } from "./contexts/LanguageContext";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { Toaster } from "@/components/ui/toaster";
+import { CookieConsent } from "@/components/CookieConsent";
 
 // Lazy load all pages for code splitting
 const Index = lazy(() => import("./pages/Index"));
@@ -53,6 +54,7 @@ function App() {
                   </Routes>
                 </Suspense>
                 <Toaster />
+                <CookieConsent />
                 <Suspense fallback={null}>
                   <Analytics />
                   <SpeedInsights />

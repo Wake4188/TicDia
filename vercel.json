@@ -9,6 +9,14 @@
       "destination": "https://rtuxaekhfwvpwmvmdaul.functions.supabase.co/text-to-speech"
     },
     {
+      "source": "/privacy",
+      "destination": "/privacy.html"
+    },
+    {
+      "source": "/terms",
+      "destination": "/terms.html"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
     }
