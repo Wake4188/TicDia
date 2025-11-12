@@ -32,20 +32,13 @@ const Profile = () => {
   const t = translations;
   
   // Load user preferences to apply highlight color throughout the app
-  useUserPreferences();
+  const { userPreferences, updatePreferences: updateUserPrefs } = useUserPreferences();
   const [savedArticles, setSavedArticles] = useState<SavedArticle[]>([]);
   const [filteredArticles, setFilteredArticles] = useState<SavedArticle[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedArticle, setSelectedArticle] = useState<SavedArticle | null>(null);
   const [isSmallTicOpen, setIsSmallTicOpen] = useState(false);
-  const [preferences, setPreferences] = useState<UserPreferences>({
-    fontFamily: 'Inter',
-    backgroundOpacity: 70,
-    highlightColor: '#FE2C55',
-    fontSize: 16
-  });
-  const [preferencesLoading, setPreferencesLoading] = useState(true);
   
   // Account Security states
   const [newEmail, setNewEmail] = useState("");
@@ -63,7 +56,6 @@ const Profile = () => {
     }
 
     setResetEmail(user.email || "");
-    loadPreferences();
     fetchSavedArticles();
   }, [user, navigate]);
 
@@ -73,43 +65,6 @@ const Profile = () => {
     );
     setFilteredArticles(filtered);
   }, [savedArticles, searchTerm]);
-
-  const loadPreferences = async () => {
-    if (!user) return;
-    
-    try {
-      setPreferencesLoading(true);
-      const userPrefs = await loadUserPreferences(user.id);
-      setPreferences(userPrefs);
-      
-      document.documentElement.style.setProperty('--highlight-color', userPrefs.highlightColor);
-      document.documentElement.style.setProperty('--progress-bar-color', userPrefs.highlightColor);
-      
-      localStorage.setItem('userPreferences', JSON.stringify({
-        fontFamily: userPrefs.fontFamily,
-        backgroundOpacity: userPrefs.backgroundOpacity,
-        progressBarColor: userPrefs.highlightColor,
-        highlightColor: userPrefs.highlightColor
-      }));
-    } catch (error) {
-      console.error('Error loading preferences:', error);
-      const savedPrefs = localStorage.getItem('userPreferences');
-      if (savedPrefs) {
-        const prefs = JSON.parse(savedPrefs);
-        if (prefs.progressBarColor && !prefs.highlightColor) {
-          prefs.highlightColor = prefs.progressBarColor;
-        }
-        setPreferences({
-          fontFamily: prefs.fontFamily || 'Inter',
-          backgroundOpacity: prefs.backgroundOpacity || 70,
-          highlightColor: prefs.highlightColor || '#FE2C55',
-          fontSize: prefs.fontSize || 16
-        });
-      }
-    } finally {
-      setPreferencesLoading(false);
-    }
-  };
 
   const fetchSavedArticles = async () => {
     try {
@@ -132,34 +87,6 @@ const Profile = () => {
     }
   };
 
-  const updatePreferences = async (newPrefs: Partial<UserPreferences>) => {
-    if (!user) return;
-
-    const updated = { ...preferences, ...newPrefs };
-    setPreferences(updated);
-    
-    document.documentElement.style.setProperty('--highlight-color', updated.highlightColor);
-    document.documentElement.style.setProperty('--progress-bar-color', updated.highlightColor);
-    
-    localStorage.setItem('userPreferences', JSON.stringify({
-      fontFamily: updated.fontFamily,
-      backgroundOpacity: updated.backgroundOpacity,
-      progressBarColor: updated.highlightColor,
-      highlightColor: updated.highlightColor
-    }));
-
-    try {
-      await saveUserPreferences(user.id, updated);
-      console.log('Preferences saved to database successfully');
-    } catch (error) {
-      console.error('Error saving preferences to database:', error);
-      toast({
-        title: t.preferencesWarning,
-        description: t.preferencesWarningDesc,
-        variant: "destructive",
-      });
-    }
-  };
 
   const removeSavedArticle = async (articleId: string) => {
     try {
@@ -525,22 +452,16 @@ const Profile = () => {
               <CardHeader className="transition-all duration-300">
                 <CardTitle>{t.readingPreferences}</CardTitle>
                 <CardDescription>
-                  {t.customize} {preferencesLoading ? `(${t.loading}...)` : `(${t.syncedToCloud})`}
+                  {t.customize} ({t.syncedToCloud})
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
-                {preferencesLoading ? (
-                  <div className="text-center py-8">
-                    <div className="animate-pulse">{t.loadingPreferences}...</div>
-                  </div>
-                ) : (
-                  <>
-                    <div className="space-y-3 animate-in fade-in-50 slide-in-from-left-4 duration-500">
-                      <label className="text-sm font-medium">{t.articleFont}</label>
-                      <Select 
-                        value={preferences.fontFamily} 
-                        onValueChange={(value) => updatePreferences({ fontFamily: value })}
-                      >
+                <div className="space-y-3 animate-in fade-in-50 slide-in-from-left-4 duration-500">
+                  <label className="text-sm font-medium">{t.articleFont}</label>
+                  <Select 
+                    value={userPreferences.fontFamily} 
+                    onValueChange={(value) => updateUserPrefs({ fontFamily: value })}
+                  >
                         <SelectTrigger className="bg-gray-800/60 backdrop-blur-sm border-gray-700/50 transition-all duration-300 hover:border-gray-600/70 focus:border-wikitok-red/50">
                           <SelectValue />
                         </SelectTrigger>
@@ -554,12 +475,12 @@ const Profile = () => {
                       </Select>
                     </div>
 
-                    <div className="space-y-3 animate-in fade-in-50 slide-in-from-left-4 duration-500" style={{ animationDelay: "100ms" }}>
-                      <label className="text-sm font-medium">{t.highlightColor}</label>
-                      <Select 
-                        value={preferences.highlightColor} 
-                        onValueChange={(value) => updatePreferences({ highlightColor: value })}
-                      >
+                <div className="space-y-3 animate-in fade-in-50 slide-in-from-left-4 duration-500" style={{ animationDelay: "100ms" }}>
+                  <label className="text-sm font-medium">{t.highlightColor}</label>
+                  <Select 
+                    value={userPreferences.highlightColor} 
+                    onValueChange={(value) => updateUserPrefs({ highlightColor: value })}
+                  >
                         <SelectTrigger className="bg-gray-800/60 backdrop-blur-sm border-gray-700/50 transition-all duration-300 hover:border-gray-600/70 focus:border-wikitok-red/50">
                           <SelectValue />
                         </SelectTrigger>
@@ -579,77 +500,75 @@ const Profile = () => {
                       </Select>
                     </div>
 
-                    <div className="space-y-3 animate-in fade-in-50 slide-in-from-left-4 duration-500" style={{ animationDelay: "200ms" }}>
-                      <label className="text-sm font-medium">
-                        {t.backgroundOpacity}: {preferences.backgroundOpacity}%
-                      </label>
-                      <Slider
-                        value={[preferences.backgroundOpacity]}
-                        onValueChange={(value) => updatePreferences({ backgroundOpacity: value[0] })}
-                        max={100}
-                        min={10}
-                        step={5}
-                        className="w-full transition-all duration-300"
-                      />
-                      <p className="text-xs text-gray-400">
-                        {t.backgroundOpacityDesc}
-                      </p>
-                    </div>
+                <div className="space-y-3 animate-in fade-in-50 slide-in-from-left-4 duration-500" style={{ animationDelay: "200ms" }}>
+                  <label className="text-sm font-medium">
+                    {t.backgroundOpacity}: {userPreferences.backgroundOpacity}%
+                  </label>
+                  <Slider
+                    value={[userPreferences.backgroundOpacity]}
+                    onValueChange={(value) => updateUserPrefs({ backgroundOpacity: value[0] })}
+                    max={100}
+                    min={10}
+                    step={5}
+                    className="w-full transition-all duration-300"
+                  />
+                  <p className="text-xs text-gray-400">
+                    {t.backgroundOpacityDesc}
+                  </p>
+                </div>
 
-                    <div className="space-y-3 animate-in fade-in-50 slide-in-from-left-4 duration-500" style={{ animationDelay: "250ms" }}>
-                      <label className="text-sm font-medium">
-                        Text Size: {preferences.fontSize}px
-                      </label>
-                      <Slider
-                        value={[preferences.fontSize]}
-                        onValueChange={(value) => updatePreferences({ fontSize: value[0] })}
-                        max={24}
-                        min={12}
-                        step={1}
-                        className="w-full transition-all duration-300"
-                      />
-                      <p className="text-xs text-gray-400">
-                        Adjust the size of article text for comfortable reading
-                      </p>
-                    </div>
+                <div className="space-y-3 animate-in fade-in-50 slide-in-from-left-4 duration-500" style={{ animationDelay: "250ms" }}>
+                  <label className="text-sm font-medium">
+                    Text Size: {userPreferences.fontSize}px
+                  </label>
+                  <Slider
+                    value={[userPreferences.fontSize]}
+                    onValueChange={(value) => updateUserPrefs({ fontSize: value[0] })}
+                    max={24}
+                    min={12}
+                    step={1}
+                    className="w-full transition-all duration-300"
+                  />
+                  <p className="text-xs text-gray-400">
+                    Adjust the size of article text for comfortable reading
+                  </p>
+                </div>
 
-                    <div className="p-4 bg-gray-800/60 backdrop-blur-sm rounded-lg border border-gray-700/30 transition-all duration-500 hover:border-gray-600/50 animate-in fade-in-50 slide-in-from-bottom-4" style={{ animationDelay: "300ms" }}>
-                      <h4 className="text-sm font-medium mb-2">{t.preview}</h4>
-                      <div 
-                        className="relative p-4 rounded bg-cover bg-center overflow-hidden transition-all duration-500"
-                        style={{
-                          backgroundImage: "url('https://images.unsplash.com/photo-1506905925346-21bda4d32df4?ixlib=rb-4.0.3')",
-                        }}
-                      >
+                <div className="p-4 bg-gray-800/60 backdrop-blur-sm rounded-lg border border-gray-700/30 transition-all duration-500 hover:border-gray-600/50 animate-in fade-in-50 slide-in-from-bottom-4" style={{ animationDelay: "300ms" }}>
+                  <h4 className="text-sm font-medium mb-2">{t.preview}</h4>
+                  <div 
+                    className="relative p-4 rounded bg-cover bg-center overflow-hidden transition-all duration-500"
+                    style={{
+                      backgroundImage: "url('https://images.unsplash.com/photo-1506905925346-21bda4d32df4?ixlib=rb-4.0.3')",
+                    }}
+                  >
+                    <div 
+                      className="absolute inset-0 bg-black rounded transition-all duration-500"
+                      style={{ opacity: userPreferences.backgroundOpacity / 100 }}
+                    />
+                    <p 
+                      className="relative z-10 text-white mb-4 transition-all duration-300"
+                      style={{ 
+                        fontFamily: userPreferences.fontFamily,
+                        fontSize: `${userPreferences.fontSize}px`
+                      }}
+                    >
+                      {t.previewText}
+                    </p>
+                    <div className="relative z-10">
+                      <p className="text-xs text-gray-300 mb-1">{t.progressPreview}:</p>
+                      <div className="h-1 bg-black/20 rounded overflow-hidden">
                         <div 
-                          className="absolute inset-0 bg-black rounded transition-all duration-500"
-                          style={{ opacity: preferences.backgroundOpacity / 100 }}
-                        />
-                        <p 
-                          className="relative z-10 text-white mb-4 transition-all duration-300"
+                          className="h-full rounded transition-all duration-500 ease-out"
                           style={{ 
-                            fontFamily: preferences.fontFamily,
-                            fontSize: `${preferences.fontSize}px`
+                            backgroundColor: userPreferences.highlightColor,
+                            width: '60%'
                           }}
-                        >
-                          {t.previewText}
-                        </p>
-                        <div className="relative z-10">
-                          <p className="text-xs text-gray-300 mb-1">{t.progressPreview}:</p>
-                          <div className="h-1 bg-black/20 rounded overflow-hidden">
-                            <div 
-                              className="h-full rounded transition-all duration-500 ease-out"
-                              style={{ 
-                                backgroundColor: preferences.highlightColor,
-                                width: '60%'
-                              }}
-                            />
-                          </div>
-                        </div>
+                        />
                       </div>
                     </div>
-                  </>
-                )}
+                  </div>
+                </div>
               </CardContent>
             </Card>
           </TabsContent>

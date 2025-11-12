@@ -67,7 +67,10 @@ const ArticleItem = ({
             <div className="max-w-2xl">
               <p 
                 className="text-sm sm:text-lg leading-relaxed" 
-                style={{ fontFamily: userPreferences.fontFamily }}
+                style={{ 
+                  fontFamily: userPreferences.fontFamily,
+                  fontSize: `${userPreferences.fontSize}px`
+                }}
                 translate="yes"
               >
                 {contentToShow}
