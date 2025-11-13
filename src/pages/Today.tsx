@@ -73,9 +73,35 @@ const Today = () => {
   const [smallTicOpen, setSmallTicOpen] = useState(false);
   const [selectedArticle, setSelectedArticle] = useState<{ article_title: string; article_url: string } | null>(null);
   const [showAllArticles, setShowAllArticles] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
 
-  // Check if user is admin - will work after migration is approved
-  const isAdmin = false; // TODO: Enable after user_roles migration is run
+  // Check if user is admin using has_role function
+  useEffect(() => {
+    const checkAdminRole = async () => {
+      if (!user) {
+        setIsAdmin(false);
+        return;
+      }
+
+      try {
+        const { data, error } = await supabase.rpc('has_role', {
+          _user_id: user.id,
+          _role: 'admin'
+        });
+
+        if (!error && data) {
+          setIsAdmin(true);
+        } else {
+          setIsAdmin(false);
+        }
+      } catch (error) {
+        console.error('Error checking admin role:', error);
+        setIsAdmin(false);
+      }
+    };
+
+    checkAdminRole();
+  }, [user]);
 
   // Get today's date
   const today = new Date();

@@ -4,7 +4,7 @@ project_id = "rtuxaekhfwvpwmvmdaul"
 verify_jwt = true
 
 [functions.daily-article-selection]
-verify_jwt = false
+verify_jwt = true
 
 [functions.tts-stream]
 verify_jwt = true
