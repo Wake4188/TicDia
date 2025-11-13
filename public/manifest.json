@@ -1,6 +1,6 @@
 {
-  "name": "WikiTok - Discover Wikipedia",
-  "short_name": "WikiTok",
+  "name": "TicDia - Discover Wikipedia",
+  "short_name": "TicDia",
   "description": "Discover Wikipedia articles in a modern, engaging format",
   "start_url": "/",
   "display": "standalone",
