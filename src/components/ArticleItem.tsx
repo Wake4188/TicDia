@@ -32,8 +32,12 @@ const ArticleItem = ({
   const contentToShow = isCurrent && displayedText ? displayedText : article.content;
   
   return (
-    <div data-index={index} className="article-section h-screen w-screen snap-start snap-always relative flex items-center justify-center">
-      <div className="absolute inset-0 w-screen h-screen">
+    <div 
+      data-index={index} 
+      className="article-section h-screen w-screen snap-start snap-always relative flex items-center justify-center"
+      style={{ minHeight: '100vh' }}
+    >
+      <div className="absolute inset-0 w-screen h-screen" style={{ aspectRatio: '16/9' }}>
         <img 
           src={article.image} 
           alt={article.title} 
@@ -43,6 +47,7 @@ const ArticleItem = ({
           width="1920"
           height="1080"
           fetchPriority={index === 0 ? "high" : "low"}
+          style={{ aspectRatio: '16/9' }}
         />
         <div 
           className="absolute inset-0 bg-black" 
