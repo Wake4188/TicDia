@@ -111,7 +111,12 @@ const VoteButton = ({
     }
   };
   return <div className="flex flex-col items-center text-white">
-      <button className={`sidebar-icon ${isVoted ? 'text-tictok-red' : ''} ${isLoading ? 'opacity-50' : ''}`} onClick={handleVote} disabled={isLoading}>
+      <button 
+        className={`sidebar-icon ${isVoted ? 'text-tictok-red' : ''} ${isLoading ? 'opacity-50' : ''} min-w-[44px] min-h-[44px] flex items-center justify-center`} 
+        onClick={handleVote} 
+        disabled={isLoading}
+        aria-label={isVoted ? `Remove upvote from ${articleTitle}` : `Upvote ${articleTitle}`}
+      >
         <ArrowUp className={`w-6 h-6 ${isVoted ? 'fill-current' : ''}`} />
       </button>
       <span className="text-xs font-medium text-left my-0 mx-0 px-[7px] py-0">{isVoted ? t.upvote + "d" : t.upvote}</span>

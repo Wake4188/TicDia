@@ -78,6 +78,7 @@ const VotingProgressBar = () => {
               <Progress
                 value={(article.votes / maxVotes) * 100}
                 className="h-2"
+                aria-label={`${article.title} voting progress: ${article.votes} votes`}
                 indicatorClassName={`transition-all duration-1000 ${
                   index === 0 ? 'bg-yellow-500' :
                   index === 1 ? 'bg-gray-400' :

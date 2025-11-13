@@ -68,7 +68,8 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
           </div>
           <button 
             onClick={() => setIsOpen(true)} 
-            className="bg-black/30 backdrop-blur-sm border border-white/20 text-white p-2.5 rounded-full hover:bg-black/40 transition-all"
+            className="bg-black/30 backdrop-blur-sm border border-white/20 text-white p-2.5 rounded-full hover:bg-black/40 transition-all min-w-[44px] min-h-[44px]"
+            aria-label="Open menu"
           >
             <Menu className="w-6 h-6" />
           </button>
@@ -81,7 +82,11 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
       <div className="p-4 h-full overflow-y-auto">
         <div className="flex items-center justify-between mb-6">
           <div className="text-xl font-bold text-tictok-red">TicDia</div>
-          <button onClick={() => setIsOpen(false)} className={`p-2 rounded-full ${isDark ? 'hover:bg-white/10' : 'hover:bg-gray-100'}`}>
+          <button 
+            onClick={() => setIsOpen(false)} 
+            className={`p-2 rounded-full ${isDark ? 'hover:bg-white/10' : 'hover:bg-gray-100'} min-w-[44px] min-h-[44px]`}
+            aria-label="Close menu"
+          >
               <X className={`w-5 h-5 ${isDark ? 'text-white' : 'text-gray-900'}`} />
             </button>
           </div>
