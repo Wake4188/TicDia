@@ -13,10 +13,72 @@ serve(async (req) => {
   }
 
   try {
+    // Verify JWT token
+    const authHeader = req.headers.get('Authorization')
+    if (!authHeader) {
+      return new Response(
+        JSON.stringify({ error: 'Missing authorization header' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+    const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY')!
     
+    // Create client with anon key to verify JWT
+    const supabaseAuth = createClient(supabaseUrl, supabaseAnonKey, {
+      global: { headers: { Authorization: authHeader } }
+    })
+
+    // Verify user is authenticated and has admin role
+    const { data: { user }, error: authError } = await supabaseAuth.auth.getUser()
+    
+    if (authError || !user) {
+      return new Response(
+        JSON.stringify({ error: 'Unauthorized' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+
+    // Check if user has admin role
+    const { data: hasAdminRole, error: roleError } = await supabaseAuth.rpc('has_role', {
+      _user_id: user.id,
+      _role: 'admin'
+    })
+
+    if (roleError || !hasAdminRole) {
+      return new Response(
+        JSON.stringify({ error: 'Forbidden - Admin access required' }),
+        { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+
+    // Create service role client for data operations
     const supabase = createClient(supabaseUrl, supabaseServiceKey)
+
+    // Idempotency check - only run once per day
+    const today = new Date().toISOString().split('T')[0]
+    const lastRunKey = `last_article_selection_run`
+    
+    // Check if we've already run today by looking at created_at of today_articles
+    const { data: existingArticles } = await supabase
+      .from('today_articles')
+      .select('created_at')
+      .gte('created_at', `${today}T00:00:00.000Z`)
+      .limit(1)
+
+    if (existingArticles && existingArticles.length > 0) {
+      console.log('Daily article selection already ran today')
+      return new Response(
+        JSON.stringify({ 
+          success: true, 
+          message: 'Daily article selection already completed for today',
+          alreadyRan: true 
+        }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
 
     // Get top 3 voted articles from yesterday (since this runs at 5 PM, we want yesterday's votes)
     const yesterday = new Date()
