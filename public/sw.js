@@ -1,5 +1,5 @@
 // Service Worker for caching and offline functionality
-const CACHE_NAME = 'wikitok-v1';
+const CACHE_NAME = 'ticdia-v1';
 const STATIC_CACHE = 'static-v1';
 
 // Files to cache immediately
