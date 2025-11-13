@@ -52,27 +52,58 @@ export default defineConfig(({ mode }) => ({
     sourcemap: true, // Enable source maps for production debugging
     rollupOptions: {
       output: {
-        manualChunks: {
-          'react-vendor': ['react', 'react-dom', 'react-router-dom'],
-          'ui-vendor': ['framer-motion', '@radix-ui/react-dialog', '@radix-ui/react-dropdown-menu'],
-          'query-vendor': ['@tanstack/react-query'],
-          'radix-base': ['@radix-ui/react-slot', '@radix-ui/react-avatar', '@radix-ui/react-label'],
-          'radix-forms': ['@radix-ui/react-checkbox', '@radix-ui/react-radio-group', '@radix-ui/react-select', '@radix-ui/react-switch'],
+        manualChunks: (id) => {
+          // More aggressive code splitting for better caching
+          if (id.includes('node_modules')) {
+            if (id.includes('react') || id.includes('react-dom') || id.includes('react-router')) {
+              return 'react-vendor';
+            }
+            if (id.includes('framer-motion')) {
+              return 'framer-motion';
+            }
+            if (id.includes('@radix-ui')) {
+              if (id.includes('dialog') || id.includes('dropdown') || id.includes('popover')) {
+                return 'radix-overlays';
+              }
+              if (id.includes('form') || id.includes('checkbox') || id.includes('select')) {
+                return 'radix-forms';
+              }
+              return 'radix-base';
+            }
+            if (id.includes('@tanstack/react-query')) {
+              return 'react-query';
+            }
+            if (id.includes('@supabase')) {
+              return 'supabase';
+            }
+            // Split other large libraries individually
+            return 'vendor';
+          }
         },
+        chunkFileNames: 'assets/[name]-[hash].js',
+        entryFileNames: 'assets/[name]-[hash].js',
+        assetFileNames: 'assets/[name]-[hash].[ext]',
       },
     },
     target: 'esnext',
     minify: 'terser',
     terserOptions: {
       compress: {
-        drop_console: mode === 'production', // Remove console in production
+        drop_console: mode === 'production',
         drop_debugger: true,
-        passes: 2, // More aggressive minification
-        pure_funcs: mode === 'production' ? ['console.log', 'console.info'] : [],
+        passes: 3, // More aggressive minification
+        pure_funcs: mode === 'production' ? ['console.log', 'console.info', 'console.debug'] : [],
+        unsafe: true,
+        unsafe_comps: true,
+        unsafe_math: true,
       },
       mangle: {
-        safari10: true, // Fix Safari 10 issues
+        safari10: true,
+      },
+      format: {
+        comments: false, // Remove all comments
       },
     },
+    chunkSizeWarningLimit: 1000,
   },
 }));

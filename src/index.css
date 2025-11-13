@@ -18,6 +18,22 @@
     @apply bg-tictok-dark text-white;
   }
 
+  /* Optimize font loading to prevent layout shifts */
+  @font-face {
+    font-family: 'Inter';
+    font-display: swap;
+  }
+
+  /* Prevent layout shift by reserving space for images */
+  img {
+    aspect-ratio: attr(width) / attr(height);
+  }
+
+  /* Prevent cumulative layout shift */
+  * {
+    content-visibility: auto;
+  }
+
   /* Apply highlight color to various elements */
   .text-tictok-red {
     color: var(--highlight-color) !important;

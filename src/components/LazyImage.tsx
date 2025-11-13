@@ -60,7 +60,14 @@ const LazyImage = ({
   };
 
   return (
-    <div ref={imgRef} className={`relative overflow-hidden ${className}`}>
+    <div 
+      ref={imgRef} 
+      className={`relative overflow-hidden ${className}`}
+      style={{ 
+        aspectRatio: `${width}/${height}`,
+        minHeight: `${height}px`
+      }}
+    >
       {!isLoaded && !error && (
         <Skeleton className="absolute inset-0 w-full h-full" />
       )}
@@ -78,6 +85,7 @@ const LazyImage = ({
           width={width}
           height={height}
           fetchPriority={priority ? "high" : "low"}
+          style={{ aspectRatio: `${width}/${height}` }}
         />
       )}
     </div>
