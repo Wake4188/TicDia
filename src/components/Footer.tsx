@@ -6,7 +6,7 @@ export const Footer = () => {
       <div className="container mx-auto px-4">
         <div className="flex flex-col md:flex-row justify-between items-center gap-4">
           <div className="text-gray-400 text-sm">
-            © {new Date().getFullYear()} WikTok. All rights reserved.
+            © {new Date().getFullYear()} TicDia. All rights reserved.
           </div>
           <div className="flex gap-6 text-sm">
             <a 

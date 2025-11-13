@@ -17,6 +17,10 @@ const Progress = React.forwardRef<
       className
     )}
     style={style}
+    aria-valuemin={0}
+    aria-valuemax={100}
+    aria-valuenow={value || 0}
+    role="progressbar"
     {...props}
   >
     <ProgressPrimitive.Indicator

@@ -84,7 +84,7 @@ const Today = () => {
       }
 
       try {
-        const { data, error } = await supabase.rpc('has_role', {
+        const { data, error } = await supabase.rpc('has_role' as any, {
           _user_id: user.id,
           _role: 'admin'
         });

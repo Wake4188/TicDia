@@ -49,12 +49,15 @@ export default defineConfig(({ mode }) => ({
   },
   build: {
     cssCodeSplit: true,
+    sourcemap: true, // Enable source maps for production debugging
     rollupOptions: {
       output: {
         manualChunks: {
           'react-vendor': ['react', 'react-dom', 'react-router-dom'],
           'ui-vendor': ['framer-motion', '@radix-ui/react-dialog', '@radix-ui/react-dropdown-menu'],
           'query-vendor': ['@tanstack/react-query'],
+          'radix-base': ['@radix-ui/react-slot', '@radix-ui/react-avatar', '@radix-ui/react-label'],
+          'radix-forms': ['@radix-ui/react-checkbox', '@radix-ui/react-radio-group', '@radix-ui/react-select', '@radix-ui/react-switch'],
         },
       },
     },
@@ -62,8 +65,13 @@ export default defineConfig(({ mode }) => ({
     minify: 'terser',
     terserOptions: {
       compress: {
-        drop_console: false, // Keep console for debugging
+        drop_console: mode === 'production', // Remove console in production
         drop_debugger: true,
+        passes: 2, // More aggressive minification
+        pure_funcs: mode === 'production' ? ['console.log', 'console.info'] : [],
+      },
+      mangle: {
+        safari10: true, // Fix Safari 10 issues
       },
     },
   },

@@ -123,7 +123,8 @@ const AudioPlayer = ({ text, onAudioStart, onAudioEnd, autoPlay = false }: Audio
         size="sm"
         onClick={handlePlayPause}
         disabled={isLoading}
-        className="h-7 w-7 p-0"
+        className="h-7 w-7 p-0 min-w-[44px] min-h-[44px]"
+        aria-label={isPlaying ? "Pause audio" : "Play audio"}
       >
         {isLoading ? (
           <div className="flex items-center">
@@ -141,7 +142,8 @@ const AudioPlayer = ({ text, onAudioStart, onAudioEnd, autoPlay = false }: Audio
         variant="ghost"
         size="sm"
         onClick={toggleMute}
-        className="h-7 w-7 p-0"
+        className="h-7 w-7 p-0 min-w-[44px] min-h-[44px]"
+        aria-label={isMuted ? "Unmute audio" : "Mute audio"}
       >
         {isMuted ? <VolumeX className="h-3 w-3" /> : <Volume2 className="h-3 w-3" />}
       </Button>

@@ -296,8 +296,8 @@ const Profile = () => {
   ];
 
   const colorOptions = [
-    { value: '#FE2C55', label: `TicTok Red (${t.default})`, color: '#FE2C55' },
-    { value: '#20D5EC', label: 'WikTok Blue', color: '#20D5EC' },
+    { value: '#FE2C55', label: `TicDia Red (${t.default})`, color: '#FE2C55' },
+    { value: '#20D5EC', label: 'TicDia Blue', color: '#20D5EC' },
     { value: '#FF6B6B', label: 'Coral Red', color: '#FF6B6B' },
     { value: '#4ECDC4', label: 'Turquoise', color: '#4ECDC4' },
     { value: '#45B7D1', label: 'Sky Blue', color: '#45B7D1' },
