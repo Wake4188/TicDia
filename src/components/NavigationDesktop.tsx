@@ -86,7 +86,7 @@ const NavigationDesktop = ({
           <Button
             variant="ghost"
             onClick={handleDiscoverClick}
-            className="text-gray-400 hover:text-white hover:bg-white/5 transition-colors p-1.5 md:p-2"
+            className="text-white hover:text-white hover:bg-white/5 transition-colors p-1.5 md:p-2"
             aria-label={t.discover}
           >
             <Compass className="w-4 h-4 md:w-5 md:h-5" />
@@ -95,7 +95,7 @@ const NavigationDesktop = ({
           <Button
             variant="ghost"
             onClick={onTodayClick}
-            className="flex items-center gap-1 md:gap-2 text-gray-400 hover:text-white hover:bg-white/5 transition-colors p-1.5 md:p-2"
+            className="flex items-center gap-1 md:gap-2 text-white hover:text-white hover:bg-white/5 transition-colors p-1.5 md:p-2"
             aria-label={t.today}
           >
             <Calendar className="w-4 h-4 md:w-5 md:h-5" />
@@ -104,7 +104,7 @@ const NavigationDesktop = ({
 
           <h1 
             onClick={() => navigate('/')}
-            className="text-lg md:text-2xl font-bold cursor-pointer transition-all duration-300 drop-shadow-[0_0_4px_rgba(255,255,255,0.3)] hover:drop-shadow-[0_0_12px_rgba(255,255,255,0.9)]"
+            className="text-lg md:text-2xl font-bold cursor-pointer transition-all duration-300 drop-shadow-[0_0_8px_rgba(255,255,255,0.5)] hover:drop-shadow-[0_0_20px_rgba(255,255,255,1)]"
             style={{ color: isDark ? '#FFFFFF' : '#000000' }}
             role="button"
             tabIndex={0}
