@@ -104,7 +104,7 @@ const NavigationDesktop = ({
 
           <h1 
             onClick={() => navigate('/')}
-            className="text-lg md:text-2xl font-bold cursor-pointer transition-all duration-300 hover:drop-shadow-[0_0_8px_rgba(255,255,255,0.8)]"
+            className="text-lg md:text-2xl font-bold cursor-pointer transition-all duration-300 drop-shadow-[0_0_4px_rgba(255,255,255,0.3)] hover:drop-shadow-[0_0_12px_rgba(255,255,255,0.9)]"
             style={{ color: isDark ? '#FFFFFF' : '#000000' }}
             role="button"
             tabIndex={0}
