@@ -22,7 +22,7 @@ const LeftSidebar = ({
       </div>
       
       {/* Vote Button - Desktop only */}
-      {!isMobile && <VoteButton articleId={article.id?.toString() || article.title} articleTitle={article.title} articleUrl={article.url} />}
+      {!isMobile && <VoteButton articleId={article.id?.toString() || article.title} articleTitle={article.title} articleUrl={article.url} className="px-[2px] py-0 my-0 mx-[9px] rounded-xl" />}
     </div>;
 };
 export default LeftSidebar;
