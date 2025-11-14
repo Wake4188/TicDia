@@ -110,7 +110,7 @@ const VoteButton = ({
       setIsLoading(false);
     }
   };
-  return <div className="flex flex-col items-center text-white">
+  return <div className="flex flex-col items-center text-white backdrop-blur-md bg-black/20 rounded-lg p-2">
       <button 
         className={`sidebar-icon ${isVoted ? 'text-tictok-red' : ''} ${isLoading ? 'opacity-50' : ''} min-w-[44px] min-h-[44px] flex items-center justify-center`} 
         onClick={handleVote} 
