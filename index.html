@@ -33,10 +33,23 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="theme-color" content="#FE2C55" />
   
-  <!-- Critical CSS for initial paint -->
+  <!-- Critical CSS for initial paint - Enhanced for CLS prevention -->
   <style>
-    body { margin: 0; padding: 0; background-color: #000; }
-    #root { min-height: 100vh; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { 
+      margin: 0; 
+      padding: 0; 
+      background-color: #0a0a0f; 
+      color: #f5f5f5;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+      overflow-x: hidden;
+    }
+    #root { min-height: 100vh; display: flex; flex-direction: column; }
+    
+    /* Prevent layout shifts */
+    img, video { max-width: 100%; height: auto; display: block; }
+    
+    /* Loading skeleton */
     .loading-skeleton { 
       width: 100vw; 
       height: 100vh; 
@@ -47,6 +60,12 @@
     @keyframes shimmer {
       0% { background-position: 200% 0; }
       100% { background-position: -200% 0; }
+    }
+    
+    /* Preload font display to prevent FOIT */
+    @font-face {
+      font-family: 'Inter';
+      font-display: swap;
     }
   </style>
 
