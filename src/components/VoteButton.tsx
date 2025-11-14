@@ -112,14 +112,14 @@ const VoteButton = ({
   };
   return <div className="flex flex-col items-center text-white backdrop-blur-md bg-black/20 rounded-lg px-2 pt-1 pb-2">
       <button 
-        className={`sidebar-icon ${isVoted ? 'text-tictok-red' : ''} ${isLoading ? 'opacity-50' : ''} min-w-[44px] min-h-[44px] flex items-center justify-center`} 
+        className={`sidebar-icon ${isVoted ? 'text-tictok-red' : ''} ${isLoading ? 'opacity-50' : ''} min-w-[44px] min-h-[44px] flex items-center justify-center transition-all duration-200 active:scale-90 hover:scale-110`} 
         onClick={handleVote} 
         disabled={isLoading}
         aria-label={isVoted ? `Remove upvote from ${articleTitle}` : `Upvote ${articleTitle}`}
       >
-        <ArrowUp className={`w-6 h-6 ${isVoted ? 'fill-current' : ''}`} />
+        <ArrowUp className={`w-6 h-6 transition-all duration-300 ${isVoted ? 'fill-current scale-110' : 'scale-100'}`} />
       </button>
-      <span className="text-xs font-medium text-left my-0 mx-0 px-[7px] py-0">{isVoted ? t.upvote + "d" : t.upvote}</span>
+      <span className="text-xs font-medium text-left my-0 mx-0 px-[7px] py-0 transition-opacity duration-200">{isVoted ? t.upvote + "d" : t.upvote}</span>
       
     </div>;
 };
