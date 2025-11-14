@@ -4,19 +4,20 @@ import path from "path";
 import { componentTagger } from "lovable-tagger";
 import { visualizer } from "rollup-plugin-visualizer";
 
-// Plugin to defer CSS loading for better performance
+// Enhanced plugin to defer CSS loading and eliminate render blocking
 const deferCSSPlugin = (): Plugin => ({
   name: 'defer-css',
   transformIndexHtml: {
     order: 'post',
     handler(html) {
-      // Transform blocking CSS links to preload with deferred loading
+      // Transform blocking CSS links to non-blocking preload with media print trick
       return html.replace(
-        /<link([^>]*?)rel="stylesheet"([^>]*?)>/gi,
-        (match, before, after) => {
-          const href = match.match(/href="([^"]+)"/)?.[1];
-          if (href && href.includes('.css')) {
-            return `<link${before}rel="preload"${after} as="style" onload="this.onload=null;this.rel='stylesheet'"><noscript><link${before}rel="stylesheet"${after}></noscript>`;
+        /<link([^>]*?)rel="stylesheet"([^>]*?)href="([^"]+)"([^>]*?)>/gi,
+        (match, before, middle, href, after) => {
+          if (href && href.includes('.css') && !href.includes('fonts.googleapis')) {
+            // Use media="print" trick for instant non-blocking load
+            return `<link${before}rel="stylesheet"${middle}href="${href}"${after} media="print" onload="this.media='all';this.onload=null">` +
+                   `<noscript><link${before}rel="stylesheet"${middle}href="${href}"${after}></noscript>`;
           }
           return match;
         }
