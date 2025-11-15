@@ -1,6 +1,5 @@
 
 import { useState } from "react";
-import { motion } from "framer-motion";
 import { Progress } from "./ui/progress";
 import { UserPreferences } from "@/services/userPreferencesService";
 import AudioPlayer from "./AudioPlayer";
@@ -55,12 +54,9 @@ const ArticleItem = ({
         />
       </div>
       
-      <motion.div 
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.3, ease: "easeOut" }}
-        className="relative z-10 text-white p-4 sm:p-8 max-w-3xl mx-auto h-full flex flex-col justify-center"
-        style={{ minHeight: '300px', willChange: 'opacity' }}
+      <div 
+        className="relative z-10 text-white p-4 sm:p-8 max-w-3xl mx-auto h-full flex flex-col justify-center animate-fade-in"
+        style={{ minHeight: '300px' }}
       >
         <div className={`${isMobile ? 'bg-black/40 backdrop-blur-sm rounded-lg p-4 max-h-[70vh] overflow-y-auto' : 'text-center max-h-[80vh] overflow-y-auto'}`} style={{ minHeight: '200px' }}>
           <div className="space-y-4" style={{ minHeight: '150px' }}>
@@ -123,7 +119,7 @@ const ArticleItem = ({
           <span>•</span>
           <span>{article.views.toLocaleString()} views</span>
         </div>
-      </motion.div>
+      </div>
       
       {isCurrent && progress > 0 && (
         <div className="absolute bottom-0 left-0 right-0 z-20">
