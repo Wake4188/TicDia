@@ -56,7 +56,11 @@ const ArticleItem = ({
       
       <div 
         className="relative z-10 text-white p-4 sm:p-8 max-w-3xl mx-auto h-full flex flex-col justify-center animate-fade-in"
-        style={{ minHeight: '300px' }}
+        style={{ 
+          minHeight: '300px',
+          animationDelay: `${index * 0.1}s`,
+          animationFillMode: 'both'
+        }}
       >
         <div className={`${isMobile ? 'bg-black/40 backdrop-blur-sm rounded-lg p-4 max-h-[70vh] overflow-y-auto' : 'text-center max-h-[80vh] overflow-y-auto'}`} style={{ minHeight: '200px' }}>
           <div className="space-y-4" style={{ minHeight: '150px' }}>
