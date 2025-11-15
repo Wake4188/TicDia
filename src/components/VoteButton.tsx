@@ -1,10 +1,10 @@
 import { useState, useEffect } from "react";
 import { ArrowUp } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/components/ui/use-toast";
 import { useNavigate } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { getArticleVoteCount, getUserVote, voteOnArticle, removeVote } from "@/services/votingService";
 interface VoteButtonProps {
   articleId: string;
   articleTitle: string;
@@ -31,26 +31,14 @@ const VoteButton = ({
   const [isLoading, setIsLoading] = useState(false);
   useEffect(() => {
     const checkVoteStatus = async () => {
-      if (!user) return;
       try {
-        const {
-          data: voteData,
-          error: voteError
-        } = await supabase.from('article_votes').select('id').eq('article_id', articleId).eq('user_id', user.id).maybeSingle();
-        if (voteError) {
-          console.error('Error checking vote status:', voteError);
-          return;
-        }
-        setIsVoted(!!voteData);
-        const {
-          data: voteCounts,
-          error: countError
-        } = await supabase.from('article_votes').select('id').eq('article_id', articleId);
-        if (countError) {
-          console.error('Error fetching vote count:', countError);
-          return;
-        }
-        setVotes(voteCounts?.length || 0);
+        const [userVote, voteCount] = await Promise.all([
+          user ? getUserVote(articleId) : Promise.resolve(null),
+          getArticleVoteCount(articleId)
+        ]);
+        
+        setIsVoted(!!userVote);
+        setVotes(voteCount);
       } catch (error) {
         console.error('Error in vote check:', error);
       }
@@ -72,10 +60,7 @@ const VoteButton = ({
     setIsLoading(true);
     try {
       if (isVoted) {
-        const {
-          error
-        } = await supabase.from('article_votes').delete().eq('article_id', articleId).eq('user_id', user.id);
-        if (error) throw error;
+        await removeVote(articleId);
         setIsVoted(false);
         setVotes(prev => Math.max(0, prev - 1));
         toast({
@@ -83,15 +68,7 @@ const VoteButton = ({
           description: "Your vote has been removed."
         });
       } else {
-        const {
-          error
-        } = await supabase.from('article_votes').insert({
-          article_id: articleId,
-          user_id: user.id,
-          article_title: articleTitle,
-          article_url: articleUrl
-        });
-        if (error) throw error;
+        await voteOnArticle(articleId, articleTitle, articleUrl);
         setIsVoted(true);
         setVotes(prev => prev + 1);
         toast({
