@@ -63,7 +63,7 @@ const ArticleViewer = ({ articles, onArticleChange, onArticleView }: ArticleView
   }, [handleTtsStart, handleTtsStop]);
 
   return (
-    <div className="flex-1 relative">
+    <main className="flex-1 relative" role="feed" aria-label="Wikipedia articles feed">
       <div
         ref={containerRef}
         className="h-full w-full overflow-y-auto snap-y snap-mandatory"
@@ -72,6 +72,8 @@ const ArticleViewer = ({ articles, onArticleChange, onArticleView }: ArticleView
           msOverflowStyle: 'none',
           WebkitScrollbar: { display: 'none' }
         } as any}
+        aria-live="polite"
+        aria-atomic="false"
       >
         
         {managedArticles.map((article, index) => (
@@ -89,7 +91,7 @@ const ArticleViewer = ({ articles, onArticleChange, onArticleView }: ArticleView
         
         {isLoading && <ArticleLoadingState />}
       </div>
-    </div>
+    </main>
   );
 };
 
