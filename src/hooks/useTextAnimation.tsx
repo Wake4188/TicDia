@@ -23,26 +23,10 @@ export const useTextAnimation = (
       return;
     }
 
-    console.log('Starting text animation for:', text.substring(0, 50) + '...');
-    
-    const words = text.split(' ');
-    let currentWordIndex = 0;
-    setDisplayedText('');
-    setProgress(0);
-
-    intervalRef.current = setInterval(() => {
-      if (currentWordIndex < words.length) {
-        const wordsToShow = words.slice(0, currentWordIndex + 1);
-        setDisplayedText(wordsToShow.join(' '));
-        setProgress(((currentWordIndex + 1) / words.length) * 100);
-        currentWordIndex++;
-      } else {
-        if (intervalRef.current) {
-          clearInterval(intervalRef.current);
-          intervalRef.current = null;
-        }
-      }
-    }, speed);
+    // Show full text immediately to prevent CLS issues
+    // Text animation disabled for better performance and CLS score
+    setDisplayedText(text);
+    setProgress(100);
 
     return () => {
       if (intervalRef.current) {

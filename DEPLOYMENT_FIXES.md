@@ -174,3 +174,24 @@ If issues occur:
 2. Investigate logs and errors
 3. Fix issues in development
 4. Re-deploy after thorough testing
+
+## Cumulative Layout Shift (CLS) Fixes
+
+### Problem Identified:
+- CLS score of 0.155 (target: <0.1)
+- 15 layout shifts from article content area
+- Framer Motion vertical animations causing shifts
+- Word-by-word text animation causing content reflows
+
+### Changes Made:
+1. **Removed vertical motion animations**: Changed from `y: 20` to opacity-only fade
+2. **Disabled text animation**: Show full text immediately instead of word-by-word
+3. **Reserved space**: Added min-height to article containers (300px, 200px, 100px)
+4. **CSS containment**: Added `contain: layout style` to article sections
+5. **Optimized transitions**: Reduced duration from 0.5s to 0.3s, added `willChange: opacity`
+
+### Expected Impact:
+- CLS score improvement from 0.155 to <0.05
+- Eliminated all 15 layout shifts
+- Faster perceived loading
+- Better SEO and Core Web Vitals scores
