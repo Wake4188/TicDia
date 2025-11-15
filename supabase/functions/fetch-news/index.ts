@@ -74,7 +74,10 @@ serve(async (req) => {
       return null
     }
 
-    const stripTags = (html: string) => html?.replace(/<[^>]+>/g, '').trim()
+    const stripTags = (html: string) => {
+      if (!html || typeof html !== 'string') return ''
+      return html.replace(/<[^>]+>/g, '').trim()
+    }
 
     const articles = items.slice(0, 8).map((item: any) => {
       const imageUrl = pickImage(item)
