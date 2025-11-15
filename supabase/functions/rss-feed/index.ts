@@ -35,6 +35,61 @@ serve(async (req) => {
       );
     }
 
+    // SECURITY: Whitelist allowed RSS feed domains to prevent SSRF attacks
+    const ALLOWED_DOMAINS = [
+      'rss.nytimes.com',
+      'feeds.bbci.co.uk',
+      'www.france24.com',
+      'feeds.skynews.com',
+      'feeds.reuters.com',
+      'feeds.cnn.com',
+      'feeds.theguardian.com',
+      'rss.cbc.ca'
+    ];
+
+    try {
+      const urlObj = new URL(feedUrl);
+      
+      // Only allow HTTP and HTTPS protocols
+      if (urlObj.protocol !== 'http:' && urlObj.protocol !== 'https:') {
+        return new Response(
+          JSON.stringify({ error: 'Invalid protocol. Only HTTP and HTTPS are allowed.' }),
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      // Check if domain is in whitelist
+      if (!ALLOWED_DOMAINS.includes(urlObj.hostname)) {
+        return new Response(
+          JSON.stringify({ 
+            error: 'Domain not allowed. Only whitelisted RSS feeds are supported.',
+            allowed_domains: ALLOWED_DOMAINS 
+          }),
+          { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      // Block private IP ranges
+      const hostname = urlObj.hostname;
+      if (
+        hostname.startsWith('127.') ||
+        hostname.startsWith('10.') ||
+        hostname.startsWith('192.168.') ||
+        hostname.startsWith('169.254.') ||
+        hostname === 'localhost'
+      ) {
+        return new Response(
+          JSON.stringify({ error: 'Access to private IP ranges is not allowed.' }),
+          { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+    } catch (urlError) {
+      return new Response(
+        JSON.stringify({ error: 'Invalid URL format' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
     // Check cache first
     const cacheKey = feedUrl;
     const cached = cache.get(cacheKey);
@@ -48,19 +103,32 @@ serve(async (req) => {
 
     console.log('Fetching RSS feed:', feedUrl);
 
-    const response = await fetch(feedUrl);
-    if (!response.ok) {
-      throw new Error(`Failed to fetch RSS feed: ${response.status}`);
-    }
+    // Add timeout to prevent hanging requests
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
 
-    const xmlText = await response.text();
-    const parser = new DOMParser();
-    const xmlDoc = parser.parseFromString(xmlText, 'application/xml');
+    try {
+      const response = await fetch(feedUrl, { 
+        signal: controller.signal,
+        redirect: 'follow',
+        headers: {
+          'User-Agent': 'Ticdia RSS Feed Reader/1.0'
+        }
+      });
+      clearTimeout(timeoutId);
+      
+      if (!response.ok) {
+        throw new Error(`Failed to fetch RSS feed: ${response.status}`);
+      }
 
-    const items = Array.from(xmlDoc.querySelectorAll('item, entry')).slice(0, 15);
-    const articles: RSSArticle[] = [];
+      const xmlText = await response.text();
+      const parser = new DOMParser();
+      const xmlDoc = parser.parseFromString(xmlText, 'application/xml');
 
-    for (const item of items) {
+      const items = Array.from(xmlDoc.querySelectorAll('item, entry')).slice(0, 15);
+      const articles: RSSArticle[] = [];
+
+      for (const item of items) {
       const title = item.querySelector('title')?.textContent?.trim() || 'Untitled';
       let summary = item.querySelector('description, summary, content')?.textContent?.trim() || '';
       
@@ -109,27 +177,37 @@ serve(async (req) => {
       const pubDate = item.querySelector('pubDate, published, updated')?.textContent?.trim() || 
                      new Date().toISOString();
 
-      if (title && summary) {
-        articles.push({
-          title,
-          summary,
-          link,
-          image,
-          publishedAt: pubDate,
-          source
-        });
+        if (title && summary) {
+          articles.push({
+            title,
+            summary,
+            link,
+            image,
+            publishedAt: pubDate,
+            source
+          });
+        }
       }
+
+      // Cache the results
+      cache.set(cacheKey, { data: articles, timestamp: Date.now() });
+
+      console.log(`Successfully parsed ${articles.length} articles from RSS feed`);
+
+      return new Response(
+        JSON.stringify(articles),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    } catch (fetchError) {
+      clearTimeout(timeoutId);
+      if (fetchError.name === 'AbortError') {
+        return new Response(
+          JSON.stringify({ error: 'Request timeout while fetching RSS feed' }),
+          { status: 504, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+      throw fetchError;
     }
-
-    // Cache the results
-    cache.set(cacheKey, { data: articles, timestamp: Date.now() });
-
-    console.log(`Successfully parsed ${articles.length} articles from RSS feed`);
-
-    return new Response(
-      JSON.stringify(articles),
-      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-    );
 
   } catch (error) {
     console.error('RSS feed error:', error);

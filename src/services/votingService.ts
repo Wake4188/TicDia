@@ -64,44 +64,31 @@ export const getUserVote = async (articleId: string): Promise<ArticleVote | null
 };
 
 export const getArticleVoteCount = async (articleId: string): Promise<number> => {
-  const { count, error } = await supabase
-    .from('article_votes')
-    .select('*', { count: 'exact', head: true })
-    .eq('article_id', articleId)
-    .eq('vote_type', 'upvote');
+  // Use secure database function that doesn't expose individual votes
+  const { data, error } = await supabase
+    .rpc('get_article_vote_count', { p_article_id: articleId });
 
   if (error) throw error;
-  return count || 0;
+  return data || 0;
 };
 
 export const getTopVotedArticles = async (limit: number = 3): Promise<any[]> => {
   const today = new Date().toISOString().split('T')[0];
   
+  // Use secure database function that returns aggregated data only
   const { data, error } = await supabase
-    .from('article_votes')
-    .select('article_id, article_title, article_url, vote_type')
-    .eq('vote_type', 'upvote')
-    .gte('voted_at', `${today}T00:00:00.000Z`)
-    .lt('voted_at', `${today}T23:59:59.999Z`);
+    .rpc('get_top_voted_articles', { 
+      p_limit: limit,
+      p_date: today 
+    });
 
   if (error) throw error;
 
-  // Group by article and count votes
-  const voteCounts = data.reduce((acc: any, vote) => {
-    if (!acc[vote.article_id]) {
-      acc[vote.article_id] = {
-        id: vote.article_id,
-        title: vote.article_title,
-        url: vote.article_url,
-        votes: 0
-      };
-    }
-    acc[vote.article_id].votes++;
-    return acc;
-  }, {});
-
-  // Sort by vote count and return top articles
-  return Object.values(voteCounts)
-    .sort((a: any, b: any) => b.votes - a.votes)
-    .slice(0, limit);
+  // Map to the expected format
+  return (data || []).map((article: any) => ({
+    id: article.article_id,
+    title: article.article_title,
+    url: article.article_url,
+    votes: Number(article.vote_count)
+  }));
 };
