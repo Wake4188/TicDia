@@ -56,30 +56,51 @@ export default defineConfig(({ mode }) => ({
     rollupOptions: {
       output: {
         manualChunks: (id) => {
-          // More aggressive code splitting for better caching
+          // Aggressive code splitting for better caching and reduced unused JS
           if (id.includes('node_modules')) {
-            if (id.includes('react') || id.includes('react-dom') || id.includes('react-router')) {
-              return 'react-vendor';
+            // Core React - always needed
+            if (id.includes('react') || id.includes('react-dom')) {
+              return 'react-core';
             }
+            // Router - only needed when navigating
+            if (id.includes('react-router')) {
+              return 'react-router';
+            }
+            // Animation library - defer for better initial load
             if (id.includes('framer-motion')) {
               return 'framer-motion';
             }
+            // UI components split by usage pattern
             if (id.includes('@radix-ui')) {
-              if (id.includes('dialog') || id.includes('dropdown') || id.includes('popover')) {
+              if (id.includes('dialog') || id.includes('dropdown') || id.includes('popover') || id.includes('sheet')) {
                 return 'radix-overlays';
               }
-              if (id.includes('form') || id.includes('checkbox') || id.includes('select')) {
+              if (id.includes('form') || id.includes('checkbox') || id.includes('select') || id.includes('slider')) {
                 return 'radix-forms';
               }
               return 'radix-base';
             }
+            // Data fetching - separate for better caching
             if (id.includes('@tanstack/react-query')) {
               return 'react-query';
             }
+            // Backend client
             if (id.includes('@supabase')) {
               return 'supabase';
             }
-            // Split other large libraries individually
+            // Icons - large library, split separately
+            if (id.includes('lucide-react')) {
+              return 'icons';
+            }
+            // Charts - only needed on specific pages
+            if (id.includes('recharts')) {
+              return 'charts';
+            }
+            // Other large libraries
+            if (id.includes('date-fns')) {
+              return 'date-utils';
+            }
+            // Remaining vendor code
             return 'vendor';
           }
         },
