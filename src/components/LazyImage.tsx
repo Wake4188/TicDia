@@ -30,6 +30,11 @@ const LazyImage = ({
   const imgRef = useRef<HTMLImageElement>(null);
 
   useEffect(() => {
+    if (priority) {
+      setInView(true);
+      return;
+    }
+
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
@@ -47,7 +52,7 @@ const LazyImage = ({
     }
 
     return () => observer.disconnect();
-  }, []);
+  }, [priority]);
 
   const handleLoad = () => {
     setIsLoaded(true);
@@ -67,9 +72,11 @@ const LazyImage = ({
         aspectRatio: `${width}/${height}`,
         minHeight: `${height}px`
       }}
+      role="img"
+      aria-label={alt}
     >
       {!isLoaded && !error && (
-        <Skeleton className="absolute inset-0 w-full h-full" />
+        <Skeleton className="absolute inset-0 w-full h-full" aria-hidden="true" />
       )}
       {(inView || priority) && (
         <img

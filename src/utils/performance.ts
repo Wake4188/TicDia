@@ -184,17 +184,18 @@ export const addResourceHints = (): void => {
   if (typeof document === 'undefined') return;
 
   const hints = [
-    { rel: 'preconnect', href: 'https://api.nytimes.com' },
-    { rel: 'preconnect', href: 'https://newsapi.org' },
-    { rel: 'preconnect', href: 'https://en.wikipedia.org' },
-    { rel: 'dns-prefetch', href: 'https://supabase.co' },
-    { rel: 'dns-prefetch', href: 'https://api.allorigins.win' }
+    { rel: 'preconnect', href: 'https://rtuxaekhfwvpwmvmdaul.supabase.co' },
+    { rel: 'preconnect', href: 'https://upload.wikimedia.org' },
+    { rel: 'dns-prefetch', href: 'https://en.wikipedia.org' },
   ];
 
   hints.forEach(({ rel, href }) => {
     const link = document.createElement('link');
     link.rel = rel;
     link.href = href;
+    if (rel === 'preconnect') {
+      link.crossOrigin = 'anonymous';
+    }
     document.head.appendChild(link);
   });
 };

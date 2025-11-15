@@ -89,24 +89,23 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Playfair+Display:wght@400;700&family=Cinzel:wght@400;700&family=Courier+Prime:wght@400;700&family=Space+Mono:wght@400;700&family=Dancing+Script:wght@400;700&family=Merriweather:wght@400;700&family=Lora:wght@400;700&family=Crimson+Text:wght@400;700&family=PT+Serif:wght@400;700&family=Open+Sans:wght@400;700&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
   
-  <!-- Resource hints for better performance -->
+  <!-- Performance and resource hints - optimized -->
+  <link rel="preconnect" href="https://rtuxaekhfwvpwmvmdaul.supabase.co" crossorigin>
   <link rel="preconnect" href="https://upload.wikimedia.org">
-  <link rel="dns-prefetch" href="https://upload.wikimedia.org">
-  
-  <!-- Performance: Preconnect to critical domains only -->
-  <link rel="preconnect" href="https://rtuxaekhfwvpwmvmdaul.supabase.co">
   <link rel="dns-prefetch" href="https://en.wikipedia.org">
-  <link rel="dns-prefetch" href="https://api.nytimes.com">
-  <link rel="dns-prefetch" href="https://newsapi.org">
+  <link rel="modulepreload" href="/src/main.tsx">
+
 </head>
 
 <body>
-  <div id="root"></div>
+  <div id="root" role="main"></div>
   <noscript>
-    <h1>TicDia — Discover Wikipedia</h1>
-    <p>Discover Wikipedia articles in a TikTok-style vertical feed. Educational, fast, and distraction-free learning experience.</p>
+    <div style="text-align: center; padding: 50px; font-family: system-ui, sans-serif; background: #0a0a0f; color: #f5f5f5; min-height: 100vh;">
+      <h1 style="margin-bottom: 20px; font-size: 2rem;">TicDia — Discover Wikipedia</h1>
+      <p style="font-size: 1.1rem; line-height: 1.6;">Please enable JavaScript to use TicDia and discover Wikipedia articles in an engaging format.</p>
+    </div>
   </noscript>
-  <script src="https://cdn.gpteng.co/gptengineer.js" type="module"></script>
+  <script src="https://cdn.gpteng.co/gptengineer.js" type="module" defer></script>
   <script type="module" src="/src/main.tsx"></script>
 </body>
 
