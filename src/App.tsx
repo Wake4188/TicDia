@@ -8,10 +8,6 @@ import { ThemeProvider } from "./contexts/ThemeContext";
 import { Toaster } from "@/components/ui/toaster";
 import { CookieConsent } from "@/components/CookieConsent";
 
-// Lazy load analytics for better performance
-const Analytics = lazy(() => import("@vercel/analytics/react").then(mod => ({ default: mod.Analytics })).catch(() => ({ default: () => null })));
-const SpeedInsights = lazy(() => import("@vercel/speed-insights/react").then(mod => ({ default: mod.SpeedInsights })).catch(() => ({ default: () => null })));
-
 // Lazy load all pages for code splitting with error handling
 const Index = lazy(() => import("./pages/Index").catch(() => import("./pages/Index")));
 const Discover = lazy(() => import("./pages/Discover").catch(() => import("./pages/Discover")));
@@ -61,10 +57,6 @@ function App() {
                   </Suspense>
                   <Toaster />
                   <CookieConsent />
-                  <Suspense fallback={null}>
-                    <Analytics />
-                    <SpeedInsights />
-                  </Suspense>
                 </div>
               </Router>
             </AuthProvider>
