@@ -184,14 +184,25 @@ If issues occur:
 - Word-by-word text animation causing content reflows
 
 ### Changes Made:
-1. **Removed vertical motion animations**: Changed from `y: 20` to opacity-only fade
-2. **Disabled text animation**: Show full text immediately instead of word-by-word
-3. **Reserved space**: Added min-height to article containers (300px, 200px, 100px)
-4. **CSS containment**: Added `contain: layout style` to article sections
-5. **Optimized transitions**: Reduced duration from 0.5s to 0.3s, added `willChange: opacity`
+1. **Removed Framer Motion**: Replaced with pure CSS animations (`animate-fade-in` class)
+2. **Removed vertical motion animations**: No movement, only opacity fade
+3. **Disabled text animation**: Show full text immediately instead of word-by-word
+4. **Reserved space**: Added min-height to article containers (300px, 200px, 100px)
+5. **CSS containment**: Added `contain: layout style` to article sections
+6. **Optimized transitions**: Using CSS animations instead of JavaScript for better performance
+
+### Technical Details:
+- Removed `framer-motion` import from ArticleItem component
+- Using Tailwind's `animate-fade-in` utility class
+- CSS animations are GPU-accelerated and don't trigger layout recalculation
+- Min-height prevents content from causing shifts during load
 
 ### Expected Impact:
 - CLS score improvement from 0.155 to <0.05
 - Eliminated all 15 layout shifts
-- Faster perceived loading
+- Faster perceived loading (no JavaScript animation overhead)
 - Better SEO and Core Web Vitals scores
+- Improved mobile performance
+
+### Note:
+Changes must be **published** (click "Update" button) before they appear in PageSpeed analysis.
