@@ -23,10 +23,22 @@ export const useTextAnimation = (
       return;
     }
 
-    // Show full text immediately to prevent CLS issues
-    // Text animation disabled for better performance and CLS score
-    setDisplayedText(text);
-    setProgress(100);
+    // Perform a fast, lightweight per-character animation after first paint
+    // Use a small batch size to reduce reflows on long texts
+    const step = Math.max(1, Math.ceil(text.length / 200)); // ~200 steps max
+    const interval = Math.max(12, speed); // keep it snappy but safe
+    let i = 0;
+
+    intervalRef.current = setInterval(() => {
+      i = Math.min(text.length, i + step);
+      setDisplayedText(text.slice(0, i));
+      setProgress(Math.round((i / text.length) * 100));
+
+      if (i >= text.length && intervalRef.current) {
+        clearInterval(intervalRef.current);
+        intervalRef.current = null;
+      }
+    }, interval) as unknown as NodeJS.Timeout;
 
     return () => {
       if (intervalRef.current) {

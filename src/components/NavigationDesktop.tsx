@@ -103,12 +103,12 @@ const NavigationDesktop = ({
           </Button>
 
           <h1 
-            onClick={() => navigate('/')}
+            onClick={() => onRandomClick()}
             className="text-lg md:text-2xl font-bold cursor-pointer transition-all duration-300 drop-shadow-[0_0_8px_rgba(255,255,255,0.5)] hover:drop-shadow-[0_0_20px_rgba(255,255,255,1)]"
             style={{ color: isDark ? '#FFFFFF' : '#000000' }}
             role="button"
             tabIndex={0}
-            onKeyDown={(e) => e.key === 'Enter' && navigate('/')}
+            onKeyDown={(e) => e.key === 'Enter' && onRandomClick()}
             aria-label="Navigate to home"
           >
             TicDia
