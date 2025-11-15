@@ -326,7 +326,11 @@ export const AnalyticsStats = () => {
                         {achievement.description}
                       </p>
                       <div className="space-y-1">
-                        <Progress value={percentage} className="h-1.5" />
+                        <Progress 
+                          value={percentage} 
+                          className="h-1.5"
+                          aria-label={`${achievement.title} progress: ${achievement.progress} out of ${achievement.threshold}`}
+                        />
                         <p className="text-xs text-muted-foreground">
                           {achievement.progress} / {achievement.threshold}
                         </p>
@@ -399,7 +403,11 @@ export const AnalyticsStats = () => {
                     <span className="font-medium">{day.day}</span>
                     <span className="text-muted-foreground">{day.count} articles</span>
                   </div>
-                  <Progress value={percentage} className="h-2" />
+                  <Progress 
+                    value={percentage} 
+                    className="h-2"
+                    aria-label={`${day.day}: ${day.count} articles read`}
+                  />
                 </motion.div>
               );
             })}

@@ -124,7 +124,8 @@ const ArticleItem = ({
       {isCurrent && progress > 0 && (
         <div className="absolute bottom-0 left-0 right-0 z-20">
           <Progress 
-            value={progress} 
+            value={progress}
+            aria-label={`Article reading progress: ${Math.round(progress)}%`}
             className="h-1 bg-black/20" 
             indicatorClassName="transition-colors duration-300" 
             style={{ '--progress-bar-color': userPreferences.highlightColor } as React.CSSProperties} 

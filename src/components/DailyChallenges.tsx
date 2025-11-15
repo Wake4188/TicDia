@@ -98,6 +98,7 @@ const DailyChallenges = () => {
                 <Progress 
                   value={(challenge.progress / challenge.challenge_target) * 100}
                   className="h-2"
+                  aria-label={`${challenge.challenge_description} progress: ${challenge.progress} out of ${challenge.challenge_target}`}
                 />
               </div>
             </motion.div>
