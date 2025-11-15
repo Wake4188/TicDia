@@ -10,16 +10,18 @@ const deferCSSPlugin = (): Plugin => ({
   transformIndexHtml: {
     order: 'post',
     handler(html) {
-      // Transform blocking CSS links to non-blocking preload with media print trick
+      // Transform blocking CSS links to non-blocking preload
       return html.replace(
-        /<link([^>]*?)rel="stylesheet"([^>]*?)href="([^"]+)"([^>]*?)>/gi,
+        /<link([^>]*?)rel="stylesheet"([^>]*?)href="([^"]+\.css)"([^>]*?)>/gi,
         (match, before, middle, href, after) => {
-          if (href && href.includes('.css') && !href.includes('fonts.googleapis')) {
-            // Use media="print" trick for instant non-blocking load
-            return `<link${before}rel="stylesheet"${middle}href="${href}"${after} media="print" onload="this.media='all';this.onload=null">` +
-                   `<noscript><link${before}rel="stylesheet"${middle}href="${href}"${after}></noscript>`;
+          // Skip Google Fonts - they're already optimized
+          if (href.includes('fonts.googleapis')) {
+            return match;
           }
-          return match;
+          
+          // Use rel="preload" for non-blocking load with proper fallback
+          return `<link rel="preload" href="${href}" as="style" onload="this.onload=null;this.rel='stylesheet'">` +
+                 `<noscript><link rel="stylesheet" href="${href}"></noscript>`;
         }
       );
     }
