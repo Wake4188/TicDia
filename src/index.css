@@ -87,6 +87,8 @@
   
   .article-section {
     @apply h-screen w-full relative flex items-center justify-center;
+    contain: layout style;
+    will-change: transform;
   }
   
   .text-overlay {

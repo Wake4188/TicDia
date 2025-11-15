@@ -56,25 +56,27 @@ const ArticleItem = ({
       </div>
       
       <motion.div 
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, ease: "easeOut" }}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.3, ease: "easeOut" }}
         className="relative z-10 text-white p-4 sm:p-8 max-w-3xl mx-auto h-full flex flex-col justify-center"
+        style={{ minHeight: '300px', willChange: 'opacity' }}
       >
-        <div className={`${isMobile ? 'bg-black/40 backdrop-blur-sm rounded-lg p-4 max-h-[70vh] overflow-y-auto' : 'text-center max-h-[80vh] overflow-y-auto'}`}>
-          <div className="space-y-4">
+        <div className={`${isMobile ? 'bg-black/40 backdrop-blur-sm rounded-lg p-4 max-h-[70vh] overflow-y-auto' : 'text-center max-h-[80vh] overflow-y-auto'}`} style={{ minHeight: '200px' }}>
+          <div className="space-y-4" style={{ minHeight: '150px' }}>
             <h1 
               className="text-2xl sm:text-4xl font-bold" 
               style={{ fontFamily: userPreferences.fontFamily }}
             >
               {article.title}
             </h1>
-            <div className="max-w-2xl">
+            <div className="max-w-2xl" style={{ minHeight: '100px' }}>
               <p 
                 className="text-sm sm:text-lg leading-relaxed" 
                 style={{ 
                   fontFamily: userPreferences.fontFamily,
-                  fontSize: `${userPreferences.fontSize}px`
+                  fontSize: `${userPreferences.fontSize}px`,
+                  minHeight: '80px'
                 }}
                 translate="yes"
               >
