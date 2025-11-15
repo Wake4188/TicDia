@@ -28,12 +28,15 @@ const deferCSSPlugin = (): Plugin => ({
   }
 });
 
-// https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
+  // ✅ REQUIRED for Vercel — fixes MIME type + blank screen
+  base: "/",
+
   server: {
     host: "::",
     port: 8080,
   },
+
   plugins: [
     react(),
     mode === 'development' && componentTagger(),
@@ -45,32 +48,30 @@ export default defineConfig(({ mode }) => ({
     }),
     mode === 'production' && deferCSSPlugin(),
   ].filter(Boolean),
+
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
     },
   },
+
   build: {
     cssCodeSplit: true,
-    sourcemap: true, // Enable source maps for production debugging
+    sourcemap: true,
+
     rollupOptions: {
       output: {
         manualChunks: (id) => {
-          // Aggressive code splitting for better caching and reduced unused JS
           if (id.includes('node_modules')) {
-            // Core React - always needed
             if (id.includes('react') || id.includes('react-dom')) {
               return 'react-core';
             }
-            // Router - only needed when navigating
             if (id.includes('react-router')) {
               return 'react-router';
             }
-            // Animation library - defer for better initial load
             if (id.includes('framer-motion')) {
               return 'framer-motion';
             }
-            // UI components split by usage pattern
             if (id.includes('@radix-ui')) {
               if (id.includes('dialog') || id.includes('dropdown') || id.includes('popover') || id.includes('sheet')) {
                 return 'radix-overlays';
@@ -80,27 +81,21 @@ export default defineConfig(({ mode }) => ({
               }
               return 'radix-base';
             }
-            // Data fetching - separate for better caching
             if (id.includes('@tanstack/react-query')) {
               return 'react-query';
             }
-            // Backend client
             if (id.includes('@supabase')) {
               return 'supabase';
             }
-            // Icons - large library, split separately
             if (id.includes('lucide-react')) {
               return 'icons';
             }
-            // Charts - only needed on specific pages
             if (id.includes('recharts')) {
               return 'charts';
             }
-            // Other large libraries
             if (id.includes('date-fns')) {
               return 'date-utils';
             }
-            // Remaining vendor code
             return 'vendor';
           }
         },
@@ -109,14 +104,19 @@ export default defineConfig(({ mode }) => ({
         assetFileNames: 'assets/[name]-[hash].[ext]',
       },
     },
+
     target: 'esnext',
+
     minify: 'terser',
+
     terserOptions: {
       compress: {
         drop_console: mode === 'production',
         drop_debugger: true,
-        passes: 3, // More aggressive minification
-        pure_funcs: mode === 'production' ? ['console.log', 'console.info', 'console.debug'] : [],
+        passes: 3,
+        pure_funcs: mode === 'production'
+          ? ['console.log', 'console.info', 'console.debug']
+          : [],
         unsafe: true,
         unsafe_comps: true,
         unsafe_math: true,
@@ -125,9 +125,10 @@ export default defineConfig(({ mode }) => ({
         safari10: true,
       },
       format: {
-        comments: false, // Remove all comments
+        comments: false,
       },
     },
+
     chunkSizeWarningLimit: 1000,
   },
 }));
