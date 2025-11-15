@@ -29,10 +29,8 @@
     aspect-ratio: attr(width) / attr(height);
   }
 
-  /* Prevent cumulative layout shift */
-  * {
-    content-visibility: auto;
-  }
+  /* Avoid global content-visibility to prevent blank screen on some browsers */
+  /* Apply content-visibility selectively on heavy, off-screen sections if needed */
 
   /* Apply highlight color to various elements */
   .text-tictok-red {

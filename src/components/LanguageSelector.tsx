@@ -37,10 +37,10 @@ const LanguageSelector: React.FC = () => {
       {isOpen && (
         <>
           <div 
-            className="fixed inset-0 z-40" 
+            className="fixed inset-0 z-[70]" 
             onClick={() => setIsOpen(false)}
           />
-          <div className={`absolute top-full mt-2 left-0 w-64 max-w-[90vw] rounded-lg border shadow-lg z-50 ${dropdownBg}`}>
+          <div className={`absolute top-full mt-2 left-0 w-64 max-w-[90vw] rounded-lg border shadow-lg z-[80] ${dropdownBg}`}>
             <div className="py-2 max-h-[50vh] overflow-y-auto">
               {SUPPORTED_LANGUAGES.map((language) => (
                 <button
