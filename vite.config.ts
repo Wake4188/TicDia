@@ -18,10 +18,10 @@ const deferCSSPlugin = (): Plugin => ({
           if (href.includes('fonts.googleapis')) {
             return match;
           }
-          
+
           // Use rel="preload" for non-blocking load with proper fallback
           return `<link rel="preload" href="${href}" as="style" onload="this.onload=null;this.rel='stylesheet'">` +
-                 `<noscript><link rel="stylesheet" href="${href}"></noscript>`;
+            `<noscript><link rel="stylesheet" href="${href}"></noscript>`;
         }
       );
     }
@@ -46,7 +46,7 @@ export default defineConfig(({ mode }) => ({
       gzipSize: true,
       brotliSize: true,
     }),
-    mode === 'production' && deferCSSPlugin(),
+    // mode === 'production' && deferCSSPlugin(), // Disabled for debugging
   ].filter(Boolean),
 
   resolve: {
@@ -111,12 +111,10 @@ export default defineConfig(({ mode }) => ({
 
     terserOptions: {
       compress: {
-        drop_console: mode === 'production',
+        drop_console: false, // Enabled for debugging
         drop_debugger: true,
         passes: 3,
-        pure_funcs: mode === 'production'
-          ? ['console.log', 'console.info', 'console.debug']
-          : [],
+        pure_funcs: [],
         unsafe: true,
         unsafe_comps: true,
         unsafe_math: true,

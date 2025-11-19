@@ -10,12 +10,12 @@ import { CookieConsent } from "@/components/CookieConsent";
 import { GoogleAnalyticsTracker } from "./components/GoogleAnalyticsTracker";
 
 // Lazy load all pages for code splitting with error handling
-const Index = lazy(() => import("./pages/Index").catch(() => import("./pages/Index")));
-const Discover = lazy(() => import("./pages/Discover").catch(() => import("./pages/Discover")));
-const Auth = lazy(() => import("./pages/Auth").catch(() => import("./pages/Auth")));
-const Profile = lazy(() => import("./pages/Profile").catch(() => import("./pages/Profile")));
-const Today = lazy(() => import("./pages/Today").catch(() => import("./pages/Today")));
-const Recap = lazy(() => import("./pages/Recap").catch(() => import("./pages/Recap")));
+const Index = lazy(() => import("./pages/Index"));
+const Discover = lazy(() => import("./pages/Discover"));
+const Auth = lazy(() => import("./pages/Auth"));
+const Profile = lazy(() => import("./pages/Profile"));
+const Today = lazy(() => import("./pages/Today"));
+const Recap = lazy(() => import("./pages/Recap"));
 
 // Create a client with optimized caching
 const queryClient = new QueryClient({
