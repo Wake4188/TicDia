@@ -39,7 +39,7 @@ interface RSSArticle {
 
 const NewsFeed = () => {
   const [nytArticles, setNytArticles] = useState<NYTArticle[]>([]);
-  
+
   const [franceInfoArticles, setFranceInfoArticles] = useState<RSSArticle[]>([]);
   const [bbcArticles, setBbcArticles] = useState<RSSArticle[]>([]);
   const [loading, setLoading] = useState(true);
@@ -86,11 +86,11 @@ const NewsFeed = () => {
       const { data, error } = await supabase.functions.invoke('fetch-news', {
         body: { source: 'nyt' },
       });
-      
+
       if (error) throw error;
-      
+
       const articles = data || [];
-      const uniqueArticles = articles.filter((article: NYTArticle, index: number, self: NYTArticle[]) => 
+      const uniqueArticles = articles.filter((article: NYTArticle, index: number, self: NYTArticle[]) =>
         index === self.findIndex(a => a.url === article.url)
       );
       setNytArticles(uniqueArticles);
@@ -176,19 +176,20 @@ const NewsFeed = () => {
 
   const renderNYTArticles = () => {
     // Remove duplicates based on URL
-    const uniqueArticles = nytArticles.filter((article, index, self) => 
+    const uniqueArticles = nytArticles.filter((article, index, self) =>
       index === self.findIndex(a => a.url === article.url)
     );
-    
+
     return uniqueArticles.map((article, index) => (
       <Card key={`nyt-${article.url}`} className="bg-gray-900/50 border-gray-800 hover:bg-gray-800/50 transition-colors group">
         <CardContent className="p-4 sm:p-6">
           <div className="flex flex-col sm:flex-row gap-4">
             {getNYTImageUrl(article) && (
               <div className="w-full sm:w-32 h-32 sm:h-20 flex-shrink-0 overflow-hidden rounded">
-                <img 
-                  src={getNYTImageUrl(article)} 
+                <img
+                  src={getNYTImageUrl(article)}
                   alt={article.title}
+                  loading="lazy"
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                   onError={(e) => {
                     e.currentTarget.style.display = 'none';
@@ -196,16 +197,16 @@ const NewsFeed = () => {
                 />
               </div>
             )}
-            
+
             <div className="flex-1 min-w-0">
               <h3 className="text-lg font-medium text-white mb-2 line-clamp-2 leading-tight">
                 {article.title}
               </h3>
-              
+
               <p className="text-gray-400 text-sm mb-3 line-clamp-2 leading-relaxed">
                 {article.abstract}
               </p>
-              
+
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                 <div className="flex items-center gap-3 text-xs text-gray-500">
                   <span className="flex items-center gap-1">
@@ -218,17 +219,17 @@ const NewsFeed = () => {
                     </span>
                   )}
                 </div>
-                
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  asChild 
+
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  asChild
                   className="text-tictok-red hover:text-tictok-red/80 hover:bg-tictok-red/10"
                 >
-                  <a 
-                    href={article.url} 
-                    target="_blank" 
-                    rel="noopener noreferrer" 
+                  <a
+                    href={article.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
                     className="flex items-center gap-1 text-xs"
                   >
                     {t('readOn')} NYT <ExternalLink className="w-3 h-3" />
@@ -250,9 +251,10 @@ const NewsFeed = () => {
           <div className="flex flex-col sm:flex-row gap-4">
             {article.image && (
               <div className="w-full sm:w-32 h-32 sm:h-20 flex-shrink-0 overflow-hidden rounded">
-                <img 
-                  src={article.image} 
+                <img
+                  src={article.image}
                   alt={article.title}
+                  loading="lazy"
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                   onError={(e) => { e.currentTarget.style.display = 'none'; }}
                 />
@@ -307,8 +309,8 @@ const NewsFeed = () => {
   const currentArticles = selectedSource === "nyt"
     ? nytArticles
     : selectedSource === "franceinfo"
-    ? franceInfoArticles
-    : bbcArticles;
+      ? franceInfoArticles
+      : bbcArticles;
 
   return (
     <div className="space-y-4">
@@ -316,7 +318,7 @@ const NewsFeed = () => {
         <h2 className="text-xl font-semibold text-gray-300 flex items-center gap-2">
           {t('latestNews')}
         </h2>
-        
+
         <div className="flex items-center gap-3">
           <Select value={selectedSource} onValueChange={(value: NewsSource) => setSelectedSource(value)}>
             <SelectTrigger className="w-40 bg-gray-800 border-gray-700 text-white">
@@ -325,7 +327,7 @@ const NewsFeed = () => {
             <SelectContent className="bg-gray-800 border-gray-700 z-[100]" position="popper" side="top" sideOffset={5}>
               <SelectItem value="nyt" className="text-white focus:bg-gray-700">
                 <div className="flex items-center gap-2">
-                  <img src="/lovable-uploads/3a2edeb7-cd16-4493-a86a-5667a46f7870.png" alt="NYT" className="w-4 h-4" />
+                  <img src="/lovable-uploads/3a2edeb7-cd16-4493-a86a-5667a46f7870.png" alt="NYT" loading="lazy" className="w-4 h-4" />
                   {t('nytNews')}
                 </div>
               </SelectItem>
@@ -343,11 +345,11 @@ const NewsFeed = () => {
               </SelectItem>
             </SelectContent>
           </Select>
-          
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            onClick={fetchAllNews} 
+
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={fetchAllNews}
             className="text-gray-400 hover:text-white"
           >
             <Clock className="w-4 h-4 mr-1" />
@@ -355,15 +357,15 @@ const NewsFeed = () => {
           </Button>
         </div>
       </div>
-      
+
       <div className="grid gap-4">
         {selectedSource === "nyt"
           ? renderNYTArticles()
           : selectedSource === "franceinfo"
-          ? renderRSSArticles(franceInfoArticles, "text-yellow-400 hover:text-yellow-300 hover:bg-yellow-900/10", "France Info")
-          : renderRSSArticles(bbcArticles, "text-red-400 hover:text-red-300 hover:bg-red-900/10", "BBC World")
+            ? renderRSSArticles(franceInfoArticles, "text-yellow-400 hover:text-yellow-300 hover:bg-yellow-900/10", "France Info")
+            : renderRSSArticles(bbcArticles, "text-red-400 hover:text-red-300 hover:bg-red-900/10", "BBC World")
         }
-        
+
         {currentArticles.length === 0 && (
           <Card className="bg-gray-900/50 border-gray-800">
             <CardContent className="p-6 text-center">

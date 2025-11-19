@@ -47,7 +47,7 @@ const Today = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
   const { currentLanguage, translations } = useLanguage();
-  
+
   const t = (key: string, params?: Record<string, string | number>) => {
     const keys = key.split('.');
     let value = translations;
@@ -63,7 +63,7 @@ const Today = () => {
     }
     return result;
   };
-  
+
   // Load user preferences to apply highlight color
   useUserPreferences();
   const [isAddingArticle, setIsAddingArticle] = useState(false);
@@ -105,11 +105,11 @@ const Today = () => {
 
   // Get today's date
   const today = new Date();
-  const dateString = today.toLocaleDateString(currentLanguage.code, { 
-    weekday: 'long', 
-    year: 'numeric', 
-    month: 'long', 
-    day: 'numeric' 
+  const dateString = today.toLocaleDateString(currentLanguage.code, {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
   });
 
   // Fetch admin articles
@@ -150,12 +150,12 @@ const Today = () => {
       const currentDate = new Date();
       const month = currentDate.toLocaleString(currentLanguage.code, { month: 'long' });
       const day = currentDate.getDate();
-      
+
       const wikipediaDomain = currentLanguage.wikipediaDomain;
       const response = await fetch(
         `https://${wikipediaDomain}/api/rest_v1/page/summary/${month}_${day}`
       );
-      
+
       if (!response.ok) {
         // Fallback to "Current events" page
         const fallbackResponse = await fetch(
@@ -171,19 +171,19 @@ const Today = () => {
         }
         return;
       }
-      
+
       const data = await response.json();
       setWikipediaArticles([{
         title: data.title,
         extract: data.extract,
         fullurl: data.content_urls?.desktop?.page || `https://${wikipediaDomain}/wiki/${encodeURIComponent(data.title)}`
       }]);
-      
+
       // Try to get more current events
       const eventsResponse = await fetch(
         `https://${wikipediaDomain}/w/api.php?action=query&format=json&prop=extracts&exintro=true&explaintext=true&titles=Portal:Current_events&origin=*`
       );
-      
+
       if (eventsResponse.ok) {
         const eventsData = await eventsResponse.json();
         const pages = eventsData.query?.pages;
@@ -357,9 +357,10 @@ const Today = () => {
                       <div className="flex flex-col sm:flex-row gap-4">
                         {article.image && (
                           <div className="w-full sm:w-32 h-32 sm:h-20 flex-shrink-0 overflow-hidden rounded">
-                            <img 
-                              src={article.image} 
+                            <img
+                              src={article.image}
                               alt={article.title}
+                              loading="lazy"
                               className="w-full h-full object-cover"
                               onError={(e) => { e.currentTarget.style.display = 'none'; }}
                             />
