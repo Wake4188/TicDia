@@ -7,6 +7,7 @@ import { LanguageProvider } from "./contexts/LanguageContext";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { Toaster } from "@/components/ui/toaster";
 import { CookieConsent } from "@/components/CookieConsent";
+import { GoogleAnalyticsTracker } from "./components/GoogleAnalyticsTracker";
 
 // Lazy load all pages for code splitting with error handling
 const Index = lazy(() => import("./pages/Index").catch(() => import("./pages/Index")));
@@ -37,6 +38,7 @@ function App() {
           <LanguageProvider>
             <AuthProvider>
               <Router>
+                <GoogleAnalyticsTracker />
                 <div className="min-h-screen bg-background">
                   <Suspense fallback={
                     <div className="h-screen w-screen flex items-center justify-center bg-background">
