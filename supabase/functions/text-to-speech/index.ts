@@ -15,11 +15,11 @@ function checkRateLimit(userId: string): boolean {
   const now = Date.now()
   const userRequests = rateLimitStore.get(userId) || []
   const recentRequests = userRequests.filter(timestamp => now - timestamp < RATE_LIMIT_WINDOW)
-  
+
   if (recentRequests.length >= MAX_REQUESTS_PER_WINDOW) {
     return false
   }
-  
+
   recentRequests.push(now)
   rateLimitStore.set(userId, recentRequests)
   return true
@@ -83,7 +83,7 @@ serve(async (req) => {
       },
       body: JSON.stringify({
         text: text.slice(0, 2500), // Limit text length for better performance
-        model_id: 'eleven_turbo_v2_5',
+        model_id: 'eleven_multilingual_v2',
         voice_settings: {
           stability: 0.5,
           similarity_boost: 0.8,
@@ -101,7 +101,7 @@ serve(async (req) => {
     // Convert audio buffer to base64
     const arrayBuffer = await response.arrayBuffer()
     const uint8Array = new Uint8Array(arrayBuffer)
-    
+
     // Process in chunks to avoid stack overflow
     let binaryString = ''
     const chunkSize = 8192
