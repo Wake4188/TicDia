@@ -44,12 +44,13 @@ serve(async (req) => {
       'feeds.reuters.com',
       'feeds.cnn.com',
       'feeds.theguardian.com',
-      'rss.cbc.ca'
+      'rss.cbc.ca',
+      'rss.app'
     ];
 
     try {
       const urlObj = new URL(feedUrl);
-      
+
       // Only allow HTTP and HTTPS protocols
       if (urlObj.protocol !== 'http:' && urlObj.protocol !== 'https:') {
         return new Response(
@@ -61,9 +62,9 @@ serve(async (req) => {
       // Check if domain is in whitelist
       if (!ALLOWED_DOMAINS.includes(urlObj.hostname)) {
         return new Response(
-          JSON.stringify({ 
+          JSON.stringify({
             error: 'Domain not allowed. Only whitelisted RSS feeds are supported.',
-            allowed_domains: ALLOWED_DOMAINS 
+            allowed_domains: ALLOWED_DOMAINS
           }),
           { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
@@ -108,7 +109,7 @@ serve(async (req) => {
     const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
 
     try {
-      const response = await fetch(feedUrl, { 
+      const response = await fetch(feedUrl, {
         signal: controller.signal,
         redirect: 'follow',
         headers: {
@@ -116,7 +117,7 @@ serve(async (req) => {
         }
       });
       clearTimeout(timeoutId);
-      
+
       if (!response.ok) {
         throw new Error(`Failed to fetch RSS feed: ${response.status}`);
       }
@@ -129,53 +130,53 @@ serve(async (req) => {
       const articles: RSSArticle[] = [];
 
       for (const item of items) {
-      const title = item.querySelector('title')?.textContent?.trim() || 'Untitled';
-      let summary = item.querySelector('description, summary, content')?.textContent?.trim() || '';
-      
-      // Clean HTML tags from summary
-      summary = summary.replace(/<[^>]*>/g, '').trim();
-      if (summary.length > 200) {
-        summary = summary.substring(0, 200) + '...';
-      }
+        const title = item.querySelector('title')?.textContent?.trim() || 'Untitled';
+        let summary = item.querySelector('description, summary, content')?.textContent?.trim() || '';
 
-      const link = item.querySelector('link')?.textContent?.trim() || 
-                   item.querySelector('link')?.getAttribute('href') || '#';
-
-      // Try multiple ways to get images
-      let image: string | undefined;
-      
-      // Try enclosure
-      const enclosure = item.querySelector('enclosure[type^="image"]');
-      if (enclosure) {
-        image = enclosure.getAttribute('url') || undefined;
-      }
-      
-      // Try media:content or media:thumbnail
-      if (!image) {
-        const mediaContent = item.querySelector('media\\:content[medium="image"], content[medium="image"]');
-        if (mediaContent) {
-          image = mediaContent.getAttribute('url') || undefined;
+        // Clean HTML tags from summary
+        summary = summary.replace(/<[^>]*>/g, '').trim();
+        if (summary.length > 200) {
+          summary = summary.substring(0, 200) + '...';
         }
-      }
-      
-      if (!image) {
-        const mediaThumbnail = item.querySelector('media\\:thumbnail, thumbnail');
-        if (mediaThumbnail) {
-          image = mediaThumbnail.getAttribute('url') || undefined;
-        }
-      }
 
-      // Try to extract image from description/content HTML
-      if (!image) {
-        const descContent = item.querySelector('description, content')?.textContent || '';
-        const imgMatch = descContent.match(/<img[^>]+src=["']([^"']+)["'][^>]*>/i);
-        if (imgMatch) {
-          image = imgMatch[1];
-        }
-      }
+        const link = item.querySelector('link')?.textContent?.trim() ||
+          item.querySelector('link')?.getAttribute('href') || '#';
 
-      const pubDate = item.querySelector('pubDate, published, updated')?.textContent?.trim() || 
-                     new Date().toISOString();
+        // Try multiple ways to get images
+        let image: string | undefined;
+
+        // Try enclosure
+        const enclosure = item.querySelector('enclosure[type^="image"]');
+        if (enclosure) {
+          image = enclosure.getAttribute('url') || undefined;
+        }
+
+        // Try media:content or media:thumbnail
+        if (!image) {
+          const mediaContent = item.querySelector('media\\:content[medium="image"], content[medium="image"]');
+          if (mediaContent) {
+            image = mediaContent.getAttribute('url') || undefined;
+          }
+        }
+
+        if (!image) {
+          const mediaThumbnail = item.querySelector('media\\:thumbnail, thumbnail');
+          if (mediaThumbnail) {
+            image = mediaThumbnail.getAttribute('url') || undefined;
+          }
+        }
+
+        // Try to extract image from description/content HTML
+        if (!image) {
+          const descContent = item.querySelector('description, content')?.textContent || '';
+          const imgMatch = descContent.match(/<img[^>]+src=["']([^"']+)["'][^>]*>/i);
+          if (imgMatch) {
+            image = imgMatch[1];
+          }
+        }
+
+        const pubDate = item.querySelector('pubDate, published, updated')?.textContent?.trim() ||
+          new Date().toISOString();
 
         if (title && summary) {
           articles.push({
