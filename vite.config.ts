@@ -61,44 +61,6 @@ export default defineConfig(({ mode }) => ({
 
     rollupOptions: {
       output: {
-        manualChunks: (id) => {
-          if (id.includes('node_modules')) {
-            if (id.includes('react') || id.includes('react-dom')) {
-              return 'react-core';
-            }
-            if (id.includes('react-router')) {
-              return 'react-router';
-            }
-            if (id.includes('framer-motion')) {
-              return 'framer-motion';
-            }
-            if (id.includes('@radix-ui')) {
-              if (id.includes('dialog') || id.includes('dropdown') || id.includes('popover') || id.includes('sheet')) {
-                return 'radix-overlays';
-              }
-              if (id.includes('form') || id.includes('checkbox') || id.includes('select') || id.includes('slider')) {
-                return 'radix-forms';
-              }
-              return 'radix-base';
-            }
-            if (id.includes('@tanstack/react-query')) {
-              return 'react-query';
-            }
-            if (id.includes('@supabase')) {
-              return 'supabase';
-            }
-            if (id.includes('lucide-react')) {
-              return 'icons';
-            }
-            if (id.includes('recharts')) {
-              return 'charts';
-            }
-            if (id.includes('date-fns')) {
-              return 'date-utils';
-            }
-            return 'vendor';
-          }
-        },
         chunkFileNames: 'assets/[name]-[hash].js',
         entryFileNames: 'assets/[name]-[hash].js',
         assetFileNames: 'assets/[name]-[hash].[ext]',
