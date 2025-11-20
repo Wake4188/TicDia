@@ -9,6 +9,8 @@ import { Toaster } from "@/components/ui/toaster";
 import { CookieConsent } from "@/components/CookieConsent";
 import { GoogleAnalyticsTracker } from "./components/GoogleAnalyticsTracker";
 
+import { useUserPreferences } from "./hooks/useUserPreferences";
+
 // Lazy load all pages for code splitting with error handling
 const Index = lazy(() => import("./pages/Index"));
 const Discover = lazy(() => import("./pages/Discover"));
@@ -30,6 +32,34 @@ const queryClient = new QueryClient({
   },
 });
 
+function AppContent() {
+  const { userPreferences } = useUserPreferences();
+
+  return (
+    <div className={`min-h-screen bg-background ${userPreferences.liquidGlassMode ? 'liquid-glass' : ''}`}>
+      <Suspense fallback={
+        <div className="h-screen w-screen flex items-center justify-center bg-background">
+          <div className="flex flex-col items-center gap-4">
+            <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin" role="status" aria-label="Loading"></div>
+            <div className="text-foreground text-lg">Loading TicDia...</div>
+          </div>
+        </div>
+      }>
+        <Routes>
+          <Route path="/" element={<Index />} />
+          <Route path="/discover" element={<Discover />} />
+          <Route path="/auth" element={<Auth />} />
+          <Route path="/profile" element={<Profile />} />
+          <Route path="/today" element={<Today />} />
+          <Route path="/recap" element={<Recap />} />
+        </Routes>
+      </Suspense>
+      <Toaster />
+      <CookieConsent />
+    </div>
+  );
+}
+
 function App() {
   return (
     <ErrorBoundary>
@@ -39,27 +69,7 @@ function App() {
             <AuthProvider>
               <Router>
                 <GoogleAnalyticsTracker />
-                <div className={`min-h-screen bg-background ${userPreferences.liquidGlassMode ? 'liquid-glass' : ''}`}>
-                  <Suspense fallback={
-                    <div className="h-screen w-screen flex items-center justify-center bg-background">
-                      <div className="flex flex-col items-center gap-4">
-                        <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin" role="status" aria-label="Loading"></div>
-                        <div className="text-foreground text-lg">Loading TicDia...</div>
-                      </div>
-                    </div>
-                  }>
-                    <Routes>
-                      <Route path="/" element={<Index />} />
-                      <Route path="/discover" element={<Discover />} />
-                      <Route path="/auth" element={<Auth />} />
-                      <Route path="/profile" element={<Profile />} />
-                      <Route path="/today" element={<Today />} />
-                      <Route path="/recap" element={<Recap />} />
-                    </Routes>
-                  </Suspense>
-                  <Toaster />
-                  <CookieConsent />
-                </div>
+                <AppContent />
               </Router>
             </AuthProvider>
           </LanguageProvider>
