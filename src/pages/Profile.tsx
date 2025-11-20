@@ -549,78 +549,94 @@ const Profile = () => {
                 </div>
 
                 <div className="space-y-3 animate-in fade-in-50 slide-in-from-left-4 duration-500" style={{ animationDelay: "275ms" }}>
-                  <div className="flex items-center gap-2">
-                    <label className="text-sm font-medium">Feed Preference</label>
-                    <span className="bg-wikitok-red/20 text-wikitok-red text-[10px] px-1.5 py-0.5 rounded font-bold border border-wikitok-red/30">BETA</span>
-                  </div>
-                  <Select
-                    value={userPreferences.feedType || 'mixed'}
-                    onValueChange={(value: any) => updateUserPrefs({ feedType: value })}
-                  >
-                    <SelectTrigger className="bg-gray-800/60 backdrop-blur-sm border-gray-700/50 transition-all duration-300 hover:border-gray-600/70 focus:border-wikitok-red/50">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent className="bg-gray-800/90 backdrop-blur-md border-gray-700/50">
-                      <SelectItem value="random" className="transition-all duration-200 hover:bg-gray-700/60">
-                        <div className="flex flex-col">
-                          <span>Random</span>
-                          <span className="text-xs text-gray-400">Completely random articles</span>
-                        </div>
-                      </SelectItem>
-                      <SelectItem value="curated" className="transition-all duration-200 hover:bg-gray-700/60">
-                        <div className="flex flex-col">
-                          <span>AI Curated</span>
-                          <span className="text-xs text-gray-400">Personalized based on your history</span>
-                        </div>
-                      </SelectItem>
-                      <SelectItem value="mixed" className="transition-all duration-200 hover:bg-gray-700/60">
-                        <div className="flex flex-col">
-                          <span>Mixed (Recommended)</span>
-                          <span className="text-xs text-gray-400">A mix of random and curated</span>
-                        </div>
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <p className="text-xs text-gray-400">
-                    Choose how articles are selected for your feed.
-                  </p>
-                </div>
-
-                <div className="p-4 bg-gray-800/60 backdrop-blur-sm rounded-lg border border-gray-700/30 transition-all duration-500 hover:border-gray-600/50 animate-in fade-in-50 slide-in-from-bottom-4" style={{ animationDelay: "300ms" }}>
-                  <h4 className="text-sm font-medium mb-2">{t.preview}</h4>
-                  <div
-                    className="relative p-4 rounded bg-cover bg-center overflow-hidden transition-all duration-500"
-                    style={{
-                      backgroundImage: "url('https://images.unsplash.com/photo-1506905925346-21bda4d32df4?ixlib=rb-4.0.3')",
-                    }}
-                  >
-                    <div
-                      className="absolute inset-0 bg-black rounded transition-all duration-500"
-                      style={{ opacity: userPreferences.backgroundOpacity / 100 }}
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-0.5">
+                      <Label className="text-base">Liquid Glass Mode</Label>
+                      <p className="text-sm text-muted-foreground">
+                        Enable Apple-style glassmorphism effects
+                      </p>
+                    </div>
+                    <Switch
+                      checked={userPreferences.liquidGlassMode}
+                      onCheckedChange={(checked) => updateUserPrefs({ liquidGlassMode: checked })}
                     />
-                    <p
-                      className="relative z-10 text-white mb-4 transition-all duration-300"
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-0.5">
+                      <Label className="text-base">Feed Preference <span className="ml-2 text-xs bg-wikitok-red/20 text-wikitok-red px-1.5 py-0.5 rounded font-bold border border-wikitok-red/30">BETA</span></Label>
+                      <p className="text-sm text-muted-foreground">
+                        Choose how articles are selected for you
+                      </p>
+                    </div>
+                    <Select
+                      value={userPreferences.feedType || 'mixed'}
+                      onValueChange={(value: 'random' | 'curated' | 'mixed') => updateUserPrefs({ feedType: value })}
+                    >
+                      <SelectTrigger className="bg-gray-800/60 backdrop-blur-sm border-gray-700/50 transition-all duration-300 hover:border-gray-600/70 focus:border-wikitok-red/50">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent className="bg-gray-800/90 backdrop-blur-md border-gray-700/50">
+                        <SelectItem value="random" className="transition-all duration-200 hover:bg-gray-700/60">
+                          <div className="flex flex-col">
+                            <span>Random</span>
+                            <span className="text-xs text-gray-400">Completely random articles</span>
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="curated" className="transition-all duration-200 hover:bg-gray-700/60">
+                          <div className="flex flex-col">
+                            <span>AI Curated</span>
+                            <span className="text-xs text-gray-400">Personalized based on your history</span>
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="mixed" className="transition-all duration-200 hover:bg-gray-700/60">
+                          <div className="flex flex-col">
+                            <span>Mixed (Recommended)</span>
+                            <span className="text-xs text-gray-400">A mix of random and curated</span>
+                          </div>
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <p className="text-xs text-gray-400">
+                      Choose how articles are selected for your feed.
+                    </p>
+                  </div>
+
+                  <div className="p-4 bg-gray-800/60 backdrop-blur-sm rounded-lg border border-gray-700/30 transition-all duration-500 hover:border-gray-600/50 animate-in fade-in-50 slide-in-from-bottom-4" style={{ animationDelay: "300ms" }}>
+                    <h4 className="text-sm font-medium mb-2">{t.preview}</h4>
+                    <div
+                      className="relative p-4 rounded bg-cover bg-center overflow-hidden transition-all duration-500"
                       style={{
-                        fontFamily: userPreferences.fontFamily,
-                        fontSize: `${userPreferences.fontSize}px`
+                        backgroundImage: "url('https://images.unsplash.com/photo-1506905925346-21bda4d32df4?ixlib=rb-4.0.3')",
                       }}
                     >
-                      {t.previewText}
-                    </p>
-                    <div className="relative z-10">
-                      <p className="text-xs text-gray-300 mb-1">{t.progressPreview}:</p>
-                      <div className="h-1 bg-black/20 rounded overflow-hidden">
-                        <div
-                          className="h-full rounded transition-all duration-500 ease-out"
-                          style={{
-                            backgroundColor: userPreferences.highlightColor,
-                            width: '60%'
-                          }}
-                        />
+                      <div
+                        className="absolute inset-0 bg-black rounded transition-all duration-500"
+                        style={{ opacity: userPreferences.backgroundOpacity / 100 }}
+                      />
+                      <p
+                        className="relative z-10 text-white mb-4 transition-all duration-300"
+                        style={{
+                          fontFamily: userPreferences.fontFamily,
+                          fontSize: `${userPreferences.fontSize}px`
+                        }}
+                      >
+                        {t.previewText}
+                      </p>
+                      <div className="relative z-10">
+                        <p className="text-xs text-gray-300 mb-1">{t.progressPreview}:</p>
+                        <div className="h-1 bg-black/20 rounded overflow-hidden">
+                          <div
+                            className="h-full rounded transition-all duration-500 ease-out"
+                            style={{
+                              backgroundColor: userPreferences.highlightColor,
+                              width: '60%'
+                            }}
+                          />
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
               </CardContent>
             </Card>
           </TabsContent>

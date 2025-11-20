@@ -39,7 +39,7 @@ function App() {
             <AuthProvider>
               <Router>
                 <GoogleAnalyticsTracker />
-                <div className="min-h-screen bg-background">
+                <div className={`min-h-screen bg-background ${userPreferences.liquidGlassMode ? 'liquid-glass' : ''}`}>
                   <Suspense fallback={
                     <div className="h-screen w-screen flex items-center justify-center bg-background">
                       <div className="flex flex-col items-center gap-4">

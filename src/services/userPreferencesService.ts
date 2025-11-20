@@ -7,9 +7,8 @@ export interface UserPreferences {
   backgroundOpacity: number;
   highlightColor: string;
   fontSize: number;
-  fontSize: number;
-  tts_autoplay?: boolean;
-  feedType?: 'random' | 'curated' | 'mixed';
+  feedType: 'random' | 'curated' | 'mixed';
+  liquidGlassMode: boolean;
 }
 
 export const loadUserPreferences = async (userId: string): Promise<UserPreferences> => {
@@ -26,20 +25,16 @@ export const loadUserPreferences = async (userId: string): Promise<UserPreferenc
     }
 
     if (!data) {
-      // Create default preferences for the user
-      const defaultPrefs = getDefaultPreferences();
-      await saveUserPreferences(userId, defaultPrefs);
-      return defaultPrefs;
+      return getDefaultPreferences();
     }
 
-    // Validate and sanitize the loaded preferences
     return {
-      fontFamily: validateFontFamily(data.font_family),
-      backgroundOpacity: validateBackgroundOpacity(data.background_opacity),
-      highlightColor: validateHexColor(data.highlight_color),
-      fontSize: (data as any).font_size || 16,
-      tts_autoplay: data.tts_autoplay || false,
+      fontFamily: data.font_family || 'Inter',
+      backgroundOpacity: data.background_opacity || 80,
+      highlightColor: data.highlight_color || '#ea384c',
+      fontSize: data.font_size || 16,
       feedType: data.feed_type || 'mixed',
+      liquidGlassMode: data.liquid_glass_mode || false
     };
   } catch (error) {
     console.error('Error loading user preferences:', sanitizeErrorMessage(error));
@@ -49,13 +44,6 @@ export const loadUserPreferences = async (userId: string): Promise<UserPreferenc
 
 export const saveUserPreferences = async (userId: string, preferences: UserPreferences): Promise<void> => {
   try {
-    // Validate preferences before saving
-    const validatedPreferences = {
-      fontFamily: validateFontFamily(preferences.fontFamily),
-      backgroundOpacity: validateBackgroundOpacity(preferences.backgroundOpacity),
-      highlightColor: validateHexColor(preferences.highlightColor),
-    };
-
     const { error } = await supabase
       .from('user_preferences')
       .upsert({
