@@ -149,7 +149,18 @@ TicDia/
 ├── index.html             # Entry HTML
 ├── vite.config.ts         # Vite configuration
 ├── vercel.json            # Vercel deployment config
+├── CODEBASE_MAP.md        # 📍 Developer navigation guide
 └── package.json           # Dependencies
+
+```
+
+## 🗺️ For Developers
+
+New to the codebase? Check out **[CODEBASE_MAP.md](CODEBASE_MAP.md)** for:
+- Quick file location reference
+- Feature implementation guides
+- Common code patterns
+- Troubleshooting tips
 
 ```
 
