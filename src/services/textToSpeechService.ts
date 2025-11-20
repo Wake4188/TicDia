@@ -11,12 +11,20 @@ export const fetchTTSBlob = async (
   options: TextToSpeechOptions = {}
 ): Promise<Blob> => {
   try {
+    // Get the current session token
+    const { data: { session } } = await supabase.auth.getSession();
+
+    if (!session) {
+      throw new Error("Authentication required. Please log in to use text-to-speech.");
+    }
+
     const res = await fetch(
       "/api/tts",
       {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "Authorization": `Bearer ${session.access_token}`,
         },
         body: JSON.stringify({ text, voice: options.voice }),
       }
@@ -33,7 +41,7 @@ export const fetchTTSBlob = async (
           const txt = await res.text();
           message = txt || message;
         }
-      } catch {}
+      } catch { }
       throw new Error(message);
     }
 
