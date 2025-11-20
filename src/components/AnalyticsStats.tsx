@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { getUserAnalytics, UserAnalytics } from "@/services/analyticsService";
 import { useAuth } from "@/contexts/AuthContext";
-import { BookOpen, TrendingUp, Award, Target, Flame, Clock, BarChart3, Trophy } from "lucide-react";
+import { BookOpen, TrendingUp, Award, Target, Flame, Clock, BarChart3, Trophy, Star, Zap } from "lucide-react";
 import { motion } from "framer-motion";
 
 interface Achievement {
@@ -31,11 +31,11 @@ export const AnalyticsStats = () => {
 
   const loadAnalytics = async () => {
     if (!user) return;
-    
+
     try {
       const data = await getUserAnalytics(user.id);
       setAnalytics(data);
-      
+
       if (data) {
         calculateAchievements(data);
       }
@@ -135,7 +135,7 @@ export const AnalyticsStats = () => {
 
   const getTopicStats = () => {
     if (!analytics?.favorite_topics) return [];
-    
+
     return analytics.favorite_topics.slice(0, 10).map((topic: string) => ({
       name: topic,
       count: 1 // This would be actual count in a more advanced implementation
@@ -144,12 +144,33 @@ export const AnalyticsStats = () => {
 
   const getDailyActivityStats = () => {
     if (!analytics?.daily_activity) return [];
-    
+
     const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
     return days.map(day => ({
       day,
       count: analytics.daily_activity[day] || 0
     }));
+  };
+
+  const calculateLevel = (articlesRead: number) => {
+    // Simple level formula: Level = floor(sqrt(articlesRead)) + 1
+    // Level 1: 0-3 articles
+    // Level 2: 4-8 articles
+    // Level 3: 9-15 articles
+    // etc.
+    const level = Math.floor(Math.sqrt(articlesRead)) + 1;
+    const currentLevelBaseXP = Math.pow(level - 1, 2);
+    const nextLevelBaseXP = Math.pow(level, 2);
+    const levelProgress = articlesRead - currentLevelBaseXP;
+    const levelTotalXP = nextLevelBaseXP - currentLevelBaseXP;
+    const progressPercentage = Math.min((levelProgress / levelTotalXP) * 100, 100);
+
+    return {
+      level,
+      progressPercentage,
+      nextLevelXP: nextLevelBaseXP - articlesRead,
+      currentXP: articlesRead
+    };
   };
 
   if (loading) {
@@ -177,9 +198,52 @@ export const AnalyticsStats = () => {
   const avgArticlesPerDay = analytics.articles_viewed / Math.max(1, getDaysSinceFirstVisit(analytics.first_visit_date));
   const audioHours = Math.floor((analytics.total_audio_time || 0) / 3600);
   const audioMinutes = Math.floor(((analytics.total_audio_time || 0) % 3600) / 60);
+  const levelStats = calculateLevel(analytics.articles_viewed);
 
   return (
     <div className="space-y-6">
+      {/* Level Progress */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.05 }}
+      >
+        <Card className="bg-gradient-to-r from-gray-900 to-gray-800 border-wikitok-red/30 overflow-hidden relative">
+          <div className="absolute top-0 right-0 p-4 opacity-10">
+            <Star className="w-32 h-32 text-wikitok-red" />
+          </div>
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-4">
+                <div className="relative">
+                  <div className="w-16 h-16 rounded-full bg-wikitok-red/20 flex items-center justify-center border-2 border-wikitok-red">
+                    <span className="text-2xl font-bold text-white">{levelStats.level}</span>
+                  </div>
+                  <div className="absolute -bottom-2 -right-2 bg-wikitok-red text-white text-xs px-2 py-0.5 rounded-full font-bold">
+                    LVL
+                  </div>
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold text-white">Knowledge Seeker</h3>
+                  <p className="text-gray-400 text-sm">Keep reading to level up!</p>
+                </div>
+              </div>
+              <div className="text-right">
+                <div className="text-2xl font-bold text-wikitok-red">{levelStats.currentXP} <span className="text-sm text-gray-400">XP</span></div>
+                <p className="text-xs text-gray-400">{levelStats.nextLevelXP} XP to next level</p>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <div className="flex justify-between text-xs text-gray-400">
+                <span>Level {levelStats.level}</span>
+                <span>Level {levelStats.level + 1}</span>
+              </div>
+              <Progress value={levelStats.progressPercentage} className="h-3 bg-gray-700" indicatorClassName="bg-gradient-to-r from-wikitok-red to-orange-500" />
+            </div>
+          </CardContent>
+        </Card>
+      </motion.div>
+
       {/* Overview Stats */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <motion.div
@@ -292,26 +356,23 @@ export const AnalyticsStats = () => {
             {achievements.map((achievement, index) => {
               const Icon = achievement.icon;
               const percentage = Math.min((achievement.progress / achievement.threshold) * 100, 100);
-              
+
               return (
                 <motion.div
                   key={achievement.id}
                   initial={{ opacity: 0, scale: 0.95 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ delay: index * 0.05 }}
-                  className={`p-4 rounded-lg border transition-all ${
-                    achievement.unlocked
-                      ? 'bg-wikitok-red/10 border-wikitok-red/30'
-                      : 'bg-gray-800/40 border-gray-700/30'
-                  }`}
+                  className={`p-4 rounded-lg border transition-all ${achievement.unlocked
+                    ? 'bg-wikitok-red/10 border-wikitok-red/30'
+                    : 'bg-gray-800/40 border-gray-700/30'
+                    }`}
                 >
                   <div className="flex items-start gap-3">
-                    <div className={`p-2 rounded-lg ${
-                      achievement.unlocked ? 'bg-wikitok-red/20' : 'bg-gray-700/50'
-                    }`}>
-                      <Icon className={`w-5 h-5 ${
-                        achievement.unlocked ? 'text-wikitok-red' : 'text-gray-400'
-                      }`} />
+                    <div className={`p-2 rounded-lg ${achievement.unlocked ? 'bg-wikitok-red/20' : 'bg-gray-700/50'
+                      }`}>
+                      <Icon className={`w-5 h-5 ${achievement.unlocked ? 'text-wikitok-red' : 'text-gray-400'
+                        }`} />
                     </div>
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-1">
@@ -326,8 +387,8 @@ export const AnalyticsStats = () => {
                         {achievement.description}
                       </p>
                       <div className="space-y-1">
-                        <Progress 
-                          value={percentage} 
+                        <Progress
+                          value={percentage}
                           className="h-1.5"
                           aria-label={`${achievement.title} progress: ${achievement.progress} out of ${achievement.threshold}`}
                         />
@@ -390,7 +451,7 @@ export const AnalyticsStats = () => {
             {getDailyActivityStats().map((day, index) => {
               const maxCount = Math.max(...getDailyActivityStats().map(d => d.count), 1);
               const percentage = (day.count / maxCount) * 100;
-              
+
               return (
                 <motion.div
                   key={day.day}
@@ -403,8 +464,8 @@ export const AnalyticsStats = () => {
                     <span className="font-medium">{day.day}</span>
                     <span className="text-muted-foreground">{day.count} articles</span>
                   </div>
-                  <Progress 
-                    value={percentage} 
+                  <Progress
+                    value={percentage}
                     className="h-2"
                     aria-label={`${day.day}: ${day.count} articles read`}
                   />

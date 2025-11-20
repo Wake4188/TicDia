@@ -57,9 +57,10 @@ export const getUserVote = async (articleId: string): Promise<ArticleVote | null
     .select('*')
     .eq('user_id', user.id)
     .eq('article_id', articleId)
-    .single();
+    .limit(1)
+    .maybeSingle();
 
-  if (error && error.code !== 'PGRST116') throw error;
+  if (error) throw error;
   return data as ArticleVote;
 };
 
@@ -74,12 +75,12 @@ export const getArticleVoteCount = async (articleId: string): Promise<number> =>
 
 export const getTopVotedArticles = async (limit: number = 3): Promise<any[]> => {
   const today = new Date().toISOString().split('T')[0];
-  
+
   // Use secure database function that returns aggregated data only
   const { data, error } = await supabase
-    .rpc('get_top_voted_articles', { 
+    .rpc('get_top_voted_articles', {
       p_limit: limit,
-      p_date: today 
+      p_date: today
     });
 
   if (error) throw error;

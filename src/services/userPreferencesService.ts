@@ -7,7 +7,9 @@ export interface UserPreferences {
   backgroundOpacity: number;
   highlightColor: string;
   fontSize: number;
+  fontSize: number;
   tts_autoplay?: boolean;
+  feedType?: 'random' | 'curated' | 'mixed';
 }
 
 export const loadUserPreferences = async (userId: string): Promise<UserPreferences> => {
@@ -37,6 +39,7 @@ export const loadUserPreferences = async (userId: string): Promise<UserPreferenc
       highlightColor: validateHexColor(data.highlight_color),
       fontSize: (data as any).font_size || 16,
       tts_autoplay: data.tts_autoplay || false,
+      feedType: data.feed_type || 'mixed',
     };
   } catch (error) {
     console.error('Error loading user preferences:', sanitizeErrorMessage(error));
@@ -62,6 +65,7 @@ export const saveUserPreferences = async (userId: string, preferences: UserPrefe
         highlight_color: validatedPreferences.highlightColor,
         font_size: preferences.fontSize || 16,
         tts_autoplay: preferences.tts_autoplay || false,
+        feed_type: preferences.feedType || 'mixed',
         updated_at: new Date().toISOString(),
       }, {
         onConflict: 'user_id'
@@ -83,6 +87,7 @@ export const getDefaultPreferences = (): UserPreferences => ({
   highlightColor: '#FE2C55',
   fontSize: 16,
   tts_autoplay: false,
+  feedType: 'mixed',
 });
 
 export const updateUserPreferences = async (userId: string, updates: Partial<UserPreferences>): Promise<void> => {

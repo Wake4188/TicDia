@@ -43,9 +43,10 @@ export const getUserAnalytics = async (userId: string): Promise<UserAnalytics | 
     .from('user_analytics')
     .select('*')
     .eq('user_id', userId)
-    .single();
+    .limit(1)
+    .maybeSingle();
 
-  if (error && error.code !== 'PGRST116') throw error;
+  if (error) throw error;
   return data;
 };
 
@@ -70,7 +71,7 @@ export const incrementArticleView = async (userId: string, articleTags: string[]
 
   const today = new Date().toISOString().split('T')[0];
   const dayOfWeek = new Date().toLocaleDateString('en-US', { weekday: 'long' });
-  
+
   // Update daily activity
   const dailyActivity = { ...analytics.daily_activity };
   dailyActivity[dayOfWeek] = (dailyActivity[dayOfWeek] || 0) + 1;

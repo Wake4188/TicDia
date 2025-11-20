@@ -170,35 +170,35 @@ const RightSidebar = ({ article }) => {
               <MoreVertical className="w-6 h-6" />
             </button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent 
+          <DropdownMenuContent
             align="end"
             side="top"
             sideOffset={12}
             className="bg-black/95 backdrop-blur-md border border-white/20 text-white z-[100] min-w-[200px]"
           >
-            <DropdownMenuItem 
-              onClick={handleBookmark} 
+            <DropdownMenuItem
+              onClick={handleBookmark}
               disabled={isLoading}
               className="hover:bg-white/10 focus:bg-white/10 cursor-pointer py-3"
             >
               <Bookmark className={`w-5 h-5 mr-3 ${isSaved ? 'fill-current text-wikitok-red' : ''}`} />
               <span className="text-base">{isSaved ? t.saved : t.save}</span>
             </DropdownMenuItem>
-            <DropdownMenuItem 
+            <DropdownMenuItem
               onClick={handleShare}
               className="hover:bg-white/10 focus:bg-white/10 cursor-pointer py-3"
             >
               <Share2 className="w-5 h-5 mr-3" />
               <span className="text-base">{t.share}</span>
             </DropdownMenuItem>
-            <DropdownMenuItem 
+            <DropdownMenuItem
               onClick={handleEdit}
               className="hover:bg-white/10 focus:bg-white/10 cursor-pointer py-3"
             >
               <Edit className="w-5 h-5 mr-3" />
               <span className="text-base">{t.edit}</span>
             </DropdownMenuItem>
-            <DropdownMenuItem 
+            <DropdownMenuItem
               onClick={handleWikipediaRedirect}
               className="hover:bg-white/10 focus:bg-white/10 cursor-pointer py-3"
             >
@@ -213,38 +213,38 @@ const RightSidebar = ({ article }) => {
 
   return (
     <div className="fixed right-4 bottom-20 flex flex-col items-center space-y-4 z-50">
-        <div className="flex flex-col items-center">
-          <button 
-            className={`sidebar-icon ${isSaved ? 'text-wikitok-red' : ''} ${isLoading ? 'opacity-50' : ''}`} 
-            onClick={handleBookmark}
-            disabled={isLoading}
-          >
-            <Bookmark className={`w-7 h-7 ${isSaved ? 'fill-current' : ''}`} />
-          </button>
-          <span className="text-xs mt-1">{isSaved ? t.saved : t.save}</span>
-        </div>
-        
-        <div className="flex flex-col items-center">
-          <button className="sidebar-icon" onClick={handleShare}>
-            <Share2 className="w-7 h-7" />
-          </button>
-          <span className="text-xs mt-1">{t.share}</span>
-        </div>
-        
-        <div className="flex flex-col items-center">
-          <button className="sidebar-icon" onClick={handleEdit}>
-            <Edit className="w-7 h-7" />
-          </button>
-          <span className="text-xs mt-1">{t.edit}</span>
-        </div>
-        
-        <div className="flex flex-col items-center">
-          <button className="sidebar-icon" onClick={handleWikipediaRedirect}>
-            <BookOpen className="w-7 h-7" />
-          </button>
-          <span className="text-xs mt-1">{t.view}</span>
-        </div>
+      <div className="flex flex-col items-center">
+        <button
+          className={`sidebar-icon ${isSaved ? 'text-wikitok-red' : ''} ${isLoading ? 'opacity-50' : ''}`}
+          onClick={handleBookmark}
+          disabled={isLoading}
+        >
+          <Bookmark className={`w-7 h-7 ${isSaved ? 'fill-current' : ''}`} />
+        </button>
+        <span className="text-xs mt-1">{isSaved ? t.saved : t.save}</span>
       </div>
+
+      <div className="flex flex-col items-center">
+        <button className="sidebar-icon" onClick={handleShare}>
+          <Share2 className="w-7 h-7" />
+        </button>
+        <span className="text-xs mt-1">{t.share}</span>
+      </div>
+
+      <div className="flex flex-col items-center">
+        <button className="sidebar-icon" onClick={handleEdit}>
+          <Edit className="w-7 h-7" />
+        </button>
+        <span className="text-xs mt-1">{t.edit}</span>
+      </div>
+
+      <div className="flex flex-col items-center">
+        <button className="sidebar-icon" onClick={handleWikipediaRedirect}>
+          <BookOpen className="w-7 h-7" />
+        </button>
+        <span className="text-xs mt-1">{t.view}</span>
+      </div>
+    </div>
   );
 };
 

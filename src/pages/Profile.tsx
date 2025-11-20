@@ -32,7 +32,7 @@ const Profile = () => {
   const { toast } = useToast();
   const { currentLanguage, translations } = useLanguage();
   const t = translations;
-  
+
   // Load user preferences to apply highlight color throughout the app
   const { userPreferences, updatePreferences: updateUserPrefs } = useUserPreferences();
   const [savedArticles, setSavedArticles] = useState<SavedArticle[]>([]);
@@ -41,7 +41,7 @@ const Profile = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedArticle, setSelectedArticle] = useState<SavedArticle | null>(null);
   const [isSmallTicOpen, setIsSmallTicOpen] = useState(false);
-  
+
   // Account Security states
   const [newEmail, setNewEmail] = useState("");
   const [emailLoading, setEmailLoading] = useState(false);
@@ -98,7 +98,7 @@ const Profile = () => {
         .eq('id', articleId);
 
       if (error) throw error;
-      
+
       setSavedArticles(prev => prev.filter(article => article.id !== articleId));
       toast({
         title: t.removed,
@@ -122,7 +122,7 @@ const Profile = () => {
         .eq('user_id', user!.id);
 
       if (error) throw error;
-      
+
       setSavedArticles([]);
       toast({
         title: t.cleared,
@@ -160,7 +160,7 @@ const Profile = () => {
 
     if (newEmail === user?.email) {
       toast({
-        title: "Error", 
+        title: "Error",
         description: "New email must be different from current email",
         variant: "destructive",
       });
@@ -169,12 +169,12 @@ const Profile = () => {
 
     setEmailLoading(true);
     try {
-      const { error } = await supabase.auth.updateUser({ 
-        email: newEmail 
+      const { error } = await supabase.auth.updateUser({
+        email: newEmail
       });
-      
+
       if (error) throw error;
-      
+
       toast({
         title: "Email Update Initiated",
         description: "Please check both your old and new email addresses for confirmation links.",
@@ -222,12 +222,12 @@ const Profile = () => {
 
     setPasswordLoading(true);
     try {
-      const { error } = await supabase.auth.updateUser({ 
-        password: newPassword 
+      const { error } = await supabase.auth.updateUser({
+        password: newPassword
       });
-      
+
       if (error) throw error;
-      
+
       toast({
         title: "Password Updated",
         description: "Your password has been successfully changed.",
@@ -261,9 +261,9 @@ const Profile = () => {
       const { error } = await supabase.auth.resetPasswordForEmail(resetEmail, {
         redirectTo: `${window.location.origin}/auth`,
       });
-      
+
       if (error) throw error;
-      
+
       toast({
         title: "Password Reset Sent",
         description: "Please check your email for password reset instructions.",
@@ -314,8 +314,8 @@ const Profile = () => {
     <div className="min-h-screen bg-black text-white">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-8 max-w-7xl">
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 mb-6 sm:mb-8">
-          <Button 
-            variant="ghost" 
+          <Button
+            variant="ghost"
             size="icon"
             onClick={() => navigate("/")}
             className="text-white hover:bg-white/10 transition-all duration-300 hover:scale-105 self-start sm:self-auto"
@@ -330,31 +330,31 @@ const Profile = () => {
 
         <Tabs defaultValue="saved" className="space-y-4 sm:space-y-6">
           <TabsList className="bg-gray-800/50 backdrop-blur-md border border-gray-700/50 p-1 rounded-xl shadow-2xl w-full sm:w-auto grid grid-cols-4 sm:flex">
-            <TabsTrigger 
-              value="saved" 
+            <TabsTrigger
+              value="saved"
               className="data-[state=active]:bg-wikitok-red/20 data-[state=active]:backdrop-blur-md data-[state=active]:border data-[state=active]:border-wikitok-red/30 data-[state=active]:shadow-lg transition-all duration-500 ease-out rounded-lg text-xs sm:text-sm px-2 sm:px-4"
             >
               <BookMarked className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2 transition-transform duration-300" />
               <span className="hidden sm:inline">{t.savedArticles}</span>
               <span className="sm:hidden">Saved</span>
             </TabsTrigger>
-            <TabsTrigger 
-              value="analytics" 
+            <TabsTrigger
+              value="analytics"
               className="data-[state=active]:bg-wikitok-red/20 data-[state=active]:backdrop-blur-md data-[state=active]:border data-[state=active]:border-wikitok-red/30 data-[state=active]:shadow-lg transition-all duration-500 ease-out rounded-lg text-xs sm:text-sm px-2 sm:px-4"
             >
               <BarChart3 className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2 transition-transform duration-300" />
               <span className="hidden sm:inline">Analytics</span>
               <span className="sm:hidden">Stats</span>
             </TabsTrigger>
-            <TabsTrigger 
-              value="settings" 
+            <TabsTrigger
+              value="settings"
               className="data-[state=active]:bg-wikitok-red/20 data-[state=active]:backdrop-blur-md data-[state=active]:border data-[state=active]:border-wikitok-red/30 data-[state=active]:shadow-lg transition-all duration-500 ease-out rounded-lg text-xs sm:text-sm px-2 sm:px-4"
             >
               <span className="hidden sm:inline">{t.title}</span>
               <span className="sm:hidden">Settings</span>
             </TabsTrigger>
-            <TabsTrigger 
-              value="security" 
+            <TabsTrigger
+              value="security"
               className="data-[state=active]:bg-wikitok-red/20 data-[state=active]:backdrop-blur-md data-[state=active]:border data-[state=active]:border-wikitok-red/30 data-[state=active]:shadow-lg transition-all duration-500 ease-out rounded-lg text-xs sm:text-sm px-2 sm:px-4"
             >
               <Lock className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2 transition-transform duration-300" />
@@ -411,8 +411,8 @@ const Profile = () => {
                 ) : (
                   <div className="space-y-3">
                     {filteredArticles.map((article, index) => (
-                      <div 
-                        key={article.id} 
+                      <div
+                        key={article.id}
                         className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-3 sm:p-4 bg-gray-800/60 backdrop-blur-sm rounded-lg border border-gray-700/30 transition-all duration-300 hover:bg-gray-700/60 hover:border-gray-600/50 hover:scale-[1.02] animate-in fade-in-50 slide-in-from-left-4 cursor-pointer space-y-3 sm:space-y-0"
                         style={{ animationDelay: `${index * 100}ms` }}
                         onClick={() => handleArticleClick(article)}
@@ -472,47 +472,47 @@ const Profile = () => {
               <CardContent className="space-y-6">
                 <div className="space-y-3 animate-in fade-in-50 slide-in-from-left-4 duration-500">
                   <label className="text-sm font-medium">{t.articleFont}</label>
-                  <Select 
-                    value={userPreferences.fontFamily} 
+                  <Select
+                    value={userPreferences.fontFamily}
                     onValueChange={(value) => updateUserPrefs({ fontFamily: value })}
                   >
-                        <SelectTrigger className="bg-gray-800/60 backdrop-blur-sm border-gray-700/50 transition-all duration-300 hover:border-gray-600/70 focus:border-wikitok-red/50">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent className="bg-gray-800/90 backdrop-blur-md border-gray-700/50">
-                          {fontOptions.map((font) => (
-                            <SelectItem key={font.value} value={font.value} className="transition-all duration-200 hover:bg-gray-700/60">
-                              <span style={{ fontFamily: font.value }}>{font.label}</span>
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
+                    <SelectTrigger className="bg-gray-800/60 backdrop-blur-sm border-gray-700/50 transition-all duration-300 hover:border-gray-600/70 focus:border-wikitok-red/50">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent className="bg-gray-800/90 backdrop-blur-md border-gray-700/50">
+                      {fontOptions.map((font) => (
+                        <SelectItem key={font.value} value={font.value} className="transition-all duration-200 hover:bg-gray-700/60">
+                          <span style={{ fontFamily: font.value }}>{font.label}</span>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
 
                 <div className="space-y-3 animate-in fade-in-50 slide-in-from-left-4 duration-500" style={{ animationDelay: "100ms" }}>
                   <label className="text-sm font-medium">{t.highlightColor}</label>
-                  <Select 
-                    value={userPreferences.highlightColor} 
+                  <Select
+                    value={userPreferences.highlightColor}
                     onValueChange={(value) => updateUserPrefs({ highlightColor: value })}
                   >
-                        <SelectTrigger className="bg-gray-800/60 backdrop-blur-sm border-gray-700/50 transition-all duration-300 hover:border-gray-600/70 focus:border-wikitok-red/50">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent className="bg-gray-800/90 backdrop-blur-md border-gray-700/50">
-                          {colorOptions.map((color) => (
-                            <SelectItem key={color.value} value={color.value} className="transition-all duration-200 hover:bg-gray-700/60">
-                              <div className="flex items-center gap-2">
-                                <div 
-                                  className="w-4 h-4 rounded transition-transform duration-200 hover:scale-110"
-                                  style={{ backgroundColor: color.color }}
-                                />
-                                <span>{color.label}</span>
-                              </div>
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
+                    <SelectTrigger className="bg-gray-800/60 backdrop-blur-sm border-gray-700/50 transition-all duration-300 hover:border-gray-600/70 focus:border-wikitok-red/50">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent className="bg-gray-800/90 backdrop-blur-md border-gray-700/50">
+                      {colorOptions.map((color) => (
+                        <SelectItem key={color.value} value={color.value} className="transition-all duration-200 hover:bg-gray-700/60">
+                          <div className="flex items-center gap-2">
+                            <div
+                              className="w-4 h-4 rounded transition-transform duration-200 hover:scale-110"
+                              style={{ backgroundColor: color.color }}
+                            />
+                            <span>{color.label}</span>
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
 
                 <div className="space-y-3 animate-in fade-in-50 slide-in-from-left-4 duration-500" style={{ animationDelay: "200ms" }}>
                   <label className="text-sm font-medium">
@@ -548,21 +548,59 @@ const Profile = () => {
                   </p>
                 </div>
 
+                <div className="space-y-3 animate-in fade-in-50 slide-in-from-left-4 duration-500" style={{ animationDelay: "275ms" }}>
+                  <div className="flex items-center gap-2">
+                    <label className="text-sm font-medium">Feed Preference</label>
+                    <span className="bg-wikitok-red/20 text-wikitok-red text-[10px] px-1.5 py-0.5 rounded font-bold border border-wikitok-red/30">BETA</span>
+                  </div>
+                  <Select
+                    value={userPreferences.feedType || 'mixed'}
+                    onValueChange={(value: any) => updateUserPrefs({ feedType: value })}
+                  >
+                    <SelectTrigger className="bg-gray-800/60 backdrop-blur-sm border-gray-700/50 transition-all duration-300 hover:border-gray-600/70 focus:border-wikitok-red/50">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent className="bg-gray-800/90 backdrop-blur-md border-gray-700/50">
+                      <SelectItem value="random" className="transition-all duration-200 hover:bg-gray-700/60">
+                        <div className="flex flex-col">
+                          <span>Random</span>
+                          <span className="text-xs text-gray-400">Completely random articles</span>
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="curated" className="transition-all duration-200 hover:bg-gray-700/60">
+                        <div className="flex flex-col">
+                          <span>AI Curated</span>
+                          <span className="text-xs text-gray-400">Personalized based on your history</span>
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="mixed" className="transition-all duration-200 hover:bg-gray-700/60">
+                        <div className="flex flex-col">
+                          <span>Mixed (Recommended)</span>
+                          <span className="text-xs text-gray-400">A mix of random and curated</span>
+                        </div>
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <p className="text-xs text-gray-400">
+                    Choose how articles are selected for your feed.
+                  </p>
+                </div>
+
                 <div className="p-4 bg-gray-800/60 backdrop-blur-sm rounded-lg border border-gray-700/30 transition-all duration-500 hover:border-gray-600/50 animate-in fade-in-50 slide-in-from-bottom-4" style={{ animationDelay: "300ms" }}>
                   <h4 className="text-sm font-medium mb-2">{t.preview}</h4>
-                  <div 
+                  <div
                     className="relative p-4 rounded bg-cover bg-center overflow-hidden transition-all duration-500"
                     style={{
                       backgroundImage: "url('https://images.unsplash.com/photo-1506905925346-21bda4d32df4?ixlib=rb-4.0.3')",
                     }}
                   >
-                    <div 
+                    <div
                       className="absolute inset-0 bg-black rounded transition-all duration-500"
                       style={{ opacity: userPreferences.backgroundOpacity / 100 }}
                     />
-                    <p 
+                    <p
                       className="relative z-10 text-white mb-4 transition-all duration-300"
-                      style={{ 
+                      style={{
                         fontFamily: userPreferences.fontFamily,
                         fontSize: `${userPreferences.fontSize}px`
                       }}
@@ -572,9 +610,9 @@ const Profile = () => {
                     <div className="relative z-10">
                       <p className="text-xs text-gray-300 mb-1">{t.progressPreview}:</p>
                       <div className="h-1 bg-black/20 rounded overflow-hidden">
-                        <div 
+                        <div
                           className="h-full rounded transition-all duration-500 ease-out"
-                          style={{ 
+                          style={{
                             backgroundColor: userPreferences.highlightColor,
                             width: '60%'
                           }}
@@ -611,7 +649,7 @@ const Profile = () => {
                       className="bg-gray-800/60 border-gray-700/50 text-white text-sm sm:text-base"
                     />
                   </div>
-                  <Button 
+                  <Button
                     onClick={handleEmailChange}
                     disabled={emailLoading || !newEmail.trim()}
                     className="w-full bg-wikitok-red hover:bg-wikitok-red/80 transition-all duration-300 text-sm sm:text-base py-2 sm:py-3"
@@ -656,7 +694,7 @@ const Profile = () => {
                       className="bg-gray-800/60 border-gray-700/50 text-white text-sm sm:text-base"
                     />
                   </div>
-                  <Button 
+                  <Button
                     onClick={handlePasswordChange}
                     disabled={passwordLoading || !newPassword || !confirmPassword}
                     className="w-full bg-wikitok-red hover:bg-wikitok-red/80 transition-all duration-300 text-sm sm:text-base py-2 sm:py-3"
@@ -691,7 +729,7 @@ const Profile = () => {
                       className="bg-gray-800/60 border-gray-700/50 text-white text-sm sm:text-base"
                     />
                   </div>
-                  <Button 
+                  <Button
                     onClick={handlePasswordReset}
                     disabled={resetLoading || !resetEmail.trim()}
                     variant="outline"
@@ -714,25 +752,25 @@ const Profile = () => {
             <div className="text-sm text-gray-400">
               <h4 className="font-medium mb-2">Site Map</h4>
               <div className="flex flex-wrap justify-center gap-4">
-                <button 
+                <button
                   onClick={() => navigate("/")}
                   className="text-gray-400 hover:text-white transition-colors"
                 >
                   Home
                 </button>
-                <button 
+                <button
                   onClick={() => navigate("/discover")}
                   className="text-gray-400 hover:text-white transition-colors"
                 >
                   Discover
                 </button>
-                <button 
+                <button
                   onClick={() => navigate("/today")}
                   className="text-gray-400 hover:text-white transition-colors"
                 >
                   Today
                 </button>
-                <button 
+                <button
                   onClick={() => navigate("/profile")}
                   className="text-gray-400 hover:text-white transition-colors"
                 >

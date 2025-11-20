@@ -13,10 +13,10 @@ interface LazyImageProps {
   priority?: boolean;
 }
 
-const LazyImage = ({ 
-  src, 
-  alt, 
-  className = '', 
+const LazyImage = ({
+  src,
+  alt,
+  className = '',
   fallback = '/placeholder-image.jpg',
   onLoad,
   onError,
@@ -65,10 +65,10 @@ const LazyImage = ({
   };
 
   return (
-    <div 
-      ref={imgRef} 
+    <div
+      ref={imgRef}
       className={`relative overflow-hidden ${className}`}
-      style={{ 
+      style={{
         aspectRatio: `${width}/${height}`,
         minHeight: `${height}px`
       }}
@@ -82,16 +82,15 @@ const LazyImage = ({
         <img
           src={error ? fallback : src}
           alt={alt}
-          className={`w-full h-full object-cover transition-opacity duration-300 ${
-            isLoaded ? 'opacity-100' : 'opacity-0'
-          }`}
+          className={`w-full h-full object-cover transition-opacity duration-300 ${isLoaded ? 'opacity-100' : 'opacity-0'
+            }`}
           onLoad={handleLoad}
           onError={handleError}
           loading={priority ? "eager" : "lazy"}
           decoding="async"
           width={width}
           height={height}
-          fetchPriority={priority ? "high" : "low"}
+          fetchpriority={priority ? "high" : "low"}
           style={{ aspectRatio: `${width}/${height}` }}
         />
       )}
