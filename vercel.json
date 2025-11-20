@@ -15,10 +15,6 @@
     {
       "source": "/terms",
       "destination": "/terms.html"
-    },
-    {
-      "source": "/:path*",
-      "destination": "/index.html"
     }
   ],
   "headers": [
