@@ -6,7 +6,7 @@ import ArticleViewer from "../components/ArticleViewer";
 import RightSidebar from "../components/RightSidebar";
 import LeftSidebar from "../components/LeftSidebar";
 import Navigation from "../components/Navigation";
-import { getRandomArticles, searchArticles } from "../services/wikipediaService";
+import { getRandomArticles, searchArticles, getPersonalizedArticles } from "../services/wikipediaService";
 import { useToast } from "@/components/ui/use-toast";
 import { useLanguage } from "../contexts/LanguageContext";
 import { useAnalyticsTracking } from "../hooks/useAnalyticsTracking";
@@ -14,6 +14,8 @@ import { useChallengeTracking } from "../hooks/useChallengeTracking";
 import { AnalyticsCheck } from "../components/AnalyticsCheck";
 import BadgeDisplay from "../components/BadgeDisplay";
 import DailyChallenges from "../components/DailyChallenges";
+import { useUserPreferences } from "../hooks/useUserPreferences";
+import { useAuth } from "../contexts/AuthContext";
 
 const Index = () => {
   const { toast } = useToast();
@@ -26,13 +28,28 @@ const Index = () => {
   const [currentArticle, setCurrentArticle] = useState(null);
   const { trackArticleView } = useAnalyticsTracking();
   useChallengeTracking();
+  const { userPreferences } = useUserPreferences();
+  const { user } = useAuth();
 
   const { data: articles, isLoading, error } = useQuery({
-    queryKey: ["articles", searchQuery, currentLanguage.code],
+    queryKey: ["articles", searchQuery, currentLanguage.code, userPreferences.feedType, user?.id],
     queryFn: async () => {
       if (searchQuery) {
         const results = location.state?.reorderedResults || await searchArticles(searchQuery, currentLanguage);
         return results.filter(article => article.image);
+      }
+
+      // Use personalized feed if feedType is 'curated' and user is logged in
+      if (userPreferences.feedType === 'curated' && user) {
+        try {
+          const personalizedArticles = await getPersonalizedArticles(user.id, 10, currentLanguage);
+          const articlesWithImages = personalizedArticles.filter(article => article.image);
+          if (articlesWithImages.length > 0) {
+            return articlesWithImages;
+          }
+        } catch (error) {
+          console.error('Failed to fetch personalized articles, falling back to random:', error);
+        }
       }
 
       // Resilient fetching logic - retry until we find articles with images
