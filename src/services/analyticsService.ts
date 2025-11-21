@@ -50,6 +50,12 @@ export const getUserAnalytics = async (userId: string): Promise<UserAnalytics | 
 };
 
 export const updateUserAnalytics = async (userId: string, updates: Partial<UserAnalytics>): Promise<UserAnalytics> => {
+  // First, verify the record exists
+  const existing = await getUserAnalytics(userId);
+  if (!existing) {
+    throw new Error('User analytics record not found');
+  }
+
   const { data, error } = await supabase
     .from('user_analytics')
     .update({
@@ -58,10 +64,13 @@ export const updateUserAnalytics = async (userId: string, updates: Partial<UserA
     })
     .eq('user_id', userId)
     .select()
-    .single();
+    .limit(1);
 
   if (error) throw error;
-  return data;
+  if (!data || data.length === 0) {
+    throw new Error('Failed to update user analytics');
+  }
+  return data[0];
 };
 
 export const incrementArticleView = async (userId: string, articleTags: string[] = []) => {
