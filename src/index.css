@@ -98,18 +98,78 @@
     @apply bg-black/40 backdrop-blur-xl border border-white/10 shadow-xl;
   }
 
+  /* VisionOS Liquid Glass Aesthetic */
   .liquid-glass .glass-panel,
   .liquid-glass .bg-card,
   .liquid-glass .bg-popover,
   .liquid-glass .bg-gray-900,
-  .liquid-glass .bg-black {
-    @apply bg-white/10 backdrop-blur-2xl border-white/20;
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0));
-    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
-    border: 1px solid rgba(255, 255, 255, 0.18);
+  .liquid-glass .bg-black,
+  .liquid-glass .dialog-content {
+    @apply bg-white/5 backdrop-blur-3xl border-white/10;
+
+    /* 1. Visual Material Properties */
+    background: linear-gradient(180deg,
+        rgba(255, 255, 255, 0.08) 0%,
+        rgba(255, 255, 255, 0.03) 100%);
+
+    /* 2. Shape Language & Thickness */
+    box-shadow:
+      /* Inner Glow / Thickness */
+      inset 0 1px 1px 0 rgba(255, 255, 255, 0.15),
+      inset 0 0 0 1px rgba(255, 255, 255, 0.05),
+      /* Soft Shadow */
+      0 10px 40px -10px rgba(0, 0, 0, 0.5),
+      0 0 20px -5px rgba(0, 0, 0, 0.3);
+
+    /* 3. Texture & Noise (Simulated via grain) */
+    position: relative;
+    overflow: hidden;
+    /* Ensure noise stays inside */
+  }
+
+  /* Subsurface Noise Overlay */
+  .liquid-glass .glass-panel::before,
+  .liquid-glass .bg-card::before,
+  .liquid-glass .bg-popover::before,
+  .liquid-glass .bg-gray-900::before,
+  .liquid-glass .bg-black::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    opacity: 0.03;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+    pointer-events: none;
+    mix-blend-mode: overlay;
+  }
+
+  /* 4. Light Behavior & Edge Highlights */
+  .liquid-glass .glass-panel::after,
+  .liquid-glass .bg-card::after,
+  .liquid-glass .bg-popover::after,
+  .liquid-glass .bg-gray-900::after,
+  .liquid-glass .bg-black::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1px;
+    /* Border width */
+    background: linear-gradient(135deg,
+        rgba(255, 255, 255, 0.4) 0%,
+        rgba(255, 255, 255, 0.1) 25%,
+        rgba(255, 255, 255, 0.05) 50%,
+        rgba(255, 255, 255, 0) 100%);
+    -webkit-mask:
+      linear-gradient(#fff 0 0) content-box,
+      linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
   }
 
   .liquid-glass .sidebar-icon {
-    @apply bg-white/10 backdrop-blur-md border-white/20 hover:bg-white/20;
+    @apply bg-white/5 backdrop-blur-md border-white/10 hover:bg-white/20 transition-all duration-300;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
   }
 }

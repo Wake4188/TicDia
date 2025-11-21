@@ -604,7 +604,10 @@ const Profile = () => {
                       </div>
                       <Switch
                         checked={userPreferences.liquidGlassMode}
-                        onCheckedChange={(checked) => updateUserPrefs({ liquidGlassMode: checked })}
+                        onCheckedChange={async (checked) => {
+                          await updateUserPrefs({ liquidGlassMode: checked });
+                          window.location.reload();
+                        }}
                       />
                     </div>
 
