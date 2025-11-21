@@ -43,11 +43,10 @@ export const getUserAnalytics = async (userId: string): Promise<UserAnalytics | 
     .from('user_analytics')
     .select('*')
     .eq('user_id', userId)
-    .limit(1)
-    .maybeSingle();
+    .limit(1);
 
   if (error) throw error;
-  return data;
+  return data && data.length > 0 ? data[0] : null;
 };
 
 export const updateUserAnalytics = async (userId: string, updates: Partial<UserAnalytics>): Promise<UserAnalytics> => {
