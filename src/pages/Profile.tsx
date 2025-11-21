@@ -19,6 +19,7 @@ import { useLanguage } from "../contexts/LanguageContext";
 import { useUserPreferences } from "@/hooks/useUserPreferences";
 import { AnalyticsStats } from "@/components/AnalyticsStats";
 import { Footer } from "@/components/Footer";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface SavedArticle {
   id: string;
@@ -44,6 +45,8 @@ const Profile = () => {
   const [selectedArticle, setSelectedArticle] = useState<SavedArticle | null>(null);
   const [isSmallTicOpen, setIsSmallTicOpen] = useState(false);
 
+  const [activeTab, setActiveTab] = useState("saved");
+
   // Account Security states
   const [newEmail, setNewEmail] = useState("");
   const [emailLoading, setEmailLoading] = useState(false);
@@ -52,6 +55,21 @@ const Profile = () => {
   const [passwordLoading, setPasswordLoading] = useState(false);
   const [resetEmail, setResetEmail] = useState(user?.email || "");
   const [resetLoading, setResetLoading] = useState(false);
+
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    show: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1
+      }
+    }
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    show: { opacity: 1, y: 0 }
+  };
 
   useEffect(() => {
     if (!user) {
@@ -330,438 +348,465 @@ const Profile = () => {
           </div>
         </div>
 
-        <Tabs defaultValue="saved" className="space-y-4 sm:space-y-6">
-          <TabsList className="bg-gray-800/50 backdrop-blur-md border border-gray-700/50 p-1 rounded-xl shadow-2xl w-full sm:w-auto grid grid-cols-4 sm:flex">
-            <TabsTrigger
-              value="saved"
-              className="data-[state=active]:bg-wikitok-red/20 data-[state=active]:backdrop-blur-md data-[state=active]:border data-[state=active]:border-wikitok-red/30 data-[state=active]:shadow-lg transition-all duration-500 ease-out rounded-lg text-xs sm:text-sm px-2 sm:px-4"
-            >
-              <BookMarked className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2 transition-transform duration-300" />
-              <span className="hidden sm:inline">{t.savedArticles}</span>
-              <span className="sm:hidden">Saved</span>
-            </TabsTrigger>
-            <TabsTrigger
-              value="analytics"
-              className="data-[state=active]:bg-wikitok-red/20 data-[state=active]:backdrop-blur-md data-[state=active]:border data-[state=active]:border-wikitok-red/30 data-[state=active]:shadow-lg transition-all duration-500 ease-out rounded-lg text-xs sm:text-sm px-2 sm:px-4"
-            >
-              <BarChart3 className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2 transition-transform duration-300" />
-              <span className="hidden sm:inline">Analytics</span>
-              <span className="sm:hidden">Stats</span>
-            </TabsTrigger>
-            <TabsTrigger
-              value="settings"
-              className="data-[state=active]:bg-wikitok-red/20 data-[state=active]:backdrop-blur-md data-[state=active]:border data-[state=active]:border-wikitok-red/30 data-[state=active]:shadow-lg transition-all duration-500 ease-out rounded-lg text-xs sm:text-sm px-2 sm:px-4"
-            >
-              <span className="hidden sm:inline">{t.title}</span>
-              <span className="sm:hidden">Settings</span>
-            </TabsTrigger>
-            <TabsTrigger
-              value="security"
-              className="data-[state=active]:bg-wikitok-red/20 data-[state=active]:backdrop-blur-md data-[state=active]:border data-[state=active]:border-wikitok-red/30 data-[state=active]:shadow-lg transition-all duration-500 ease-out rounded-lg text-xs sm:text-sm px-2 sm:px-4"
-            >
-              <Lock className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2 transition-transform duration-300" />
-              <span className="hidden sm:inline">Account Security</span>
-              <span className="sm:hidden">Security</span>
-            </TabsTrigger>
-          </TabsList>
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4 sm:space-y-6">
+          <div className="relative bg-gray-900/40 backdrop-blur-xl border border-white/10 p-1.5 rounded-2xl shadow-2xl w-full sm:w-auto overflow-x-auto">
+            <TabsList className="bg-transparent border-none p-0 h-auto w-full flex justify-between sm:justify-start gap-2">
+              {[
+                { id: "saved", icon: BookMarked, label: t.savedArticles, shortLabel: "Saved" },
+                { id: "analytics", icon: BarChart3, label: "Analytics", shortLabel: "Stats" },
+                { id: "settings", icon: null, label: t.title, shortLabel: "Settings" },
+                { id: "security", icon: Lock, label: "Account Security", shortLabel: "Security" }
+              ].map((tab) => (
+                <TabsTrigger
+                  key={tab.id}
+                  value={tab.id}
+                  className="relative z-10 data-[state=active]:bg-transparent data-[state=active]:shadow-none transition-all duration-300 ease-out rounded-xl text-xs sm:text-sm px-3 py-2.5 sm:px-5 sm:py-3 flex-1 sm:flex-none h-auto"
+                >
+                  {activeTab === tab.id && (
+                    <motion.div
+                      layoutId="active-tab"
+                      className="absolute inset-0 bg-wikitok-red rounded-xl shadow-[0_0_20px_rgba(254,44,85,0.3)]"
+                      transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                    />
+                  )}
+                  <div className="relative z-20 flex items-center justify-center gap-2">
+                    {tab.icon && <tab.icon className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${activeTab === tab.id ? 'text-white' : 'text-gray-400'}`} />}
+                    <span className={`hidden sm:inline font-medium ${activeTab === tab.id ? 'text-white' : 'text-gray-400'}`}>{tab.label}</span>
+                    <span className={`sm:hidden font-medium ${activeTab === tab.id ? 'text-white' : 'text-gray-400'}`}>{tab.shortLabel}</span>
+                  </div>
+                </TabsTrigger>
+              ))}
+            </TabsList>
+          </div>
 
-          <TabsContent value="saved" className="space-y-4 animate-in fade-in-50 slide-in-from-bottom-4 duration-700">
-            <Card className="bg-gray-900/80 backdrop-blur-md border-gray-800/50 shadow-2xl transition-all duration-500 hover:shadow-wikitok-red/10 hover:shadow-xl">
-              <CardHeader className="transition-all duration-300">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <CardTitle>{t.yourSaved}</CardTitle>
-                    <CardDescription>
-                      {savedArticles.length} {savedArticles.length !== 1 ? t.articles : t.article} {t.saved}
-                    </CardDescription>
+          <TabsContent value="saved" className="space-y-4 focus-visible:outline-none focus-visible:ring-0">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.4 }}
+            >
+              <Card className="bg-gray-900/40 backdrop-blur-xl border-white/10 shadow-2xl overflow-hidden">
+                <CardHeader className="border-b border-white/5 pb-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <div>
+                      <CardTitle className="text-2xl font-bold bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent">{t.yourSaved}</CardTitle>
+                      <CardDescription className="text-gray-400 mt-1">
+                        {savedArticles.length} {savedArticles.length !== 1 ? t.articles : t.article} {t.saved}
+                      </CardDescription>
+                    </div>
+                    {savedArticles.length > 0 && (
+                      <Button
+                        variant="destructive"
+                        size="sm"
+                        onClick={removeAllSavedArticles}
+                        className="bg-red-500/10 text-red-500 hover:bg-red-500/20 border border-red-500/20 transition-all duration-300 hover:scale-105"
+                      >
+                        <Trash2 className="w-4 h-4 mr-2" />
+                        {t.clearAll}
+                      </Button>
+                    )}
                   </div>
                   {savedArticles.length > 0 && (
-                    <Button
-                      variant="destructive"
-                      size="sm"
-                      onClick={removeAllSavedArticles}
-                      className="transition-all duration-300 hover:scale-105"
-                    >
-                      <Trash2 className="w-4 h-4 mr-2" />
-                      {t.clearAll}
-                    </Button>
+                    <div className="relative group">
+                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4 transition-colors group-focus-within:text-wikitok-red" />
+                      <Input
+                        placeholder={t.searchPlaceholder}
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="pl-10 bg-black/20 border-white/10 text-white focus:border-wikitok-red/50 focus:ring-wikitok-red/20 transition-all duration-300"
+                      />
+                    </div>
                   )}
-                </div>
-                {savedArticles.length > 0 && (
-                  <div className="relative">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                    <Input
-                      placeholder={t.searchPlaceholder}
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                      className="pl-10 bg-gray-800/60 border-gray-700/50 text-white"
-                    />
-                  </div>
-                )}
-              </CardHeader>
-              <CardContent>
-                {loading ? (
-                  <div className="text-center py-8">
-                    <div className="animate-pulse">{t.loading}...</div>
-                  </div>
-                ) : filteredArticles.length === 0 ? (
-                  <div className="text-center py-8 text-gray-400">
-                    <BookMarked className="w-12 h-12 mx-auto mb-4 opacity-50 animate-pulse" />
-                    <p>{searchTerm ? t.noMatch : t.noSaved}</p>
-                    <p className="text-sm">{searchTerm ? t.tryDifferent : t.startSaving}</p>
-                  </div>
-                ) : (
-                  <div className="space-y-3">
-                    {filteredArticles.map((article, index) => (
-                      <div
-                        key={article.id}
-                        className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-3 sm:p-4 bg-gray-800/60 backdrop-blur-sm rounded-lg border border-gray-700/30 transition-all duration-300 hover:bg-gray-700/60 hover:border-gray-600/50 hover:scale-[1.02] animate-in fade-in-50 slide-in-from-left-4 cursor-pointer space-y-3 sm:space-y-0"
-                        style={{ animationDelay: `${index * 100}ms` }}
-                        onClick={() => handleArticleClick(article)}
-                      >
-                        <div className="flex-1 w-full sm:w-auto">
-                          <h3 className="font-medium text-sm sm:text-base break-words">{article.article_title}</h3>
-                          <p className="text-xs sm:text-sm text-gray-400">
-                            {t.savedOn} {new Date(article.saved_at).toLocaleDateString()}
-                          </p>
-                        </div>
-                        <div className="flex gap-2 w-full sm:w-auto justify-end sm:justify-start">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleArticleClick(article);
-                            }}
-                            className="transition-all duration-300 hover:scale-105 flex-1 sm:flex-none"
-                          >
-                            <Eye className="w-4 h-4 mr-2 sm:mr-0" />
-                            <span className="sm:hidden">View</span>
-                          </Button>
-                          <Button
-                            variant="destructive"
-                            size="sm"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              removeSavedArticle(article.id);
-                            }}
-                            className="transition-all duration-300 hover:scale-105 flex-1 sm:flex-none"
-                          >
-                            <Trash2 className="w-4 h-4 mr-2 sm:mr-0" />
-                            <span className="sm:hidden">Delete</span>
-                          </Button>
-                        </div>
+                </CardHeader>
+                <CardContent className="p-0">
+                  {loading ? (
+                    <div className="text-center py-12">
+                      <div className="animate-pulse text-wikitok-red">{t.loading}...</div>
+                    </div>
+                  ) : filteredArticles.length === 0 ? (
+                    <div className="text-center py-16 text-gray-400">
+                      <div className="bg-gray-800/50 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <BookMarked className="w-10 h-10 opacity-50" />
                       </div>
-                    ))}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="analytics" className="space-y-6 animate-in fade-in-50 slide-in-from-bottom-4 duration-700">
-            <AnalyticsStats />
-          </TabsContent>
-
-          <TabsContent value="settings" className="space-y-6 animate-in fade-in-50 slide-in-from-bottom-4 duration-700">
-            <Card className="bg-gray-900/80 backdrop-blur-md border-gray-800/50 shadow-2xl transition-all duration-500 hover:shadow-wikitok-red/10 hover:shadow-xl">
-              <CardHeader className="transition-all duration-300">
-                <CardTitle>{t.readingPreferences}</CardTitle>
-                <CardDescription>
-                  {t.customize} ({t.syncedToCloud})
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="space-y-3 animate-in fade-in-50 slide-in-from-left-4 duration-500">
-                  <label className="text-sm font-medium">{t.articleFont}</label>
-                  <Select
-                    value={userPreferences.fontFamily}
-                    onValueChange={(value) => updateUserPrefs({ fontFamily: value })}
-                  >
-                    <SelectTrigger className="bg-gray-800/60 backdrop-blur-sm border-gray-700/50 transition-all duration-300 hover:border-gray-600/70 focus:border-wikitok-red/50">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent className="bg-gray-800/90 backdrop-blur-md border-gray-700/50">
-                      {fontOptions.map((font) => (
-                        <SelectItem key={font.value} value={font.value} className="transition-all duration-200 hover:bg-gray-700/60">
-                          <span style={{ fontFamily: font.value }}>{font.label}</span>
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="space-y-3 animate-in fade-in-50 slide-in-from-left-4 duration-500" style={{ animationDelay: "100ms" }}>
-                  <label className="text-sm font-medium">{t.highlightColor}</label>
-                  <Select
-                    value={userPreferences.highlightColor}
-                    onValueChange={(value) => updateUserPrefs({ highlightColor: value })}
-                  >
-                    <SelectTrigger className="bg-gray-800/60 backdrop-blur-sm border-gray-700/50 transition-all duration-300 hover:border-gray-600/70 focus:border-wikitok-red/50">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent className="bg-gray-800/90 backdrop-blur-md border-gray-700/50">
-                      {colorOptions.map((color) => (
-                        <SelectItem key={color.value} value={color.value} className="transition-all duration-200 hover:bg-gray-700/60">
-                          <div className="flex items-center gap-2">
-                            <div
-                              className="w-4 h-4 rounded transition-transform duration-200 hover:scale-110"
-                              style={{ backgroundColor: color.color }}
-                            />
-                            <span>{color.label}</span>
-                          </div>
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="space-y-3 animate-in fade-in-50 slide-in-from-left-4 duration-500" style={{ animationDelay: "200ms" }}>
-                  <label className="text-sm font-medium">
-                    {t.backgroundOpacity}: {userPreferences.backgroundOpacity}%
-                  </label>
-                  <Slider
-                    value={[userPreferences.backgroundOpacity]}
-                    onValueChange={(value) => updateUserPrefs({ backgroundOpacity: value[0] })}
-                    max={100}
-                    min={10}
-                    step={5}
-                    className="w-full transition-all duration-300"
-                  />
-                  <p className="text-xs text-gray-400">
-                    {t.backgroundOpacityDesc}
-                  </p>
-                </div>
-
-                <div className="space-y-3 animate-in fade-in-50 slide-in-from-left-4 duration-500" style={{ animationDelay: "250ms" }}>
-                  <label className="text-sm font-medium">
-                    Text Size: {userPreferences.fontSize}px
-                  </label>
-                  <Slider
-                    value={[userPreferences.fontSize]}
-                    onValueChange={(value) => updateUserPrefs({ fontSize: value[0] })}
-                    max={24}
-                    min={12}
-                    step={1}
-                    className="w-full transition-all duration-300"
-                  />
-                  <p className="text-xs text-gray-400">
-                    Adjust the size of article text for comfortable reading
-                  </p>
-                </div>
-
-                <div className="space-y-3 animate-in fade-in-50 slide-in-from-left-4 duration-500" style={{ animationDelay: "275ms" }}>
-                  <div className="flex items-center justify-between">
-                    <div className="space-y-0.5">
-                      <Label className="text-base">Liquid Glass Mode</Label>
-                      <p className="text-sm text-muted-foreground">
-                        Enable Apple-style glassmorphism effects
-                      </p>
+                      <p className="text-lg font-medium text-white mb-2">{searchTerm ? t.noMatch : t.noSaved}</p>
+                      <p className="text-sm text-gray-500">{searchTerm ? t.tryDifferent : t.startSaving}</p>
                     </div>
-                    <Switch
-                      checked={userPreferences.liquidGlassMode}
-                      onCheckedChange={(checked) => updateUserPrefs({ liquidGlassMode: checked })}
-                    />
-                  </div>
-
-                  <div className="flex items-center justify-between">
-                    <div className="space-y-0.5">
-                      <Label className="text-base">Feed Preference <span className="ml-2 text-xs bg-wikitok-red/20 text-wikitok-red px-1.5 py-0.5 rounded font-bold border border-wikitok-red/30">BETA</span></Label>
-                      <p className="text-sm text-muted-foreground">
-                        Choose how articles are selected for you
-                      </p>
-                    </div>
-                    <Select
-                      value={userPreferences.feedType || 'mixed'}
-                      onValueChange={(value: 'random' | 'curated' | 'mixed') => updateUserPrefs({ feedType: value })}
+                  ) : (
+                    <motion.div
+                      className="divide-y divide-white/5"
+                      variants={containerVariants}
+                      initial="hidden"
+                      animate="show"
                     >
-                      <SelectTrigger className="bg-gray-800/60 backdrop-blur-sm border-gray-700/50 transition-all duration-300 hover:border-gray-600/70 focus:border-wikitok-red/50">
+                      {filteredArticles.map((article) => (
+                        <motion.div
+                          key={article.id}
+                          variants={itemVariants}
+                          className="group flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 sm:p-6 hover:bg-white/5 transition-colors cursor-pointer gap-4"
+                          onClick={() => handleArticleClick(article)}
+                        >
+                          <div className="flex-1 min-w-0">
+                            <h3 className="font-medium text-base sm:text-lg text-gray-200 group-hover:text-white transition-colors line-clamp-2 mb-1.5">
+                              {article.article_title}
+                            </h3>
+                            <p className="text-xs sm:text-sm text-gray-500 flex items-center gap-2">
+                              <span className="w-1.5 h-1.5 rounded-full bg-wikitok-red/50"></span>
+                              {t.savedOn} {new Date(article.saved_at).toLocaleDateString()}
+                            </p>
+                          </div>
+                          <div className="flex gap-2 w-full sm:w-auto opacity-0 group-hover:opacity-100 transition-opacity duration-300 transform translate-x-4 group-hover:translate-x-0">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleArticleClick(article);
+                              }}
+                              className="hover:bg-white/10 hover:text-white"
+                            >
+                              <Eye className="w-4 h-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                removeSavedArticle(article.id);
+                              }}
+                              className="hover:bg-red-500/20 hover:text-red-500 text-gray-500"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+                          </div>
+                        </motion.div>
+                      ))}
+                    </motion.div>
+                  )}
+                </CardContent>
+              </Card>
+            </motion.div>
+          </TabsContent>
+
+          <TabsContent value="analytics" className="space-y-6 focus-visible:outline-none focus-visible:ring-0">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.4 }}
+            >
+              <AnalyticsStats />
+            </motion.div>
+          </TabsContent>
+
+          <TabsContent value="settings" className="space-y-6 focus-visible:outline-none focus-visible:ring-0">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.4 }}
+            >
+              <Card className="bg-gray-900/40 backdrop-blur-xl border-white/10 shadow-2xl overflow-hidden">
+                <CardHeader className="border-b border-white/5 pb-6">
+                  <CardTitle className="text-2xl font-bold bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent">{t.readingPreferences}</CardTitle>
+                  <CardDescription className="text-gray-400 mt-1">
+                    {t.customize} ({t.syncedToCloud})
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-8 p-6">
+                  <div className="space-y-4">
+                    <label className="text-sm font-medium text-gray-300">{t.articleFont}</label>
+                    <Select
+                      value={userPreferences.fontFamily}
+                      onValueChange={(value) => updateUserPrefs({ fontFamily: value })}
+                    >
+                      <SelectTrigger className="bg-black/20 border-white/10 h-12 transition-all duration-300 hover:border-white/20 focus:border-wikitok-red/50 focus:ring-wikitok-red/20">
                         <SelectValue />
                       </SelectTrigger>
-                      <SelectContent className="bg-gray-800/90 backdrop-blur-md border-gray-700/50">
-                        <SelectItem value="random" className="transition-all duration-200 hover:bg-gray-700/60">
-                          <div className="flex flex-col">
-                            <span>Random</span>
-                            <span className="text-xs text-gray-400">Completely random articles</span>
-                          </div>
-                        </SelectItem>
-                        <SelectItem value="curated" className="transition-all duration-200 hover:bg-gray-700/60">
-                          <div className="flex flex-col">
-                            <span>AI Curated</span>
-                            <span className="text-xs text-gray-400">Personalized based on your history</span>
-                          </div>
-                        </SelectItem>
-                        <SelectItem value="mixed" className="transition-all duration-200 hover:bg-gray-700/60">
-                          <div className="flex flex-col">
-                            <span>Mixed (Recommended)</span>
-                            <span className="text-xs text-gray-400">A mix of random and curated</span>
-                          </div>
-                        </SelectItem>
+                      <SelectContent className="bg-gray-900/95 backdrop-blur-xl border-white/10">
+                        {fontOptions.map((font) => (
+                          <SelectItem key={font.value} value={font.value} className="focus:bg-white/10 focus:text-white cursor-pointer py-3">
+                            <span style={{ fontFamily: font.value }}>{font.label}</span>
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
-                    <p className="text-xs text-gray-400">
-                      Choose how articles are selected for your feed.
+                  </div>
+
+                  <div className="space-y-4">
+                    <label className="text-sm font-medium text-gray-300">{t.highlightColor}</label>
+                    <Select
+                      value={userPreferences.highlightColor}
+                      onValueChange={(value) => updateUserPrefs({ highlightColor: value })}
+                    >
+                      <SelectTrigger className="bg-black/20 border-white/10 h-12 transition-all duration-300 hover:border-white/20 focus:border-wikitok-red/50 focus:ring-wikitok-red/20">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent className="bg-gray-900/95 backdrop-blur-xl border-white/10">
+                        {colorOptions.map((color) => (
+                          <SelectItem key={color.value} value={color.value} className="focus:bg-white/10 focus:text-white cursor-pointer py-3">
+                            <div className="flex items-center gap-3">
+                              <div
+                                className="w-4 h-4 rounded-full shadow-lg ring-2 ring-white/10"
+                                style={{ backgroundColor: color.color }}
+                              />
+                              <span>{color.label}</span>
+                            </div>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-4">
+                    <div className="flex justify-between">
+                      <label className="text-sm font-medium text-gray-300">{t.backgroundOpacity}</label>
+                      <span className="text-sm text-wikitok-red font-bold">{userPreferences.backgroundOpacity}%</span>
+                    </div>
+                    <Slider
+                      value={[userPreferences.backgroundOpacity]}
+                      onValueChange={(value) => updateUserPrefs({ backgroundOpacity: value[0] })}
+                      max={100}
+                      min={10}
+                      step={5}
+                      className="py-4"
+                    />
+                    <p className="text-xs text-gray-500">
+                      {t.backgroundOpacityDesc}
                     </p>
                   </div>
 
-                  <div className="p-4 bg-gray-800/60 backdrop-blur-sm rounded-lg border border-gray-700/30 transition-all duration-500 hover:border-gray-600/50 animate-in fade-in-50 slide-in-from-bottom-4" style={{ animationDelay: "300ms" }}>
-                    <h4 className="text-sm font-medium mb-2">{t.preview}</h4>
+                  <div className="space-y-4">
+                    <div className="flex justify-between">
+                      <label className="text-sm font-medium text-gray-300">Text Size</label>
+                      <span className="text-sm text-wikitok-red font-bold">{userPreferences.fontSize}px</span>
+                    </div>
+                    <Slider
+                      value={[userPreferences.fontSize]}
+                      onValueChange={(value) => updateUserPrefs({ fontSize: value[0] })}
+                      max={24}
+                      min={12}
+                      step={1}
+                      className="py-4"
+                    />
+                    <p className="text-xs text-gray-500">
+                      Adjust the size of article text for comfortable reading
+                    </p>
+                  </div>
+
+                  <div className="space-y-6 pt-4 border-t border-white/5">
+                    <div className="flex items-center justify-between p-4 rounded-xl bg-white/5 hover:bg-white/10 transition-colors">
+                      <div className="space-y-1">
+                        <Label className="text-base font-medium text-gray-200">Liquid Glass Mode</Label>
+                        <p className="text-sm text-gray-500">
+                          Enable Apple-style glassmorphism effects
+                        </p>
+                      </div>
+                      <Switch
+                        checked={userPreferences.liquidGlassMode}
+                        onCheckedChange={(checked) => updateUserPrefs({ liquidGlassMode: checked })}
+                      />
+                    </div>
+
+                    <div className="flex items-center justify-between p-4 rounded-xl bg-white/5 hover:bg-white/10 transition-colors">
+                      <div className="space-y-1">
+                        <Label className="text-base font-medium text-gray-200 flex items-center gap-2">
+                          Feed Preference
+                          <span className="text-[10px] bg-wikitok-red/20 text-wikitok-red px-2 py-0.5 rounded-full font-bold border border-wikitok-red/30 uppercase tracking-wider">Beta</span>
+                        </Label>
+                        <p className="text-sm text-gray-500">
+                          Choose how articles are selected for you
+                        </p>
+                      </div>
+                      <Select
+                        value={userPreferences.feedType || 'mixed'}
+                        onValueChange={(value: 'random' | 'curated' | 'mixed') => updateUserPrefs({ feedType: value })}
+                      >
+                        <SelectTrigger className="w-[140px] bg-black/20 border-white/10 transition-all duration-300 hover:border-white/20 focus:border-wikitok-red/50 focus:ring-wikitok-red/20">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent className="bg-gray-900/95 backdrop-blur-xl border-white/10">
+                          <SelectItem value="random" className="focus:bg-white/10 focus:text-white cursor-pointer">Random</SelectItem>
+                          <SelectItem value="curated" className="focus:bg-white/10 focus:text-white cursor-pointer">AI Curated</SelectItem>
+                          <SelectItem value="mixed" className="focus:bg-white/10 focus:text-white cursor-pointer">Mixed</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+
+                  <div className="p-6 bg-black/40 rounded-xl border border-white/5 mt-8">
+                    <h4 className="text-sm font-medium text-gray-400 mb-4 uppercase tracking-wider text-xs">{t.preview}</h4>
                     <div
-                      className="relative p-4 rounded bg-cover bg-center overflow-hidden transition-all duration-500"
+                      className="relative p-6 rounded-lg bg-cover bg-center overflow-hidden shadow-2xl transition-all duration-500 group"
                       style={{
                         backgroundImage: "url('https://images.unsplash.com/photo-1506905925346-21bda4d32df4?ixlib=rb-4.0.3')",
+                        height: '200px'
                       }}
                     >
                       <div
-                        className="absolute inset-0 bg-black rounded transition-all duration-500"
+                        className="absolute inset-0 bg-black transition-all duration-500"
                         style={{ opacity: userPreferences.backgroundOpacity / 100 }}
                       />
-                      <p
-                        className="relative z-10 text-white mb-4 transition-all duration-300"
-                        style={{
-                          fontFamily: userPreferences.fontFamily,
-                          fontSize: `${userPreferences.fontSize}px`
-                        }}
-                      >
-                        {t.previewText}
-                      </p>
-                      <div className="relative z-10">
-                        <p className="text-xs text-gray-300 mb-1">{t.progressPreview}:</p>
-                        <div className="h-1 bg-black/20 rounded overflow-hidden">
-                          <div
-                            className="h-full rounded transition-all duration-500 ease-out"
-                            style={{
-                              backgroundColor: userPreferences.highlightColor,
-                              width: '60%'
-                            }}
-                          />
+                      <div className="relative z-10 h-full flex flex-col justify-between">
+                        <p
+                          className="text-white transition-all duration-300 leading-relaxed"
+                          style={{
+                            fontFamily: userPreferences.fontFamily,
+                            fontSize: `${userPreferences.fontSize}px`
+                          }}
+                        >
+                          {t.previewText}
+                        </p>
+                        <div>
+                          <p className="text-xs text-gray-300 mb-2 font-medium">{t.progressPreview}</p>
+                          <div className="h-1.5 bg-white/20 rounded-full overflow-hidden backdrop-blur-sm">
+                            <div
+                              className="h-full rounded-full transition-all duration-500 ease-out shadow-[0_0_10px_rgba(0,0,0,0.5)]"
+                              style={{
+                                backgroundColor: userPreferences.highlightColor,
+                                width: '60%'
+                              }}
+                            />
+                          </div>
                         </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+            </motion.div>
           </TabsContent>
 
-          <TabsContent value="security" className="space-y-4 sm:space-y-6 animate-in fade-in-50 slide-in-from-bottom-4 duration-700">
-            <div className="grid gap-4 sm:gap-6">
+          <TabsContent value="security" className="space-y-4 sm:space-y-6 focus-visible:outline-none focus-visible:ring-0">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.4 }}
+              className="grid gap-4 sm:gap-6"
+            >
               {/* Email Change Section */}
-              <Card className="bg-gray-900/80 backdrop-blur-md border-gray-800/50 shadow-2xl transition-all duration-500 hover:shadow-wikitok-red/10 hover:shadow-xl">
-                <CardHeader className="pb-3 sm:pb-6">
-                  <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
-                    <Mail className="w-4 h-4 sm:w-5 sm:h-5" />
+              <Card className="bg-gray-900/40 backdrop-blur-xl border-white/10 shadow-2xl overflow-hidden">
+                <CardHeader className="pb-3 sm:pb-6 border-b border-white/5">
+                  <CardTitle className="flex items-center gap-3 text-lg sm:text-xl">
+                    <div className="p-2 rounded-lg bg-wikitok-red/10 text-wikitok-red">
+                      <Mail className="w-4 h-4 sm:w-5 sm:h-5" />
+                    </div>
                     <span className="text-sm sm:text-base">Change Email Address</span>
                   </CardTitle>
-                  <CardDescription className="text-xs sm:text-sm">
-                    Current email: <span className="break-all">{user.email}</span>
+                  <CardDescription className="text-xs sm:text-sm text-gray-400 ml-12">
+                    Current email: <span className="text-white font-medium">{user.email}</span>
                   </CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-3 sm:space-y-4">
-                  <div className="space-y-1 sm:space-y-2">
-                    <label className="text-xs sm:text-sm font-medium">New Email Address</label>
+                <CardContent className="space-y-4 p-6">
+                  <div className="space-y-2">
+                    <label className="text-xs sm:text-sm font-medium text-gray-300">New Email Address</label>
                     <Input
                       type="email"
                       placeholder="Enter new email address"
                       value={newEmail}
                       onChange={(e) => setNewEmail(e.target.value)}
-                      className="bg-gray-800/60 border-gray-700/50 text-white text-sm sm:text-base"
+                      className="bg-black/20 border-white/10 text-white text-sm sm:text-base focus:border-wikitok-red/50 focus:ring-wikitok-red/20"
                     />
                   </div>
                   <Button
                     onClick={handleEmailChange}
                     disabled={emailLoading || !newEmail.trim()}
-                    className="w-full bg-wikitok-red hover:bg-wikitok-red/80 transition-all duration-300 text-sm sm:text-base py-2 sm:py-3"
+                    className="w-full bg-wikitok-red hover:bg-wikitok-red/80 transition-all duration-300 text-sm sm:text-base py-2 sm:py-3 shadow-lg shadow-wikitok-red/20"
                   >
                     {emailLoading ? "Updating..." : "Update Email"}
                   </Button>
-                  <p className="text-xs text-gray-400 leading-relaxed">
+                  <p className="text-xs text-gray-500 leading-relaxed text-center">
                     You will need to confirm the change in both your old and new email addresses.
                   </p>
                 </CardContent>
               </Card>
 
               {/* Password Change Section */}
-              <Card className="bg-gray-900/80 backdrop-blur-md border-gray-800/50 shadow-2xl transition-all duration-500 hover:shadow-wikitok-red/10 hover:shadow-xl">
-                <CardHeader className="pb-3 sm:pb-6">
-                  <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
-                    <Lock className="w-4 h-4 sm:w-5 sm:h-5" />
+              <Card className="bg-gray-900/40 backdrop-blur-xl border-white/10 shadow-2xl overflow-hidden">
+                <CardHeader className="pb-3 sm:pb-6 border-b border-white/5">
+                  <CardTitle className="flex items-center gap-3 text-lg sm:text-xl">
+                    <div className="p-2 rounded-lg bg-wikitok-red/10 text-wikitok-red">
+                      <Lock className="w-4 h-4 sm:w-5 sm:h-5" />
+                    </div>
                     <span className="text-sm sm:text-base">Change Password</span>
                   </CardTitle>
-                  <CardDescription className="text-xs sm:text-sm">
+                  <CardDescription className="text-xs sm:text-sm text-gray-400 ml-12">
                     Update your account password for security
                   </CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-3 sm:space-y-4">
-                  <div className="space-y-1 sm:space-y-2">
-                    <label className="text-xs sm:text-sm font-medium">New Password</label>
+                <CardContent className="space-y-4 p-6">
+                  <div className="space-y-2">
+                    <label className="text-xs sm:text-sm font-medium text-gray-300">New Password</label>
                     <Input
                       type="password"
                       placeholder="Enter new password"
                       value={newPassword}
                       onChange={(e) => setNewPassword(e.target.value)}
-                      className="bg-gray-800/60 border-gray-700/50 text-white text-sm sm:text-base"
+                      className="bg-black/20 border-white/10 text-white text-sm sm:text-base focus:border-wikitok-red/50 focus:ring-wikitok-red/20"
                     />
                   </div>
-                  <div className="space-y-1 sm:space-y-2">
-                    <label className="text-xs sm:text-sm font-medium">Confirm New Password</label>
+                  <div className="space-y-2">
+                    <label className="text-xs sm:text-sm font-medium text-gray-300">Confirm New Password</label>
                     <Input
                       type="password"
                       placeholder="Confirm new password"
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
-                      className="bg-gray-800/60 border-gray-700/50 text-white text-sm sm:text-base"
+                      className="bg-black/20 border-white/10 text-white text-sm sm:text-base focus:border-wikitok-red/50 focus:ring-wikitok-red/20"
                     />
                   </div>
                   <Button
                     onClick={handlePasswordChange}
                     disabled={passwordLoading || !newPassword || !confirmPassword}
-                    className="w-full bg-wikitok-red hover:bg-wikitok-red/80 transition-all duration-300 text-sm sm:text-base py-2 sm:py-3"
+                    className="w-full bg-wikitok-red hover:bg-wikitok-red/80 transition-all duration-300 text-sm sm:text-base py-2 sm:py-3 shadow-lg shadow-wikitok-red/20"
                   >
                     {passwordLoading ? "Updating..." : "Update Password"}
                   </Button>
-                  <p className="text-xs text-gray-400 leading-relaxed">
+                  <p className="text-xs text-gray-500 leading-relaxed text-center">
                     Password must be at least 6 characters long.
                   </p>
                 </CardContent>
               </Card>
 
               {/* Password Reset Section */}
-              <Card className="bg-gray-900/80 backdrop-blur-md border-gray-800/50 shadow-2xl transition-all duration-500 hover:shadow-wikitok-red/10 hover:shadow-xl">
-                <CardHeader className="pb-3 sm:pb-6">
-                  <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
-                    <Key className="w-4 h-4 sm:w-5 sm:h-5" />
+              <Card className="bg-gray-900/40 backdrop-blur-xl border-white/10 shadow-2xl overflow-hidden">
+                <CardHeader className="pb-3 sm:pb-6 border-b border-white/5">
+                  <CardTitle className="flex items-center gap-3 text-lg sm:text-xl">
+                    <div className="p-2 rounded-lg bg-wikitok-red/10 text-wikitok-red">
+                      <Key className="w-4 h-4 sm:w-5 sm:h-5" />
+                    </div>
                     <span className="text-sm sm:text-base">Reset Password via Email</span>
                   </CardTitle>
-                  <CardDescription className="text-xs sm:text-sm">
+                  <CardDescription className="text-xs sm:text-sm text-gray-400 ml-12">
                     Send a password reset link to your email address
                   </CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-3 sm:space-y-4">
-                  <div className="space-y-1 sm:space-y-2">
-                    <label className="text-xs sm:text-sm font-medium">Email Address</label>
+                <CardContent className="space-y-4 p-6">
+                  <div className="space-y-2">
+                    <label className="text-xs sm:text-sm font-medium text-gray-300">Email Address</label>
                     <Input
                       type="email"
                       placeholder="Enter email address"
                       value={resetEmail}
                       onChange={(e) => setResetEmail(e.target.value)}
-                      className="bg-gray-800/60 border-gray-700/50 text-white text-sm sm:text-base"
+                      className="bg-black/20 border-white/10 text-white text-sm sm:text-base focus:border-wikitok-red/50 focus:ring-wikitok-red/20"
                     />
                   </div>
                   <Button
                     onClick={handlePasswordReset}
                     disabled={resetLoading || !resetEmail.trim()}
                     variant="outline"
-                    className="w-full border-gray-600 text-white hover:bg-gray-800 transition-all duration-300 text-sm sm:text-base py-2 sm:py-3"
+                    className="w-full border-white/10 text-white hover:bg-white/5 transition-all duration-300 text-sm sm:text-base py-2 sm:py-3"
                   >
                     {resetLoading ? "Sending..." : "Send Password Reset Email"}
                   </Button>
-                  <p className="text-xs text-gray-400 leading-relaxed">
+                  <p className="text-xs text-gray-500 leading-relaxed text-center">
                     You will receive an email with instructions to reset your password.
                   </p>
                 </CardContent>
               </Card>
-            </div>
+            </motion.div>
           </TabsContent>
         </Tabs>
 
