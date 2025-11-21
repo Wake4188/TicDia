@@ -1,11 +1,9 @@
 // Service Worker for caching and offline functionality
-const CACHE_NAME = 'wikitok-v1';
-const STATIC_CACHE = 'static-v1';
+const CACHE_NAME = 'wikitok-v2';
+const STATIC_CACHE = 'static-v2';
 
 // Files to cache immediately
 const STATIC_ASSETS = [
-  '/',
-  '/index.html',
   '/manifest.json',
   '/favicon.ico'
 ];
