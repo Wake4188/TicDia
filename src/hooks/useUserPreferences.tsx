@@ -49,7 +49,8 @@ export const useUserPreferences = () => {
               backgroundOpacity: prefs.backgroundOpacity || 70,
               highlightColor: prefs.highlightColor || '#FE2C55',
               fontSize: prefs.fontSize || 16,
-              tts_autoplay: Boolean(prefs.tts_autoplay) || false,
+              feedType: prefs.feedType || 'mixed',
+              liquidGlassMode: Boolean(prefs.liquidGlassMode) || false,
             });
             document.documentElement.style.setProperty('--progress-bar-color', prefs.highlightColor || '#FE2C55');
             document.documentElement.style.setProperty('--highlight-color', prefs.highlightColor || '#FE2C55');
@@ -67,7 +68,8 @@ export const useUserPreferences = () => {
             backgroundOpacity: prefs.backgroundOpacity || 70,
             highlightColor: prefs.highlightColor || '#FE2C55',
             fontSize: prefs.fontSize || 16,
-            tts_autoplay: Boolean(prefs.tts_autoplay) || false,
+            feedType: prefs.feedType || 'mixed',
+            liquidGlassMode: Boolean(prefs.liquidGlassMode) || false,
           });
           document.documentElement.style.setProperty('--progress-bar-color', prefs.highlightColor || '#FE2C55');
           document.documentElement.style.setProperty('--highlight-color', prefs.highlightColor || '#FE2C55');
