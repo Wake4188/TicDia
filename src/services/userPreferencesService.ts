@@ -44,6 +44,13 @@ export const loadUserPreferences = async (userId: string): Promise<UserPreferenc
 
 export const saveUserPreferences = async (userId: string, preferences: UserPreferences): Promise<void> => {
   try {
+    // Validate preferences
+    const validatedPreferences = {
+      fontFamily: validateFontFamily(preferences.fontFamily),
+      backgroundOpacity: validateBackgroundOpacity(preferences.backgroundOpacity),
+      highlightColor: validateHexColor(preferences.highlightColor)
+    };
+
     const { error } = await supabase
       .from('user_preferences')
       .upsert({
@@ -52,8 +59,8 @@ export const saveUserPreferences = async (userId: string, preferences: UserPrefe
         background_opacity: validatedPreferences.backgroundOpacity,
         highlight_color: validatedPreferences.highlightColor,
         font_size: preferences.fontSize || 16,
-        tts_autoplay: preferences.tts_autoplay || false,
         feed_type: preferences.feedType || 'mixed',
+        liquid_glass_mode: preferences.liquidGlassMode || false,
         updated_at: new Date().toISOString(),
       }, {
         onConflict: 'user_id'
@@ -74,8 +81,8 @@ export const getDefaultPreferences = (): UserPreferences => ({
   backgroundOpacity: 70,
   highlightColor: '#FE2C55',
   fontSize: 16,
-  tts_autoplay: false,
   feedType: 'mixed',
+  liquidGlassMode: false,
 });
 
 export const updateUserPreferences = async (userId: string, updates: Partial<UserPreferences>): Promise<void> => {
