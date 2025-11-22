@@ -10,7 +10,7 @@ export const translations = {
     profile: "Profile",
     random: "Random",
     signIn: "Sign In",
-    
+
     // Today page
     todayHighlights: "Today's Highlights",
     latestNews: "Latest News",
@@ -23,20 +23,20 @@ export const translations = {
     refresh: "Refresh",
     justNow: "Just now",
     hoursAgo: "{hours}h ago",
-    
-    topArticlesToday: "Top Articles Today", 
+
+    topArticlesToday: "Top Articles Today",
     dailyRankingResets: "Daily ranking resets at midnight",
     europeParisTime: "Europe/Paris time",
     apNews: "AP News",
-    showAll: "Show All", 
+    showAll: "Show All",
     showLess: "Show Less",
     more: "more",
     backToHome: "Back to Home",
-    
+
     nytNews: "NYT News",
     headlines: "Headlines",
     newsApiHeadlines: "NewsAPI Headlines",
-    
+
     loading: "Loading...",
     error: "Error",
     retry: "Retry",
@@ -51,11 +51,11 @@ export const translations = {
     explainWithAI: "Explain with AI",
     explaining: "Explaining...",
     aiExplanation: "AI Explanation",
-    
+
     categories: {
       all: "All",
       science: "Science",
-      technology: "Technology", 
+      technology: "Technology",
       history: "History",
       art: "Art",
       arts: "Arts",
@@ -66,23 +66,23 @@ export const translations = {
       philosophy: "Philosophy",
       literature: "Literature"
     },
-    
+
     savedArticles: "Saved Articles",
     settings: "Settings",
     articles: "articles",
     article: "article",
     views: "views",
-    
+
     loadingDescription: "Loading amazing articles for you...",
-    
+
     failedToLoad: "Failed to load news articles. Please try again later.",
     noArticlesAvailable: "No articles available from {source}",
-    
+
     articleTitle: "Article Title",
     articleContent: "Article Content",
     articleUrl: "Article URL (optional)",
     addNewArticle: "Add New Article",
-    
+
     errorLoading: "Error loading saved articles",
     preferencesWarning: "Reading Preferences",
     preferencesWarningDesc: "These preferences sync across devices",
@@ -124,7 +124,7 @@ export const translations = {
     profile: "Perfil",
     random: "Aleatorio",
     signIn: "Iniciar sesión",
-    
+
     todayHighlights: "Destacados de hoy",
     latestNews: "Últimas noticias",
     fromWikipedia: "De Wikipedia",
@@ -136,7 +136,7 @@ export const translations = {
     refresh: "Actualizar",
     justNow: "Justo ahora",
     hoursAgo: "Hace {hours}h",
-    
+
     topArticlesToday: "Artículos principales de hoy",
     dailyRankingResets: "La clasificación diaria se reinicia a medianoche",
     europeParisTime: "Hora de Europa/París",
@@ -145,11 +145,11 @@ export const translations = {
     showLess: "Mostrar menos",
     more: "más",
     backToHome: "Volver al inicio",
-    
+
     nytNews: "NYT Noticias",
     headlines: "Titulares",
     newsApiHeadlines: "Titulares de NewsAPI",
-    
+
     loading: "Cargando...",
     error: "Error",
     retry: "Reintentar",
@@ -164,7 +164,7 @@ export const translations = {
     explainWithAI: "Explicar con IA",
     explaining: "Explicando...",
     aiExplanation: "Explicación de IA",
-    
+
     categories: {
       all: "Todo",
       science: "Ciencia",
@@ -179,23 +179,23 @@ export const translations = {
       philosophy: "Filosofía",
       literature: "Literatura"
     },
-    
+
     savedArticles: "Artículos guardados",
     settings: "Configuración",
     articles: "artículos",
     article: "artículo",
     views: "vistas",
-    
+
     loadingDescription: "Cargando artículos increíbles para ti...",
-    
+
     failedToLoad: "No se pudieron cargar los artículos. Inténtalo de nuevo más tarde.",
     noArticlesAvailable: "No hay artículos disponibles de {source}",
-    
+
     articleTitle: "Título del artículo",
     articleContent: "Contenido del artículo",
     articleUrl: "URL del artículo (opcional)",
     addNewArticle: "Añadir nuevo artículo",
-    
+
     errorLoading: "Error al cargar artículos guardados",
     preferencesWarning: "Preferencias de lectura",
     preferencesWarningDesc: "Estas preferencias se sincronizan entre dispositivos",
@@ -237,7 +237,7 @@ export const translations = {
     profile: "Profil",
     random: "Aléatoire",
     signIn: "Se connecter",
-    
+
     todayHighlights: "Points forts d'aujourd'hui",
     latestNews: "Dernières nouvelles",
     fromWikipedia: "De Wikipédia",
@@ -249,7 +249,7 @@ export const translations = {
     refresh: "Actualiser",
     justNow: "À l'instant",
     hoursAgo: "Il y a {hours}h",
-    
+
     topArticlesToday: "Meilleurs articles aujourd'hui",
     dailyRankingResets: "Le classement quotidien se réinitialise à minuit",
     europeParisTime: "Heure Europe/Paris",
@@ -258,11 +258,11 @@ export const translations = {
     showLess: "Afficher moins",
     more: "plus",
     backToHome: "Retour à l'accueil",
-    
+
     nytNews: "NYT Nouvelles",
     headlines: "Titres",
     newsApiHeadlines: "Titres NewsAPI",
-    
+
     loading: "Chargement...",
     error: "Erreur",
     retry: "Réessayer",
@@ -277,7 +277,7 @@ export const translations = {
     explainWithAI: "Expliquer avec IA",
     explaining: "Explication en cours...",
     aiExplanation: "Explication IA",
-    
+
     categories: {
       all: "Tout",
       science: "Science",
@@ -292,23 +292,23 @@ export const translations = {
       philosophy: "Philosophie",
       literature: "Littérature"
     },
-    
+
     savedArticles: "Articles enregistrés",
     settings: "Paramètres",
     articles: "articles",
     article: "article",
     views: "vues",
-    
+
     loadingDescription: "Chargement d'articles incroyables pour vous...",
-    
+
     failedToLoad: "Échec du chargement des articles. Veuillez réessayer plus tard.",
     noArticlesAvailable: "Aucun article disponible de {source}",
-    
+
     articleTitle: "Titre de l'article",
     articleContent: "Contenu de l'article",
     articleUrl: "URL de l'article (facultatif)",
     addNewArticle: "Ajouter un nouvel article",
-    
+
     errorLoading: "Erreur lors du chargement des articles enregistrés",
     preferencesWarning: "Préférences de lecture",
     preferencesWarningDesc: "Ces préférences se synchronisent entre les appareils",
@@ -350,7 +350,7 @@ export const translations = {
     profile: "Profil",
     random: "Zufällig",
     signIn: "Anmelden",
-    
+
     todayHighlights: "Höhepunkte von heute",
     latestNews: "Neueste Nachrichten",
     fromWikipedia: "Von Wikipedia",
@@ -362,7 +362,7 @@ export const translations = {
     refresh: "Aktualisieren",
     justNow: "Gerade eben",
     hoursAgo: "Vor {hours}h",
-    
+
     topArticlesToday: "Top-Artikel heute",
     dailyRankingResets: "Tägliche Rangliste wird um Mitternacht zurückgesetzt",
     europeParisTime: "Europa/Paris Zeit",
@@ -371,11 +371,11 @@ export const translations = {
     showLess: "Weniger anzeigen",
     more: "mehr",
     backToHome: "Zurück zur Startseite",
-    
+
     nytNews: "NYT Nachrichten",
     headlines: "Schlagzeilen",
     newsApiHeadlines: "NewsAPI Schlagzeilen",
-    
+
     loading: "Wird geladen...",
     error: "Fehler",
     retry: "Wiederholen",
@@ -390,7 +390,7 @@ export const translations = {
     explainWithAI: "Mit KI erklären",
     explaining: "Erklärung läuft...",
     aiExplanation: "KI-Erklärung",
-    
+
     categories: {
       all: "Alle",
       science: "Wissenschaft",
@@ -405,23 +405,23 @@ export const translations = {
       philosophy: "Philosophie",
       literature: "Literatur"
     },
-    
+
     savedArticles: "Gespeicherte Artikel",
     settings: "Einstellungen",
     articles: "Artikel",
     article: "Artikel",
     views: "Aufrufe",
-    
+
     loadingDescription: "Lade erstaunliche Artikel für dich...",
-    
+
     failedToLoad: "Artikel konnten nicht geladen werden. Bitte versuchen Sie es später erneut.",
     noArticlesAvailable: "Keine Artikel verfügbar von {source}",
-    
+
     articleTitle: "Artikeltitel",
     articleContent: "Artikelinhalt",
     articleUrl: "Artikel-URL (optional)",
     addNewArticle: "Neuen Artikel hinzufügen",
-    
+
     errorLoading: "Fehler beim Laden gespeicherter Artikel",
     preferencesWarning: "Leseeinstellungen",
     preferencesWarningDesc: "Diese Einstellungen werden geräteübergreifend synchronisiert",
@@ -463,7 +463,7 @@ export const translations = {
     profile: "Profilo",
     random: "Casuale",
     signIn: "Accedi",
-    
+
     todayHighlights: "In evidenza oggi",
     latestNews: "Ultime notizie",
     fromWikipedia: "Da Wikipedia",
@@ -475,7 +475,7 @@ export const translations = {
     refresh: "Aggiorna",
     justNow: "Proprio ora",
     hoursAgo: "{hours}h fa",
-    
+
     topArticlesToday: "Articoli principali oggi",
     dailyRankingResets: "La classifica giornaliera si azzera a mezzanotte",
     europeParisTime: "Ora Europa/Parigi",
@@ -484,11 +484,11 @@ export const translations = {
     showLess: "Mostra meno",
     more: "più",
     backToHome: "Torna alla home",
-    
+
     nytNews: "NYT Notizie",
     headlines: "Titoli",
     newsApiHeadlines: "Titoli NewsAPI",
-    
+
     loading: "Caricamento...",
     error: "Errore",
     retry: "Riprova",
@@ -503,7 +503,7 @@ export const translations = {
     explainWithAI: "Spiega con IA",
     explaining: "Spiegazione in corso...",
     aiExplanation: "Spiegazione IA",
-    
+
     categories: {
       all: "Tutto",
       science: "Scienza",
@@ -518,23 +518,23 @@ export const translations = {
       philosophy: "Filosofia",
       literature: "Letteratura"
     },
-    
+
     savedArticles: "Articoli salvati",
     settings: "Impostazioni",
     articles: "articoli",
     article: "articolo",
     views: "visualizzazioni",
-    
+
     loadingDescription: "Caricamento di articoli straordinari per te...",
-    
+
     failedToLoad: "Impossibile caricare gli articoli. Riprova più tardi.",
     noArticlesAvailable: "Nessun articolo disponibile da {source}",
-    
+
     articleTitle: "Titolo articolo",
     articleContent: "Contenuto articolo",
     articleUrl: "URL articolo (opzionale)",
     addNewArticle: "Aggiungi nuovo articolo",
-    
+
     errorLoading: "Errore nel caricamento degli articoli salvati",
     preferencesWarning: "Preferenze di lettura",
     preferencesWarningDesc: "Queste preferenze si sincronizzano tra dispositivi",
@@ -576,7 +576,7 @@ export const translations = {
     profile: "Perfil",
     random: "Aleatório",
     signIn: "Entrar",
-    
+
     todayHighlights: "Destaques de hoje",
     latestNews: "Últimas notícias",
     fromWikipedia: "Da Wikipédia",
@@ -588,7 +588,7 @@ export const translations = {
     refresh: "Atualizar",
     justNow: "Agora mesmo",
     hoursAgo: "Há {hours}h",
-    
+
     topArticlesToday: "Principais artigos hoje",
     dailyRankingResets: "O ranking diário é redefinido à meia-noite",
     europeParisTime: "Hora Europa/Paris",
@@ -597,11 +597,11 @@ export const translations = {
     showLess: "Mostrar menos",
     more: "mais",
     backToHome: "Voltar ao início",
-    
+
     nytNews: "NYT Notícias",
     headlines: "Manchetes",
     newsApiHeadlines: "Manchetes NewsAPI",
-    
+
     loading: "Carregando...",
     error: "Erro",
     retry: "Tentar novamente",
@@ -616,7 +616,7 @@ export const translations = {
     explainWithAI: "Explicar com IA",
     explaining: "Explicando...",
     aiExplanation: "Explicação da IA",
-    
+
     categories: {
       all: "Tudo",
       science: "Ciência",
@@ -631,23 +631,23 @@ export const translations = {
       philosophy: "Filosofia",
       literature: "Literatura"
     },
-    
+
     savedArticles: "Artigos salvos",
     settings: "Configurações",
     articles: "artigos",
     article: "artigo",
     views: "visualizações",
-    
+
     loadingDescription: "Carregando artigos incríveis para você...",
-    
+
     failedToLoad: "Falha ao carregar artigos. Tente novamente mais tarde.",
     noArticlesAvailable: "Nenhum artigo disponível de {source}",
-    
+
     articleTitle: "Título do artigo",
     articleContent: "Conteúdo do artigo",
     articleUrl: "URL do artigo (opcional)",
     addNewArticle: "Adicionar novo artigo",
-    
+
     errorLoading: "Erro ao carregar artigos salvos",
     preferencesWarning: "Preferências de leitura",
     preferencesWarningDesc: "Essas preferências sincronizam entre dispositivos",
@@ -689,7 +689,7 @@ export const translations = {
     profile: "Профиль",
     random: "Случайно",
     signIn: "Войти",
-    
+
     todayHighlights: "Основное сегодня",
     latestNews: "Последние новости",
     fromWikipedia: "Из Википедии",
@@ -701,7 +701,7 @@ export const translations = {
     refresh: "Обновить",
     justNow: "Только что",
     hoursAgo: "{hours}ч назад",
-    
+
     topArticlesToday: "Лучшие статьи сегодня",
     dailyRankingResets: "Ежедневный рейтинг обнуляется в полночь",
     europeParisTime: "Европа/Париж время",
@@ -710,11 +710,11 @@ export const translations = {
     showLess: "Показать меньше",
     more: "ещё",
     backToHome: "Вернуться на главную",
-    
+
     nytNews: "NYT Новости",
     headlines: "Заголовки",
     newsApiHeadlines: "Заголовки NewsAPI",
-    
+
     loading: "Загрузка...",
     error: "Ошибка",
     retry: "Повторить",
@@ -729,7 +729,7 @@ export const translations = {
     explainWithAI: "Объяснить с помощью ИИ",
     explaining: "Объяснение...",
     aiExplanation: "Объяснение ИИ",
-    
+
     categories: {
       all: "Всё",
       science: "Наука",
@@ -744,23 +744,23 @@ export const translations = {
       philosophy: "Философия",
       literature: "Литература"
     },
-    
+
     savedArticles: "Сохраненные статьи",
     settings: "Настройки",
     articles: "статьи",
     article: "статья",
     views: "просмотры",
-    
+
     loadingDescription: "Загружаем удивительные статьи для вас...",
-    
+
     failedToLoad: "Не удалось загрузить статьи. Повторите попытку позже.",
     noArticlesAvailable: "Нет доступных статей из {source}",
-    
+
     articleTitle: "Название статьи",
     articleContent: "Содержание статьи",
     articleUrl: "URL статьи (необязательно)",
     addNewArticle: "Добавить новую статью",
-    
+
     errorLoading: "Ошибка загрузки сохраненных статей",
     preferencesWarning: "Настройки чтения",
     preferencesWarningDesc: "Эти настройки синхронизируются между устройствами",
@@ -802,7 +802,7 @@ export const translations = {
     profile: "プロフィール",
     random: "ランダム",
     signIn: "サインイン",
-    
+
     todayHighlights: "今日のハイライト",
     latestNews: "最新ニュース",
     fromWikipedia: "ウィキペディアより",
@@ -814,7 +814,7 @@ export const translations = {
     refresh: "更新",
     justNow: "たった今",
     hoursAgo: "{hours}時間前",
-    
+
     topArticlesToday: "今日のトップ記事",
     dailyRankingResets: "毎日のランキングは真夜中にリセットされます",
     europeParisTime: "ヨーロッパ/パリ時間",
@@ -823,11 +823,11 @@ export const translations = {
     showLess: "表示を減らす",
     more: "もっと",
     backToHome: "ホームに戻る",
-    
+
     nytNews: "NYTニュース",
     headlines: "ヘッドライン",
     newsApiHeadlines: "NewsAPIヘッドライン",
-    
+
     loading: "読み込み中...",
     error: "エラー",
     retry: "再試行",
@@ -842,7 +842,7 @@ export const translations = {
     explainWithAI: "AIで説明",
     explaining: "説明中...",
     aiExplanation: "AI説明",
-    
+
     categories: {
       all: "すべて",
       science: "科学",
@@ -857,23 +857,23 @@ export const translations = {
       philosophy: "哲学",
       literature: "文学"
     },
-    
+
     savedArticles: "保存した記事",
     settings: "設定",
     articles: "記事",
     article: "記事",
     views: "閲覧数",
-    
+
     loadingDescription: "素晴らしい記事を読み込んでいます...",
-    
+
     failedToLoad: "記事の読み込みに失敗しました。後でもう一度お試しください。",
     noArticlesAvailable: "{source}から利用可能な記事がありません",
-    
+
     articleTitle: "記事のタイトル",
     articleContent: "記事の内容",
     articleUrl: "記事のURL（オプション）",
     addNewArticle: "新しい記事を追加",
-    
+
     errorLoading: "保存した記事の読み込みエラー",
     preferencesWarning: "読書設定",
     preferencesWarningDesc: "これらの設定はデバイス間で同期されます",
@@ -915,7 +915,7 @@ export const translations = {
     profile: "个人资料",
     random: "随机",
     signIn: "登录",
-    
+
     todayHighlights: "今日亮点",
     latestNews: "最新新闻",
     fromWikipedia: "来自维基百科",
@@ -927,7 +927,7 @@ export const translations = {
     refresh: "刷新",
     justNow: "刚刚",
     hoursAgo: "{hours}小时前",
-    
+
     topArticlesToday: "今日热门文章",
     dailyRankingResets: "每日排名在午夜重置",
     europeParisTime: "欧洲/巴黎时间",
@@ -936,11 +936,11 @@ export const translations = {
     showLess: "显示更少",
     more: "更多",
     backToHome: "返回主页",
-    
+
     nytNews: "纽约时报新闻",
     headlines: "头条",
     newsApiHeadlines: "NewsAPI头条",
-    
+
     loading: "加载中...",
     error: "错误",
     retry: "重试",
@@ -955,7 +955,7 @@ export const translations = {
     explainWithAI: "用AI解释",
     explaining: "解释中...",
     aiExplanation: "AI解释",
-    
+
     categories: {
       all: "全部",
       science: "科学",
@@ -970,23 +970,23 @@ export const translations = {
       philosophy: "哲学",
       literature: "文学"
     },
-    
+
     savedArticles: "已保存文章",
     settings: "设置",
     articles: "文章",
     article: "文章",
     views: "查看次数",
-    
+
     loadingDescription: "正在为您加载精彩文章...",
-    
+
     failedToLoad: "加载文章失败。请稍后重试。",
     noArticlesAvailable: "没有来自{source}的可用文章",
-    
+
     articleTitle: "文章标题",
     articleContent: "文章内容",
     articleUrl: "文章URL（可选）",
     addNewArticle: "添加新文章",
-    
+
     errorLoading: "加载已保存文章时出错",
     preferencesWarning: "阅读偏好",
     preferencesWarningDesc: "这些偏好在设备间同步",
@@ -1028,7 +1028,7 @@ export const translations = {
     profile: "الملف الشخصي",
     random: "عشوائي",
     signIn: "تسجيل الدخول",
-    
+
     todayHighlights: "أبرز أحداث اليوم",
     latestNews: "آخر الأخبار",
     fromWikipedia: "من ويكيبيديا",
@@ -1040,7 +1040,7 @@ export const translations = {
     refresh: "تحديث",
     justNow: "الآن",
     hoursAgo: "منذ {hours} ساعة",
-    
+
     topArticlesToday: "أهم المقالات اليوم",
     dailyRankingResets: "يتم إعادة تعيين التصنيف اليومي في منتصف الليل",
     europeParisTime: "توقيت أوروبا/باريس",
@@ -1049,11 +1049,11 @@ export const translations = {
     showLess: "عرض أقل",
     more: "المزيد",
     backToHome: "العودة للرئيسية",
-    
+
     nytNews: "أخبار NYT",
     headlines: "العناوين",
     newsApiHeadlines: "عناوين NewsAPI",
-    
+
     loading: "جارٍ التحميل...",
     error: "خطأ",
     retry: "إعادة المحاولة",
@@ -1068,7 +1068,7 @@ export const translations = {
     explainWithAI: "شرح باستخدام الذكاء الاصطناعي",
     explaining: "جارٍ الشرح...",
     aiExplanation: "شرح الذكاء الاصطناعي",
-    
+
     categories: {
       all: "الكل",
       science: "علوم",
@@ -1083,23 +1083,23 @@ export const translations = {
       philosophy: "فلسفة",
       literature: "أدب"
     },
-    
+
     savedArticles: "المقالات المحفوظة",
     settings: "الإعدادات",
     articles: "مقالات",
     article: "مقال",
     views: "مشاهدات",
-    
+
     loadingDescription: "جارٍ تحميل مقالات رائعة لك...",
-    
+
     failedToLoad: "فشل تحميل المقالات. يرجى المحاولة مرة أخرى لاحقًا.",
     noArticlesAvailable: "لا توجد مقالات متاحة من {source}",
-    
+
     articleTitle: "عنوان المقال",
     articleContent: "محتوى المقال",
     articleUrl: "رابط المقال (اختياري)",
     addNewArticle: "إضافة مقال جديد",
-    
+
     errorLoading: "خطأ في تحميل المقالات المحفوظة",
     preferencesWarning: "تفضيلات القراءة",
     preferencesWarningDesc: "هذه التفضيلات تتزامن عبر الأجهزة",
@@ -1134,30 +1134,934 @@ export const translations = {
     previewText: "هذا كيف ستبدو المقالات مع إعداداتك المختارة",
     progressPreview: "تقدم القراءة: 42% مكتمل",
   },
+  ko: {
+    search: "검색",
+    today: "오늘",
+    discover: "발견",
+    profile: "프로필",
+    random: "무작위",
+    signIn: "로그인",
+
+    todayHighlights: "오늘의 하이라이트",
+    latestNews: "최신 뉴스",
+    fromWikipedia: "위키백과에서",
+    editorialHighlights: "편집자 하이라이트",
+    addArticle: "기사 추가",
+    readMore: "더 읽기",
+    readOn: "읽기",
+    readArticle: "기사 읽기",
+    refresh: "새로고침",
+    justNow: "방금",
+    hoursAgo: "{hours}시간 전",
+
+    topArticlesToday: "오늘의 인기 기사",
+    dailyRankingResets: "일일 순위는 자정에 재설정됩니다",
+    europeParisTime: "유럽/파리 시간",
+    apNews: "AP 뉴스",
+    showAll: "모두 표시",
+    showLess: "간단히 보기",
+    more: "더보기",
+    backToHome: "홈으로",
+
+    nytNews: "NYT 뉴스",
+    headlines: "헤드라인",
+    newsApiHeadlines: "NewsAPI 헤드라인",
+
+    loading: "로딩 중...",
+    error: "오류",
+    retry: "다시 시도",
+    close: "닫기",
+    save: "저장",
+    saved: "저장됨",
+    delete: "삭제",
+    edit: "편집",
+    share: "공유",
+    view: "보기",
+    upvote: "추천",
+    explainWithAI: "AI로 설명",
+    explaining: "설명 중...",
+    aiExplanation: "AI 설명",
+
+    categories: {
+      all: "전체",
+      science: "과학",
+      technology: "기술",
+      history: "역사",
+      art: "예술",
+      arts: "예술",
+      politics: "정치",
+      nature: "자연",
+      sports: "스포츠",
+      culture: "문화",
+      philosophy: "철학",
+      literature: "문학"
+    },
+
+    savedArticles: "저장된 기사",
+    settings: "설정",
+    articles: "기사",
+    article: "기사",
+    views: "조회수",
+
+    loadingDescription: "멋진 기사를 불러오는 중...",
+
+    failedToLoad: "기사를 불러오지 못했습니다. 나중에 다시 시도해 주세요.",
+    noArticlesAvailable: "{source}에서 사용 가능한 기사가 없습니다",
+
+    articleTitle: "기사 제목",
+    articleContent: "기사 내용",
+    articleUrl: "기사 URL (선택사항)",
+    addNewArticle: "새 기사 추가",
+
+    errorLoading: "저장된 기사를 불러오는 중 오류 발생",
+    preferencesWarning: "읽기 환경설정",
+    preferencesWarningDesc: "이 환경설정은 기기 간에 동기화됩니다",
+    removed: "기사 제거됨",
+    removedDesc: "저장된 기사에서 제거되었습니다",
+    errorRemoving: "기사 제거 중 오류 발생",
+    cleared: "모든 기사 삭제됨",
+    clearedDesc: "저장된 모든 기사가 제거되었습니다",
+    errorClearing: "기사 삭제 중 오류 발생",
+    default: "기본",
+    serif: "세리프",
+    sansSerif: "산세리프",
+    title: "설정",
+    yourSaved: "저장된 기사",
+    clearAll: "모두 삭제",
+    searchPlaceholder: "저장된 기사 검색...",
+    noMatch: "검색과 일치하는 기사가 없습니다",
+    noSaved: "아직 저장된 기사가 없습니다",
+    tryDifferent: "다른 키워드를 시도해 보세요",
+    startSaving: "기사를 저장하여 여기서 확인하세요",
+    savedOn: "저장일",
+    readingPreferences: "읽기 환경설정",
+    customize: "읽기 경험을 맞춤 설정하세요",
+    syncedToCloud: "클라우드에 동기화됨",
+    loadingPreferences: "환경설정 로딩 중...",
+    articleFont: "기사 글꼴",
+    textSize: "텍스트 크기",
+    highlightColor: "강조 색상",
+    backgroundOpacity: "배경 투명도",
+    backgroundOpacityDesc: "기사 배경의 투명도를 조정합니다",
+    preview: "미리보기",
+    previewText: "선택한 설정으로 기사가 이렇게 보입니다",
+    progressPreview: "읽기 진행률: 42% 완료",
+  },
+  hi: {
+    search: "खोजें",
+    today: "आज",
+    discover: "खोजें",
+    profile: "प्रोफ़ाइल",
+    random: "यादृच्छिक",
+    signIn: "साइन इन करें",
+
+    todayHighlights: "आज की मुख्य बातें",
+    latestNews: "ताज़ा खबरें",
+    fromWikipedia: "विकिपीडिया से",
+    editorialHighlights: "संपादकीय हाइलाइट्स",
+    addArticle: "लेख जोड़ें",
+    readMore: "और पढ़ें",
+    readOn: "पर पढ़ें",
+    readArticle: "लेख पढ़ें",
+    refresh: "ताज़ा करें",
+    justNow: "अभी-अभी",
+    hoursAgo: "{hours} घंटे पहले",
+
+    topArticlesToday: "आज के शीर्ष लेख",
+    dailyRankingResets: "दैनिक रैंकिंग आधी रात को रीसेट होती है",
+    europeParisTime: "यूरोप/पेरिस समय",
+    apNews: "AP न्यूज़",
+    showAll: "सभी दिखाएं",
+    showLess: "कम दिखाएं",
+    more: "अधिक",
+    backToHome: "होम पर वापस",
+
+    nytNews: "NYT न्यूज़",
+    headlines: "सुर्खियां",
+    newsApiHeadlines: "NewsAPI सुर्खियां",
+
+    loading: "लोड हो रहा है...",
+    error: "त्रुटि",
+    retry: "पुनः प्रयास करें",
+    close: "बंद करें",
+    save: "सहेजें",
+    saved: "सहेजा गया",
+    delete: "हटाएं",
+    edit: "संपादित करें",
+    share: "साझा करें",
+    view: "देखें",
+    upvote: "अपवोट",
+    explainWithAI: "AI से समझाएं",
+    explaining: "समझा रहे हैं...",
+    aiExplanation: "AI व्याख्या",
+
+    categories: {
+      all: "सभी",
+      science: "विज्ञान",
+      technology: "प्रौद्योगिकी",
+      history: "इतिहास",
+      art: "कला",
+      arts: "कलाएं",
+      politics: "राजनीति",
+      nature: "प्रकृति",
+      sports: "खेल",
+      culture: "संस्कृति",
+      philosophy: "दर्शन",
+      literature: "साहित्य"
+    },
+
+    savedArticles: "सहेजे गए लेख",
+    settings: "सेटिंग्स",
+    articles: "लेख",
+    article: "लेख",
+    views: "दृश्य",
+
+    loadingDescription: "आपके लिए अद्भुत लेख लोड हो रहे हैं...",
+
+    failedToLoad: "लेख लोड करने में विफल। कृपया बाद में पुनः प्रयास करें।",
+    noArticlesAvailable: "{source} से कोई लेख उपलब्ध नहीं है",
+
+    articleTitle: "लेख शीर्षक",
+    articleContent: "लेख सामग्री",
+    articleUrl: "लेख URL (वैकल्पिक)",
+    addNewArticle: "नया लेख जोड़ें",
+
+    errorLoading: "सहेजे गए लेख लोड करने में त्रुटि",
+    preferencesWarning: "पठन प्राथमिकताएं",
+    preferencesWarningDesc: "ये प्राथमिकताएं डिवाइसों के बीच सिंक होती हैं",
+    removed: "लेख हटाया गया",
+    removedDesc: "सहेजे गए लेखों से हटाया गया",
+    errorRemoving: "लेख हटाने में त्रुटि",
+    cleared: "सभी लेख साफ़ कर दिए गए",
+    clearedDesc: "सभी सहेजे गए लेख हटा दिए गए हैं",
+    errorClearing: "लेख साफ़ करने में त्रुटि",
+    default: "डिफ़ॉल्ट",
+    serif: "सेरिफ",
+    sansSerif: "सैंस सेरिफ",
+    title: "सेटिंग्स",
+    yourSaved: "आपके सहेजे गए लेख",
+    clearAll: "सभी साफ़ करें",
+    searchPlaceholder: "सहेजे गए लेख खोजें...",
+    noMatch: "कोई लेख आपकी खोज से मेल नहीं खाता",
+    noSaved: "अभी तक कोई सहेजा गया लेख नहीं",
+    tryDifferent: "विभिन्न कीवर्ड आज़माएं",
+    startSaving: "यहां देखने के लिए लेख सहेजना शुरू करें",
+    savedOn: "सहेजा गया",
+    readingPreferences: "पठन प्राथमिकताएं",
+    customize: "अपने पठन अनुभव को अनुकूलित करें",
+    syncedToCloud: "क्लाउड से सिंक किया गया",
+    loadingPreferences: "प्राथमिकताएं लोड हो रही हैं...",
+    articleFont: "लेख फ़ॉन्ट",
+    textSize: "टेक्स्ट आकार",
+    highlightColor: "हाइलाइट रंग",
+    backgroundOpacity: "पृष्ठभूमि अपारदर्शिता",
+    backgroundOpacityDesc: "लेख पृष्ठभूमि की पारदर्शिता समायोजित करें",
+    preview: "पूर्वावलोकन",
+    previewText: "आपकी चुनी हुई सेटिंग्स के साथ लेख ऐसे दिखेंगे",
+    progressPreview: "पठन प्रगति: 42% पूर्ण",
+  },
+  tr: {
+    search: "Ara",
+    today: "Bugün",
+    discover: "Keşfet",
+    profile: "Profil",
+    random: "Rastgele",
+    signIn: "Giriş Yap",
+
+    todayHighlights: "Bugünün Öne Çıkanları",
+    latestNews: "Son Haberler",
+    fromWikipedia: "Vikipedi'den",
+    editorialHighlights: "Editörün Seçtikleri",
+    addArticle: "Makale Ekle",
+    readMore: "Daha fazla oku",
+    readOn: "Okumaya devam et",
+    readArticle: "Makaleyi Oku",
+    refresh: "Yenile",
+    justNow: "Az önce",
+    hoursAgo: "{hours}s önce",
+
+    topArticlesToday: "Bugünün En İyi Makaleleri",
+    dailyRankingResets: "Günlük sıralama gece yarısı sıfırlanır",
+    europeParisTime: "Avrupa/Paris saati",
+    apNews: "AP Haber",
+    showAll: "Tümünü Göster",
+    showLess: "Daha Az Göster",
+    more: "daha fazla",
+    backToHome: "Ana Sayfaya Dön",
+
+    nytNews: "NYT Haber",
+    headlines: "Manşetler",
+    newsApiHeadlines: "NewsAPI Manşetleri",
+
+    loading: "Yükleniyor...",
+    error: "Hata",
+    retry: "Yeniden Dene",
+    close: "Kapat",
+    save: "Kaydet",
+    saved: "Kaydedildi",
+    delete: "Sil",
+    edit: "Düzenle",
+    share: "Paylaş",
+    view: "Görüntüle",
+    upvote: "Beğen",
+    explainWithAI: "AI ile Açıkla",
+    explaining: "Açıklanıyor...",
+    aiExplanation: "AI Açıklaması",
+
+    categories: {
+      all: "Tümü",
+      science: "Bilim",
+      technology: "Teknoloji",
+      history: "Tarih",
+      art: "Sanat",
+      arts: "Sanatlar",
+      politics: "Politika",
+      nature: "Doğa",
+      sports: "Spor",
+      culture: "Kültür",
+      philosophy: "Felsefe",
+      literature: "Edebiyat"
+    },
+
+    savedArticles: "Kaydedilen Makaleler",
+    settings: "Ayarlar",
+    articles: "makaleler",
+    article: "makale",
+    views: "görüntülenme",
+
+    loadingDescription: "Sizin için harika makaleler yükleniyor...",
+
+    failedToLoad: "Makaleler yüklenemedi. Lütfen daha sonra tekrar deneyin.",
+    noArticlesAvailable: "{source} kaynağından mevcut makale yok",
+
+    articleTitle: "Makale Başlığı",
+    articleContent: "Makale İçeriği",
+    articleUrl: "Makale URL'si (opsiyonel)",
+    addNewArticle: "Yeni Makale Ekle",
+
+    errorLoading: "Kaydedilen makaleler yüklenirken hata oluştu",
+    preferencesWarning: "Okuma Tercihleri",
+    preferencesWarningDesc: "Bu tercihler cihazlar arasında senkronize edilir",
+    removed: "Makale kaldırıldı",
+    removedDesc: "Makale kaydedilenlerden kaldırıldı",
+    errorRemoving: "Makale kaldırılırken hata oluştu",
+    cleared: "Tüm makaleler temizlendi",
+    clearedDesc: "Kaydedilen tüm makaleler kaldırıldı",
+    errorClearing: "Makaleler temizlenirken hata oluştu",
+    default: "Varsayılan",
+    serif: "Serif",
+    sansSerif: "Sans Serif",
+    title: "Ayarlar",
+    yourSaved: "Kaydedilenleriniz",
+    clearAll: "Tümünü Temizle",
+    searchPlaceholder: "Kaydedilen makalelerde ara...",
+    noMatch: "Aramanızla eşleşen makale yok",
+    noSaved: "Henüz kaydedilen makale yok",
+    tryDifferent: "Farklı anahtar kelimeler deneyin",
+    startSaving: "Burada görmek için makale kaydetmeye başlayın",
+    savedOn: "Kaydedildi",
+    readingPreferences: "Okuma Tercihleri",
+    customize: "Okuma deneyiminizi özelleştirin",
+    syncedToCloud: "Bulut ile senkronize",
+    loadingPreferences: "Tercihler yükleniyor...",
+    articleFont: "Makale Yazı Tipi",
+    textSize: "Metin Boyutu",
+    highlightColor: "Vurgulama Rengi",
+    backgroundOpacity: "Arka Plan Şeffaflığı",
+    backgroundOpacityDesc: "Makale arka planlarının şeffaflığını ayarlayın",
+    preview: "Önizleme",
+    previewText: "Seçtiğiniz ayarlarla makaleler böyle görünecek",
+    progressPreview: "Okuma ilerlemesi: %42 tamamlandı",
+  },
+  nl: {
+    search: "Zoeken",
+    today: "Vandaag",
+    discover: "Ontdekken",
+    profile: "Profiel",
+    random: "Willekeurig",
+    signIn: "Inloggen",
+
+    todayHighlights: "Hoogtepunten van Vandaag",
+    latestNews: "Laatste Nieuws",
+    fromWikipedia: "Van Wikipedia",
+    editorialHighlights: "Redactionele Hoogtepunten",
+    addArticle: "Artikel Toevoegen",
+    readMore: "Lees meer",
+    readOn: "Lees verder",
+    readArticle: "Artikel Lezen",
+    refresh: "Verversen",
+    justNow: "Zojuist",
+    hoursAgo: "{hours}u geleden",
+
+    topArticlesToday: "Top Artikelen Vandaag",
+    dailyRankingResets: "Dagelijkse ranglijst wordt om middernacht gereset",
+    europeParisTime: "Europa/Parijs tijd",
+    apNews: "AP Nieuws",
+    showAll: "Toon Alles",
+    showLess: "Toon Minder",
+    more: "meer",
+    backToHome: "Terug naar Home",
+
+    nytNews: "NYT Nieuws",
+    headlines: "Krantenkoppen",
+    newsApiHeadlines: "NewsAPI Krantenkoppen",
+
+    loading: "Laden...",
+    error: "Fout",
+    retry: "Opnieuw Proberen",
+    close: "Sluiten",
+    save: "Opslaan",
+    saved: "Opgeslagen",
+    delete: "Verwijderen",
+    edit: "Bewerken",
+    share: "Delen",
+    view: "Bekijken",
+    upvote: "Stemmen",
+    explainWithAI: "Uitleggen met AI",
+    explaining: "Uitleggen...",
+    aiExplanation: "AI Uitleg",
+
+    categories: {
+      all: "Alles",
+      science: "Wetenschap",
+      technology: "Technologie",
+      history: "Geschiedenis",
+      art: "Kunst",
+      arts: "Kunsten",
+      politics: "Politiek",
+      nature: "Natuur",
+      sports: "Sport",
+      culture: "Cultuur",
+      philosophy: "Filosofie",
+      literature: "Literatuur"
+    },
+
+    savedArticles: "Opgeslagen Artikelen",
+    settings: "Instellingen",
+    articles: "artikelen",
+    article: "artikel",
+    views: "weergaven",
+
+    loadingDescription: "Geweldige artikelen voor je laden...",
+
+    failedToLoad: "Kon artikelen niet laden. Probeer het later opnieuw.",
+    noArticlesAvailable: "Geen artikelen beschikbaar van {source}",
+
+    articleTitle: "Artikel Titel",
+    articleContent: "Artikel Inhoud",
+    articleUrl: "Artikel URL (optioneel)",
+    addNewArticle: "Nieuw Artikel Toevoegen",
+
+    errorLoading: "Fout bij het laden van opgeslagen artikelen",
+    preferencesWarning: "Lees Voorkeuren",
+    preferencesWarningDesc: "Deze voorkeuren synchroniseren tussen apparaten",
+    removed: "Artikel verwijderd",
+    removedDesc: "Artikel verwijderd uit opgeslagen artikelen",
+    errorRemoving: "Fout bij verwijderen artikel",
+    cleared: "Alle artikelen gewist",
+    clearedDesc: "Alle opgeslagen artikelen zijn verwijderd",
+    errorClearing: "Fout bij wissen artikelen",
+    default: "Standaard",
+    serif: "Serif",
+    sansSerif: "Sans Serif",
+    title: "Instellingen",
+    yourSaved: "Jouw opgeslagen artikelen",
+    clearAll: "Alles Wissen",
+    searchPlaceholder: "Zoek opgeslagen artikelen...",
+    noMatch: "Geen artikelen komen overeen met je zoekopdracht",
+    noSaved: "Nog geen opgeslagen artikelen",
+    tryDifferent: "Probeer verschillende zoekwoorden",
+    startSaving: "Begin met artikelen opslaan om ze hier te zien",
+    savedOn: "Opgeslagen op",
+    readingPreferences: "Lees Voorkeuren",
+    customize: "Personaliseer je leeservaring",
+    syncedToCloud: "Gesynchroniseerd met cloud",
+    loadingPreferences: "Voorkeuren laden...",
+    articleFont: "Artikel Lettertype",
+    textSize: "Tekstgrootte",
+    highlightColor: "Markeringskleur",
+    backgroundOpacity: "Achtergrond Transparantie",
+    backgroundOpacityDesc: "Pas de transparantie van artikel achtergronden aan",
+    preview: "Voorbeeld",
+    previewText: "Zo zullen artikelen eruit zien met je gekozen instellingen",
+    progressPreview: "Leesvoortgang: 42% voltooid",
+  },
+  sv: {
+    search: "Sök",
+    today: "Idag",
+    discover: "Upptäck",
+    profile: "Profil",
+    random: "Slumpmässig",
+    signIn: "Logga in",
+
+    todayHighlights: "Dagens Höjdpunkter",
+    latestNews: "Senaste Nytt",
+    fromWikipedia: "Från Wikipedia",
+    editorialHighlights: "Redaktionella Höjdpunkter",
+    addArticle: "Lägg till Artikel",
+    readMore: "Läs mer",
+    readOn: "Läs vidare",
+    readArticle: "Läs Artikel",
+    refresh: "Uppdatera",
+    justNow: "Nyss",
+    hoursAgo: "{hours}t sedan",
+
+    topArticlesToday: "Toppartiklar Idag",
+    dailyRankingResets: "Daglig rankning återställs vid midnatt",
+    europeParisTime: "Europa/Paris tid",
+    apNews: "AP Nyheter",
+    showAll: "Visa Alla",
+    showLess: "Visa Färre",
+    more: "mer",
+    backToHome: "Tillbaka till Hem",
+
+    nytNews: "NYT Nyheter",
+    headlines: "Rubriker",
+    newsApiHeadlines: "NewsAPI Rubriker",
+
+    loading: "Laddar...",
+    error: "Fel",
+    retry: "Försök igen",
+    close: "Stäng",
+    save: "Spara",
+    saved: "Sparad",
+    delete: "Radera",
+    edit: "Redigera",
+    share: "Dela",
+    view: "Visa",
+    upvote: "Rösta",
+    explainWithAI: "Förklara med AI",
+    explaining: "Förklarar...",
+    aiExplanation: "AI Förklaring",
+
+    categories: {
+      all: "Alla",
+      science: "Vetenskap",
+      technology: "Teknologi",
+      history: "Historia",
+      art: "Konst",
+      arts: "Konster",
+      politics: "Politik",
+      nature: "Natur",
+      sports: "Sport",
+      culture: "Kultur",
+      philosophy: "Filosofi",
+      literature: "Litteratur"
+    },
+
+    savedArticles: "Sparade Artiklar",
+    settings: "Inställningar",
+    articles: "artiklar",
+    article: "artikel",
+    views: "visningar",
+
+    loadingDescription: "Laddar fantastiska artiklar för dig...",
+
+    failedToLoad: "Kunde inte ladda artiklar. Försök igen senare.",
+    noArticlesAvailable: "Inga artiklar tillgängliga från {source}",
+
+    articleTitle: "Artikeltitel",
+    articleContent: "Artikelinnehåll",
+    articleUrl: "Artikel-URL (valfritt)",
+    addNewArticle: "Lägg till Ny Artikel",
+
+    errorLoading: "Fel vid laddning av sparade artiklar",
+    preferencesWarning: "Läsinställningar",
+    preferencesWarningDesc: "Dessa inställningar synkroniseras mellan enheter",
+    removed: "Artikel borttagen",
+    removedDesc: "Artikel borttagen från sparade artiklar",
+    errorRemoving: "Fel vid borttagning av artikel",
+    cleared: "Alla artiklar rensade",
+    clearedDesc: "Alla sparade artiklar har tagits bort",
+    errorClearing: "Fel vid rensning av artiklar",
+    default: "Standard",
+    serif: "Serif",
+    sansSerif: "Sans Serif",
+    title: "Inställningar",
+    yourSaved: "Dina sparade artiklar",
+    clearAll: "Rensa Alla",
+    searchPlaceholder: "Sök sparade artiklar...",
+    noMatch: "Inga artiklar matchar din sökning",
+    noSaved: "Inga sparade artiklar ännu",
+    tryDifferent: "Prova olika sökord",
+    startSaving: "Börja spara artiklar för att se dem här",
+    savedOn: "Sparad den",
+    readingPreferences: "Läsinställningar",
+    customize: "Anpassa din läsupplevelse",
+    syncedToCloud: "Synkroniserad till molnet",
+    loadingPreferences: "Laddar inställningar...",
+    articleFont: "Artikeltypsnitt",
+    textSize: "Textstorlek",
+    highlightColor: "Markeringsfärg",
+    backgroundOpacity: "Bakgrundstransparens",
+    backgroundOpacityDesc: "Justera transparensen för artikelbakgrunder",
+    preview: "Förhandsgranskning",
+    previewText: "Så här kommer artiklar att se ut med dina valda inställningar",
+    progressPreview: "Läsframsteg: 42% klart",
+  },
+  pl: {
+    search: "Szukaj",
+    today: "Dzisiaj",
+    discover: "Odkryj",
+    profile: "Profil",
+    random: "Losowo",
+    signIn: "Zaloguj się",
+
+    todayHighlights: "Najważniejsze Dzisiaj",
+    latestNews: "Najnowsze Wiadomości",
+    fromWikipedia: "Z Wikipedii",
+    editorialHighlights: "Wyróżnione Artykuły",
+    addArticle: "Dodaj Artykuł",
+    readMore: "Czytaj więcej",
+    readOn: "Czytaj dalej",
+    readArticle: "Czytaj Artykuł",
+    refresh: "Odśwież",
+    justNow: "Przed chwilą",
+    hoursAgo: "{hours}g temu",
+
+    topArticlesToday: "Najpopularniejsze Artykuły Dziś",
+    dailyRankingResets: "Ranking dzienny resetuje się o północy",
+    europeParisTime: "Czas Europa/Paryż",
+    apNews: "Wiadomości AP",
+    showAll: "Pokaż Wszystko",
+    showLess: "Pokaż Mniej",
+    more: "więcej",
+    backToHome: "Powrót do Strony Głównej",
+
+    nytNews: "Wiadomości NYT",
+    headlines: "Nagłówki",
+    newsApiHeadlines: "Nagłówki NewsAPI",
+
+    loading: "Ładowanie...",
+    error: "Błąd",
+    retry: "Spróbuj ponownie",
+    close: "Zamknij",
+    save: "Zapisz",
+    saved: "Zapisano",
+    delete: "Usuń",
+    edit: "Edytuj",
+    share: "Udostępnij",
+    view: "Zobacz",
+    upvote: "Zagłosuj",
+    explainWithAI: "Wyjaśnij z AI",
+    explaining: "Wyjaśnianie...",
+    aiExplanation: "Wyjaśnienie AI",
+
+    categories: {
+      all: "Wszystko",
+      science: "Nauka",
+      technology: "Technologia",
+      history: "Historia",
+      art: "Sztuka",
+      arts: "Sztuki",
+      politics: "Polityka",
+      nature: "Przyroda",
+      sports: "Sport",
+      culture: "Kultura",
+      philosophy: "Filozofia",
+      literature: "Literatura"
+    },
+
+    savedArticles: "Zapisane Artykuły",
+    settings: "Ustawienia",
+    articles: "artykuły",
+    article: "artykuł",
+    views: "wyświetlenia",
+
+    loadingDescription: "Ładowanie niesamowitych artykułów dla ciebie...",
+
+    failedToLoad: "Nie udało się załadować artykułów. Spróbuj ponownie później.",
+    noArticlesAvailable: "Brak dostępnych artykułów z {source}",
+
+    articleTitle: "Tytuł Artykułu",
+    articleContent: "Treść Artykułu",
+    articleUrl: "URL Artykułu (opcjonalnie)",
+    addNewArticle: "Dodaj Nowy Artykuł",
+
+    errorLoading: "Błąd podczas ładowania zapisanych artykułów",
+    preferencesWarning: "Preferencje Czytania",
+    preferencesWarningDesc: "Te preferencje synchronizują się między urządzeniami",
+    removed: "Artykuł usunięty",
+    removedDesc: "Artykuł usunięty z zapisanych",
+    errorRemoving: "Błąd podczas usuwania artykułu",
+    cleared: "Wszystkie artykuły wyczyszczone",
+    clearedDesc: "Wszystkie zapisane artykuły zostały usunięte",
+    errorClearing: "Błąd podczas czyszczenia artykułów",
+    default: "Domyślne",
+    serif: "Szeryfowe",
+    sansSerif: "Bezszeryfowe",
+    title: "Ustawienia",
+    yourSaved: "Twoje zapisane artykuły",
+    clearAll: "Wyczyść Wszystko",
+    searchPlaceholder: "Szukaj zapisanych artykułów...",
+    noMatch: "Żadne artykuły nie pasują do wyszukiwania",
+    noSaved: "Brak zapisanych artykułów",
+    tryDifferent: "Spróbuj innych słów kluczowych",
+    startSaving: "Zacznij zapisywać artykuły, aby je tutaj zobaczyć",
+    savedOn: "Zapisano",
+    readingPreferences: "Preferencje Czytania",
+    customize: "Dostosuj swoje doświadczenie czytania",
+    syncedToCloud: "Zsynchronizowane z chmurą",
+    loadingPreferences: "Ładowanie preferencji...",
+    articleFont: "Czcionka Artykułu",
+    textSize: "Rozmiar Tekstu",
+    highlightColor: "Kolor Podświetlenia",
+    backgroundOpacity: "Przezroczystość Tła",
+    backgroundOpacityDesc: "Dostosuj przezroczystość tła artykułów",
+    preview: "Podgląd",
+    previewText: "Tak będą wyglądać artykuły z twoimi ustawieniami",
+    progressPreview: "Postęp czytania: 42% ukończone",
+  },
+  uk: {
+    search: "Пошук",
+    today: "Сьогодні",
+    discover: "Відкрити",
+    profile: "Профіль",
+    random: "Випадково",
+    signIn: "Увійти",
+
+    todayHighlights: "Головне сьогодні",
+    latestNews: "Останні новини",
+    fromWikipedia: "З Вікіпедії",
+    editorialHighlights: "Редакційні матеріали",
+    addArticle: "Додати статтю",
+    readMore: "Читати далі",
+    readOn: "Читати на",
+    readArticle: "Читати статтю",
+    refresh: "Оновити",
+    justNow: "Щойно",
+    hoursAgo: "{hours}г тому",
+
+    topArticlesToday: "Топ статті сьогодні",
+    dailyRankingResets: "Щоденний рейтинг скидається опівночі",
+    europeParisTime: "Час Європа/Париж",
+    apNews: "AP Новини",
+    showAll: "Показати все",
+    showLess: "Показати менше",
+    more: "більше",
+    backToHome: "Повернутися на головну",
+
+    nytNews: "NYT Новини",
+    headlines: "Заголовки",
+    newsApiHeadlines: "Заголовки NewsAPI",
+
+    loading: "Завантаження...",
+    error: "Помилка",
+    retry: "Повторити",
+    close: "Закрити",
+    save: "Зберегти",
+    saved: "Збережено",
+    delete: "Видалити",
+    edit: "Редагувати",
+    share: "Поділитися",
+    view: "Переглянути",
+    upvote: "Проголосувати",
+    explainWithAI: "Пояснити за допомогою AI",
+    explaining: "Пояснення...",
+    aiExplanation: "Пояснення AI",
+
+    categories: {
+      all: "Все",
+      science: "Наука",
+      technology: "Технологія",
+      history: "Історія",
+      art: "Мистецтво",
+      arts: "Мистецтва",
+      politics: "Політика",
+      nature: "Природа",
+      sports: "Спорт",
+      culture: "Культура",
+      philosophy: "Філософія",
+      literature: "Література"
+    },
+
+    savedArticles: "Збережені статті",
+    settings: "Налаштування",
+    articles: "статті",
+    article: "стаття",
+    views: "перегляди",
+
+    loadingDescription: "Завантажуємо чудові статті для вас...",
+
+    failedToLoad: "Не вдалося завантажити статті. Спробуйте пізніше.",
+    noArticlesAvailable: "Немає доступних статей з {source}",
+
+    articleTitle: "Назва статті",
+    articleContent: "Зміст статті",
+    articleUrl: "URL статті (необов'язково)",
+    addNewArticle: "Додати нову статтю",
+
+    errorLoading: "Помилка завантаження збережених статей",
+    preferencesWarning: "Налаштування читання",
+    preferencesWarningDesc: "Ці налаштування синхронізуються між пристроями",
+    removed: "Статтю видалено",
+    removedDesc: "Статтю видалено зі збережених",
+    errorRemoving: "Помилка видалення статті",
+    cleared: "Всі статті видалено",
+    clearedDesc: "Всі збережені статті видалено",
+    errorClearing: "Помилка очищення статей",
+    default: "За замовчуванням",
+    serif: "З засічками",
+    sansSerif: "Без засічок",
+    title: "Налаштування",
+    yourSaved: "Ваші збережені статті",
+    clearAll: "Очистити все",
+    searchPlaceholder: "Пошук збережених статей...",
+    noMatch: "Немає статей що відповідають вашому пошуку",
+    noSaved: "Поки немає збережених статей",
+    tryDifferent: "Спробуйте інші ключові слова",
+    startSaving: "Почніть зберігати статті щоб бачити їх тут",
+    savedOn: "Збережено",
+    readingPreferences: "Налаштування читання",
+    customize: "Налаштуйте свій досвід читання",
+    syncedToCloud: "Синхронізовано з хмарою",
+    loadingPreferences: "Завантаження налаштувань...",
+    articleFont: "Шрифт статті",
+    textSize: "Розмір тексту",
+    highlightColor: "Колір виділення",
+    backgroundOpacity: "Прозорість фону",
+    backgroundOpacityDesc: "Налаштуйте прозорість фону статей",
+    preview: "Попередній перегляд",
+    previewText: "Так виглядатимуть статті з вашими налаштуваннями",
+    progressPreview: "Прогрес читання: 42% завершено",
+  },
+  vi: {
+    search: "Tìm kiếm",
+    today: "Hôm nay",
+    discover: "Khám phá",
+    profile: "Hồ sơ",
+    random: "Ngẫu nhiên",
+    signIn: "Đăng nhập",
+
+    todayHighlights: "Nổi bật Hôm nay",
+    latestNews: "Tin tức Mới nhất",
+    fromWikipedia: "Từ Wikipedia",
+    editorialHighlights: "Nổi bật Biên tập",
+    addArticle: "Thêm Bài viết",
+    readMore: "Đọc thêm",
+    readOn: "Đọc tiếp",
+    readArticle: "Đọc Bài viết",
+    refresh: "Làm mới",
+    justNow: "Vừa xong",
+    hoursAgo: "{hours}g trước",
+
+    topArticlesToday: "Bài viết Hàng đầu Hôm nay",
+    dailyRankingResets: "Xếp hạng hàng ngày đặt lại vào nửa đêm",
+    europeParisTime: "Giờ Châu Âu/Paris",
+    apNews: "Tin tức AP",
+    showAll: "Hiển thị Tất cả",
+    showLess: "Hiển thị Ít hơn",
+    more: "thêm",
+    backToHome: "Quay lại Trang chủ",
+
+    nytNews: "Tin tức NYT",
+    headlines: "Tiêu đề",
+    newsApiHeadlines: "Tiêu đề NewsAPI",
+
+    loading: "Đang tải...",
+    error: "Lỗi",
+    retry: "Thử lại",
+    close: "Đóng",
+    save: "Lưu",
+    saved: "Đã lưu",
+    delete: "Xóa",
+    edit: "Chỉnh sửa",
+    share: "Chia sẻ",
+    view: "Xem",
+    upvote: "Bình chọn",
+    explainWithAI: "Giải thích với AI",
+    explaining: "Đang giải thích...",
+    aiExplanation: "Giải thích AI",
+
+    categories: {
+      all: "Tất cả",
+      science: "Khoa học",
+      technology: "Công nghệ",
+      history: "Lịch sử",
+      art: "Nghệ thuật",
+      arts: "Nghệ thuật",
+      politics: "Chính trị",
+      nature: "Thiên nhiên",
+      sports: "Thể thao",
+      culture: "Văn hóa",
+      philosophy: "Triết học",
+      literature: "Văn học"
+    },
+
+    savedArticles: "Bài viết Đã lưu",
+    settings: "Cài đặt",
+    articles: "bài viết",
+    article: "bài viết",
+    views: "lượt xem",
+
+    loadingDescription: "Đang tải các bài viết tuyệt vời cho bạn...",
+
+    failedToLoad: "Không thể tải bài viết. Vui lòng thử lại sau.",
+    noArticlesAvailable: "Không có bài viết từ {source}",
+
+    articleTitle: "Tiêu đề Bài viết",
+    articleContent: "Nội dung Bài viết",
+    articleUrl: "URL Bài viết (tùy chọn)",
+    addNewArticle: "Thêm Bài viết Mới",
+
+    errorLoading: "Lỗi khi tải bài viết đã lưu",
+    preferencesWarning: "Tùy chọn Đọc",
+    preferencesWarningDesc: "Các tùy chọn này đồng bộ giữa các thiết bị",
+    removed: "Đã xóa bài viết",
+    removedDesc: "Đã xóa bài viết khỏi danh sách đã lưu",
+    errorRemoving: "Lỗi khi xóa bài viết",
+    cleared: "Đã xóa tất cả bài viết",
+    clearedDesc: "Tất cả bài viết đã lưu đã được xóa",
+    errorClearing: "Lỗi khi xóa bài viết",
+    default: "Mặc định",
+    serif: "Serif",
+    sansSerif: "Sans Serif",
+    title: "Cài đặt",
+    yourSaved: "Bài viết đã lưu của bạn",
+    clearAll: "Xóa Tất cả",
+    searchPlaceholder: "Tìm kiếm bài viết đã lưu...",
+    noMatch: "Không có bài viết nào khớp với tìm kiếm của bạn",
+    noSaved: "Chưa có bài viết đã lưu",
+    tryDifferent: "Thử các từ khóa khác",
+    startSaving: "Bắt đầu lưu bài viết để xem ở đây",
+    savedOn: "Đã lưu vào",
+    readingPreferences: "Tùy chọn Đọc",
+    customize: "Tùy chỉnh trải nghiệm đọc của bạn",
+    syncedToCloud: "Đã đồng bộ với đám mây",
+    loadingPreferences: "Đang tải tùy chọn...",
+    articleFont: "Phông chữ Bài viết",
+    textSize: "Kích thước Chữ",
+    highlightColor: "Màu Đánh dấu",
+    backgroundOpacity: "Độ trong suốt Nền",
+    backgroundOpacityDesc: "Điều chỉnh độ trong suốt của nền bài viết",
+    preview: "Xem trước",
+    previewText: "Bài viết sẽ trông như thế này với cài đặt của bạn",
+    progressPreview: "Tiến độ đọc: 42% hoàn thành",
+  },
 };
 
 // Utility functions without API calls
 export const getTranslation = (key: string, language: string = 'en', params?: Record<string, string | number>): string => {
   const langData = translations[language as keyof typeof translations] || translations.en;
-  
+
   // Navigate through nested keys (e.g., "categories.science")
   const keys = key.split('.');
   let value: any = langData;
-  
+
   for (const k of keys) {
     value = value?.[k];
     if (value === undefined) break;
   }
-  
+
   let result = value || key;
-  
+
   // Replace parameters if provided
   if (params && typeof result === 'string') {
     Object.entries(params).forEach(([param, val]) => {
       result = result.replace(`{${param}}`, String(val));
     });
   }
-  
+
   return result;
 };
 
@@ -1171,18 +2075,26 @@ export const formatDate = (date: Date, language: any = 'en'): string => {
     month: 'short',
     day: 'numeric'
   };
-  
+
   const langCode = typeof language === 'object' ? language.code : language;
-  const locale = langCode === 'en' ? 'en-US' : 
-                 langCode === 'es' ? 'es-ES' :
-                 langCode === 'fr' ? 'fr-FR' :
-                 langCode === 'de' ? 'de-DE' :
-                 langCode === 'it' ? 'it-IT' :
-                 langCode === 'pt' ? 'pt-PT' :
-                 langCode === 'ru' ? 'ru-RU' :
-                 langCode === 'ja' ? 'ja-JP' :
-                 langCode === 'zh' ? 'zh-CN' :
-                 langCode === 'ar' ? 'ar-SA' : 'en-US';
-  
+  const locale = langCode === 'en' ? 'en-US' :
+    langCode === 'es' ? 'es-ES' :
+      langCode === 'fr' ? 'fr-FR' :
+        langCode === 'de' ? 'de-DE' :
+          langCode === 'it' ? 'it-IT' :
+            langCode === 'pt' ? 'pt-PT' :
+              langCode === 'ru' ? 'ru-RU' :
+                langCode === 'ja' ? 'ja-JP' :
+                  langCode === 'zh' ? 'zh-CN' :
+                    langCode === 'ar' ? 'ar-SA' :
+                      langCode === 'ko' ? 'ko-KR' :
+                        langCode === 'hi' ? 'hi-IN' :
+                          langCode === 'tr' ? 'tr-TR' :
+                            langCode === 'nl' ? 'nl-NL' :
+                              langCode === 'sv' ? 'sv-SE' :
+                                langCode === 'pl' ? 'pl-PL' :
+                                  langCode === 'uk' ? 'uk-UA' :
+                                    langCode === 'vi' ? 'vi-VN' : 'en-US';
+
   return new Intl.DateTimeFormat(locale, options).format(date);
 };

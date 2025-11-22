@@ -1,4 +1,5 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { XMLParser } from 'https://esm.sh/fast-xml-parser@4.4.0'
 
 const corsHeaders = {
@@ -6,7 +7,7 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
-// Simple in-memory rate limiting (kept from previous version)
+// Simple in-memory rate limiting
 const rateLimitStore = new Map<string, number[]>()
 const RATE_LIMIT_WINDOW = 60000 // 1 minute
 const MAX_REQUESTS_PER_WINDOW = 10
@@ -27,6 +28,41 @@ serve(async (req) => {
   }
 
   try {
+    // 1. Verify Authentication
+    const authHeader = req.headers.get('Authorization')
+    if (!authHeader) {
+      return new Response(JSON.stringify({ error: 'Missing Authorization header' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      })
+    }
+
+    const supabaseClient = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
+      { global: { headers: { Authorization: authHeader } } }
+    )
+
+    const {
+      data: { user },
+      error: authError,
+    } = await supabaseClient.auth.getUser()
+
+    if (authError || !user) {
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      })
+    }
+
+    // 2. Check Rate Limit
+    if (!checkRateLimit(user.id)) {
+      return new Response(JSON.stringify({ error: 'Too many requests' }), {
+        status: 429,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      })
+    }
+
     const body = await req.json().catch(() => ({}))
     const source = body?.source || 'nyt'
 
@@ -88,16 +124,16 @@ serve(async (req) => {
         published_date: item?.pubDate || new Date().toISOString(),
         multimedia: imageUrl
           ? [
-              {
-                url: imageUrl,
-                format: 'mediumThreeByTwo440',
-                height: 293,
-                width: 440,
-                type: 'image',
-                subtype: 'photo',
-                caption: '',
-              },
-            ]
+            {
+              url: imageUrl,
+              format: 'mediumThreeByTwo440',
+              height: 293,
+              width: 440,
+              type: 'image',
+              subtype: 'photo',
+              caption: '',
+            },
+          ]
           : [],
         byline: item?.creator || 'NYT',
         section: 'World',

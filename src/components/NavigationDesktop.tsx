@@ -6,6 +6,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import LanguageSelector from "./LanguageSelector";
+import { ThemeToggle } from "./ThemeToggle";
 
 interface NavigationDesktopProps {
   searchValue: string;
@@ -26,7 +27,7 @@ const NavigationDesktop = ({
   const { currentLanguage, translations } = useLanguage();
   const t = translations;
   const isDark = theme === 'dark';
-  
+
   const handleDiscoverClick = () => {
     navigate("/discover");
   };
@@ -40,7 +41,7 @@ const NavigationDesktop = ({
       <div className="flex items-center justify-between px-3 md:px-6 py-2 max-w-7xl mx-auto gap-2 md:gap-4">
         {/* Left Section - Sign In & Language */}
         <div className="flex items-center gap-2 md:gap-3 flex-shrink-0">
-          <div 
+          <div
             className={`flex items-center gap-1 md:gap-2 cursor-pointer transition-colors duration-300 text-white hover:text-tictok-red`}
             onClick={handleAuthClick}
             role="button"
@@ -62,12 +63,12 @@ const NavigationDesktop = ({
               </>
             )}
           </div>
-          
+
           <LanguageSelector />
         </div>
 
         {/* Center Section - Search */}
-        <div 
+        <div
           className={`flex items-center ${isDark ? 'bg-black/20' : 'bg-white/80'} backdrop-blur-sm rounded-full px-3 md:px-4 py-1.5 cursor-pointer transition-all duration-300 flex-1 max-w-xs md:max-w-md`}
           onClick={onSearchClick}
           role="button"
@@ -81,7 +82,7 @@ const NavigationDesktop = ({
           </span>
         </div>
 
-        {/* Right Section - Discover, Today, Logo */}
+        {/* Right Section - Discover, Theme, Today, Logo */}
         <div className="flex items-center gap-1.5 md:gap-3 flex-shrink-0">
           <Button
             variant="ghost"
@@ -91,6 +92,8 @@ const NavigationDesktop = ({
           >
             <Compass className="w-4 h-4 md:w-5 md:h-5" />
           </Button>
+
+          <ThemeToggle />
 
           <Button
             variant="ghost"
@@ -102,10 +105,9 @@ const NavigationDesktop = ({
             <span className="hidden md:inline text-sm">{t.today}</span>
           </Button>
 
-          <h1 
+          <h1
             onClick={() => onRandomClick()}
-            className="text-lg md:text-2xl font-bold cursor-pointer transition-all duration-300 drop-shadow-[0_0_8px_rgba(255,255,255,0.5)] hover:drop-shadow-[0_0_20px_rgba(255,255,255,1)]"
-            style={{ color: isDark ? '#FFFFFF' : '#000000' }}
+            className="text-lg md:text-2xl font-bold cursor-pointer transition-all duration-300 drop-shadow-[0_0_8px_rgba(255,255,255,0.5)] hover:drop-shadow-[0_0_20px_rgba(255,255,255,1)] text-white"
             role="button"
             tabIndex={0}
             onKeyDown={(e) => e.key === 'Enter' && onRandomClick()}

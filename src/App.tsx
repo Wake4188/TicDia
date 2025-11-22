@@ -9,7 +9,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { CookieConsent } from "@/components/CookieConsent";
 import { GoogleAnalyticsTracker } from "./components/GoogleAnalyticsTracker";
 
-import { useUserPreferences } from "./hooks/useUserPreferences";
+import { useUserPreferences, UserPreferencesProvider } from "./contexts/UserPreferencesContext";
 
 // Lazy load all pages for code splitting with error handling
 const Index = lazy(() => import("./pages/Index"));
@@ -32,19 +32,24 @@ const queryClient = new QueryClient({
   },
 });
 
+import LoadingScreen from "./components/LoadingScreen";
+
+// ... imports
+
+import FluidSmokeEffect from "./components/FluidSmokeEffect";
+import { useLocation } from "react-router-dom";
+
 function AppContent() {
   const { userPreferences } = useUserPreferences();
+  const location = useLocation();
+
+  // Show smoke effect if enabled AND not on the main feed (/)
+  const showSmoke = userPreferences.smokeEffect && location.pathname !== '/';
 
   return (
     <div className={`min-h-screen bg-background ${userPreferences.liquidGlassMode ? 'liquid-glass' : ''}`}>
-      <Suspense fallback={
-        <div className="h-screen w-screen flex items-center justify-center bg-background">
-          <div className="flex flex-col items-center gap-4">
-            <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin" role="status" aria-label="Loading"></div>
-            <div className="text-foreground text-lg">Loading TicDia...</div>
-          </div>
-        </div>
-      }>
+      {showSmoke && <FluidSmokeEffect />}
+      <Suspense fallback={<LoadingScreen />}>
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/discover" element={<Discover />} />
@@ -66,12 +71,14 @@ function App() {
       <QueryClientProvider client={queryClient}>
         <ThemeProvider>
           <LanguageProvider>
-            <AuthProvider>
-              <Router>
-                <GoogleAnalyticsTracker />
-                <AppContent />
-              </Router>
-            </AuthProvider>
+            <UserPreferencesProvider> {/* Added UserPreferencesProvider */}
+              <AuthProvider>
+                <Router>
+                  <GoogleAnalyticsTracker />
+                  <AppContent />
+                </Router>
+              </AuthProvider>
+            </UserPreferencesProvider> {/* Closed UserPreferencesProvider */}
           </LanguageProvider>
         </ThemeProvider>
       </QueryClientProvider>

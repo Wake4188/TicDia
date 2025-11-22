@@ -1,5 +1,4 @@
-
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode, useMemo } from 'react';
 import { Language, SUPPORTED_LANGUAGES, DEFAULT_LANGUAGE } from '../services/languageConfig';
 
 interface LanguageContextType {
@@ -21,18 +20,21 @@ import { getTranslations, translations as baseTranslations } from '../services/t
 export const LanguageProvider: React.FC<LanguageProviderProps> = ({ children }) => {
   const [currentLanguage, setCurrentLanguage] = useState<Language>(DEFAULT_LANGUAGE);
   const [isLoading, setIsLoading] = useState(false);
-  const [translations, setTranslations] = useState<any>(baseTranslations.en);
+  const [translationsRaw, setTranslationsRaw] = useState<any>(baseTranslations.en);
+
+  // Memoize translations to prevent re-render cascades
+  const translations = useMemo(() => translationsRaw, [translationsRaw]);
 
   const loadTranslations = async (language: Language) => {
     try {
       setIsLoading(true);
       const translatedData = await getTranslations(language.code);
-      setTranslations(translatedData);
+      setTranslationsRaw(translatedData);
     } catch (error) {
       console.error('Failed to load translations:', error);
       // Fallback to English translations
       const fallbackData = await getTranslations('en');
-      setTranslations(fallbackData);
+      setTranslationsRaw(fallbackData);
     } finally {
       setIsLoading(false);
     }
@@ -57,11 +59,11 @@ export const LanguageProvider: React.FC<LanguageProviderProps> = ({ children }) 
     setIsLoading(true);
     setCurrentLanguage(language);
     localStorage.setItem('ticdia-language', language.code);
-    
+
     // Set document direction for RTL languages
     document.documentElement.dir = language.rtl ? 'rtl' : 'ltr';
     document.documentElement.lang = language.code;
-    
+
     await loadTranslations(language);
   };
 
@@ -70,12 +72,12 @@ export const LanguageProvider: React.FC<LanguageProviderProps> = ({ children }) 
   };
 
   return (
-    <LanguageContext.Provider value={{ 
-      currentLanguage, 
-      setLanguage, 
-      isLoading, 
+    <LanguageContext.Provider value={{
+      currentLanguage,
+      setLanguage,
+      isLoading,
       translations,
-      refreshTranslations 
+      refreshTranslations
     }}>
       {children}
     </LanguageContext.Provider>

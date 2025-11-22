@@ -17,20 +17,8 @@ export const AnalyticsCheck = () => {
     if (!user) return;
 
     const checkRecapEligibility = async () => {
-      try {
-        const analytics = await getUserAnalytics(user.id);
-        if (analytics) {
-          const days = getDaysSinceFirstVisit(analytics.first_visit_date);
-          setDaysSinceJoining(days);
-          
-          // Show banner if user has been active for 365+ days (or 1+ day for demo)
-          if (days >= 1) {
-            setShowRecapBanner(true);
-          }
-        }
-      } catch (error) {
-        console.error('Failed to check recap eligibility:', error);
-      }
+      // Recap paused for now
+      setShowRecapBanner(false);
     };
 
     checkRecapEligibility();
@@ -51,15 +39,15 @@ export const AnalyticsCheck = () => {
           {daysSinceJoining} days of knowledge await you
         </p>
         <div className="flex gap-2">
-          <Button 
-            onClick={() => navigate('/recap')} 
+          <Button
+            onClick={() => navigate('/recap')}
             className="bg-primary hover:bg-primary/80 flex-1"
           >
             View Recap
           </Button>
-          <Button 
-            onClick={() => setShowRecapBanner(false)} 
-            variant="outline" 
+          <Button
+            onClick={() => setShowRecapBanner(false)}
+            variant="outline"
             size="sm"
             className="border-white/20 text-white/60"
           >

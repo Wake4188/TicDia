@@ -4,8 +4,10 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { getUserAnalytics, UserAnalytics } from "@/services/analyticsService";
 import { useAuth } from "@/contexts/AuthContext";
-import { BookOpen, TrendingUp, Award, Target, Flame, Clock, BarChart3, Trophy, Star, Zap } from "lucide-react";
+import { BookOpen, TrendingUp, Award, Target, Flame, Clock, Trophy, Star, Zap, BarChart3, PieChart } from "lucide-react";
 import { motion } from "framer-motion";
+import { Bar, BarChart, Line, LineChart, ResponsiveContainer, XAxis, YAxis, Tooltip, CartesianGrid, Cell, Pie, PieChart as RechartsPieChart } from "recharts";
+import { ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 
 interface Achievement {
   id: string;
@@ -17,6 +19,17 @@ interface Achievement {
   unlocked: boolean;
   category: string;
 }
+
+const chartConfig = {
+  articles: {
+    label: "Articles Read",
+    color: "hsl(var(--primary))",
+  },
+  streak: {
+    label: "Streak",
+    color: "hsl(var(--orange-500))",
+  },
+} satisfies ChartConfig;
 
 export const AnalyticsStats = () => {
   const { user } = useAuth();
@@ -136,9 +149,12 @@ export const AnalyticsStats = () => {
   const getTopicStats = () => {
     if (!analytics?.favorite_topics) return [];
 
-    return analytics.favorite_topics.slice(0, 10).map((topic: string) => ({
+    // Mocking count data for visualization since the API only returns a list of strings
+    // In a real app, we'd want the backend to return counts per topic
+    return analytics.favorite_topics.slice(0, 5).map((topic: string, index: number) => ({
       name: topic,
-      count: 1 // This would be actual count in a more advanced implementation
+      value: 10 - index, // Mock distribution
+      fill: `hsl(var(--chart-${(index % 5) + 1}))`
     }));
   };
 
@@ -147,17 +163,12 @@ export const AnalyticsStats = () => {
 
     const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
     return days.map(day => ({
-      day,
-      count: analytics.daily_activity[day] || 0
+      day: day.substring(0, 3), // Mon, Tue, etc.
+      articles: analytics.daily_activity[day] || 0
     }));
   };
 
   const calculateLevel = (articlesRead: number) => {
-    // Simple level formula: Level = floor(sqrt(articlesRead)) + 1
-    // Level 1: 0-3 articles
-    // Level 2: 4-8 articles
-    // Level 3: 9-15 articles
-    // etc.
     const level = Math.floor(Math.sqrt(articlesRead)) + 1;
     const currentLevelBaseXP = Math.pow(level - 1, 2);
     const nextLevelBaseXP = Math.pow(level, 2);
@@ -183,7 +194,7 @@ export const AnalyticsStats = () => {
 
   if (!analytics) {
     return (
-      <Card className="bg-gray-900/80 backdrop-blur-md border-gray-800/50">
+      <Card className="bg-card/50 backdrop-blur-sm border-border/50">
         <CardContent className="py-12 text-center">
           <BarChart3 className="w-12 h-12 mx-auto mb-4 text-muted-foreground opacity-50" />
           <p className="text-muted-foreground">No analytics data available yet.</p>
@@ -195,293 +206,286 @@ export const AnalyticsStats = () => {
 
   const unlockedCount = achievements.filter(a => a.unlocked).length;
   const scrollKm = (analytics.total_scroll_distance / 1000).toFixed(1);
-  const avgArticlesPerDay = analytics.articles_viewed / Math.max(1, getDaysSinceFirstVisit(analytics.first_visit_date));
+  const avgArticlesPerDay = analytics.articles_viewed / Math.max(1, 30); // Simplified for now
   const audioHours = Math.floor((analytics.total_audio_time || 0) / 3600);
   const audioMinutes = Math.floor(((analytics.total_audio_time || 0) % 3600) / 60);
   const levelStats = calculateLevel(analytics.articles_viewed);
+  const dailyData = getDailyActivityStats();
+  const topicData = getTopicStats();
 
   return (
-    <div className="space-y-6">
-      {/* Level Progress */}
+    <div className="space-y-8 animate-fade-in">
+      {/* Level Progress Banner */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.05 }}
       >
-        <Card className="bg-gradient-to-r from-gray-900 to-gray-800 border-wikitok-red/30 overflow-hidden relative">
-          <div className="absolute top-0 right-0 p-4 opacity-10">
-            <Star className="w-32 h-32 text-wikitok-red" />
+        <Card className="bg-gradient-to-r from-primary/10 via-primary/5 to-background border-primary/20 overflow-hidden relative">
+          <div className="absolute top-0 right-0 p-4 opacity-5">
+            <Star className="w-64 h-64 text-primary rotate-12" />
           </div>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-4">
+          <CardContent className="p-6 sm:p-8">
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-6">
+              <div className="flex items-center gap-6">
                 <div className="relative">
-                  <div className="w-16 h-16 rounded-full bg-wikitok-red/20 flex items-center justify-center border-2 border-wikitok-red">
-                    <span className="text-2xl font-bold text-white">{levelStats.level}</span>
+                  <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-background flex items-center justify-center border-4 border-primary shadow-lg shadow-primary/20">
+                    <span className="text-3xl sm:text-4xl font-bold text-primary">{levelStats.level}</span>
                   </div>
-                  <div className="absolute -bottom-2 -right-2 bg-wikitok-red text-white text-xs px-2 py-0.5 rounded-full font-bold">
-                    LVL
+                  <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground text-xs px-3 py-1 rounded-full font-bold shadow-sm">
+                    LEVEL
                   </div>
                 </div>
-                <div>
-                  <h3 className="text-xl font-bold text-white">Knowledge Seeker</h3>
-                  <p className="text-gray-400 text-sm">Keep reading to level up!</p>
+                <div className="text-center sm:text-left">
+                  <h3 className="text-2xl font-bold text-foreground">Knowledge Seeker</h3>
+                  <p className="text-muted-foreground">Keep reading to unlock new titles!</p>
                 </div>
               </div>
-              <div className="text-right">
-                <div className="text-2xl font-bold text-wikitok-red">{levelStats.currentXP} <span className="text-sm text-gray-400">XP</span></div>
-                <p className="text-xs text-gray-400">{levelStats.nextLevelXP} XP to next level</p>
+
+              <div className="w-full sm:w-1/2 space-y-2">
+                <div className="flex justify-between text-sm font-medium">
+                  <span className="text-primary">{levelStats.currentXP} XP</span>
+                  <span className="text-muted-foreground">{levelStats.nextLevelXP} XP to next level</span>
+                </div>
+                <div className="h-4 bg-secondary rounded-full overflow-hidden">
+                  <motion.div
+                    className="h-full bg-primary"
+                    initial={{ width: 0 }}
+                    animate={{ width: `${levelStats.progressPercentage}%` }}
+                    transition={{ duration: 1, ease: "easeOut" }}
+                  />
+                </div>
               </div>
-            </div>
-            <div className="space-y-2">
-              <div className="flex justify-between text-xs text-gray-400">
-                <span>Level {levelStats.level}</span>
-                <span>Level {levelStats.level + 1}</span>
-              </div>
-              <Progress value={levelStats.progressPercentage} className="h-3 bg-gray-700" indicatorClassName="bg-gradient-to-r from-wikitok-red to-orange-500" />
             </div>
           </CardContent>
         </Card>
       </motion.div>
 
-      {/* Overview Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-        >
-          <Card className="bg-gradient-to-br from-wikitok-red/20 to-transparent border-wikitok-red/30 backdrop-blur-md">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium flex items-center gap-2">
-                <BookOpen className="w-4 h-4" />
-                Articles Read
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold">{analytics.articles_viewed}</div>
-              <p className="text-xs text-muted-foreground mt-1">
-                ~{avgArticlesPerDay.toFixed(1)} per day
-              </p>
-            </CardContent>
-          </Card>
-        </motion.div>
+      {/* Key Metrics Grid */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        {[
+          { title: "Articles Read", value: analytics.articles_viewed, icon: BookOpen, color: "text-blue-500", sub: "Total lifetime" },
+          { title: "Current Streak", value: analytics.current_scroll_streak, icon: Flame, color: "text-orange-500", sub: `Best: ${analytics.longest_scroll_streak}` },
+          { title: "Topics Explored", value: analytics.favorite_topics?.length || 0, icon: Target, color: "text-green-500", sub: `${scrollKm}km scrolled` },
+          { title: "Audio Time", value: audioHours > 0 ? `${audioHours}h` : `${audioMinutes}m`, icon: Clock, color: "text-purple-500", sub: `${analytics.audio_articles_listened || 0} listened` }
+        ].map((stat, index) => (
+          <motion.div
+            key={stat.title}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 + index * 0.05 }}
+          >
+            <Card className="bg-card/50 backdrop-blur-sm hover:bg-card/80 transition-colors border-border/50">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <div className={`p-2 rounded-lg bg-background ${stat.color} bg-opacity-10`}>
+                    <stat.icon className={`w-5 h-5 ${stat.color}`} />
+                  </div>
+                  {index === 1 && (
+                    <Badge variant="outline" className="border-orange-500/20 text-orange-500 bg-orange-500/10">
+                      Active
+                    </Badge>
+                  )}
+                </div>
+                <div className="space-y-1">
+                  <h4 className="text-2xl font-bold text-foreground">{stat.value}</h4>
+                  <p className="text-xs text-muted-foreground font-medium">{stat.title}</p>
+                  <p className="text-[10px] text-muted-foreground/60">{stat.sub}</p>
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+        ))}
+      </div>
 
+      {/* Charts Section */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Activity Chart */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-        >
-          <Card className="bg-gradient-to-br from-orange-500/20 to-transparent border-orange-500/30 backdrop-blur-md">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium flex items-center gap-2">
-                <Flame className="w-4 h-4" />
-                Current Streak
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold">{analytics.current_scroll_streak}</div>
-              <p className="text-xs text-muted-foreground mt-1">
-                Best: {analytics.longest_scroll_streak} days
-              </p>
-            </CardContent>
-          </Card>
-        </motion.div>
-
-        <motion.div
+          className="lg:col-span-2"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
         >
-          <Card className="bg-gradient-to-br from-blue-500/20 to-transparent border-blue-500/30 backdrop-blur-md">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium flex items-center gap-2">
-                <Target className="w-4 h-4" />
-                Topics Explored
+          <Card className="h-full bg-card/50 backdrop-blur-sm border-border/50">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <BarChart3 className="w-5 h-5 text-primary" />
+                Weekly Activity
               </CardTitle>
+              <CardDescription>Articles read over the last 7 days</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold">{analytics.favorite_topics?.length || 0}</div>
-              <p className="text-xs text-muted-foreground mt-1">
-                {scrollKm} km scrolled
-              </p>
+              <div className="h-[300px] w-full">
+                <ChartContainer config={chartConfig}>
+                  <BarChart data={dailyData}>
+                    <CartesianGrid vertical={false} strokeDasharray="3 3" className="stroke-muted/20" />
+                    <XAxis
+                      dataKey="day"
+                      tickLine={false}
+                      axisLine={false}
+                      tickMargin={10}
+                      className="text-xs text-muted-foreground"
+                    />
+                    <YAxis
+                      tickLine={false}
+                      axisLine={false}
+                      className="text-xs text-muted-foreground"
+                    />
+                    <ChartTooltip cursor={false} content={<ChartTooltipContent hideLabel />} />
+                    <Bar
+                      dataKey="articles"
+                      fill="var(--color-articles)"
+                      radius={[4, 4, 0, 0]}
+                      maxBarSize={50}
+                    />
+                  </BarChart>
+                </ChartContainer>
+              </div>
             </CardContent>
           </Card>
         </motion.div>
 
+        {/* Topic Distribution */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4 }}
         >
-          <Card className="bg-gradient-to-br from-purple-500/20 to-transparent border-purple-500/30 backdrop-blur-md">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium flex items-center gap-2">
-                <Clock className="w-4 h-4" />
-                Audio Time
+          <Card className="h-full bg-card/50 backdrop-blur-sm border-border/50">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <PieChart className="w-5 h-5 text-primary" />
+                Top Topics
               </CardTitle>
+              <CardDescription>Your favorite reading categories</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold">
-                {audioHours > 0 ? `${audioHours}h` : `${audioMinutes}m`}
+              <div className="h-[300px] w-full flex items-center justify-center">
+                {topicData.length > 0 ? (
+                  <ResponsiveContainer width="100%" height="100%">
+                    <RechartsPieChart>
+                      <Pie
+                        data={topicData}
+                        cx="50%"
+                        cy="50%"
+                        innerRadius={60}
+                        outerRadius={80}
+                        paddingAngle={5}
+                        dataKey="value"
+                      >
+                        {topicData.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={entry.fill} />
+                        ))}
+                      </Pie>
+                      <Tooltip
+                        content={({ active, payload }) => {
+                          if (active && payload && payload.length) {
+                            return (
+                              <div className="bg-popover border border-border p-2 rounded-lg shadow-lg">
+                                <p className="font-medium text-popover-foreground">{payload[0].name}</p>
+                              </div>
+                            );
+                          }
+                          return null;
+                        }}
+                      />
+                    </RechartsPieChart>
+                  </ResponsiveContainer>
+                ) : (
+                  <div className="text-center text-muted-foreground">
+                    <p>No topic data yet</p>
+                  </div>
+                )}
               </div>
-              <p className="text-xs text-muted-foreground mt-1">
-                {analytics.audio_articles_listened || 0} articles
-              </p>
+              <div className="flex flex-wrap justify-center gap-2 mt-4">
+                {topicData.map((topic, index) => (
+                  <div key={topic.name} className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                    <div className="w-2 h-2 rounded-full" style={{ backgroundColor: topic.fill }} />
+                    {topic.name}
+                  </div>
+                ))}
+              </div>
             </CardContent>
           </Card>
         </motion.div>
       </div>
 
-      {/* Achievements */}
-      <Card className="bg-gray-900/80 backdrop-blur-md border-gray-800/50">
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <div>
-              <CardTitle className="flex items-center gap-2">
-                <Trophy className="w-5 h-5 text-yellow-500" />
-                Achievements
-              </CardTitle>
-              <CardDescription>
-                {unlockedCount} of {achievements.length} unlocked
-              </CardDescription>
-            </div>
-            <Badge variant="secondary" className="text-lg">
-              {Math.round((unlockedCount / achievements.length) * 100)}%
-            </Badge>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {achievements.map((achievement, index) => {
-              const Icon = achievement.icon;
-              const percentage = Math.min((achievement.progress / achievement.threshold) * 100, 100);
-
-              return (
-                <motion.div
-                  key={achievement.id}
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ delay: index * 0.05 }}
-                  className={`p-4 rounded-lg border transition-all ${achievement.unlocked
-                    ? 'bg-wikitok-red/10 border-wikitok-red/30'
-                    : 'bg-gray-800/40 border-gray-700/30'
-                    }`}
-                >
-                  <div className="flex items-start gap-3">
-                    <div className={`p-2 rounded-lg ${achievement.unlocked ? 'bg-wikitok-red/20' : 'bg-gray-700/50'
-                      }`}>
-                      <Icon className={`w-5 h-5 ${achievement.unlocked ? 'text-wikitok-red' : 'text-gray-400'
-                        }`} />
-                    </div>
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-1">
-                        <h4 className="font-medium text-sm">{achievement.title}</h4>
-                        {achievement.unlocked && (
-                          <Badge className="bg-wikitok-red/20 text-wikitok-red border-wikitok-red/30 text-xs">
-                            ✓
-                          </Badge>
-                        )}
-                      </div>
-                      <p className="text-xs text-muted-foreground mb-2">
-                        {achievement.description}
-                      </p>
-                      <div className="space-y-1">
-                        <Progress
-                          value={percentage}
-                          className="h-1.5"
-                          aria-label={`${achievement.title} progress: ${achievement.progress} out of ${achievement.threshold}`}
-                        />
-                        <p className="text-xs text-muted-foreground">
-                          {achievement.progress} / {achievement.threshold}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </motion.div>
-              );
-            })}
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Topic Distribution */}
-      {getTopicStats().length > 0 && (
-        <Card className="bg-gray-900/80 backdrop-blur-md border-gray-800/50">
+      {/* Achievements Section */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.5 }}
+      >
+        <Card className="bg-card/50 backdrop-blur-sm border-border/50">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Target className="w-5 h-5" />
-              Your Top Topics
-            </CardTitle>
-            <CardDescription>Topics you've explored the most</CardDescription>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="flex items-center gap-2">
+                  <Trophy className="w-5 h-5 text-yellow-500" />
+                  Achievements
+                </CardTitle>
+                <CardDescription>
+                  {unlockedCount} of {achievements.length} unlocked
+                </CardDescription>
+              </div>
+              <Badge variant="secondary" className="text-lg px-4 py-1">
+                {Math.round((unlockedCount / achievements.length) * 100)}%
+              </Badge>
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="flex flex-wrap gap-2">
-              {getTopicStats().map((topic, index) => (
-                <motion.div
-                  key={topic.name}
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ delay: index * 0.05 }}
-                >
-                  <Badge
-                    variant="secondary"
-                    className="bg-wikitok-red/10 border-wikitok-red/30 hover:bg-wikitok-red/20 transition-colors"
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
+              {achievements.map((achievement, index) => {
+                const Icon = achievement.icon;
+                const percentage = Math.min((achievement.progress / achievement.threshold) * 100, 100);
+
+                return (
+                  <motion.div
+                    key={achievement.id}
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: 0.5 + index * 0.05 }}
+                    className={`p-4 rounded-xl border transition-all duration-300 ${achievement.unlocked
+                        ? 'bg-primary/5 border-primary/20 shadow-sm'
+                        : 'bg-muted/30 border-border/50 grayscale opacity-70'
+                      }`}
                   >
-                    {topic.name}
-                  </Badge>
-                </motion.div>
-              ))}
+                    <div className="flex items-start gap-3">
+                      <div className={`p-2.5 rounded-lg ${achievement.unlocked ? 'bg-primary/10 text-primary' : 'bg-muted text-muted-foreground'
+                        }`}>
+                        <Icon className="w-5 h-5" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-1">
+                          <h4 className="font-semibold text-sm truncate text-foreground">{achievement.title}</h4>
+                          {achievement.unlocked && (
+                            <Zap className="w-3 h-3 text-yellow-500 fill-yellow-500" />
+                          )}
+                        </div>
+                        <p className="text-xs text-muted-foreground mb-3 line-clamp-2 h-8">
+                          {achievement.description}
+                        </p>
+                        <div className="space-y-1.5">
+                          <Progress
+                            value={percentage}
+                            className="h-1.5"
+                          // Using custom CSS variable for progress color if needed, but default is fine
+                          />
+                          <div className="flex justify-between text-[10px] text-muted-foreground font-medium">
+                            <span>{achievement.progress}</span>
+                            <span>{achievement.threshold}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </motion.div>
+                );
+              })}
             </div>
           </CardContent>
         </Card>
-      )}
-
-      {/* Daily Activity */}
-      <Card className="bg-gray-900/80 backdrop-blur-md border-gray-800/50">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <TrendingUp className="w-5 h-5" />
-            Weekly Activity
-          </CardTitle>
-          <CardDescription>Your reading pattern by day of the week</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-3">
-            {getDailyActivityStats().map((day, index) => {
-              const maxCount = Math.max(...getDailyActivityStats().map(d => d.count), 1);
-              const percentage = (day.count / maxCount) * 100;
-
-              return (
-                <motion.div
-                  key={day.day}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: index * 0.05 }}
-                  className="space-y-1"
-                >
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="font-medium">{day.day}</span>
-                    <span className="text-muted-foreground">{day.count} articles</span>
-                  </div>
-                  <Progress
-                    value={percentage}
-                    className="h-2"
-                    aria-label={`${day.day}: ${day.count} articles read`}
-                  />
-                </motion.div>
-              );
-            })}
-          </div>
-        </CardContent>
-      </Card>
+      </motion.div>
     </div>
   );
 };
-
-function getDaysSinceFirstVisit(firstVisitDate: string): number {
-  const firstVisit = new Date(firstVisitDate);
-  const today = new Date();
-  const diffTime = Math.abs(today.getTime() - firstVisit.getTime());
-  return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-}

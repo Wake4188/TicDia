@@ -1,10 +1,16 @@
 import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Play, Pause, Volume2, VolumeX } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Play, Pause, Volume2, VolumeX, Gauge } from "lucide-react";
 import { Slider } from "@/components/ui/slider";
 import { fetchTTSBlob, createAudioFromBlob, revokeAudioObjectUrl } from "@/services/textToSpeechService";
 import { useToast } from "@/components/ui/use-toast";
-import { useUserPreferences } from "@/hooks/useUserPreferences";
+import { useUserPreferences } from "@/contexts/UserPreferencesContext";
 
 interface AudioPlayerProps {
   text: string;
@@ -21,6 +27,7 @@ const AudioPlayer = ({ text, onAudioStart, onAudioEnd, autoPlay = false }: Audio
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const { toast } = useToast();
   const { userPreferences, updatePreferences } = useUserPreferences();
+  const [playbackSpeed, setPlaybackSpeed] = useState(userPreferences.ttsSpeed || 1.0);
 
   // Stop audio when text changes (article switch)
   useEffect(() => {
@@ -42,7 +49,7 @@ const AudioPlayer = ({ text, onAudioStart, onAudioEnd, autoPlay = false }: Audio
       });
       return;
     }
-    
+
     if (isPlaying) {
       audioRef.current?.pause();
       setIsPlaying(false);
@@ -67,6 +74,7 @@ const AudioPlayer = ({ text, onAudioStart, onAudioEnd, autoPlay = false }: Audio
       // Apply current controls
       audio.volume = volume[0];
       audio.muted = isMuted;
+      audio.playbackRate = playbackSpeed;
 
       audio.onended = () => {
         setIsPlaying(false);
@@ -116,8 +124,17 @@ const AudioPlayer = ({ text, onAudioStart, onAudioEnd, autoPlay = false }: Audio
     }
   };
 
+  const handleSpeedChange = (newSpeed: number) => {
+    setPlaybackSpeed(newSpeed);
+    if (audioRef.current) {
+      audioRef.current.playbackRate = newSpeed;
+    }
+    // Persist to user preferences
+    updatePreferences({ ttsSpeed: newSpeed });
+  };
+
   return (
-    <div className="flex items-center justify-center gap-2 p-2 bg-background/60 backdrop-blur-sm rounded-lg border border-border/30 max-w-[280px] mx-auto">
+    <div className="flex items-center justify-center gap-2 p-2 bg-background/60 backdrop-blur-sm rounded-lg border border-border/30 max-w-[360px] mx-auto">
       <Button
         variant="ghost"
         size="sm"
@@ -157,6 +174,31 @@ const AudioPlayer = ({ text, onAudioStart, onAudioEnd, autoPlay = false }: Audio
           className="flex-1 h-1"
         />
       </div>
+
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-7 px-2 min-w-[44px] min-h-[44px] gap-1"
+            aria-label="Adjust playback speed"
+          >
+            <Gauge className="h-3 w-3" />
+            <span className="text-xs">{playbackSpeed}x</span>
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          {[0.5, 0.75, 1, 1.25, 1.5, 2].map((speed) => (
+            <DropdownMenuItem
+              key={speed}
+              onClick={() => handleSpeedChange(speed)}
+              className={playbackSpeed === speed ? "bg-accent" : ""}
+            >
+              {speed}x {speed === 1 && "(Normal)"}
+            </DropdownMenuItem>
+          ))}
+        </DropdownMenuContent>
+      </DropdownMenu>
 
       <span className="text-xs text-muted-foreground/80">
         Listen

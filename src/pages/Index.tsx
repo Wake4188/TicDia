@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useSearchParams, useLocation, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import ArticleViewer from "../components/ArticleViewer";
+import ArticleLoadingState from "../components/ArticleLoadingState";
 import RightSidebar from "../components/RightSidebar";
 import LeftSidebar from "../components/LeftSidebar";
 import Navigation from "../components/Navigation";
@@ -14,7 +15,7 @@ import { useChallengeTracking } from "../hooks/useChallengeTracking";
 import { AnalyticsCheck } from "../components/AnalyticsCheck";
 import BadgeDisplay from "../components/BadgeDisplay";
 import DailyChallenges from "../components/DailyChallenges";
-import { useUserPreferences } from "../hooks/useUserPreferences";
+import { useUserPreferences } from "../contexts/UserPreferencesContext";
 import { useAuth } from "../contexts/AuthContext";
 
 const Index = () => {
@@ -31,8 +32,12 @@ const Index = () => {
   const { userPreferences } = useUserPreferences();
   const { user } = useAuth();
 
+  // Extract specific values to prevent query re-execution on every render
+  const feedType = userPreferences.feedType;
+  const userId = user?.id;
+
   const { data: articles, isLoading, error } = useQuery({
-    queryKey: ["articles", searchQuery, currentLanguage.code, userPreferences.feedType, user?.id],
+    queryKey: ["articles", searchQuery, currentLanguage.code, feedType, userId],
     queryFn: async () => {
       if (searchQuery) {
         const results = location.state?.reorderedResults || await searchArticles(searchQuery, currentLanguage);
@@ -40,9 +45,9 @@ const Index = () => {
       }
 
       // Use personalized feed if feedType is 'curated' and user is logged in
-      if (userPreferences.feedType === 'curated' && user) {
+      if (feedType === 'curated' && userId) {
         try {
-          const personalizedArticles = await getPersonalizedArticles(user.id, 10, currentLanguage);
+          const personalizedArticles = await getPersonalizedArticles(userId, 10, currentLanguage);
           const articlesWithImages = personalizedArticles.filter(article => article.image);
           if (articlesWithImages.length > 0) {
             return articlesWithImages;
@@ -80,17 +85,16 @@ const Index = () => {
     });
   }
 
+
+  // ... existing code ...
+
   if (isLoading || languageLoading) {
-    return (
-      <div className="h-screen w-screen flex items-center justify-center bg-tictok-dark text-white">
-        <div>{t.loading}</div>
-      </div>
-    );
+    return <ArticleLoadingState />;
   }
 
   if (error || !articles || articles.length === 0) {
     return (
-      <div className="h-screen w-screen flex items-center justify-center bg-tictok-dark text-white">
+      <div className="h-screen w-screen flex items-center justify-center bg-background text-foreground">
         <div>{t.error}</div>
       </div>
     );
@@ -99,10 +103,10 @@ const Index = () => {
   const currentDisplayArticle = currentArticle || articles[0];
 
   return (
-    <div className="h-screen w-screen relative overflow-hidden bg-tictok-dark">
+    <div className="h-screen w-screen relative overflow-hidden bg-background">
       <AnalyticsCheck />
-      <BadgeDisplay />
-      <DailyChallenges />
+      {/* BadgeDisplay removed as requested */}
+      {/* DailyChallenges removed as requested */}
       <Navigation currentArticle={currentDisplayArticle} />
       <div className="flex h-full">
         <LeftSidebar article={currentDisplayArticle} onTagClick={handleTagClick} />

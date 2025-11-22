@@ -18,6 +18,14 @@ export const SUPPORTED_LANGUAGES: Language[] = [
   { code: 'ja', name: 'Japanese', nativeName: '日本語', wikipediaDomain: 'ja.wikipedia.org' },
   { code: 'zh', name: 'Chinese', nativeName: '中文', wikipediaDomain: 'zh.wikipedia.org' },
   { code: 'ar', name: 'Arabic', nativeName: 'العربية', wikipediaDomain: 'ar.wikipedia.org', rtl: true },
+  { code: 'ko', name: 'Korean', nativeName: '한국어', wikipediaDomain: 'ko.wikipedia.org' },
+  { code: 'hi', name: 'Hindi', nativeName: 'हिन्दी', wikipediaDomain: 'hi.wikipedia.org' },
+  { code: 'tr', name: 'Turkish', nativeName: 'Türkçe', wikipediaDomain: 'tr.wikipedia.org' },
+  { code: 'nl', name: 'Dutch', nativeName: 'Nederlands', wikipediaDomain: 'nl.wikipedia.org' },
+  { code: 'sv', name: 'Swedish', nativeName: 'Svenska', wikipediaDomain: 'sv.wikipedia.org' },
+  { code: 'pl', name: 'Polish', nativeName: 'Polski', wikipediaDomain: 'pl.wikipedia.org' },
+  { code: 'uk', name: 'Ukrainian', nativeName: 'Українська', wikipediaDomain: 'uk.wikipedia.org' },
+  { code: 'vi', name: 'Vietnamese', nativeName: 'Tiếng Việt', wikipediaDomain: 'vi.wikipedia.org' },
 ];
 
 export const DEFAULT_LANGUAGE = SUPPORTED_LANGUAGES[0]; // English

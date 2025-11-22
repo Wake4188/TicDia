@@ -1,9 +1,9 @@
-
-import { useState } from "react";
+import React, { useState } from "react";
 import { Progress } from "./ui/progress";
 import { UserPreferences } from "@/services/userPreferencesService";
 import AudioPlayer from "./AudioPlayer";
 import { useAuth } from "@/contexts/AuthContext";
+import { ExportMenu } from "./ExportMenu";
 
 interface ArticleItemProps {
   article: any;
@@ -49,20 +49,33 @@ const ArticleItem = ({
           style={{ aspectRatio: '16/9' }}
         />
         <div
-          className="absolute inset-0 bg-black"
+          className="absolute inset-0 bg-background"
           style={{ opacity: userPreferences.backgroundOpacity / 100 }}
         />
       </div>
 
+      {/* Export Menu - positioned in top-right corner */}
+      {isCurrent && (
+        <div className="absolute top-20 right-4 z-20">
+          <ExportMenu article={{
+            id: article.id?.toString() || article.title,
+            title: article.title,
+            content: article.content,
+            image: article.image,
+            url: article.url
+          }} />
+        </div>
+      )}
+
       <div
-        className="relative z-10 text-white p-4 sm:p-8 max-w-3xl mx-auto h-full flex flex-col justify-center animate-fade-in"
+        className="relative z-10 text-foreground p-4 sm:p-8 max-w-3xl mx-auto h-full flex flex-col justify-center animate-fade-in"
         style={{
           minHeight: '300px',
           animationDelay: `${index * 0.1}s`,
           animationFillMode: 'both'
         }}
       >
-        <div className={`${isMobile ? 'bg-black/40 backdrop-blur-sm rounded-lg p-4 max-h-[70vh] overflow-y-auto' : 'text-center max-h-[80vh] overflow-y-auto'}`} style={{ minHeight: '200px' }}>
+        <div className={`${isMobile ? 'bg-background/40 backdrop-blur-sm rounded-lg p-4 max-h-[70vh] overflow-y-auto' : 'text-center max-h-[80vh] overflow-y-auto'}`} style={{ minHeight: '200px' }}>
           <div className="space-y-4" style={{ minHeight: '150px' }}>
             <h1
               className="text-2xl sm:text-4xl font-bold"
@@ -118,7 +131,7 @@ const ArticleItem = ({
             )}
           </div>
         </div>
-        <div className="flex items-center space-x-2 text-xs sm:text-sm text-gray-300 flex-shrink-0 mt-4 ml-6">
+        <div className="flex items-center space-x-2 text-xs sm:text-sm text-muted-foreground flex-shrink-0 mt-4 ml-6">
           <span>{article.readTime} min read</span>
           <span>•</span>
           <span>{article.views.toLocaleString()} views</span>
@@ -140,4 +153,20 @@ const ArticleItem = ({
   );
 };
 
-export default ArticleItem;
+export default React.memo(ArticleItem, (prevProps, nextProps) => {
+  // React.memo: return TRUE if props are EQUAL (skip re-render)
+  //             return FALSE if props are DIFFERENT (DO re-render)
+  const areEqual = (
+    prevProps.index === nextProps.index &&
+    prevProps.isCurrent === nextProps.isCurrent &&
+    prevProps.progress === nextProps.progress &&
+    prevProps.displayedText === nextProps.displayedText &&
+    prevProps.article.id === nextProps.article.id &&
+    prevProps.userPreferences.fontFamily === nextProps.userPreferences.fontFamily &&
+    prevProps.userPreferences.fontSize === nextProps.userPreferences.fontSize &&
+    prevProps.userPreferences.backgroundOpacity === nextProps.userPreferences.backgroundOpacity &&
+    prevProps.userPreferences.highlightColor === nextProps.userPreferences.highlightColor
+  );
+
+  return areEqual; // TRUE = skip, FALSE = re-render
+});

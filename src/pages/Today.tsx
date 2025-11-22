@@ -15,7 +15,7 @@ import SmallTic from "@/components/SmallTic";
 import NewsFeed from "@/components/NewsFeed";
 import VotingProgressBar from "@/components/VotingProgressBar";
 import { useNavigate } from "react-router-dom";
-import { useUserPreferences } from "@/hooks/useUserPreferences";
+import { useUserPreferences } from "@/contexts/UserPreferencesContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 interface TodayArticle {

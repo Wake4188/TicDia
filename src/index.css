@@ -13,15 +13,39 @@
     --highlight-color: var(--progress-bar-color);
   }
 
+  /* Light Theme Variables */
+  body.light {
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+    --primary: 222.2 47.4% 11.2%;
+    --primary-foreground: 210 40% 98%;
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 222.2 84% 4.9%;
+  }
+
   body {
     @apply bg-tictok-dark text-white;
   }
 
-  /* Optimize font loading to prevent layout shifts */
-  @font-face {
-    font-family: 'Inter';
-    font-display: swap;
+  /* Light theme body styling */
+  body.light {
+    @apply bg-white text-gray-900;
   }
+
+  /* Font loading is handled via Google Fonts in index.html */
 
   /* Prevent layout shift by reserving space for images */
   img {
@@ -163,6 +187,9 @@
     -webkit-mask:
       linear-gradient(#fff 0 0) content-box,
       linear-gradient(#fff 0 0);
+    mask:
+      linear-gradient(#fff 0 0) content-box,
+      linear-gradient(#fff 0 0);
     -webkit-mask-composite: xor;
     mask-composite: exclude;
     pointer-events: none;
@@ -171,5 +198,15 @@
   .liquid-glass .sidebar-icon {
     @apply bg-white/5 backdrop-blur-md border-white/10 hover:bg-white/20 transition-all duration-300;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+
+  100% {
+    transform: translateX(100%);
   }
 }

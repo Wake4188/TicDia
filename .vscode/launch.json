@@ -1,0 +1,10 @@
+{
+    "configurations": [
+        {
+            "type": "chrome",
+            "name": "https://www.ticdia.vercel.app",
+            "request": "launch",
+            "url": "https://www.ticdia.vercel.app"
+        }
+    ]
+}

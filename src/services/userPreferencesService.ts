@@ -9,6 +9,8 @@ export interface UserPreferences {
   fontSize: number;
   feedType: 'random' | 'curated' | 'mixed';
   liquidGlassMode: boolean;
+  ttsSpeed: number;
+  smokeEffect: boolean;
 }
 
 export const loadUserPreferences = async (userId: string): Promise<UserPreferences> => {
@@ -34,7 +36,9 @@ export const loadUserPreferences = async (userId: string): Promise<UserPreferenc
       highlightColor: data.highlight_color || '#ea384c',
       fontSize: data.font_size || 16,
       feedType: data.feed_type || 'mixed',
-      liquidGlassMode: data.liquid_glass_mode || false
+      liquidGlassMode: data.liquid_glass_mode || false,
+      ttsSpeed: data.tts_speed || 1.0,
+      smokeEffect: data.smoke_effect !== false // Default to true if null/undefined
     };
   } catch (error) {
     console.error('Error loading user preferences:', sanitizeErrorMessage(error));
@@ -61,6 +65,8 @@ export const saveUserPreferences = async (userId: string, preferences: UserPrefe
         font_size: preferences.fontSize || 16,
         feed_type: preferences.feedType || 'mixed',
         liquid_glass_mode: preferences.liquidGlassMode || false,
+        tts_speed: preferences.ttsSpeed || 1.0,
+        smoke_effect: preferences.smokeEffect !== false,
         updated_at: new Date().toISOString(),
       }, {
         onConflict: 'user_id'
@@ -83,6 +89,8 @@ export const getDefaultPreferences = (): UserPreferences => ({
   fontSize: 16,
   feedType: 'mixed',
   liquidGlassMode: false,
+  ttsSpeed: 1.0,
+  smokeEffect: true,
 });
 
 export const updateUserPreferences = async (userId: string, updates: Partial<UserPreferences>): Promise<void> => {

@@ -3,7 +3,7 @@ import ArticleItem from "./ArticleItem";
 import ArticleLoadingState from "./ArticleLoadingState";
 import { useArticleManagement } from "../hooks/useArticleManagement";
 import { useTextAnimation } from "../hooks/useTextAnimation";
-import { useUserPreferences } from "../hooks/useUserPreferences";
+import { useUserPreferences } from "../contexts/UserPreferencesContext";
 import { useMobileDetection } from "../hooks/useMobileDetection";
 
 interface ArticleViewerProps {
@@ -15,7 +15,7 @@ interface ArticleViewerProps {
 const ArticleViewer = ({ articles, onArticleChange, onArticleView }: ArticleViewerProps) => {
   const { userPreferences } = useUserPreferences();
   const isMobile = useMobileDetection();
-  
+
   const {
     articles: managedArticles,
     currentIndex,
@@ -53,7 +53,7 @@ const ArticleViewer = ({ articles, onArticleChange, onArticleView }: ArticleView
       (window as any).handleTtsStart = handleTtsStart;
       (window as any).handleTtsStop = handleTtsStop;
     }
-    
+
     return () => {
       if (typeof window !== 'undefined') {
         delete (window as any).handleTtsStart;
@@ -67,15 +67,15 @@ const ArticleViewer = ({ articles, onArticleChange, onArticleView }: ArticleView
       <div
         ref={containerRef}
         className="h-full w-full overflow-y-auto snap-y snap-mandatory"
-        style={{ 
-          scrollbarWidth: 'none', 
+        style={{
+          scrollbarWidth: 'none',
           msOverflowStyle: 'none',
           WebkitScrollbar: { display: 'none' }
         } as any}
         aria-live="polite"
         aria-atomic="false"
       >
-        
+
         {managedArticles.map((article, index) => (
           <ArticleItem
             key={`${article.id}-${index}`}
@@ -88,7 +88,7 @@ const ArticleViewer = ({ articles, onArticleChange, onArticleView }: ArticleView
             isMobile={isMobile}
           />
         ))}
-        
+
         {isLoading && <ArticleLoadingState />}
       </div>
     </main>

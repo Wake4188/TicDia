@@ -7,99 +7,120 @@
   <meta http-equiv="Content-Language" content="en" />
 
   <!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-6HFC6Q72F9"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-6HFC6Q72F9"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() { dataLayer.push(arguments); }
+    gtag('js', new Date());
 
-  gtag('config', 'G-6HFC6Q72F9');
-</script>
-  
+    gtag('config', 'G-6HFC6Q72F9');
+  </script>
+
   <!-- PWA and App Identity -->
   <title>TicDia - Discover Wikipedia</title>
-  <meta name="description" content="Discover Wikipedia articles in a modern, engaging TikTok-style format. Learn something new every day with TicDia - ad-free educational content." />
+  <meta name="description"
+    content="Discover Wikipedia articles in a modern, engaging TikTok-style format. Learn something new every day with TicDia - ad-free educational content." />
   <meta name="author" content="TicDia" />
   <link rel="manifest" href="/manifest.json" />
   <meta name="robots" content="index, follow" />
-  <link rel="canonical" href="https://w-810266.vercel.app/" />
-  
+  <link rel="canonical" href="https://ticdia.vercel.app/" />
+
   <!-- SEO and Social Media -->
-  <meta name="keywords" content="wikipedia, learning, education, articles, discovery, knowledge, tiktok-style, vertical feed" />
+  <meta name="keywords"
+    content="wikipedia, learning, education, articles, discovery, knowledge, tiktok-style, vertical feed" />
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://w-810266.vercel.app/" />
   <meta property="og:title" content="TicDia - Discover Wikipedia in TikTok Style" />
-  <meta property="og:description" content="Experience Wikipedia articles in a TikTok-style vertical feed. Educational, fast, and distraction-free learning." />
+  <meta property="og:description"
+    content="Experience Wikipedia articles in a TikTok-style vertical feed. Educational, fast, and distraction-free learning." />
   <meta property="og:image" content="/og-image.svg" />
-  
+
   <!-- Twitter Cards -->
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="TicDia - Discover Wikipedia" />
   <meta name="twitter:description" content="Learn while you scroll with TikTok-style Wikipedia articles." />
-  
+
   <!-- Mobile app meta tags -->
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="theme-color" content="#FE2C55" />
-  
+
   <!-- Preconnect to Wikipedia API for faster article loading -->
   <link rel="preconnect" href="https://en.wikipedia.org" crossorigin>
   <link rel="dns-prefetch" href="https://en.wikipedia.org">
   <link rel="preconnect" href="https://wikimedia.org" crossorigin>
   <link rel="dns-prefetch" href="https://wikimedia.org">
-  
+
   <!-- Critical CSS for initial paint - Enhanced for CLS prevention -->
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { 
-      margin: 0; 
-      padding: 0; 
-      background-color: #0a0a0f; 
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: #0a0a0f;
       color: #f5f5f5;
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
       overflow-x: hidden;
     }
-    #root { min-height: 100vh; display: flex; flex-direction: column; }
-    
+
+    #root {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
     /* Prevent layout shifts */
-    img, video { max-width: 100%; height: auto; display: block; }
-    
+    img,
+    video {
+      max-width: 100%;
+      height: auto;
+      display: block;
+    }
+
     /* Loading skeleton */
-    .loading-skeleton { 
-      width: 100vw; 
-      height: 100vh; 
+    .loading-skeleton {
+      width: 100vw;
+      height: 100vh;
       background: linear-gradient(90deg, #1a1a1a 25%, #2a2a2a 50%, #1a1a1a 75%);
       background-size: 200% 100%;
       animation: shimmer 1.5s infinite;
     }
+
     @keyframes shimmer {
-      0% { background-position: 200% 0; }
-      100% { background-position: -200% 0; }
-    }
-    
-    /* Preload font display to prevent FOIT */
-    @font-face {
-      font-family: 'Inter';
-      font-display: swap;
+      0% {
+        background-position: 200% 0;
+      }
+
+      100% {
+        background-position: -200% 0;
+      }
     }
   </style>
 
   <!-- Preload polyfill for CSS loading -->
   <script>
-    !function(e){"use strict";var t=function(t,n,r){function o(e){return i.body?e():void setTimeout(function(){o(e)})}function a(){d.addEventListener&&d.removeEventListener("load",a),d.media=r||"all"}var l,i=e.document,d=i.createElement("link");if(n)l=n;else{var s=(i.body||i.getElementsByTagName("head")[0]).childNodes;l=s[s.length-1]}var u=i.styleSheets;d.rel="stylesheet",d.href=t,d.media="only x",o(function(){l.parentNode.insertBefore(d,n?l:l.nextSibling)});var f=function(e){for(var t=d.href,n=u.length;n--;)if(u[n].href===t)return e();setTimeout(function(){f(e)})};return d.addEventListener&&d.addEventListener("load",a),d.onloadcssdefined=f,f(a),d};"undefined"!=typeof exports?exports.loadCSS=t:e.loadCSS=t}("undefined"!=typeof global?global:this);
+    !function (e) { "use strict"; var t = function (t, n, r) { function o(e) { return i.body ? e() : void setTimeout(function () { o(e) }) } function a() { d.addEventListener && d.removeEventListener("load", a), d.media = r || "all" } var l, i = e.document, d = i.createElement("link"); if (n) l = n; else { var s = (i.body || i.getElementsByTagName("head")[0]).childNodes; l = s[s.length - 1] } var u = i.styleSheets; d.rel = "stylesheet", d.href = t, d.media = "only x", o(function () { l.parentNode.insertBefore(d, n ? l : l.nextSibling) }); var f = function (e) { for (var t = d.href, n = u.length; n--;)if (u[n].href === t) return e(); setTimeout(function () { f(e) }) }; return d.addEventListener && d.addEventListener("load", a), d.onloadcssdefined = f, f(a), d }; "undefined" != typeof exports ? exports.loadCSS = t : e.loadCSS = t }("undefined" != typeof global ? global : this);
   </script>
 
   <!-- Icons for mobile and desktop -->
   <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32px32px-v2.png">
   <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16px16px-v2.png">
   <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-  
+
   <!-- Google Fonts - Optimized loading with font-display: swap -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Playfair+Display:wght@400;700&family=Cinzel:wght@400;700&family=Courier+Prime:wght@400;700&family=Space+Mono:wght@400;700&family=Dancing+Script:wght@400;700&family=Merriweather:wght@400;700&family=Lora:wght@400;700&family=Crimson+Text:wght@400;700&family=PT+Serif:wght@400;700&family=Open+Sans:wght@400;700&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
-  
+  <!-- Essential fonts only - load others on demand -->
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Comic+Neue:wght@400;700&family=Merriweather:wght@400;700&family=Lora:wght@400;700&family=Open+Sans:wght@400;700&family=Roboto:wght@400;700&family=Montserrat:wght@400;700&family=Atkinson+Hyperlegible:wght@400;700&display=swap"
+    rel="stylesheet">
+
   <!-- Performance and resource hints - optimized -->
   <link rel="preconnect" href="https://rtuxaekhfwvpwmvmdaul.supabase.co" crossorigin>
   <link rel="preconnect" href="https://upload.wikimedia.org">
@@ -111,9 +132,11 @@
 <body>
   <div id="root" role="main"></div>
   <noscript>
-    <div style="text-align: center; padding: 50px; font-family: system-ui, sans-serif; background: #0a0a0f; color: #f5f5f5; min-height: 100vh;">
+    <div
+      style="text-align: center; padding: 50px; font-family: system-ui, sans-serif; background: #0a0a0f; color: #f5f5f5; min-height: 100vh;">
       <h1 style="margin-bottom: 20px; font-size: 2rem;">TicDia — Discover Wikipedia</h1>
-      <p style="font-size: 1.1rem; line-height: 1.6;">Please enable JavaScript to use TicDia and discover Wikipedia articles in an engaging format.</p>
+      <p style="font-size: 1.1rem; line-height: 1.6;">Please enable JavaScript to use TicDia and discover Wikipedia
+        articles in an engaging format.</p>
     </div>
   </noscript>
   <script src="https://cdn.gpteng.co/gptengineer.js" type="module" defer></script>

@@ -16,7 +16,7 @@ import { Switch } from "@/components/ui/switch";
 import SmallTic from "../components/SmallTic";
 import { loadUserPreferences, saveUserPreferences, UserPreferences } from "@/services/userPreferencesService";
 import { useLanguage } from "../contexts/LanguageContext";
-import { useUserPreferences } from "@/hooks/useUserPreferences";
+import { useUserPreferences } from "@/contexts/UserPreferencesContext";
 import { AnalyticsStats } from "@/components/AnalyticsStats";
 import { Footer } from "@/components/Footer";
 import { motion, AnimatePresence } from "framer-motion";
@@ -302,17 +302,27 @@ const Profile = () => {
 
   const fontOptions = [
     { value: 'Inter', label: `Inter (${t.default})` },
+    { value: 'Comic Neue', label: 'Comic Neue (Dyslexia-friendly)' },
+    { value: 'Atkinson Hyperlegible', label: 'Atkinson Hyperlegible (High Legibility)' },
     { value: 'Georgia', label: `Georgia (${t.serif})` },
     { value: 'Merriweather', label: 'Merriweather' },
     { value: 'Lora', label: 'Lora' },
     { value: 'Crimson Text', label: 'Crimson Text' },
     { value: 'PT Serif', label: 'PT Serif' },
+    { value: 'Playfair Display', label: 'Playfair Display' },
+    { value: 'EB Garamond', label: 'EB Garamond' },
     { value: 'Times New Roman', label: 'Times New Roman' },
     { value: 'Open Sans', label: 'Open Sans' },
     { value: 'Roboto', label: 'Roboto' },
+    { value: 'Montserrat', label: 'Montserrat' },
+    { value: 'Poppins', label: 'Poppins' },
+    { value: 'Raleway', label: 'Raleway' },
+    { value: 'Lato', label: 'Lato' },
+    { value: 'Source Sans Pro', label: 'Source Sans Pro' },
     { value: 'Arial', label: `Arial (${t.sansSerif})` },
     { value: 'Helvetica', label: 'Helvetica' },
     { value: 'Verdana', label: 'Verdana' },
+    { value: 'Fira Sans', label: 'Fira Sans' },
   ];
 
   const colorOptions = [
@@ -331,25 +341,25 @@ const Profile = () => {
   if (!user) return null;
 
   return (
-    <div className="min-h-screen bg-black text-white">
+    <div className="min-h-screen bg-background text-foreground transition-colors duration-300">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-8 max-w-7xl">
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 mb-6 sm:mb-8">
           <Button
             variant="ghost"
             size="icon"
             onClick={() => navigate("/")}
-            className="text-white hover:bg-white/10 transition-all duration-300 hover:scale-105 self-start sm:self-auto"
+            className="text-foreground hover:bg-muted transition-all duration-300 hover:scale-105 self-start sm:self-auto"
           >
             <ArrowLeft className="w-5 h-5" />
           </Button>
           <div className="transition-all duration-500 ease-out text-center sm:text-left w-full sm:w-auto">
             <h1 className="text-2xl sm:text-3xl font-bold">{t.profile}</h1>
-            <p className="text-gray-400 text-sm sm:text-base break-all sm:break-normal">{user.email}</p>
+            <p className="text-muted-foreground text-sm sm:text-base break-all sm:break-normal">{user.email}</p>
           </div>
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4 sm:space-y-6">
-          <div className="relative bg-gray-900/40 backdrop-blur-xl border border-white/10 p-1.5 rounded-2xl shadow-2xl w-full sm:w-auto overflow-x-auto">
+          <div className="relative bg-muted/50 backdrop-blur-xl border border-border p-1.5 rounded-2xl shadow-sm w-full sm:w-auto overflow-x-auto">
             <TabsList className="bg-transparent border-none p-0 h-auto w-full flex justify-between sm:justify-start gap-2">
               {[
                 { id: "saved", icon: BookMarked, label: t.savedArticles, shortLabel: "Saved" },
@@ -370,9 +380,9 @@ const Profile = () => {
                     />
                   )}
                   <div className="relative z-20 flex items-center justify-center gap-2">
-                    {tab.icon && <tab.icon className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${activeTab === tab.id ? 'text-white' : 'text-gray-400'}`} />}
-                    <span className={`hidden sm:inline font-medium ${activeTab === tab.id ? 'text-white' : 'text-gray-400'}`}>{tab.label}</span>
-                    <span className={`sm:hidden font-medium ${activeTab === tab.id ? 'text-white' : 'text-gray-400'}`}>{tab.shortLabel}</span>
+                    {tab.icon && <tab.icon className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${activeTab === tab.id ? 'text-white' : 'text-muted-foreground'}`} />}
+                    <span className={`hidden sm:inline font-medium ${activeTab === tab.id ? 'text-white' : 'text-muted-foreground'}`}>{tab.label}</span>
+                    <span className={`sm:hidden font-medium ${activeTab === tab.id ? 'text-white' : 'text-muted-foreground'}`}>{tab.shortLabel}</span>
                   </div>
                 </TabsTrigger>
               ))}
@@ -386,12 +396,12 @@ const Profile = () => {
               exit={{ opacity: 0, y: -20 }}
               transition={{ duration: 0.4 }}
             >
-              <Card className="bg-gray-900/40 backdrop-blur-xl border-white/10 shadow-2xl overflow-hidden">
-                <CardHeader className="border-b border-white/5 pb-6">
+              <Card className="bg-card/50 backdrop-blur-xl border-border shadow-lg overflow-hidden">
+                <CardHeader className="border-b border-border pb-6">
                   <div className="flex items-center justify-between mb-4">
                     <div>
-                      <CardTitle className="text-2xl font-bold bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent">{t.yourSaved}</CardTitle>
-                      <CardDescription className="text-gray-400 mt-1">
+                      <CardTitle className="text-2xl font-bold text-foreground">{t.yourSaved}</CardTitle>
+                      <CardDescription className="text-muted-foreground mt-1">
                         {savedArticles.length} {savedArticles.length !== 1 ? t.articles : t.article} {t.saved}
                       </CardDescription>
                     </div>
@@ -409,12 +419,12 @@ const Profile = () => {
                   </div>
                   {savedArticles.length > 0 && (
                     <div className="relative group">
-                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4 transition-colors group-focus-within:text-wikitok-red" />
+                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4 transition-colors group-focus-within:text-primary" />
                       <Input
                         placeholder={t.searchPlaceholder}
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
-                        className="pl-10 bg-black/20 border-white/10 text-white focus:border-wikitok-red/50 focus:ring-wikitok-red/20 transition-all duration-300"
+                        className="pl-10 bg-background/50 border-border text-foreground focus:border-primary/50 focus:ring-primary/20 transition-all duration-300"
                       />
                     </div>
                   )}
@@ -425,12 +435,12 @@ const Profile = () => {
                       <div className="animate-pulse text-wikitok-red">{t.loading}...</div>
                     </div>
                   ) : filteredArticles.length === 0 ? (
-                    <div className="text-center py-16 text-gray-400">
-                      <div className="bg-gray-800/50 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <div className="text-center py-16 text-muted-foreground">
+                      <div className="bg-muted/50 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6">
                         <BookMarked className="w-10 h-10 opacity-50" />
                       </div>
-                      <p className="text-lg font-medium text-white mb-2">{searchTerm ? t.noMatch : t.noSaved}</p>
-                      <p className="text-sm text-gray-500">{searchTerm ? t.tryDifferent : t.startSaving}</p>
+                      <p className="text-lg font-medium text-foreground mb-2">{searchTerm ? t.noMatch : t.noSaved}</p>
+                      <p className="text-sm text-muted-foreground">{searchTerm ? t.tryDifferent : t.startSaving}</p>
                     </div>
                   ) : (
                     <motion.div
@@ -443,15 +453,15 @@ const Profile = () => {
                         <motion.div
                           key={article.id}
                           variants={itemVariants}
-                          className="group flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 sm:p-6 hover:bg-white/5 transition-colors cursor-pointer gap-4"
+                          className="group flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 sm:p-6 hover:bg-muted/50 transition-colors cursor-pointer gap-4"
                           onClick={() => handleArticleClick(article)}
                         >
                           <div className="flex-1 min-w-0">
-                            <h3 className="font-medium text-base sm:text-lg text-gray-200 group-hover:text-white transition-colors line-clamp-2 mb-1.5">
+                            <h3 className="font-medium text-base sm:text-lg text-foreground group-hover:text-primary transition-colors line-clamp-2 mb-1.5">
                               {article.article_title}
                             </h3>
-                            <p className="text-xs sm:text-sm text-gray-500 flex items-center gap-2">
-                              <span className="w-1.5 h-1.5 rounded-full bg-wikitok-red/50"></span>
+                            <p className="text-xs sm:text-sm text-muted-foreground flex items-center gap-2">
+                              <span className="w-1.5 h-1.5 rounded-full bg-primary/50"></span>
                               {t.savedOn} {new Date(article.saved_at).toLocaleDateString()}
                             </p>
                           </div>
@@ -463,7 +473,7 @@ const Profile = () => {
                                 e.stopPropagation();
                                 handleArticleClick(article);
                               }}
-                              className="hover:bg-white/10 hover:text-white"
+                              className="hover:bg-muted hover:text-foreground"
                             >
                               <Eye className="w-4 h-4" />
                             </Button>
@@ -506,26 +516,26 @@ const Profile = () => {
               exit={{ opacity: 0, y: -20 }}
               transition={{ duration: 0.4 }}
             >
-              <Card className="bg-gray-900/40 backdrop-blur-xl border-white/10 shadow-2xl overflow-hidden">
-                <CardHeader className="border-b border-white/5 pb-6">
-                  <CardTitle className="text-2xl font-bold bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent">{t.readingPreferences}</CardTitle>
-                  <CardDescription className="text-gray-400 mt-1">
+              <Card className="bg-card/50 backdrop-blur-xl border-border shadow-lg overflow-hidden">
+                <CardHeader className="border-b border-border pb-6">
+                  <CardTitle className="text-2xl font-bold text-foreground">{t.readingPreferences}</CardTitle>
+                  <CardDescription className="text-muted-foreground mt-1">
                     {t.customize} ({t.syncedToCloud})
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-8 p-6">
                   <div className="space-y-4">
-                    <label className="text-sm font-medium text-gray-300">{t.articleFont}</label>
+                    <label className="text-sm font-medium text-muted-foreground">{t.articleFont}</label>
                     <Select
                       value={userPreferences.fontFamily}
                       onValueChange={(value) => updateUserPrefs({ fontFamily: value })}
                     >
-                      <SelectTrigger className="bg-black/20 border-white/10 h-12 transition-all duration-300 hover:border-white/20 focus:border-wikitok-red/50 focus:ring-wikitok-red/20">
+                      <SelectTrigger className="bg-background/50 border-border h-12 transition-all duration-300 hover:border-primary/50 focus:border-primary/50 focus:ring-primary/20">
                         <SelectValue />
                       </SelectTrigger>
-                      <SelectContent className="bg-gray-900/95 backdrop-blur-xl border-white/10">
+                      <SelectContent className="bg-popover backdrop-blur-xl border-border">
                         {fontOptions.map((font) => (
-                          <SelectItem key={font.value} value={font.value} className="focus:bg-white/10 focus:text-white cursor-pointer py-3">
+                          <SelectItem key={font.value} value={font.value} className="focus:bg-muted focus:text-foreground cursor-pointer py-3">
                             <span style={{ fontFamily: font.value }}>{font.label}</span>
                           </SelectItem>
                         ))}
@@ -533,21 +543,32 @@ const Profile = () => {
                     </Select>
                   </div>
 
+                  <div className="flex items-center justify-between space-x-2">
+                    <div className="space-y-0.5">
+                      <label className="text-sm font-medium text-muted-foreground">Smoke Effect</label>
+                      <p className="text-xs text-muted-foreground">Show smoke trail on cursor (except on feed)</p>
+                    </div>
+                    <Switch
+                      checked={userPreferences.smokeEffect}
+                      onCheckedChange={(checked) => updateUserPrefs({ smokeEffect: checked })}
+                    />
+                  </div>
+
                   <div className="space-y-4">
-                    <label className="text-sm font-medium text-gray-300">{t.highlightColor}</label>
+                    <label className="text-sm font-medium text-muted-foreground">{t.highlightColor}</label>
                     <Select
                       value={userPreferences.highlightColor}
                       onValueChange={(value) => updateUserPrefs({ highlightColor: value })}
                     >
-                      <SelectTrigger className="bg-black/20 border-white/10 h-12 transition-all duration-300 hover:border-white/20 focus:border-wikitok-red/50 focus:ring-wikitok-red/20">
+                      <SelectTrigger className="bg-background/50 border-border h-12 transition-all duration-300 hover:border-primary/50 focus:border-primary/50 focus:ring-primary/20">
                         <SelectValue />
                       </SelectTrigger>
-                      <SelectContent className="bg-gray-900/95 backdrop-blur-xl border-white/10">
+                      <SelectContent className="bg-popover backdrop-blur-xl border-border">
                         {colorOptions.map((color) => (
-                          <SelectItem key={color.value} value={color.value} className="focus:bg-white/10 focus:text-white cursor-pointer py-3">
+                          <SelectItem key={color.value} value={color.value} className="focus:bg-muted focus:text-foreground cursor-pointer py-3">
                             <div className="flex items-center gap-3">
                               <div
-                                className="w-4 h-4 rounded-full shadow-lg ring-2 ring-white/10"
+                                className="w-4 h-4 rounded-full shadow-lg ring-2 ring-border"
                                 style={{ backgroundColor: color.color }}
                               />
                               <span>{color.label}</span>
@@ -560,8 +581,8 @@ const Profile = () => {
 
                   <div className="space-y-4">
                     <div className="flex justify-between">
-                      <label className="text-sm font-medium text-gray-300">{t.backgroundOpacity}</label>
-                      <span className="text-sm text-wikitok-red font-bold">{userPreferences.backgroundOpacity}%</span>
+                      <label className="text-sm font-medium text-muted-foreground">{t.backgroundOpacity}</label>
+                      <span className="text-sm text-primary font-bold">{userPreferences.backgroundOpacity}%</span>
                     </div>
                     <Slider
                       value={[userPreferences.backgroundOpacity]}
@@ -578,8 +599,8 @@ const Profile = () => {
 
                   <div className="space-y-4">
                     <div className="flex justify-between">
-                      <label className="text-sm font-medium text-gray-300">Text Size</label>
-                      <span className="text-sm text-wikitok-red font-bold">{userPreferences.fontSize}px</span>
+                      <label className="text-sm font-medium text-muted-foreground">Text Size</label>
+                      <span className="text-sm text-primary font-bold">{userPreferences.fontSize}px</span>
                     </div>
                     <Slider
                       value={[userPreferences.fontSize]}
@@ -594,11 +615,11 @@ const Profile = () => {
                     </p>
                   </div>
 
-                  <div className="space-y-6 pt-4 border-t border-white/5">
-                    <div className="flex items-center justify-between p-4 rounded-xl bg-white/5 hover:bg-white/10 transition-colors">
+                  <div className="space-y-6 pt-4 border-t border-border">
+                    <div className="flex items-center justify-between p-4 rounded-xl bg-muted/30 hover:bg-muted/50 transition-colors">
                       <div className="space-y-1">
-                        <Label className="text-base font-medium text-gray-200">Liquid Glass Mode</Label>
-                        <p className="text-sm text-gray-500">
+                        <Label className="text-base font-medium text-foreground">Liquid Glass Mode</Label>
+                        <p className="text-sm text-muted-foreground">
                           Enable Apple-style glassmorphism effects
                         </p>
                       </div>
@@ -611,13 +632,13 @@ const Profile = () => {
                       />
                     </div>
 
-                    <div className="flex items-center justify-between p-4 rounded-xl bg-white/5 hover:bg-white/10 transition-colors">
+                    <div className="flex items-center justify-between p-4 rounded-xl bg-muted/30 hover:bg-muted/50 transition-colors">
                       <div className="space-y-1">
-                        <Label className="text-base font-medium text-gray-200 flex items-center gap-2">
+                        <Label className="text-base font-medium text-foreground flex items-center gap-2">
                           Feed Preference
-                          <span className="text-[10px] bg-wikitok-red/20 text-wikitok-red px-2 py-0.5 rounded-full font-bold border border-wikitok-red/30 uppercase tracking-wider">Beta</span>
+                          <span className="text-[10px] bg-primary/10 text-primary px-2 py-0.5 rounded-full font-bold border border-primary/20 uppercase tracking-wider">Beta</span>
                         </Label>
-                        <p className="text-sm text-gray-500">
+                        <p className="text-sm text-muted-foreground">
                           Choose how articles are selected for you
                         </p>
                       </div>
@@ -625,20 +646,20 @@ const Profile = () => {
                         value={userPreferences.feedType || 'mixed'}
                         onValueChange={(value: 'random' | 'curated' | 'mixed') => updateUserPrefs({ feedType: value })}
                       >
-                        <SelectTrigger className="w-[140px] bg-black/20 border-white/10 transition-all duration-300 hover:border-white/20 focus:border-wikitok-red/50 focus:ring-wikitok-red/20">
+                        <SelectTrigger className="w-[140px] bg-background/50 border-border transition-all duration-300 hover:border-primary/50 focus:border-primary/50 focus:ring-primary/20">
                           <SelectValue />
                         </SelectTrigger>
-                        <SelectContent className="bg-gray-900/95 backdrop-blur-xl border-white/10">
-                          <SelectItem value="random" className="focus:bg-white/10 focus:text-white cursor-pointer">Random</SelectItem>
-                          <SelectItem value="curated" className="focus:bg-white/10 focus:text-white cursor-pointer">AI Curated</SelectItem>
-                          <SelectItem value="mixed" className="focus:bg-white/10 focus:text-white cursor-pointer">Mixed</SelectItem>
+                        <SelectContent className="bg-popover backdrop-blur-xl border-border">
+                          <SelectItem value="random" className="focus:bg-muted focus:text-foreground cursor-pointer">Random</SelectItem>
+                          <SelectItem value="curated" className="focus:bg-muted focus:text-foreground cursor-pointer">AI Curated</SelectItem>
+                          <SelectItem value="mixed" className="focus:bg-muted focus:text-foreground cursor-pointer">Mixed</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
                   </div>
 
-                  <div className="p-6 bg-black/40 rounded-xl border border-white/5 mt-8">
-                    <h4 className="text-sm font-medium text-gray-400 mb-4 uppercase tracking-wider text-xs">{t.preview}</h4>
+                  <div className="p-6 bg-muted/30 rounded-xl border border-border mt-8">
+                    <h4 className="text-sm font-medium text-muted-foreground mb-4 uppercase tracking-wider text-xs">{t.preview}</h4>
                     <div
                       className="relative p-6 rounded-lg bg-cover bg-center overflow-hidden shadow-2xl transition-all duration-500 group"
                       style={{
@@ -689,27 +710,27 @@ const Profile = () => {
               className="grid gap-4 sm:gap-6"
             >
               {/* Email Change Section */}
-              <Card className="bg-gray-900/40 backdrop-blur-xl border-white/10 shadow-2xl overflow-hidden">
-                <CardHeader className="pb-3 sm:pb-6 border-b border-white/5">
+              <Card className="bg-card/50 backdrop-blur-xl border-border shadow-lg overflow-hidden">
+                <CardHeader className="pb-3 sm:pb-6 border-b border-border">
                   <CardTitle className="flex items-center gap-3 text-lg sm:text-xl">
-                    <div className="p-2 rounded-lg bg-wikitok-red/10 text-wikitok-red">
+                    <div className="p-2 rounded-lg bg-primary/10 text-primary">
                       <Mail className="w-4 h-4 sm:w-5 sm:h-5" />
                     </div>
-                    <span className="text-sm sm:text-base">Change Email Address</span>
+                    <span className="text-sm sm:text-base text-foreground">Change Email Address</span>
                   </CardTitle>
-                  <CardDescription className="text-xs sm:text-sm text-gray-400 ml-12">
-                    Current email: <span className="text-white font-medium">{user.email}</span>
+                  <CardDescription className="text-xs sm:text-sm text-muted-foreground ml-12">
+                    Current email: <span className="text-foreground font-medium">{user.email}</span>
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4 p-6">
                   <div className="space-y-2">
-                    <label className="text-xs sm:text-sm font-medium text-gray-300">New Email Address</label>
+                    <label className="text-xs sm:text-sm font-medium text-muted-foreground">New Email Address</label>
                     <Input
                       type="email"
                       placeholder="Enter new email address"
                       value={newEmail}
                       onChange={(e) => setNewEmail(e.target.value)}
-                      className="bg-black/20 border-white/10 text-white text-sm sm:text-base focus:border-wikitok-red/50 focus:ring-wikitok-red/20"
+                      className="bg-background/50 border-border text-foreground text-sm sm:text-base focus:border-primary/50 focus:ring-primary/20"
                     />
                   </div>
                   <Button
@@ -726,37 +747,37 @@ const Profile = () => {
               </Card>
 
               {/* Password Change Section */}
-              <Card className="bg-gray-900/40 backdrop-blur-xl border-white/10 shadow-2xl overflow-hidden">
-                <CardHeader className="pb-3 sm:pb-6 border-b border-white/5">
+              <Card className="bg-card/50 backdrop-blur-xl border-border shadow-lg overflow-hidden">
+                <CardHeader className="pb-3 sm:pb-6 border-b border-border">
                   <CardTitle className="flex items-center gap-3 text-lg sm:text-xl">
-                    <div className="p-2 rounded-lg bg-wikitok-red/10 text-wikitok-red">
+                    <div className="p-2 rounded-lg bg-primary/10 text-primary">
                       <Lock className="w-4 h-4 sm:w-5 sm:h-5" />
                     </div>
-                    <span className="text-sm sm:text-base">Change Password</span>
+                    <span className="text-sm sm:text-base text-foreground">Change Password</span>
                   </CardTitle>
-                  <CardDescription className="text-xs sm:text-sm text-gray-400 ml-12">
+                  <CardDescription className="text-xs sm:text-sm text-muted-foreground ml-12">
                     Update your account password for security
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4 p-6">
                   <div className="space-y-2">
-                    <label className="text-xs sm:text-sm font-medium text-gray-300">New Password</label>
+                    <label className="text-xs sm:text-sm font-medium text-muted-foreground">New Password</label>
                     <Input
                       type="password"
                       placeholder="Enter new password"
                       value={newPassword}
                       onChange={(e) => setNewPassword(e.target.value)}
-                      className="bg-black/20 border-white/10 text-white text-sm sm:text-base focus:border-wikitok-red/50 focus:ring-wikitok-red/20"
+                      className="bg-background/50 border-border text-foreground text-sm sm:text-base focus:border-primary/50 focus:ring-primary/20"
                     />
                   </div>
                   <div className="space-y-2">
-                    <label className="text-xs sm:text-sm font-medium text-gray-300">Confirm New Password</label>
+                    <label className="text-xs sm:text-sm font-medium text-muted-foreground">Confirm New Password</label>
                     <Input
                       type="password"
                       placeholder="Confirm new password"
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
-                      className="bg-black/20 border-white/10 text-white text-sm sm:text-base focus:border-wikitok-red/50 focus:ring-wikitok-red/20"
+                      className="bg-background/50 border-border text-foreground text-sm sm:text-base focus:border-primary/50 focus:ring-primary/20"
                     />
                   </div>
                   <Button
@@ -773,27 +794,27 @@ const Profile = () => {
               </Card>
 
               {/* Password Reset Section */}
-              <Card className="bg-gray-900/40 backdrop-blur-xl border-white/10 shadow-2xl overflow-hidden">
-                <CardHeader className="pb-3 sm:pb-6 border-b border-white/5">
+              <Card className="bg-card/50 backdrop-blur-xl border-border shadow-lg overflow-hidden">
+                <CardHeader className="pb-3 sm:pb-6 border-b border-border">
                   <CardTitle className="flex items-center gap-3 text-lg sm:text-xl">
-                    <div className="p-2 rounded-lg bg-wikitok-red/10 text-wikitok-red">
+                    <div className="p-2 rounded-lg bg-primary/10 text-primary">
                       <Key className="w-4 h-4 sm:w-5 sm:h-5" />
                     </div>
-                    <span className="text-sm sm:text-base">Reset Password via Email</span>
+                    <span className="text-sm sm:text-base text-foreground">Reset Password via Email</span>
                   </CardTitle>
-                  <CardDescription className="text-xs sm:text-sm text-gray-400 ml-12">
+                  <CardDescription className="text-xs sm:text-sm text-muted-foreground ml-12">
                     Send a password reset link to your email address
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4 p-6">
                   <div className="space-y-2">
-                    <label className="text-xs sm:text-sm font-medium text-gray-300">Email Address</label>
+                    <label className="text-xs sm:text-sm font-medium text-muted-foreground">Email Address</label>
                     <Input
                       type="email"
                       placeholder="Enter email address"
                       value={resetEmail}
                       onChange={(e) => setResetEmail(e.target.value)}
-                      className="bg-black/20 border-white/10 text-white text-sm sm:text-base focus:border-wikitok-red/50 focus:ring-wikitok-red/20"
+                      className="bg-background/50 border-border text-foreground text-sm sm:text-base focus:border-primary/50 focus:ring-primary/20"
                     />
                   </div>
                   <Button
