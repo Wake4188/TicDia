@@ -46,7 +46,7 @@ const ArticleItem = ({
           decoding="async"
           width="1920"
           height="1080"
-          fetchpriority={index === 0 ? "high" : "low"}
+          fetchPriority={index === 0 ? "high" : "low"}
           style={{ aspectRatio: '16/9' }}
         />
         <div
