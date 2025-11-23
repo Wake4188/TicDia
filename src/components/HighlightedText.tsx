@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import React, { useState, useMemo } from "react";
 import { detectComplexWords } from "@/services/wordComplexityService";
 import WordDefinitionTooltip from "./WordDefinitionTooltip";
 
@@ -6,14 +6,18 @@ interface HighlightedTextProps {
     text: string;
     className?: string;
     style?: React.CSSProperties;
+    isActive?: boolean; // Only detect words when active
 }
 
-const HighlightedText = ({ text, className = "", style = {} }: HighlightedTextProps) => {
+const HighlightedText = ({ text, className = "", style = {}, isActive = true }: HighlightedTextProps) => {
     const [selectedWord, setSelectedWord] = useState<string | null>(null);
     const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
 
-    // Detect complex words
-    const complexWords = useMemo(() => detectComplexWords(text), [text]);
+    // Only detect complex words when active (current article)
+    const complexWords = useMemo(() => {
+        if (!isActive) return [];
+        return detectComplexWords(text);
+    }, [text, isActive]);
 
     // Create a set for quick lookup
     const complexWordSet = useMemo(() =>
@@ -70,4 +74,4 @@ const HighlightedText = ({ text, className = "", style = {} }: HighlightedTextPr
     );
 };
 
-export default HighlightedText;
+export default React.memo(HighlightedText);

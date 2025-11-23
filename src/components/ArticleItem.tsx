@@ -94,6 +94,7 @@ const ArticleItem = ({
                     fontSize: `${userPreferences.fontSize}px`,
                     minHeight: '80px'
                   }}
+                  isActive={isCurrent}
                 />
               ) : (
                 <p

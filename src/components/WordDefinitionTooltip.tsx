@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { X } from "lucide-react";
 import { lookupWord, getEnglishDefinitions, type WordDefinition } from "@/services/wiktionaryService";
 
@@ -95,4 +95,4 @@ const WordDefinitionTooltip = ({ word, onClose, position }: WordDefinitionToolti
     );
 };
 
-export default WordDefinitionTooltip;
+export default React.memo(WordDefinitionTooltip);
