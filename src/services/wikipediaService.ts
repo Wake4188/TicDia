@@ -31,7 +31,7 @@ const getRelatedArticles = async (article: WikipediaArticle, language: Language 
       ?.slice(0, 10) || [];
 
     if (relatedTitles.length === 0) {
-      return getRandomArticles(3, undefined, language);
+      return getRandomArticles(12, undefined, language);
     }
 
     const data = await fetchWikipediaContent(relatedTitles, language) as WikipediaResponse;
@@ -41,7 +41,7 @@ const getRelatedArticles = async (article: WikipediaArticle, language: Language 
     return articles.filter(Boolean) as WikipediaArticle[];
   } catch (error) {
     console.error('Error fetching related articles:', error);
-    return getRandomArticles(3, undefined, language);
+    return getRandomArticles(12, undefined, language);
   }
 };
 
@@ -100,13 +100,10 @@ const getPersonalizedArticles = async (userId: string, count: number = 10, langu
 };
 
 const getRandomArticles = async (count: number = 2, category?: string, language: Language = DEFAULT_LANGUAGE): Promise<WikipediaArticle[]> => {
-  // Check cache first
-  const cacheKey = `random_${language.code}_${count}_${category || 'all'}`;
-  const cached = cache.get<WikipediaArticle[]>(cacheKey);
-  if (cached) return cached;
+  // Don't use cache for random articles to prevent duplicates in infinite scroll
 
   try {
-    const multiplier = 2; // Reduced multiplier for faster initial load
+    const multiplier = 3; // Increased multiplier for more variety
     let titles: string[];
 
     if (category && category !== "All") {
@@ -151,14 +148,10 @@ const getRandomArticles = async (count: number = 2, category?: string, language:
       // Remove duplicates by ID before merging
       const combined = [...validArticles, ...moreArticles];
       const uniqueArticles = Array.from(new Map(combined.map(a => [a.id, a])).values());
-      const result = uniqueArticles.slice(0, count);
-      cache.set(cacheKey, result, 300000); // Cache for 5 minutes
-      return result;
+      return uniqueArticles.slice(0, count);
     }
 
-    const result = validArticles.slice(0, count);
-    cache.set(cacheKey, result, 300000); // Cache for 5 minutes
-    return result;
+    return validArticles.slice(0, count);
   } catch (error) {
     console.error('Error fetching articles:', error);
     throw error;

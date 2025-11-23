@@ -43,8 +43,8 @@ function AppContent() {
   const { userPreferences } = useUserPreferences();
   const location = useLocation();
 
-  // Show smoke effect if enabled AND not on the main feed (/)
-  const showSmoke = userPreferences.smokeEffect && location.pathname !== '/';
+  // Show smoke effect if enabled
+  const showSmoke = userPreferences.smokeEffect;
 
   return (
     <div className={`min-h-screen bg-background ${userPreferences.liquidGlassMode ? 'liquid-glass' : ''}`}>

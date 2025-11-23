@@ -21,17 +21,29 @@ export const useArticleManagement = (
   // Initialize with IDs from initialArticles
   const seenIds = useRef<Set<number>>(new Set(initialArticles.map(a => a.id)));
 
+  // Track consecutive failed loads to prevent infinite loops
+  const failedLoadCount = useRef(0);
+
   const loadMoreArticles = useCallback(async () => {
     if (isLoading) return;
+
+    // Stop trying if we've failed too many times
+    if (failedLoadCount.current >= 2) {
+      console.log('Reached maximum retry limit for loading articles');
+      return;
+    }
 
     try {
       console.log('Loading more articles...');
       setIsLoading(true);
 
-      // Fetch more articles than needed to account for duplicates
-      const newArticles = currentArticle
-        ? await getRelatedArticles(currentArticle, currentLanguage)
-        : await getRandomArticles(5, undefined, currentLanguage);
+      let newArticles;
+      // Try to fetch related articles first
+      if (currentArticle) {
+        newArticles = await getRelatedArticles(currentArticle, currentLanguage);
+      } else {
+        newArticles = await getRandomArticles(12, undefined, currentLanguage);
+      }
 
       // Filter out articles we've already seen
       const uniqueNewArticles = newArticles.filter(article => {
@@ -46,13 +58,31 @@ export const useArticleManagement = (
 
       if (uniqueNewArticles.length > 0) {
         setArticles(prev => [...prev, ...uniqueNewArticles]);
+        failedLoadCount.current = 0; // Reset counter on success
       } else {
-        // If all were duplicates, try fetching again (recursive but limited)
-        // For now, just log it - the user can scroll to trigger another load
-        console.log('All loaded articles were duplicates');
+        // If all were duplicates, fetch random articles instead
+        console.log('All loaded articles were duplicates, fetching random articles...');
+        const randomArticles = await getRandomArticles(12, undefined, currentLanguage);
+        const uniqueRandomArticles = randomArticles.filter(article => {
+          if (seenIds.current.has(article.id)) {
+            return false;
+          }
+          seenIds.current.add(article.id);
+          return true;
+        });
+
+        if (uniqueRandomArticles.length > 0) {
+          setArticles(prev => [...prev, ...uniqueRandomArticles]);
+          console.log(`Added ${uniqueRandomArticles.length} random articles`);
+          failedLoadCount.current = 0; // Reset counter on success
+        } else {
+          failedLoadCount.current++;
+          console.log(`Failed to load unique articles. Attempt ${failedLoadCount.current}/2`);
+        }
       }
     } catch (error) {
       console.error("Failed to load more articles", error);
+      failedLoadCount.current++;
     } finally {
       setIsLoading(false);
     }

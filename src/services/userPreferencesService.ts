@@ -35,7 +35,7 @@ export const loadUserPreferences = async (userId: string): Promise<UserPreferenc
       backgroundOpacity: data.background_opacity || 80,
       highlightColor: data.highlight_color || '#ea384c',
       fontSize: data.font_size || 16,
-      feedType: data.feed_type || 'mixed',
+      feedType: (data.feed_type as 'random' | 'curated' | 'mixed') || 'mixed',
       liquidGlassMode: data.liquid_glass_mode || false,
       ttsSpeed: data.tts_speed || 1.0,
       smokeEffect: data.smoke_effect !== false // Default to true if null/undefined

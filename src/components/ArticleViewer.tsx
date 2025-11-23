@@ -63,7 +63,7 @@ const ArticleViewer = ({ articles, onArticleChange, onArticleView }: ArticleView
   }, [handleTtsStart, handleTtsStop]);
 
   return (
-    <main className="flex-1 relative" role="feed" aria-label="Wikipedia articles feed">
+    <div className="flex-1 relative" role="feed" aria-label="Wikipedia articles feed">
       <div
         ref={containerRef}
         className="h-full w-full overflow-y-auto snap-y snap-mandatory"
@@ -91,7 +91,7 @@ const ArticleViewer = ({ articles, onArticleChange, onArticleView }: ArticleView
 
         {isLoading && <ArticleLoadingState />}
       </div>
-    </main>
+    </div>
   );
 };
 

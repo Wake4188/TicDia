@@ -25,7 +25,10 @@ const Navigation = ({ currentArticle }: NavigationProps) => {
   const navigationProps = {
     searchValue,
     onSearchClick: () => setIsSearchOpen(true),
-    onRandomClick: () => window.location.reload(),
+    onRandomClick: () => {
+      // Force a fresh feed by reloading
+      window.location.href = '/';
+    },
     onTodayClick: () => window.location.href = '/today'
   };
 
@@ -36,10 +39,10 @@ const Navigation = ({ currentArticle }: NavigationProps) => {
       ) : (
         <NavigationDesktop {...navigationProps} />
       )}
-      
-      <SearchModal 
-        isOpen={isSearchOpen} 
-        onClose={() => setIsSearchOpen(false)} 
+
+      <SearchModal
+        isOpen={isSearchOpen}
+        onClose={() => setIsSearchOpen(false)}
       />
     </>
   );

@@ -1,7 +1,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { useSearchParams, useLocation, useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import ArticleViewer from "../components/ArticleViewer";
 import ArticleLoadingState from "../components/ArticleLoadingState";
 import RightSidebar from "../components/RightSidebar";
@@ -36,8 +36,18 @@ const Index = () => {
   const feedType = userPreferences.feedType;
   const userId = user?.id;
 
+  // Generate unique key for fresh articles on each navigation
+  const [feedKey, setFeedKey] = useState(() => Date.now());
+
+  // Reset feed when navigating back to home without search
+  useEffect(() => {
+    if (!searchQuery) {
+      setFeedKey(Date.now());
+    }
+  }, [location.pathname, searchQuery]);
+
   const { data: articles, isLoading, error } = useQuery({
-    queryKey: ["articles", searchQuery, currentLanguage.code, feedType, userId],
+    queryKey: ["articles", searchQuery, currentLanguage.code, feedType, userId, feedKey],
     queryFn: async () => {
       if (searchQuery) {
         const results = location.state?.reorderedResults || await searchArticles(searchQuery, currentLanguage);

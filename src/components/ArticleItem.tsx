@@ -4,6 +4,7 @@ import { UserPreferences } from "@/services/userPreferencesService";
 import AudioPlayer from "./AudioPlayer";
 import { useAuth } from "@/contexts/AuthContext";
 import { ExportMenu } from "./ExportMenu";
+import HighlightedText from "./HighlightedText";
 
 interface ArticleItemProps {
   article: any;
@@ -84,17 +85,29 @@ const ArticleItem = ({
               {article.title}
             </h1>
             <div className="max-w-2xl" style={{ minHeight: '100px' }}>
-              <p
-                className="text-sm sm:text-lg leading-relaxed"
-                style={{
-                  fontFamily: userPreferences.fontFamily,
-                  fontSize: `${userPreferences.fontSize}px`,
-                  minHeight: '80px'
-                }}
-                translate="yes"
-              >
-                {contentToShow}
-              </p>
+              {!isMobile && user ? (
+                <HighlightedText
+                  text={contentToShow}
+                  className="text-sm sm:text-lg leading-relaxed"
+                  style={{
+                    fontFamily: userPreferences.fontFamily,
+                    fontSize: `${userPreferences.fontSize}px`,
+                    minHeight: '80px'
+                  }}
+                />
+              ) : (
+                <p
+                  className="text-sm sm:text-lg leading-relaxed"
+                  style={{
+                    fontFamily: userPreferences.fontFamily,
+                    fontSize: `${userPreferences.fontSize}px`,
+                    minHeight: '80px'
+                  }}
+                  translate="yes"
+                >
+                  {contentToShow}
+                </p>
+              )}
             </div>
 
             {/* Audio Player */}
