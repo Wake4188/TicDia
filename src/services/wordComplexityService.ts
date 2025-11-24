@@ -18,6 +18,10 @@ const COMMON_WORDS = new Set([
     'another', 'much', 'too', 'own', 'same', 'made', 'over', 'before', 'must'
 ]);
 
+// LRU cache for complex word detection results
+const complexWordsCache = new Map<string, ComplexWord[]>();
+const MAX_CACHE_SIZE = 50; // Cache last 50 texts
+
 // Count syllables in a word (rough estimation)
 function countSyllables(word: string): number {
     word = word.toLowerCase();
@@ -37,6 +41,11 @@ export interface ComplexWord {
 }
 
 export function detectComplexWords(text: string): ComplexWord[] {
+    // Check cache first
+    if (complexWordsCache.has(text)) {
+        return complexWordsCache.get(text)!;
+    }
+
     // Split text into words while preserving punctuation context
     const wordPattern = /\b[a-zA-Z]+(?:[''][a-zA-Z]+)?\b/g;
     const matches = Array.from(text.matchAll(wordPattern));
@@ -72,6 +81,14 @@ export function detectComplexWords(text: string): ComplexWord[] {
             });
         }
     }
+
+    // Add to cache with LRU eviction
+    if (complexWordsCache.size >= MAX_CACHE_SIZE) {
+        // Remove oldest entry (first in Map)
+        const firstKey = complexWordsCache.keys().next().value;
+        complexWordsCache.delete(firstKey);
+    }
+    complexWordsCache.set(text, complexWords);
 
     return complexWords;
 }

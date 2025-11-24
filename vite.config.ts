@@ -35,7 +35,25 @@ export default defineConfig(({ mode }) => ({
   server: {
     host: "::",
     port: 8080,
+    hmr: {
+      overlay: false, // Reduce overlay noise
+    },
   },
+
+  // Optimize dependency pre-bundling for faster dev server
+  optimizeDeps: {
+    include: [
+      'react',
+      'react-dom',
+      'react-router-dom',
+      '@tanstack/react-query',
+      'lucide-react',
+    ],
+    exclude: ['@lovable-dev/tagger'],
+  },
+
+  // Enable caching for faster rebuilds
+  cacheDir: 'node_modules/.vite',
 
   plugins: [
     react(),

@@ -63,17 +63,64 @@ const getPersonalizedArticles = async (userId: string, count: number = 10, langu
       return getRandomArticles(count, undefined, language);
     }
 
-    // Get top 3 favorite topics
-    const topTopics = analytics.favorite_topics.slice(0, 3);
+    // Load seen article IDs from localStorage to avoid showing duplicates
+    const loadSeenIds = (): Set<number> => {
+      try {
+        const stored = localStorage.getItem('ticdia_seen_article_ids');
+        if (stored) {
+          const idsArray = JSON.parse(stored) as number[];
+          return new Set(idsArray);
+        }
+      } catch (error) {
+        console.error('Error loading seen IDs:', error);
+      }
+      return new Set();
+    };
+    const seenIds = loadSeenIds();
 
-    // Calculate split: 70% personalized, 30% discovery
-    const personalizedCount = Math.ceil(count * 0.7);
+    // Smart topic rotation: don't always use the same topics
+    // Track which topics we've used recently in session storage
+    const getUsedTopics = (): Set<string> => {
+      try {
+        const stored = sessionStorage.getItem('ticdia_used_topics');
+        return stored ? new Set(JSON.parse(stored)) : new Set();
+      } catch {
+        return new Set();
+      }
+    };
+
+    const saveUsedTopics = (topics: Set<string>) => {
+      try {
+        sessionStorage.setItem('ticdia_used_topics', JSON.stringify(Array.from(topics)));
+      } catch { }
+    };
+
+    const usedTopics = getUsedTopics();
+    const allTopics = analytics.favorite_topics.filter((t: string) => t && t.length > 0);
+
+    // Select 2-4 topics, preferring ones we haven't used recently
+    const availableTopics = allTopics.filter((t: string) => !usedTopics.has(t));
+    const topicsToUse = availableTopics.length >= 2
+      ? availableTopics.slice(0, Math.min(4, availableTopics.length))
+      : allTopics.slice(0, Math.min(4, allTopics.length));
+
+    // If we've exhausted all topics, reset the rotation
+    if (availableTopics.length === 0) {
+      usedTopics.clear();
+    }
+
+    // Mark these topics as used
+    topicsToUse.forEach((t: string) => usedTopics.add(t));
+    saveUsedTopics(usedTopics);
+
+    // Adjust ratio: 50% personalized, 50% discovery for more variety
+    const personalizedCount = Math.ceil(count * 0.5);
     const discoveryCount = count - personalizedCount;
 
-    // Fetch personalized articles from favorite topics
-    const personalizedPromises = topTopics.map(topic =>
-      getRandomArticles(Math.ceil(personalizedCount / topTopics.length), topic, language)
-        .catch(() => [] as WikipediaArticle[]) // Ignore failures for individual topics
+    // Fetch personalized articles from selected topics
+    const personalizedPromises = topicsToUse.map((topic: string) =>
+      getRandomArticles(Math.ceil(personalizedCount / topicsToUse.length), topic, language)
+        .catch(() => [] as WikipediaArticle[])
     );
 
     const [personalizedResults, discoveryResults] = await Promise.all([
@@ -83,13 +130,29 @@ const getPersonalizedArticles = async (userId: string, count: number = 10, langu
 
     // Flatten and combine
     const personalizedArticles = personalizedResults.flat();
-    const allArticles = [...personalizedArticles, ...discoveryResults];
+    let allArticles = [...personalizedArticles, ...discoveryResults];
 
     // Remove duplicates by ID
-    const uniqueArticles = Array.from(new Map(allArticles.map(a => [a.id, a])).values());
+    allArticles = Array.from(new Map(allArticles.map(a => [a.id, a])).values());
+
+    // Filter out articles we've already seen
+    const unseenArticles = allArticles.filter(a => !seenIds.has(a.id));
+
+    // If we filtered out too many, fetch more random articles
+    if (unseenArticles.length < count * 0.7) {
+      const additionalCount = count - unseenArticles.length;
+      const additionalArticles = await getRandomArticles(additionalCount * 2, undefined, language)
+        .catch(() => [] as WikipediaArticle[]);
+
+      const unseenAdditional = additionalArticles.filter(a =>
+        !seenIds.has(a.id) && !unseenArticles.find(ua => ua.id === a.id)
+      );
+
+      unseenArticles.push(...unseenAdditional);
+    }
 
     // Shuffle to mix personalized and discovery
-    const shuffled = uniqueArticles.sort(() => Math.random() - 0.5);
+    const shuffled = unseenArticles.sort(() => Math.random() - 0.5);
 
     return shuffled.slice(0, count);
   } catch (error) {
@@ -103,7 +166,7 @@ const getRandomArticles = async (count: number = 2, category?: string, language:
   // Don't use cache for random articles to prevent duplicates in infinite scroll
 
   try {
-    const multiplier = 3; // Increased multiplier for more variety
+    const multiplier = 5; // Increased multiplier for better variety and fewer duplicates
     let titles: string[];
 
     if (category && category !== "All") {

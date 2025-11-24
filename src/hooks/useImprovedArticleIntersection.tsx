@@ -103,7 +103,7 @@ export const useImprovedArticleIntersection = ({
     if (!container) return;
 
     const observer = new IntersectionObserver(handleIntersection, {
-      threshold: [0.5, 0.7, 0.9],
+      threshold: [0.5, 0.9], // Reduced from 3 thresholds to 2 for better performance
       root: null,
     });
 

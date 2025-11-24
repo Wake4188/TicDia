@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useCallback } from "react";
 import { detectComplexWords } from "@/services/wordComplexityService";
 import WordDefinitionTooltip from "./WordDefinitionTooltip";
 
@@ -25,48 +25,59 @@ const HighlightedText = ({ text, className = "", style = {}, isActive = true }: 
         [complexWords]
     );
 
-    const handleWordClick = (word: string, event: React.MouseEvent) => {
+    const handleWordClick = useCallback((word: string, event: React.MouseEvent) => {
         const rect = (event.target as HTMLElement).getBoundingClientRect();
         setTooltipPosition({
             x: rect.left + rect.width / 2,
             y: rect.top
         });
         setSelectedWord(word);
-    };
+    }, []);
 
-    // Split text into words and render with highlighting
-    const renderHighlightedText = () => {
+    const handleClose = useCallback(() => {
+        setSelectedWord(null);
+    }, []);
+
+    // Memoize the rendered text to avoid re-splitting on every render
+    const renderedText = useMemo(() => {
+        // Early return for inactive articles - no highlighting needed
+        if (!isActive || complexWordSet.size === 0) {
+            return <span className={className} style={style}>{text}</span>;
+        }
+
         const words = text.split(/(\s+)/); // Split but keep whitespace
 
-        return words.map((segment, idx) => {
-            const normalizedWord = segment.toLowerCase().replace(/[^a-z]/g, '');
+        return (
+            <span className={className} style={style}>
+                {words.map((segment, idx) => {
+                    const normalizedWord = segment.toLowerCase().replace(/[^a-z]/g, '');
 
-            if (complexWordSet.has(normalizedWord)) {
-                return (
-                    <span
-                        key={idx}
-                        className="complex-word cursor-pointer border-b-2 border-tictok-red bg-tictok-red/20 hover:bg-tictok-red/30 px-0.5 rounded-sm transition-all duration-200"
-                        onClick={(e) => handleWordClick(normalizedWord, e)}
-                    >
-                        {segment}
-                    </span>
-                );
-            }
+                    if (complexWordSet.has(normalizedWord)) {
+                        return (
+                            <span
+                                key={idx}
+                                className="complex-word cursor-pointer border-b-2 border-tictok-red bg-tictok-red/20 hover:bg-tictok-red/30 px-0.5 rounded-sm transition-all duration-200"
+                                onClick={(e) => handleWordClick(normalizedWord, e)}
+                            >
+                                {segment}
+                            </span>
+                        );
+                    }
 
-            return <span key={idx}>{segment}</span>;
-        });
-    };
+                    return <span key={idx}>{segment}</span>;
+                })}
+            </span>
+        );
+    }, [text, isActive, complexWordSet, className, style, handleWordClick]);
 
     return (
         <>
-            <span className={className} style={style}>
-                {renderHighlightedText()}
-            </span>
+            {renderedText}
 
             {selectedWord && (
                 <WordDefinitionTooltip
                     word={selectedWord}
-                    onClose={() => setSelectedWord(null)}
+                    onClose={handleClose}
                     position={tooltipPosition}
                 />
             )}

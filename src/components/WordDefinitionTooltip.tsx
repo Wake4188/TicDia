@@ -14,23 +14,40 @@ const WordDefinitionTooltip = ({ word, onClose, position }: WordDefinitionToolti
     const [error, setError] = useState(false);
 
     useEffect(() => {
-        const fetchDefinition = async () => {
+        const abortController = new AbortController();
+
+        // Debounce the fetch to avoid rapid API calls
+        const timer = setTimeout(async () => {
             setIsLoading(true);
             setError(false);
 
-            const response = await lookupWord(word);
-            const englishDefs = getEnglishDefinitions(response);
+            try {
+                const response = await lookupWord(word);
 
-            if (englishDefs.length > 0) {
-                setDefinitions(englishDefs);
-            } else {
-                setError(true);
+                // Check if request was aborted
+                if (abortController.signal.aborted) return;
+
+                const englishDefs = getEnglishDefinitions(response);
+
+                if (englishDefs.length > 0) {
+                    setDefinitions(englishDefs);
+                } else {
+                    setError(true);
+                }
+
+                setIsLoading(false);
+            } catch (err) {
+                if (!abortController.signal.aborted) {
+                    setError(true);
+                    setIsLoading(false);
+                }
             }
+        }, 150); // 150ms debounce
 
-            setIsLoading(false);
+        return () => {
+            clearTimeout(timer);
+            abortController.abort();
         };
-
-        fetchDefinition();
     }, [word]);
 
     return (

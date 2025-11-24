@@ -1,8 +1,37 @@
 
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import { getRandomArticles, getRelatedArticles } from "../services/wikipediaService";
 import { useImprovedArticleIntersection } from "./useImprovedArticleIntersection";
 import { useLanguage } from "../contexts/LanguageContext";
+
+const SEEN_IDS_STORAGE_KEY = 'ticdia_seen_article_ids';
+const MAX_SEEN_IDS = 500; // Store last 500 seen article IDs
+
+// Load seen IDs from localStorage
+function loadSeenIds(): Set<number> {
+  try {
+    const stored = localStorage.getItem(SEEN_IDS_STORAGE_KEY);
+    if (stored) {
+      const idsArray = JSON.parse(stored) as number[];
+      return new Set(idsArray);
+    }
+  } catch (error) {
+    console.error('Error loading seen article IDs:', error);
+  }
+  return new Set();
+}
+
+// Save seen IDs to localStorage (keep only last MAX_SEEN_IDS)
+function saveSeenIds(seenIds: Set<number>): void {
+  try {
+    const idsArray = Array.from(seenIds);
+    // Keep only the most recent IDs
+    const recentIds = idsArray.slice(-MAX_SEEN_IDS);
+    localStorage.setItem(SEEN_IDS_STORAGE_KEY, JSON.stringify(recentIds));
+  } catch (error) {
+    console.error('Error saving seen article IDs:', error);
+  }
+}
 
 export const useArticleManagement = (
   initialArticles: any[],
@@ -18,8 +47,15 @@ export const useArticleManagement = (
   const currentArticle = articles[currentIndex];
 
   // Track seen article IDs to prevent duplicates
-  // Initialize with IDs from initialArticles
-  const seenIds = useRef<Set<number>>(new Set(initialArticles.map(a => a.id)));
+  // Load from localStorage on mount, then merge with initialArticles
+  const seenIds = useRef<Set<number>>(loadSeenIds());
+
+  // Add initial article IDs to seen set
+  useEffect(() => {
+    initialArticles.forEach(a => seenIds.current.add(a.id));
+    saveSeenIds(seenIds.current);
+  }, []); // Only run once on mount
+
 
   // Track consecutive failed loads to prevent infinite loops
   const failedLoadCount = useRef(0);
@@ -29,12 +65,10 @@ export const useArticleManagement = (
 
     // Stop trying if we've failed too many times
     if (failedLoadCount.current >= 2) {
-      console.log('Reached maximum retry limit for loading articles');
       return;
     }
 
     try {
-      console.log('Loading more articles...');
       setIsLoading(true);
 
       let newArticles;
@@ -54,14 +88,12 @@ export const useArticleManagement = (
         return true;
       });
 
-      console.log(`Loaded ${newArticles.length} articles, ${uniqueNewArticles.length} unique`);
-
       if (uniqueNewArticles.length > 0) {
         setArticles(prev => [...prev, ...uniqueNewArticles]);
+        saveSeenIds(seenIds.current); // Persist to localStorage
         failedLoadCount.current = 0; // Reset counter on success
       } else {
         // If all were duplicates, fetch random articles instead
-        console.log('All loaded articles were duplicates, fetching random articles...');
         const randomArticles = await getRandomArticles(12, undefined, currentLanguage);
         const uniqueRandomArticles = randomArticles.filter(article => {
           if (seenIds.current.has(article.id)) {
@@ -73,11 +105,10 @@ export const useArticleManagement = (
 
         if (uniqueRandomArticles.length > 0) {
           setArticles(prev => [...prev, ...uniqueRandomArticles]);
-          console.log(`Added ${uniqueRandomArticles.length} random articles`);
+          saveSeenIds(seenIds.current); // Persist to localStorage
           failedLoadCount.current = 0; // Reset counter on success
         } else {
           failedLoadCount.current++;
-          console.log(`Failed to load unique articles. Attempt ${failedLoadCount.current}/2`);
         }
       }
     } catch (error) {
@@ -90,7 +121,6 @@ export const useArticleManagement = (
 
   const handleCurrentIndexChange = useCallback((newIndex: number) => {
     if (newIndex !== currentIndex && newIndex >= 0 && newIndex < articles.length) {
-      console.log('Article changed to index:', newIndex, 'Article:', articles[newIndex]?.title);
       setCurrentIndex(newIndex);
       onArticleChange(articles[newIndex]);
     }
