@@ -21,3 +21,18 @@ dist-ssr
 *.sln
 *.sw?
 
+# Android build files (keep essential configs)
+android/.gradle
+android/build
+android/app/build
+android/.idea
+android/local.properties
+*.jks
+*.keystore
+
+# Keep these Android files tracked:
+!android/app/src/main/AndroidManifest.xml
+!android/app/src/main/res/
+!android/gradle/
+!android/build.gradle
+!android/settings.gradle
