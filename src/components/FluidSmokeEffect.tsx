@@ -8,17 +8,17 @@ const FluidSmokeEffect = () => {
         if (!canvas) return;
 
         let config = {
-            SIM_RESOLUTION: 128,
-            DYE_RESOLUTION: 1440,
-            CAPTURE_RESOLUTION: 512,
-            DENSITY_DISSIPATION: 2.0, // Increased for faster disappearance
-            VELOCITY_DISSIPATION: 1.0, // Increased for faster disappearance
+            SIM_RESOLUTION: 64,  // Reduced from 128 (50% less computation)
+            DYE_RESOLUTION: 720, // Reduced from 1440 (50% less computation)
+            CAPTURE_RESOLUTION: 256, // Reduced from 512
+            DENSITY_DISSIPATION: 3.0, // Increased for faster fade (less rendering)
+            VELOCITY_DISSIPATION: 1.5, // Increased for faster fade
             PRESSURE: 0.1,
-            PRESSURE_ITERATIONS: 20,
-            CURL: 30, // Increased curl for more interesting persistent shapes
+            PRESSURE_ITERATIONS: 15, // Reduced from 20
+            CURL: 20, // Reduced from 30
             SPLAT_RADIUS: 0.25,
             SPLAT_FORCE: 6000,
-            SHADING: true,
+            SHADING: false, // Disabled for better performance
             COLOR_UPDATE_SPEED: 10,
             PAUSED: false,
             BACK_COLOR: { r: 0, g: 0, b: 0 },
@@ -683,8 +683,33 @@ const FluidSmokeEffect = () => {
         let lastUpdateTime = Date.now();
         let colorUpdateTimer = 0.0;
         let animationId: number;
+        let lastFrameTime = 0;
+        const targetFPS = 30; // Limit to 30 FPS instead of 60 for 50% less CPU
+        const frameInterval = 1000 / targetFPS;
 
-        function update() {
+        // Pause when tab is hidden to save CPU
+        let isPaused = false;
+
+        const handleVisibilityChange = () => {
+            isPaused = document.hidden;
+        };
+
+        document.addEventListener('visibilitychange', handleVisibilityChange);
+
+        function update(currentTime: number) {
+            // Throttle to target FPS
+            if (currentTime - lastFrameTime < frameInterval) {
+                animationId = requestAnimationFrame(update);
+                return;
+            }
+            lastFrameTime = currentTime;
+
+            // Skip if tab is hidden
+            if (isPaused) {
+                animationId = requestAnimationFrame(update);
+                return;
+            }
+
             const dt = calcDeltaTime();
             if (resizeCanvas()) initFramebuffers();
             updateColors(dt);
@@ -922,7 +947,7 @@ const FluidSmokeEffect = () => {
             return hash;
         };
 
-        update();
+        update(0);
 
         const handleMouseMove = (e: MouseEvent) => {
             let pointer = pointers[0];
@@ -948,6 +973,7 @@ const FluidSmokeEffect = () => {
         return () => {
             window.removeEventListener('mousemove', handleMouseMove);
             window.removeEventListener('touchmove', handleTouchMove);
+            document.removeEventListener('visibilitychange', handleVisibilityChange);
             cancelAnimationFrame(animationId);
         };
     }, []);

@@ -5,6 +5,8 @@ import App from './App.tsx'
 import './index.css'
 import { registerServiceWorker, addResourceHints } from './utils/performance'
 import { errorTracker } from './utils/errorTracking'
+import { Analytics } from '@vercel/analytics/react'
+import { SpeedInsights } from '@vercel/speed-insights/react'
 
 // Initialize error tracking
 errorTracker;
@@ -18,5 +20,7 @@ addResourceHints();
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <App />
+    <Analytics />
+    <SpeedInsights />
   </StrictMode>,
 )
