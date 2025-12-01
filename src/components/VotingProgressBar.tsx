@@ -45,7 +45,7 @@ const VotingProgressBar = () => {
   }
 
   return (
-    <Card className="bg-gray-900/50 border-gray-800">
+    <Card className="bg-transparent border-none shadow-none">
       <CardHeader className="pb-3">
         <CardTitle className="text-lg text-white flex items-center gap-2">
           <Trophy className="w-5 h-5 text-yellow-500" />
@@ -79,17 +79,16 @@ const VotingProgressBar = () => {
                 value={(article.votes / maxVotes) * 100}
                 className="h-2"
                 aria-label={`${article.title} voting progress: ${article.votes} votes`}
-                indicatorClassName={`transition-all duration-1000 ${
-                  index === 0 ? 'bg-yellow-500' :
-                  index === 1 ? 'bg-gray-400' :
-                  index === 2 ? 'bg-orange-600' :
-                  'bg-blue-500'
-                }`}
+                indicatorClassName={`transition-all duration-1000 ${index === 0 ? 'bg-yellow-500' :
+                    index === 1 ? 'bg-gray-400' :
+                      index === 2 ? 'bg-orange-600' :
+                        'bg-blue-500'
+                  }`}
               />
             </motion.div>
           </motion.div>
         ))}
-        
+
         <div className="text-xs text-gray-500 text-center mt-4 pt-2 border-t border-gray-800">
           {t('dailyRankingResets')} • {t('europeParisTime')}
         </div>

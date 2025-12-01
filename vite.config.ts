@@ -64,7 +64,7 @@ export default defineConfig(({ mode }) => ({
       gzipSize: true,
       brotliSize: true,
     }),
-    // mode === 'production' && deferCSSPlugin(), // Disabled for debugging
+    mode === 'production' && deferCSSPlugin(),
   ].filter(Boolean),
 
   resolve: {
@@ -82,6 +82,13 @@ export default defineConfig(({ mode }) => ({
         chunkFileNames: 'assets/[name]-[hash].js',
         entryFileNames: 'assets/[name]-[hash].js',
         assetFileNames: 'assets/[name]-[hash].[ext]',
+        manualChunks: {
+          vendor: ['react', 'react-dom', 'react-router-dom'],
+          ui: ['@radix-ui/react-dialog', '@radix-ui/react-slot', '@radix-ui/react-toast', 'lucide-react'],
+          animations: ['framer-motion'],
+          supabase: ['@supabase/supabase-js'],
+          query: ['@tanstack/react-query'],
+        },
       },
     },
 

@@ -11,6 +11,8 @@ import {
 import { exportToPDF, exportToAudio, exportToText } from "@/services/exportService";
 import { useToast } from "@/components/ui/use-toast";
 
+import { useAuth } from "@/contexts/AuthContext";
+
 interface ExportMenuProps {
     article: {
         id: string;
@@ -24,8 +26,18 @@ interface ExportMenuProps {
 export const ExportMenu = ({ article }: ExportMenuProps) => {
     const [isExporting, setIsExporting] = useState(false);
     const { toast } = useToast();
+    const { user } = useAuth();
 
     const handleExport = async (type: 'pdf' | 'audio' | 'text') => {
+        if (!user) {
+            toast({
+                title: "Login Required",
+                description: "You must be logged in to download articles.",
+                variant: "destructive",
+            });
+            return;
+        }
+
         setIsExporting(true);
         try {
             switch (type) {

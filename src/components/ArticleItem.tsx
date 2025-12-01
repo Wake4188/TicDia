@@ -46,7 +46,8 @@ const ArticleItem = ({
           decoding="async"
           width="1920"
           height="1080"
-          fetchPriority={index === 0 ? "high" : "low"}
+          // @ts-expect-error - fetchpriority is valid in DOM but missing in React types
+          fetchpriority={index === 0 ? "high" : "low"}
           style={{ aspectRatio: '16/9' }}
         />
         <div
@@ -85,7 +86,7 @@ const ArticleItem = ({
               {article.title}
             </h1>
             <div className="max-w-2xl" style={{ minHeight: '100px' }}>
-              {!isMobile && user ? (
+              {user ? (
                 <HighlightedText
                   text={contentToShow}
                   className="text-sm sm:text-lg leading-relaxed"

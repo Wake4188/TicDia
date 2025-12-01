@@ -24,17 +24,6 @@ serve(async (req) => {
   }
 
   try {
-    const url = new URL(req.url);
-    const feedUrl = url.searchParams.get('url');
-    const source = url.searchParams.get('source') || 'RSS';
-
-    if (!feedUrl) {
-      return new Response(
-        JSON.stringify({ error: 'Missing url parameter' }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-
     // SECURITY: Whitelist allowed RSS feed domains to prevent SSRF attacks
     const ALLOWED_DOMAINS = [
       'rss.nytimes.com',
@@ -45,8 +34,29 @@ serve(async (req) => {
       'feeds.cnn.com',
       'feeds.theguardian.com',
       'rss.cbc.ca',
-      'rss.app'
+      'rss.app',
+      'www.franceinfo.fr'
     ];
+
+    let feedUrl: string | null = null;
+    let source = 'RSS';
+
+    if (req.method === 'POST') {
+      const body = await req.json().catch(() => ({}));
+      feedUrl = body.url;
+      if (body.source) source = body.source;
+    } else {
+      const url = new URL(req.url);
+      feedUrl = url.searchParams.get('url');
+      source = url.searchParams.get('source') || 'RSS';
+    }
+
+    if (!feedUrl) {
+      return new Response(
+        JSON.stringify({ error: 'Missing url parameter' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
 
     try {
       const urlObj = new URL(feedUrl);

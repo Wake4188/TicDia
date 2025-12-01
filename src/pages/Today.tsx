@@ -1,8 +1,7 @@
-
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ChevronDown, ChevronUp } from "lucide-react";
+import { ChevronDown, ChevronUp, Trash2, Plus, ExternalLink, Calendar, Sparkles, TrendingUp, Globe } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -10,13 +9,13 @@ import { useToast } from "@/components/ui/use-toast";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Trash2, Plus, ExternalLink, Calendar } from "lucide-react";
 import SmallTic from "@/components/SmallTic";
 import NewsFeed from "@/components/NewsFeed";
 import VotingProgressBar from "@/components/VotingProgressBar";
 import { useNavigate } from "react-router-dom";
 import { useUserPreferences } from "@/contexts/UserPreferencesContext";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface TodayArticle {
   id: string;
@@ -281,33 +280,64 @@ const Today = () => {
     navigate(`/?q=${encodeURIComponent(title)}`);
   };
 
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1
+      }
+    }
+  };
+
+  const itemVariants = {
+    hidden: { y: 20, opacity: 0 },
+    visible: {
+      y: 0,
+      opacity: 1,
+      transition: {
+        type: "spring",
+        stiffness: 100
+      }
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-black text-white pt-16">
-      <div className="max-w-4xl mx-auto p-6">
-        <div className="flex items-center justify-between mb-8">
+    <div className="min-h-screen bg-gradient-to-b from-black via-[#0a0a0f] to-black text-white pt-20 pb-10 overflow-x-hidden">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+        {/* Header Section */}
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="flex flex-col md:flex-row items-start md:items-center justify-between mb-12 gap-4"
+        >
           <div>
             <Button
               variant="ghost"
               onClick={() => navigate('/')}
-              className="mb-4 text-gray-400 hover:text-white"
+              className="mb-4 text-gray-400 hover:text-white pl-0 hover:bg-transparent transition-colors"
             >
               ← {t('backToHome')}
             </Button>
-            <h1 className="text-3xl font-bold text-tictok-red mb-2">{t('todayHighlights')}</h1>
-            <p className="text-gray-400 flex items-center gap-2">
-              <Calendar className="w-4 h-4" />
+            <h1 className="text-4xl md:text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-500 mb-2">
+              {t('todayHighlights')}
+            </h1>
+            <p className="text-gray-400 flex items-center gap-2 text-lg">
+              <Calendar className="w-5 h-5 text-tictok-red" />
               {dateString}
             </p>
           </div>
+
           {isAdmin && (
             <Dialog open={isAddingArticle} onOpenChange={setIsAddingArticle}>
               <DialogTrigger asChild>
-                <Button className="bg-tictok-red hover:bg-tictok-red/90">
+                <Button className="bg-tictok-red hover:bg-tictok-red/90 shadow-lg shadow-tictok-red/20 transition-all hover:scale-105">
                   <Plus className="w-4 h-4 mr-2" />
                   {t('addArticle')}
                 </Button>
               </DialogTrigger>
-              <DialogContent className="bg-gray-900 border-gray-800">
+              <DialogContent className="bg-gray-900/95 backdrop-blur-xl border-gray-800">
                 <DialogHeader>
                   <DialogTitle>{t('addNewArticle')}</DialogTitle>
                 </DialogHeader>
@@ -316,19 +346,19 @@ const Today = () => {
                     placeholder={t('articleTitle')}
                     value={newArticle.title}
                     onChange={(e) => setNewArticle(prev => ({ ...prev, title: e.target.value }))}
-                    className="bg-gray-800 border-gray-700"
+                    className="bg-gray-800/50 border-gray-700 focus:border-tictok-red/50 transition-colors"
                   />
                   <Textarea
                     placeholder={t('articleContent')}
                     value={newArticle.content}
                     onChange={(e) => setNewArticle(prev => ({ ...prev, content: e.target.value }))}
-                    className="bg-gray-800 border-gray-700 min-h-32"
+                    className="bg-gray-800/50 border-gray-700 min-h-32 focus:border-tictok-red/50 transition-colors"
                   />
                   <Input
                     placeholder={t('articleUrl')}
                     value={newArticle.url}
                     onChange={(e) => setNewArticle(prev => ({ ...prev, url: e.target.value }))}
-                    className="bg-gray-800 border-gray-700"
+                    className="bg-gray-800/50 border-gray-700 focus:border-tictok-red/50 transition-colors"
                   />
                   <Button onClick={handleAddArticle} className="w-full bg-tictok-red hover:bg-tictok-red/90">
                     {t('addArticle')}
@@ -337,59 +367,94 @@ const Today = () => {
               </DialogContent>
             </Dialog>
           )}
-        </div>
+        </motion.div>
 
-        <div className="space-y-8">
+        <motion.div
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
+          className="space-y-12"
+        >
           {/* Voting Progress Bar */}
-          <VotingProgressBar />
+          <motion.div variants={itemVariants} className="bg-white/5 backdrop-blur-md rounded-2xl p-6 border border-white/10 shadow-xl">
+            <VotingProgressBar />
+          </motion.div>
 
           {/* News Feed Section */}
-          <NewsFeed />
+          <motion.div variants={itemVariants}>
+            <NewsFeed />
+          </motion.div>
 
           {/* AP News RSS Section */}
           {apNewsArticles.length > 0 && (
-            <div>
-              <h2 className="text-xl font-semibold mb-4 text-gray-300">{t('apNews')}</h2>
-              <div className="grid gap-4">
-                {(showAllArticles ? apNewsArticles : apNewsArticles.slice(0, 10)).map((article, index) => (
-                  <Card key={`ap-${index}`} className="bg-gray-900/50 border-gray-800 hover:bg-gray-800/50 transition-colors">
-                    <CardContent className="p-6">
-                      <div className="flex flex-col sm:flex-row gap-4">
+            <motion.div variants={itemVariants} className="space-y-6">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="p-2 bg-tictok-red/10 rounded-lg">
+                  <TrendingUp className="w-6 h-6 text-tictok-red" />
+                </div>
+                <h2 className="text-2xl font-bold text-white">{t('apNews')}</h2>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {(showAllArticles ? apNewsArticles : apNewsArticles.slice(0, 9)).map((article, index) => (
+                  <motion.div
+                    key={`ap-${index}`}
+                    variants={itemVariants}
+                    whileHover={{ y: -5, transition: { duration: 0.2 } }}
+                  >
+                    <Card className="h-full bg-white/5 backdrop-blur-md border-white/10 hover:bg-white/10 transition-all duration-300 overflow-hidden group">
+                      <CardContent className="p-0 flex flex-col h-full">
                         {article.image && (
-                          <div className="w-full sm:w-32 h-32 sm:h-20 flex-shrink-0 overflow-hidden rounded">
+                          <div className="relative w-full h-48 overflow-hidden">
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent z-10" />
                             <img
                               src={article.image}
                               alt={article.title}
                               loading="lazy"
-                              className="w-full h-full object-cover"
+                              className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-500"
                               onError={(e) => { e.currentTarget.style.display = 'none'; }}
                             />
+                            <div className="absolute bottom-3 left-3 z-20">
+                              <span className="text-xs font-medium px-2 py-1 bg-black/50 backdrop-blur-sm rounded-full text-white border border-white/20">
+                                {article.source}
+                              </span>
+                            </div>
                           </div>
                         )}
-                        <div className="flex-1 min-w-0">
-                          <h3 className="text-lg font-medium text-white mb-2 line-clamp-2">{article.title}</h3>
-                          <p className="text-gray-400 text-sm mb-3 line-clamp-2">{article.summary}</p>
-                          <div className="flex items-center justify-between">
-                            <span className="text-xs text-gray-500">{new Date(article.publishedAt).toLocaleDateString()}</span>
+                        <div className="p-5 flex-1 flex flex-col">
+                          <h3 className="text-lg font-bold text-white mb-3 line-clamp-2 group-hover:text-tictok-red transition-colors">
+                            {article.title}
+                          </h3>
+                          <p className="text-gray-400 text-sm mb-4 line-clamp-3 flex-1">
+                            {article.summary}
+                          </p>
+                          <div className="flex items-center justify-between pt-4 border-t border-white/5 mt-auto">
+                            <span className="text-xs text-gray-500 flex items-center gap-1">
+                              <Calendar className="w-3 h-3" />
+                              {new Date(article.publishedAt).toLocaleDateString()}
+                            </span>
                             <a
                               href={article.link}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="text-tictok-red hover:text-tictok-red/80 text-sm flex items-center gap-1"
+                              className="text-white hover:text-tictok-red text-sm font-medium flex items-center gap-1 transition-colors"
                             >
                               {t('readMore')} <ExternalLink className="w-3 h-3" />
                             </a>
                           </div>
                         </div>
-                      </div>
-                    </CardContent>
-                  </Card>
+                      </CardContent>
+                    </Card>
+                  </motion.div>
                 ))}
-                {apNewsArticles.length > 10 && (
+              </div>
+
+              {apNewsArticles.length > 9 && (
+                <div className="flex justify-center mt-8">
                   <Button
                     variant="outline"
                     onClick={() => setShowAllArticles(!showAllArticles)}
-                    className="w-full mt-4"
+                    className="bg-transparent border-white/20 text-white hover:bg-white/10 hover:text-tictok-red transition-all"
                   >
                     {showAllArticles ? (
                       <>
@@ -399,76 +464,106 @@ const Today = () => {
                     ) : (
                       <>
                         <ChevronDown className="w-4 h-4 mr-2" />
-                        {t('showAll')} ({apNewsArticles.length - 10} {t('more')})
+                        {t('showAll')} ({apNewsArticles.length - 9} {t('more')})
                       </>
                     )}
                   </Button>
-                )}
-              </div>
-            </div>
+                </div>
+              )}
+            </motion.div>
           )}
 
           {/* Wikipedia Articles Section */}
-          <div>
-            <h2 className="text-xl font-semibold mb-4 text-gray-300">{t('fromWikipedia')}</h2>
-            <div className="grid gap-4">
+          <motion.div variants={itemVariants} className="space-y-6">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="p-2 bg-blue-500/10 rounded-lg">
+                <Globe className="w-6 h-6 text-blue-400" />
+              </div>
+              <h2 className="text-2xl font-bold text-white">{t('fromWikipedia')}</h2>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {wikipediaArticles.map((article, index) => (
-                <Card key={index} className="bg-gray-900/50 border-gray-800 hover:bg-gray-800/50 transition-colors cursor-pointer">
-                  <CardContent className="p-6" onClick={() => handleWikipediaClick(article)}>
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <h3 className="text-lg font-medium text-white mb-2">{article.title}</h3>
-                        <p className="text-gray-400 text-sm line-clamp-3">{article.extract}</p>
+                <motion.div
+                  key={index}
+                  variants={itemVariants}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  <Card
+                    className="h-full bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-md border-white/10 hover:border-white/20 transition-all cursor-pointer group"
+                    onClick={() => handleWikipediaClick(article)}
+                  >
+                    <CardContent className="p-6">
+                      <div className="flex items-start justify-between gap-4">
+                        <div className="flex-1">
+                          <h3 className="text-xl font-bold text-white mb-3 group-hover:text-blue-400 transition-colors">
+                            {article.title}
+                          </h3>
+                          <p className="text-gray-300 text-sm line-clamp-4 leading-relaxed">
+                            {article.extract}
+                          </p>
+                        </div>
+                        <div className="p-2 bg-white/5 rounded-full group-hover:bg-blue-500/20 transition-colors">
+                          <ExternalLink className="w-5 h-5 text-gray-400 group-hover:text-blue-400" />
+                        </div>
                       </div>
-                      <ExternalLink className="w-4 h-4 text-gray-500 flex-shrink-0 ml-4" />
-                    </div>
-                  </CardContent>
-                </Card>
+                    </CardContent>
+                  </Card>
+                </motion.div>
               ))}
             </div>
-          </div>
+          </motion.div>
 
           {/* Admin Articles Section */}
           {adminArticles && adminArticles.length > 0 && (
-            <div>
-              <h2 className="text-xl font-semibold mb-4 text-gray-300">{t('editorialHighlights')}</h2>
-              <div className="grid gap-4">
+            <motion.div variants={itemVariants} className="space-y-6">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="p-2 bg-purple-500/10 rounded-lg">
+                  <Sparkles className="w-6 h-6 text-purple-400" />
+                </div>
+                <h2 className="text-2xl font-bold text-white">{t('editorialHighlights')}</h2>
+              </div>
+
+              <div className="grid grid-cols-1 gap-4">
                 {adminArticles.map((article) => (
-                  <Card key={article.id} className="bg-gray-900/50 border-gray-800">
-                    <CardHeader className="pb-3">
-                      <div className="flex items-start justify-between">
-                        <CardTitle className="text-lg text-white">{article.title}</CardTitle>
-                        {isAdmin && (
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleDeleteArticle(article.id)}
-                            className="text-red-400 hover:text-red-300 hover:bg-red-900/20"
+                  <motion.div key={article.id} variants={itemVariants}>
+                    <Card className="bg-purple-900/10 border-purple-500/20 backdrop-blur-sm">
+                      <CardHeader className="pb-3">
+                        <div className="flex items-start justify-between">
+                          <CardTitle className="text-xl text-white">{article.title}</CardTitle>
+                          {isAdmin && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleDeleteArticle(article.id)}
+                              className="text-red-400 hover:text-red-300 hover:bg-red-900/20"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+                          )}
+                        </div>
+                      </CardHeader>
+                      <CardContent className="pt-0">
+                        <p className="text-gray-300 text-sm mb-4 leading-relaxed">{article.content}</p>
+                        {article.url && (
+                          <a
+                            href={article.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-purple-500/10 text-purple-300 hover:bg-purple-500/20 transition-colors text-sm font-medium"
                           >
-                            <Trash2 className="w-4 h-4" />
-                          </Button>
+                            {t('readMore')} <ExternalLink className="w-4 h-4" />
+                          </a>
                         )}
-                      </div>
-                    </CardHeader>
-                    <CardContent className="pt-0">
-                      <p className="text-gray-400 text-sm mb-3">{article.content}</p>
-                      {article.url && (
-                        <a
-                          href={article.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-tictok-red hover:text-tictok-red/80 text-sm flex items-center gap-1"
-                        >
-                          {t('readMore')} <ExternalLink className="w-3 h-3" />
-                        </a>
-                      )}
-                    </CardContent>
-                  </Card>
+                      </CardContent>
+                    </Card>
+                  </motion.div>
                 ))}
               </div>
-            </div>
+            </motion.div>
           )}
-        </div>
+        </motion.div>
       </div>
 
       <SmallTic

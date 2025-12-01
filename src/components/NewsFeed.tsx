@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -181,7 +180,7 @@ const NewsFeed = () => {
     );
 
     return uniqueArticles.map((article, index) => (
-      <Card key={`nyt-${article.url}`} className="bg-gray-900/50 border-gray-800 hover:bg-gray-800/50 transition-colors group">
+      <Card key={`nyt-${article.url}`} className="bg-white/5 backdrop-blur-md border-white/10 hover:bg-white/10 transition-colors group">
         <CardContent className="p-4 sm:p-6">
           <div className="flex flex-col sm:flex-row gap-4">
             {getNYTImageUrl(article) && (
@@ -246,7 +245,7 @@ const NewsFeed = () => {
 
   const renderRSSArticles = (articles: RSSArticle[], buttonClasses: string, sourceLabel: string) => {
     return articles.map((article) => (
-      <Card key={`rss-${sourceLabel}-${article.link}`} className="bg-gray-900/50 border-gray-800 hover:bg-gray-800/50 transition-colors group">
+      <Card key={`rss-${sourceLabel}-${article.link}`} className="bg-white/5 backdrop-blur-md border-white/10 hover:bg-white/10 transition-colors group">
         <CardContent className="p-4 sm:p-6">
           <div className="flex flex-col sm:flex-row gap-4">
             {article.image && (
@@ -289,7 +288,7 @@ const NewsFeed = () => {
       <div className="space-y-4">
         <h2 className="text-xl font-semibold mb-4 text-gray-300">{t('latestNews')}</h2>
         {[...Array(3)].map((_, i) => (
-          <Card key={i} className="bg-gray-900/50 border-gray-800 animate-pulse">
+          <Card key={i} className="bg-white/5 backdrop-blur-md border-white/10 animate-pulse">
             <CardContent className="p-6">
               <div className="flex gap-4">
                 <div className="w-32 h-20 bg-gray-700 rounded flex-shrink-0"></div>
@@ -367,7 +366,7 @@ const NewsFeed = () => {
         }
 
         {currentArticles.length === 0 && (
-          <Card className="bg-gray-900/50 border-gray-800">
+          <Card className="bg-white/5 backdrop-blur-md border-white/10">
             <CardContent className="p-6 text-center">
               <p className="text-gray-400">
                 {t('noArticlesAvailable', { source: selectedSource === "nyt" ? "NYT" : selectedSource === "franceinfo" ? "France Info" : "BBC World" })}
