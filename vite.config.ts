@@ -2,7 +2,6 @@ import { defineConfig, Plugin } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
 import { componentTagger } from "lovable-tagger";
-import { visualizer } from "rollup-plugin-visualizer";
 
 // Enhanced plugin to defer CSS loading and eliminate render blocking
 const deferCSSPlugin = (): Plugin => ({
@@ -58,12 +57,6 @@ export default defineConfig(({ mode }) => ({
   plugins: [
     react(),
     mode === 'development' && componentTagger(),
-    mode === 'production' && visualizer({
-      filename: './dist/stats.html',
-      open: false,
-      gzipSize: true,
-      brotliSize: true,
-    }),
     mode === 'production' && deferCSSPlugin(),
   ].filter(Boolean),
 
@@ -75,7 +68,8 @@ export default defineConfig(({ mode }) => ({
 
   build: {
     cssCodeSplit: true,
-    sourcemap: true,
+    // Disable sourcemaps in production for faster builds
+    sourcemap: false,
 
     rollupOptions: {
       output: {
@@ -94,25 +88,8 @@ export default defineConfig(({ mode }) => ({
 
     target: 'esnext',
 
-    minify: 'terser',
-
-    terserOptions: {
-      compress: {
-        drop_console: false, // Enabled for debugging
-        drop_debugger: true,
-        passes: 3,
-        pure_funcs: [],
-        unsafe: true,
-        unsafe_comps: true,
-        unsafe_math: true,
-      },
-      mangle: {
-        safari10: true,
-      },
-      format: {
-        comments: false,
-      },
-    },
+    // Use esbuild instead of terser - 10x faster minification
+    minify: 'esbuild',
 
     chunkSizeWarningLimit: 1000,
   },
