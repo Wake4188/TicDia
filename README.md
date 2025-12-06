@@ -4,7 +4,7 @@
 
 [![Live Demo](https://img.shields.io/badge/Live-Demo-brightgreen)](https://ticdia.vercel.app/)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Made with Love](https://img.shields.io/badge/Made%20with-❤️%20in%20France-red)](https://github.com/yourusername)
+[![Made with Love](https://img.shields.io/badge/Made%20with-❤️%20in%20France-red)](https://github.com/Wake4188)
 
 ## 🎯 What is TicDia?
 
