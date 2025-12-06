@@ -65,15 +65,39 @@ serve(async (req) => {
       )
     }
 
-    const { text, from = 'en', to } = await req.json();
+    const body = await req.json();
+    const { text, from = 'en', to } = body;
 
-    if (!text || !to) {
+    // Input validation
+    if (!text || typeof text !== 'string') {
       return new Response(
-        JSON.stringify({ error: 'Missing required parameters: text and to' }),
-        { 
-          status: 400, 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-        }
+        JSON.stringify({ error: 'Missing or invalid text parameter' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    if (!to || typeof to !== 'string') {
+      return new Response(
+        JSON.stringify({ error: 'Missing or invalid target language parameter' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Length limit to prevent abuse
+    const MAX_TEXT_LENGTH = 10000;
+    if (text.length > MAX_TEXT_LENGTH) {
+      return new Response(
+        JSON.stringify({ error: `Text exceeds maximum length of ${MAX_TEXT_LENGTH} characters` }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Validate language codes (2-3 letter codes)
+    const langCodeRegex = /^[a-z]{2,3}$/i;
+    if (!langCodeRegex.test(from) || !langCodeRegex.test(to)) {
+      return new Response(
+        JSON.stringify({ error: 'Invalid language code format' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
@@ -85,7 +109,7 @@ serve(async (req) => {
       );
     }
 
-    console.log(`Translating text from ${from} to ${to}:`, text);
+    // Removed logging of user input for security
 
     const url = `https://free-google-translator.p.rapidapi.com/external-api/free-google-translator?from=${from}&to=${to}&query=${encodeURIComponent(text)}`;
     
@@ -98,9 +122,7 @@ serve(async (req) => {
     });
 
     if (!response.ok) {
-      console.error('Translation API error:', response.status, response.statusText);
-      const errorText = await response.text();
-      console.error('Error response:', errorText);
+      // Log error without exposing sensitive details
       
       return new Response(
         JSON.stringify({ 
@@ -115,7 +137,6 @@ serve(async (req) => {
     }
 
     const data = await response.json();
-    console.log('Translation response:', data);
 
     // Extract translated text from the response
     const translatedText = data.translation || data.result || text;
@@ -126,16 +147,12 @@ serve(async (req) => {
     );
 
   } catch (error) {
-    console.error('Error in translate function:', error);
     return new Response(
       JSON.stringify({ 
-        error: error.message,
+        error: 'Translation failed',
         fallback: 'Translation failed' 
       }),
-      { 
-        status: 500, 
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-      }
+      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }
 });

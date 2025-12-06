@@ -1,4 +1,5 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.3'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -14,8 +15,41 @@ interface RSSArticle {
   source: string;
 }
 
+// Rate limiting
+const rateLimitStore = new Map<string, number[]>();
+const RATE_LIMIT_WINDOW = 60000; // 1 minute
+const MAX_REQUESTS_PER_WINDOW = 15;
+
+function checkRateLimit(userId: string): boolean {
+  const now = Date.now();
+  const userRequests = rateLimitStore.get(userId) || [];
+  const recentRequests = userRequests.filter(timestamp => now - timestamp < RATE_LIMIT_WINDOW);
+  
+  if (recentRequests.length >= MAX_REQUESTS_PER_WINDOW) {
+    return false;
+  }
+  
+  recentRequests.push(now);
+  rateLimitStore.set(userId, recentRequests);
+  return true;
+}
+
 let cache = new Map<string, { data: RSSArticle[]; timestamp: number }>();
 const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+
+// SECURITY: Whitelist allowed RSS feed domains to prevent SSRF attacks
+const ALLOWED_DOMAINS = [
+  'rss.nytimes.com',
+  'feeds.bbci.co.uk',
+  'www.france24.com',
+  'feeds.skynews.com',
+  'feeds.reuters.com',
+  'feeds.cnn.com',
+  'feeds.theguardian.com',
+  'rss.cbc.ca',
+  'rss.app',
+  'www.franceinfo.fr'
+];
 
 serve(async (req) => {
   // Handle CORS preflight requests
@@ -24,19 +58,36 @@ serve(async (req) => {
   }
 
   try {
-    // SECURITY: Whitelist allowed RSS feed domains to prevent SSRF attacks
-    const ALLOWED_DOMAINS = [
-      'rss.nytimes.com',
-      'feeds.bbci.co.uk',
-      'www.france24.com',
-      'feeds.skynews.com',
-      'feeds.reuters.com',
-      'feeds.cnn.com',
-      'feeds.theguardian.com',
-      'rss.cbc.ca',
-      'rss.app',
-      'www.franceinfo.fr'
-    ];
+    // Authenticate user
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader) {
+      return new Response(
+        JSON.stringify({ error: 'Authentication required' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+    const supabase = createClient(supabaseUrl, supabaseKey);
+
+    const token = authHeader.replace('Bearer ', '');
+    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+
+    if (authError || !user) {
+      return new Response(
+        JSON.stringify({ error: 'Invalid authentication' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Check rate limit
+    if (!checkRateLimit(user.id)) {
+      return new Response(
+        JSON.stringify({ error: 'Rate limit exceeded. Please try again later.' }),
+        { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
 
     let feedUrl: string | null = null;
     let source = 'RSS';
@@ -51,9 +102,17 @@ serve(async (req) => {
       source = url.searchParams.get('source') || 'RSS';
     }
 
-    if (!feedUrl) {
+    if (!feedUrl || typeof feedUrl !== 'string') {
       return new Response(
-        JSON.stringify({ error: 'Missing url parameter' }),
+        JSON.stringify({ error: 'Missing or invalid url parameter' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Validate source parameter
+    if (typeof source !== 'string' || source.length > 100) {
+      return new Response(
+        JSON.stringify({ error: 'Invalid source parameter' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
@@ -105,14 +164,11 @@ serve(async (req) => {
     const cacheKey = feedUrl;
     const cached = cache.get(cacheKey);
     if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
-      console.log('Returning cached RSS data for:', feedUrl);
       return new Response(
         JSON.stringify(cached.data),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
-
-    console.log('Fetching RSS feed:', feedUrl);
 
     // Add timeout to prevent hanging requests
     const controller = new AbortController();
@@ -129,7 +185,10 @@ serve(async (req) => {
       clearTimeout(timeoutId);
 
       if (!response.ok) {
-        throw new Error(`Failed to fetch RSS feed: ${response.status}`);
+        return new Response(
+          JSON.stringify({ error: 'Failed to fetch RSS feed' }),
+          { status: 502, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
       }
 
       const xmlText = await response.text();
@@ -203,8 +262,6 @@ serve(async (req) => {
       // Cache the results
       cache.set(cacheKey, { data: articles, timestamp: Date.now() });
 
-      console.log(`Successfully parsed ${articles.length} articles from RSS feed`);
-
       return new Response(
         JSON.stringify(articles),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -221,9 +278,8 @@ serve(async (req) => {
     }
 
   } catch (error) {
-    console.error('RSS feed error:', error);
     return new Response(
-      JSON.stringify({ error: error.message || 'Failed to fetch RSS feed' }),
+      JSON.stringify({ error: 'Failed to fetch RSS feed' }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }

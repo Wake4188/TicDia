@@ -62,10 +62,33 @@ serve(async (req) => {
       )
     }
 
-    const { text, voice } = await req.json()
+    const body = await req.json()
+    const { text, voice } = body
 
-    if (!text) {
-      throw new Error('Text is required')
+    // Input validation
+    if (!text || typeof text !== 'string') {
+      return new Response(
+        JSON.stringify({ error: 'Missing or invalid text parameter' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+
+    // Length limit - already enforced at 2500 but validate early
+    const MAX_TEXT_LENGTH = 2500;
+    if (text.length > MAX_TEXT_LENGTH) {
+      return new Response(
+        JSON.stringify({ error: `Text exceeds maximum length of ${MAX_TEXT_LENGTH} characters` }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+
+    // Validate voice parameter if provided
+    const ALLOWED_VOICES = ['pNInz6obpgDQGcFmaJgB', 'EXAVITQu4vr4xnSDxMaL', '21m00Tcm4TlvDq8ikWAM', 'AZnzlk1XvdvUeBnXmlld'];
+    if (voice && !ALLOWED_VOICES.includes(voice)) {
+      return new Response(
+        JSON.stringify({ error: 'Invalid voice parameter' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
     }
 
     const ELEVENLABS_API_KEY = Deno.env.get('ELEVENLABS_API_KEY')
@@ -118,13 +141,9 @@ serve(async (req) => {
       },
     )
   } catch (error) {
-    console.error('Text-to-speech error:', error)
     return new Response(
-      JSON.stringify({ error: error.message }),
-      {
-        status: 400,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      },
+      JSON.stringify({ error: 'Text-to-speech processing failed' }),
+      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
   }
 })
