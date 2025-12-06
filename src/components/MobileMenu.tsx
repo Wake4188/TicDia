@@ -39,9 +39,17 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
     else navigate(path);
   };
 
-  const menuItems = [
+  const menuItems: Array<{
+    label: string;
+    path: string;
+    style?: React.CSSProperties;
+    icon?: React.ComponentType<{ className?: string }>;
+    action?: () => void;
+    isActive?: boolean;
+    className?: string;
+  }> = [
     {
-      label: t.today || "Today", // Fallback if translation missing
+      label: t.today || "Today",
       path: '/today',
       style: {
         backgroundColor: userPreferences.highlightColor,

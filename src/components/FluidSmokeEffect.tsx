@@ -51,7 +51,7 @@ const FluidSmokeEffect = () => {
         function getWebGLContext(canvas: HTMLCanvasElement) {
             const params = { alpha: true, depth: false, stencil: false, antialias: false, preserveDrawingBuffer: false };
 
-            let gl = canvas.getContext('webgl2', params) as WebGL2RenderingContext;
+            let gl = canvas.getContext('webgl2', params) as WebGL2RenderingContext | WebGLRenderingContext;
             const isWebGL2 = !!gl;
             if (!isWebGL2) gl = (canvas.getContext('webgl', params) || canvas.getContext('experimental-webgl', params)) as WebGLRenderingContext;
 
@@ -126,16 +126,16 @@ const FluidSmokeEffect = () => {
         class Material {
             vertexShader: any;
             fragmentShaderSource: any;
-            programs: any[];
-            activeProgram: any;
-            uniforms: any[];
+            programs: Record<number, WebGLProgram | null>;
+            activeProgram: WebGLProgram | null;
+            uniforms: Record<string, WebGLUniformLocation | null>;
 
             constructor(vertexShader: any, fragmentShaderSource: any) {
                 this.vertexShader = vertexShader;
                 this.fragmentShaderSource = fragmentShaderSource;
-                this.programs = [];
+                this.programs = {};
                 this.activeProgram = null;
-                this.uniforms = [];
+                this.uniforms = {};
             }
 
             setKeywords(keywords: any) {
@@ -161,8 +161,8 @@ const FluidSmokeEffect = () => {
         }
 
         class Program {
-            uniforms: any;
-            program: any;
+            uniforms: Record<string, WebGLUniformLocation | null>;
+            program: WebGLProgram | null;
 
             constructor(vertexShader: any, fragmentShader: any) {
                 this.uniforms = {};
@@ -187,11 +187,13 @@ const FluidSmokeEffect = () => {
         }
 
         function getUniforms(program: any) {
-            let uniforms: any = [];
+            let uniforms: Record<string, WebGLUniformLocation | null> = {};
             let uniformCount = gl.getProgramParameter(program, gl.ACTIVE_UNIFORMS);
             for (let i = 0; i < uniformCount; i++) {
-                let uniformName = gl.getActiveUniform(program, i).name;
-                uniforms[uniformName] = gl.getUniformLocation(program, uniformName);
+                let uniformName = gl.getActiveUniform(program, i)?.name;
+                if (uniformName) {
+                    uniforms[uniformName] = gl.getUniformLocation(program, uniformName);
+                }
             }
             return uniforms;
         }

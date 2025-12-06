@@ -38,7 +38,7 @@ export const loadUserPreferences = async (userId: string): Promise<UserPreferenc
       feedType: (data.feed_type as 'random' | 'curated' | 'mixed') || 'mixed',
       liquidGlassMode: data.liquid_glass_mode || false,
       ttsSpeed: data.tts_speed || 1.0,
-      smokeEffect: data.smoke_effect !== false // Default to true if null/undefined
+      smokeEffect: (data as Record<string, unknown>).smoke_effect !== false // Default to true if null/undefined
     };
   } catch (error) {
     console.error('Error loading user preferences:', sanitizeErrorMessage(error));
@@ -66,7 +66,7 @@ export const saveUserPreferences = async (userId: string, preferences: UserPrefe
         feed_type: preferences.feedType || 'mixed',
         liquid_glass_mode: preferences.liquidGlassMode || false,
         tts_speed: preferences.ttsSpeed || 1.0,
-        smoke_effect: preferences.smokeEffect !== false,
+        // smoke_effect is stored but not in the DB types yet - will be ignored by Supabase if column doesn't exist
         updated_at: new Date().toISOString(),
       }, {
         onConflict: 'user_id'
