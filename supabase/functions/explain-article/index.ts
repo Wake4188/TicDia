@@ -62,18 +62,60 @@ serve(async (req) => {
       )
     }
 
-    const { articleContent, articleTitle, language } = await req.json();
+    const body = await req.json();
+    const { articleContent, articleTitle, language } = body;
     
-    if (!articleContent || !articleTitle || !language) {
+    // Input validation
+    if (!articleContent || typeof articleContent !== 'string') {
       return new Response(
-        JSON.stringify({ error: "Missing required fields" }),
+        JSON.stringify({ error: "Missing or invalid articleContent" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    if (!articleTitle || typeof articleTitle !== 'string') {
+      return new Response(
+        JSON.stringify({ error: "Missing or invalid articleTitle" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    if (!language || typeof language !== 'string') {
+      return new Response(
+        JSON.stringify({ error: "Missing or invalid language" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // Length limits to prevent abuse
+    const MAX_CONTENT_LENGTH = 50000;
+    const MAX_TITLE_LENGTH = 500;
+    
+    if (articleContent.length > MAX_CONTENT_LENGTH) {
+      return new Response(
+        JSON.stringify({ error: `Article content exceeds maximum length of ${MAX_CONTENT_LENGTH} characters` }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    if (articleTitle.length > MAX_TITLE_LENGTH) {
+      return new Response(
+        JSON.stringify({ error: `Article title exceeds maximum length of ${MAX_TITLE_LENGTH} characters` }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // Validate language code
+    const langCodeRegex = /^[a-z]{2,3}$/i;
+    if (!langCodeRegex.test(language)) {
+      return new Response(
+        JSON.stringify({ error: "Invalid language code format" }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) {
-      console.error("LOVABLE_API_KEY not found");
       return new Response(
         JSON.stringify({ error: "AI service not configured" }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -144,8 +186,6 @@ Your task is to explain Wikipedia articles in a way that's easier to understand 
           { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
       }
-      const errorText = await response.text();
-      console.error("AI gateway error:", response.status, errorText);
       return new Response(
         JSON.stringify({ error: "AI service error" }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -167,9 +207,8 @@ Your task is to explain Wikipedia articles in a way that's easier to understand 
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (error) {
-    console.error("Error in explain-article function:", error);
     return new Response(
-      JSON.stringify({ error: error instanceof Error ? error.message : "Unknown error" }),
+      JSON.stringify({ error: "Failed to process article explanation" }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }
