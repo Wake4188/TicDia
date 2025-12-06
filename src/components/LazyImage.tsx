@@ -90,7 +90,7 @@ const LazyImage = ({
           decoding="async"
           width={width}
           height={height}
-          fetchpriority={priority ? "high" : "low"}
+          fetchPriority={priority ? "high" : "low"}
           style={{ aspectRatio: `${width}/${height}` }}
         />
       )}
