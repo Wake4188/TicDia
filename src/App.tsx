@@ -1,4 +1,4 @@
-import React, { Suspense, lazy } from "react";
+import React, { Suspense, lazy, useEffect, useState } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import ErrorBoundary from "./components/ErrorBoundary";
@@ -19,6 +19,9 @@ const Profile = lazy(() => import("./pages/Profile"));
 const Today = lazy(() => import("./pages/Today"));
 const Recap = lazy(() => import("./pages/Recap"));
 
+// Lazy load heavy components that hurt performance
+const FluidSmokeEffect = lazy(() => import("./components/FluidSmokeEffect"));
+
 // Create a client with optimized caching
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -34,21 +37,34 @@ const queryClient = new QueryClient({
 
 import LoadingScreen from "./components/LoadingScreen";
 
-// ... imports
-
-import FluidSmokeEffect from "./components/FluidSmokeEffect";
-import { useLocation } from "react-router-dom";
-
 function AppContent() {
   const { userPreferences } = useUserPreferences();
-  const location = useLocation();
+  const [showSmoke, setShowSmoke] = useState(false);
 
-  // Show smoke effect if enabled
-  const showSmoke = userPreferences.smokeEffect;
+  // Defer smoke effect loading to after initial paint (reduces INP/LCP)
+  useEffect(() => {
+    if (userPreferences.smokeEffect) {
+      // Use requestIdleCallback or setTimeout to defer heavy component
+      const timer = setTimeout(() => {
+        setShowSmoke(true);
+      }, 2000); // Load smoke effect 2s after initial render
+      return () => clearTimeout(timer);
+    } else {
+      setShowSmoke(false);
+    }
+  }, [userPreferences.smokeEffect]);
 
   return (
-    <div className={`min-h-screen bg-background ${userPreferences.liquidGlassMode ? 'liquid-glass' : ''}`}>
-      {showSmoke && <FluidSmokeEffect />}
+    <div 
+      className={`min-h-screen bg-background ${userPreferences.liquidGlassMode ? 'liquid-glass' : ''}`}
+      style={{ contain: 'layout style' }}
+    >
+      {/* Defer heavy WebGL effect to after LCP */}
+      {showSmoke && (
+        <Suspense fallback={null}>
+          <FluidSmokeEffect />
+        </Suspense>
+      )}
       <Suspense fallback={<LoadingScreen />}>
         <Routes>
           <Route path="/" element={<Index />} />
@@ -71,14 +87,14 @@ function App() {
       <QueryClientProvider client={queryClient}>
         <ThemeProvider>
           <LanguageProvider>
-            <UserPreferencesProvider> {/* Added UserPreferencesProvider */}
+            <UserPreferencesProvider>
               <AuthProvider>
                 <Router>
                   <GoogleAnalyticsTracker />
                   <AppContent />
                 </Router>
               </AuthProvider>
-            </UserPreferencesProvider> {/* Closed UserPreferencesProvider */}
+            </UserPreferencesProvider>
           </LanguageProvider>
         </ThemeProvider>
       </QueryClientProvider>
