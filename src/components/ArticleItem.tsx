@@ -1,10 +1,14 @@
-import React, { useState } from "react";
+import React, { useState, useCallback } from "react";
 import { Progress } from "./ui/progress";
 import { UserPreferences } from "@/services/userPreferencesService";
 import AudioPlayer from "./AudioPlayer";
 import { useAuth } from "@/contexts/AuthContext";
 import { ExportMenu } from "./ExportMenu";
 import HighlightedText from "./HighlightedText";
+import SmartLinks from "./SmartLinks";
+import { useSwipeGesture } from "@/hooks/useSwipeGesture";
+import { AnimatePresence } from "framer-motion";
+import { useNavigate } from "react-router-dom";
 
 interface ArticleItemProps {
   article: any;
@@ -26,17 +30,55 @@ const ArticleItem = ({
   isMobile
 }: ArticleItemProps) => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [hideTts, setHideTts] = useState<boolean>(() => {
     try { return localStorage.getItem('ticdia_hide_tts') === 'true'; } catch { return false; }
   });
-  const contentToShow = isCurrent && displayedText ? displayedText : article.content;
+  const [showSmartLinks, setShowSmartLinks] = useState(false);
+  
+  // Use text animation preference - show full text if disabled
+  const showAnimation = userPreferences.textAnimation !== false;
+  const contentToShow = isCurrent && showAnimation && displayedText ? displayedText : article.content;
+
+  const handleSwipeRight = useCallback(() => {
+    if (isCurrent) {
+      setShowSmartLinks(true);
+    }
+  }, [isCurrent]);
+
+  const handleSwipeLeft = useCallback(() => {
+    setShowSmartLinks(false);
+  }, []);
+
+  const swipeHandlers = useSwipeGesture({
+    onSwipeRight: handleSwipeRight,
+    onSwipeLeft: handleSwipeLeft,
+  });
+
+  const handleNavigateToArticle = (title: string) => {
+    setShowSmartLinks(false);
+    navigate(`/?q=${encodeURIComponent(title)}`);
+  };
 
   return (
     <div
       data-index={index}
       className="article-section h-screen w-screen snap-start snap-always relative flex items-center justify-center"
       style={{ minHeight: '100vh', contain: 'layout style paint' }}
+      {...swipeHandlers}
     >
+      {/* Smart Links Overlay */}
+      <AnimatePresence>
+        {showSmartLinks && isCurrent && (
+          <SmartLinks
+            articleContent={article.content}
+            articleTitle={article.title}
+            onClose={() => setShowSmartLinks(false)}
+            onNavigateToArticle={handleNavigateToArticle}
+          />
+        )}
+      </AnimatePresence>
+
       {/* Fixed aspect ratio container prevents CLS */}
       <div 
         className="absolute inset-0 w-full h-full overflow-hidden"
@@ -79,7 +121,7 @@ const ArticleItem = ({
       </div>
 
       {/* Export Menu - positioned in top-right corner */}
-      {isCurrent && (
+      {isCurrent && !showSmartLinks && (
         <div className="absolute top-20 right-4 z-20">
           <ExportMenu article={{
             id: article.id?.toString() || article.title,
@@ -135,7 +177,7 @@ const ArticleItem = ({
             </div>
 
             {/* Audio Player */}
-            {isCurrent && user && !hideTts && (
+            {isCurrent && user && !hideTts && !showSmartLinks && (
               <div className="mt-4">
                 <div className="flex items-center justify-between mb-2 text-xs opacity-70">
                   <span>Text to Speech</span>
@@ -172,10 +214,16 @@ const ArticleItem = ({
           <span>{article.readTime} min read</span>
           <span>•</span>
           <span>{article.views.toLocaleString()} views</span>
+          {isCurrent && (
+            <>
+              <span>•</span>
+              <span className="text-primary/70">Swipe right for links</span>
+            </>
+          )}
         </div>
       </div>
 
-      {isCurrent && progress > 0 && (
+      {isCurrent && progress > 0 && !showSmartLinks && showAnimation && (
         <div className="absolute bottom-0 left-0 right-0 z-20">
           <Progress
             value={progress}
@@ -202,7 +250,8 @@ export default React.memo(ArticleItem, (prevProps, nextProps) => {
     prevProps.userPreferences.fontFamily === nextProps.userPreferences.fontFamily &&
     prevProps.userPreferences.fontSize === nextProps.userPreferences.fontSize &&
     prevProps.userPreferences.backgroundOpacity === nextProps.userPreferences.backgroundOpacity &&
-    prevProps.userPreferences.highlightColor === nextProps.userPreferences.highlightColor
+    prevProps.userPreferences.highlightColor === nextProps.userPreferences.highlightColor &&
+    prevProps.userPreferences.textAnimation === nextProps.userPreferences.textAnimation
   );
 
   return areEqual; // TRUE = skip, FALSE = re-render

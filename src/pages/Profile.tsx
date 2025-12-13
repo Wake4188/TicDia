@@ -301,9 +301,9 @@ const Profile = () => {
   };
 
   const fontOptions = [
-    { value: 'Inter', label: `Inter (${t.default})` },
+    { value: 'Times New Roman', label: `Times New Roman (${t.default})` },
+    { value: 'Inter', label: 'Inter' },
     { value: 'Comic Neue', label: 'Comic Neue (Dyslexia-friendly)' },
-    { value: 'Atkinson Hyperlegible', label: 'Atkinson Hyperlegible (High Legibility)' },
     { value: 'Georgia', label: `Georgia (${t.serif})` },
     { value: 'Merriweather', label: 'Merriweather' },
     { value: 'Lora', label: 'Lora' },
@@ -616,6 +616,19 @@ const Profile = () => {
                   </div>
 
                   <div className="space-y-6 pt-4 border-t border-border">
+                    <div className="flex items-center justify-between p-4 rounded-xl bg-muted/30 hover:bg-muted/50 transition-colors">
+                      <div className="space-y-1">
+                        <Label className="text-base font-medium text-foreground">Text Animation</Label>
+                        <p className="text-sm text-muted-foreground">
+                          Show letter-by-letter text reveal animation
+                        </p>
+                      </div>
+                      <Switch
+                        checked={userPreferences.textAnimation !== false}
+                        onCheckedChange={(checked) => updateUserPrefs({ textAnimation: checked })}
+                      />
+                    </div>
+
                     <div className="flex items-center justify-between p-4 rounded-xl bg-muted/30 hover:bg-muted/50 transition-colors">
                       <div className="space-y-1">
                         <Label className="text-base font-medium text-foreground">Liquid Glass Mode</Label>

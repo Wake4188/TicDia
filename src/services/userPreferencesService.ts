@@ -11,6 +11,7 @@ export interface UserPreferences {
   liquidGlassMode: boolean;
   ttsSpeed: number;
   smokeEffect: boolean;
+  textAnimation: boolean;
 }
 
 export const loadUserPreferences = async (userId: string): Promise<UserPreferences> => {
@@ -31,14 +32,15 @@ export const loadUserPreferences = async (userId: string): Promise<UserPreferenc
     }
 
     return {
-      fontFamily: data.font_family || 'Inter',
+      fontFamily: data.font_family || 'Times New Roman',
       backgroundOpacity: data.background_opacity || 80,
       highlightColor: data.highlight_color || '#ea384c',
       fontSize: data.font_size || 16,
       feedType: (data.feed_type as 'random' | 'curated' | 'mixed') || 'mixed',
       liquidGlassMode: data.liquid_glass_mode || false,
       ttsSpeed: data.tts_speed || 1.0,
-      smokeEffect: (data as Record<string, unknown>).smoke_effect !== false // Default to true if null/undefined
+      smokeEffect: (data as Record<string, unknown>).smoke_effect !== false,
+      textAnimation: (data as Record<string, unknown>).text_animation !== false
     };
   } catch (error) {
     console.error('Error loading user preferences:', sanitizeErrorMessage(error));
@@ -83,7 +85,7 @@ export const saveUserPreferences = async (userId: string, preferences: UserPrefe
 };
 
 export const getDefaultPreferences = (): UserPreferences => ({
-  fontFamily: 'Inter',
+  fontFamily: 'Times New Roman',
   backgroundOpacity: 70,
   highlightColor: '#FE2C55',
   fontSize: 16,
@@ -91,6 +93,7 @@ export const getDefaultPreferences = (): UserPreferences => ({
   liquidGlassMode: false,
   ttsSpeed: 1.0,
   smokeEffect: true,
+  textAnimation: true,
 });
 
 export const updateUserPreferences = async (userId: string, updates: Partial<UserPreferences>): Promise<void> => {

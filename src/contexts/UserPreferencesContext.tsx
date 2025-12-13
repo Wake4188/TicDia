@@ -61,7 +61,7 @@ export const UserPreferencesProvider = ({ children }: { children: ReactNode }) =
                     prefs.highlightColor = prefs.progressBarColor;
                 }
                 setUserPreferences({
-                    fontFamily: prefs.fontFamily || 'Inter',
+                    fontFamily: prefs.fontFamily || 'Times New Roman',
                     backgroundOpacity: prefs.backgroundOpacity || 70,
                     highlightColor: prefs.highlightColor || '#FE2C55',
                     fontSize: prefs.fontSize || 16,
@@ -69,6 +69,7 @@ export const UserPreferencesProvider = ({ children }: { children: ReactNode }) =
                     liquidGlassMode: Boolean(prefs.liquidGlassMode) || false,
                     ttsSpeed: prefs.ttsSpeed || 1.0,
                     smokeEffect: prefs.smokeEffect !== false,
+                    textAnimation: prefs.textAnimation !== false,
                 });
                 document.documentElement.style.setProperty('--progress-bar-color', prefs.highlightColor || '#FE2C55');
                 document.documentElement.style.setProperty('--highlight-color', prefs.highlightColor || '#FE2C55');
