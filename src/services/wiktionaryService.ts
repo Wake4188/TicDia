@@ -1,164 +1,255 @@
-// Service to fetch word definitions from Wiktionary API with Dictionary API fallback
+// Service to fetch word definitions from Wiktionary API with multilingual support
 
 export interface WordDefinition {
-    partOfSpeech: string;
-    language: string;
-    definitions: {
-        definition: string;
-        examples?: string[];
-    }[];
+  partOfSpeech: string;
+  language: string;
+  definitions: {
+    definition: string;
+    examples?: string[];
+  }[];
 }
 
 export interface WiktionaryResponse {
-    [language: string]: WordDefinition[];
+  [language: string]: WordDefinition[];
 }
 
 const cache = new Map<string, WiktionaryResponse>();
 
 // Patterns that indicate useless definitions (grammatical forms)
 const USELESS_PATTERNS = [
-    /^plural\s+(of|form\s+of)\s+/i,
-    /^simple\s+past(\s+tense)?\s+(of|form\s+of)\s+/i,
-    /^past\s+participle\s+(of|form\s+of)\s+/i,
-    /^present\s+participle\s+(of|form\s+of)\s+/i,
-    /^comparative\s+(of|form\s+of)\s+/i,
-    /^superlative\s+(of|form\s+of)\s+/i,
-    /^alternative\s+(spelling|form)\s+of\s+/i,
-    /^inflection\s+of\s+/i,
-    /^third-person\s+singular\s+/i,
+  /^plural\s+(of|form\s+of)\s+/i,
+  /^simple\s+past(\s+tense)?\s+(of|form\s+of)\s+/i,
+  /^past\s+participle\s+(of|form\s+of)\s+/i,
+  /^present\s+participle\s+(of|form\s+of)\s+/i,
+  /^comparative\s+(of|form\s+of)\s+/i,
+  /^superlative\s+(of|form\s+of)\s+/i,
+  /^alternative\s+(spelling|form)\s+of\s+/i,
+  /^inflection\s+of\s+/i,
+  /^third-person\s+singular\s+/i,
+  // French grammatical forms
+  /^forme\s+(du|de)\s+/i,
+  /^pluriel\s+(du|de)\s+/i,
+  /^féminin\s+(du|de)\s+/i,
+  /^masculin\s+(du|de)\s+/i,
+  // German grammatical forms
+  /^Plural\s+(von|des)\s+/i,
+  /^Genitiv\s+(von|des)\s+/i,
+  /^Dativ\s+(von|des)\s+/i,
+  // Spanish grammatical forms
+  /^plural\s+de\s+/i,
+  /^forma\s+(del|de)\s+/i,
 ];
+
+// Wiktionary language codes mapping
+const WIKTIONARY_LANG_CODES: Record<string, string> = {
+  'en': 'en',
+  'fr': 'fr',
+  'de': 'de',
+  'es': 'es',
+  'it': 'it',
+  'pt': 'pt',
+  'nl': 'nl',
+  'ru': 'ru',
+  'ja': 'ja',
+  'zh': 'zh',
+  'ko': 'ko',
+  'ar': 'ar',
+  'hi': 'hi',
+  'pl': 'pl',
+  'tr': 'tr',
+  'sv': 'sv',
+  'da': 'da',
+  'no': 'no',
+  'fi': 'fi',
+  'cs': 'cs',
+  'el': 'el',
+  'he': 'he',
+  'th': 'th',
+  'vi': 'vi',
+  'id': 'id',
+  'ms': 'ms',
+};
 
 // Check if a definition is useless
 function isUselessDefinition(definition: string): boolean {
-    return USELESS_PATTERNS.some(pattern => pattern.test(definition.trim()));
+  return USELESS_PATTERNS.some(pattern => pattern.test(definition.trim()));
 }
 
 // Filter out useless definitions from a word definition
 function filterUselessDefinitions(wordDef: WordDefinition): WordDefinition | null {
-    const filteredDefs = wordDef.definitions.filter(d => !isUselessDefinition(d.definition));
+  const filteredDefs = wordDef.definitions.filter(d => !isUselessDefinition(d.definition));
 
-    if (filteredDefs.length === 0) {
-        return null;
-    }
+  if (filteredDefs.length === 0) {
+    return null;
+  }
 
-    return {
-        ...wordDef,
-        definitions: filteredDefs
-    };
+  return {
+    ...wordDef,
+    definitions: filteredDefs
+  };
 }
 
-// Fetch from Dictionary API as fallback
+// Fetch from Dictionary API (English only fallback)
 async function fetchFromDictionaryAPI(word: string): Promise<WiktionaryResponse | null> {
-    try {
-        const response = await fetch(
-            `https://api.dictionaryapi.dev/api/v2/entries/en/${encodeURIComponent(word)}`
-        );
+  try {
+    const response = await fetch(
+      `https://api.dictionaryapi.dev/api/v2/entries/en/${encodeURIComponent(word)}`
+    );
 
-        if (!response.ok) {
-            return null;
-        }
-
-        const data = await response.json();
-
-        if (!Array.isArray(data) || data.length === 0) {
-            return null;
-        }
-
-        // Transform Dictionary API format to our format
-        const wordDefinitions: WordDefinition[] = [];
-
-        for (const entry of data) {
-            if (!entry.meanings) continue;
-
-            for (const meaning of entry.meanings) {
-                const definitions = meaning.definitions?.map((def: any) => ({
-                    definition: def.definition || '',
-                    examples: def.example ? [def.example] : []
-                })) || [];
-
-                if (definitions.length > 0) {
-                    wordDefinitions.push({
-                        partOfSpeech: meaning.partOfSpeech || 'unknown',
-                        language: 'en',
-                        definitions: definitions.slice(0, 3) // Limit to 3 definitions per part of speech
-                    });
-                }
-            }
-        }
-
-        if (wordDefinitions.length === 0) {
-            return null;
-        }
-
-        return { en: wordDefinitions };
-    } catch (error) {
-        console.error('Error fetching from Dictionary API:', error);
-        return null;
+    if (!response.ok) {
+      return null;
     }
+
+    const data = await response.json();
+
+    if (!Array.isArray(data) || data.length === 0) {
+      return null;
+    }
+
+    const wordDefinitions: WordDefinition[] = [];
+
+    for (const entry of data) {
+      if (!entry.meanings) continue;
+
+      for (const meaning of entry.meanings) {
+        const definitions = meaning.definitions?.map((def: any) => ({
+          definition: def.definition || '',
+          examples: def.example ? [def.example] : []
+        })) || [];
+
+        if (definitions.length > 0) {
+          wordDefinitions.push({
+            partOfSpeech: meaning.partOfSpeech || 'unknown',
+            language: 'en',
+            definitions: definitions.slice(0, 3)
+          });
+        }
+      }
+    }
+
+    if (wordDefinitions.length === 0) {
+      return null;
+    }
+
+    return { en: wordDefinitions };
+  } catch (error) {
+    return null;
+  }
 }
 
-export async function lookupWord(word: string): Promise<WiktionaryResponse | null> {
-    const normalizedWord = word.toLowerCase().trim();
+// Fetch from Wiktionary in a specific language
+async function fetchFromWiktionary(word: string, langCode: string): Promise<WiktionaryResponse | null> {
+  const wiktionaryLang = WIKTIONARY_LANG_CODES[langCode] || 'en';
 
-    // Check cache first
-    if (cache.has(normalizedWord)) {
-        return cache.get(normalizedWord)!;
+  try {
+    const response = await fetch(
+      `https://${wiktionaryLang}.wiktionary.org/api/rest_v1/page/definition/${encodeURIComponent(word)}`
+    );
+
+    if (!response.ok) {
+      return null;
     }
 
-    try {
-        // Try Wiktionary first
-        const response = await fetch(
-            `https://en.wiktionary.org/api/rest_v1/page/definition/${encodeURIComponent(normalizedWord)}`
-        );
+    const data: WiktionaryResponse = await response.json();
 
-        if (response.ok) {
-            const data: WiktionaryResponse = await response.json();
+    // Get definitions in the target language first, then fall back to others
+    const targetLangKey = langCode;
+    let definitions = data[targetLangKey];
 
-            // Filter out useless definitions
-            if (data.en) {
-                const filteredDefinitions = data.en
-                    .map(filterUselessDefinitions)
-                    .filter((def): def is WordDefinition => def !== null);
-
-                if (filteredDefinitions.length > 0) {
-                    const result = { en: filteredDefinitions };
-                    cache.set(normalizedWord, result);
-                    return result;
-                }
-            }
+    // If no definitions in target language, try to find any definitions
+    if (!definitions || definitions.length === 0) {
+      // Look for any language definitions
+      const availableLanguages = Object.keys(data);
+      for (const lang of availableLanguages) {
+        if (data[lang] && data[lang].length > 0) {
+          definitions = data[lang];
+          break;
         }
-
-        // If Wiktionary failed or returned only useless definitions, try Dictionary API
-        const dictionaryResult = await fetchFromDictionaryAPI(normalizedWord);
-
-        if (dictionaryResult) {
-            cache.set(normalizedWord, dictionaryResult);
-            return dictionaryResult;
-        }
-
-        return null;
-    } catch (error) {
-        console.error('Error fetching word definition:', error);
-
-        // Try Dictionary API as final fallback
-        try {
-            const dictionaryResult = await fetchFromDictionaryAPI(normalizedWord);
-            if (dictionaryResult) {
-                cache.set(normalizedWord, dictionaryResult);
-                return dictionaryResult;
-            }
-        } catch (fallbackError) {
-            console.error('Dictionary API fallback also failed:', fallbackError);
-        }
-
-        return null;
+      }
     }
+
+    if (!definitions || definitions.length === 0) {
+      return null;
+    }
+
+    // Filter out useless definitions
+    const filteredDefinitions = definitions
+      .map(filterUselessDefinitions)
+      .filter((def): def is WordDefinition => def !== null);
+
+    if (filteredDefinitions.length === 0) {
+      return null;
+    }
+
+    return { [langCode]: filteredDefinitions };
+  } catch (error) {
+    return null;
+  }
 }
 
-// Helper to get English definitions only
+export async function lookupWord(word: string, languageCode: string = 'en'): Promise<WiktionaryResponse | null> {
+  const normalizedWord = word.toLowerCase().trim();
+  const cacheKey = `${languageCode}:${normalizedWord}`;
+
+  // Check cache first
+  if (cache.has(cacheKey)) {
+    return cache.get(cacheKey)!;
+  }
+
+  try {
+    // Try language-specific Wiktionary first
+    const wiktionaryResult = await fetchFromWiktionary(normalizedWord, languageCode);
+
+    if (wiktionaryResult) {
+      cache.set(cacheKey, wiktionaryResult);
+      return wiktionaryResult;
+    }
+
+    // For English, try the Dictionary API as fallback
+    if (languageCode === 'en') {
+      const dictionaryResult = await fetchFromDictionaryAPI(normalizedWord);
+      if (dictionaryResult) {
+        cache.set(cacheKey, dictionaryResult);
+        return dictionaryResult;
+      }
+    }
+
+    // Try English Wiktionary as final fallback (it often has entries for foreign words)
+    if (languageCode !== 'en') {
+      const englishWiktionaryResult = await fetchFromWiktionary(normalizedWord, 'en');
+      if (englishWiktionaryResult) {
+        cache.set(cacheKey, englishWiktionaryResult);
+        return englishWiktionaryResult;
+      }
+    }
+
+    return null;
+  } catch (error) {
+    return null;
+  }
+}
+
+// Helper to get definitions in a specific language
+export function getDefinitions(response: WiktionaryResponse | null, languageCode: string = 'en'): WordDefinition[] {
+  if (!response) {
+    return [];
+  }
+
+  // Try the exact language first
+  if (response[languageCode]) {
+    return response[languageCode];
+  }
+
+  // Return definitions from any available language
+  const availableLanguages = Object.keys(response);
+  if (availableLanguages.length > 0) {
+    return response[availableLanguages[0]];
+  }
+
+  return [];
+}
+
+// Legacy helper for backwards compatibility
 export function getEnglishDefinitions(response: WiktionaryResponse | null): WordDefinition[] {
-    if (!response || !response.en) {
-        return [];
-    }
-    return response.en;
+  return getDefinitions(response, 'en');
 }
