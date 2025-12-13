@@ -35,24 +35,46 @@ const ArticleItem = ({
     <div
       data-index={index}
       className="article-section h-screen w-screen snap-start snap-always relative flex items-center justify-center"
-      style={{ minHeight: '100vh' }}
+      style={{ minHeight: '100vh', contain: 'layout style paint' }}
     >
-      <div className="absolute inset-0 w-screen h-screen" style={{ aspectRatio: '16/9' }}>
+      {/* Fixed aspect ratio container prevents CLS */}
+      <div 
+        className="absolute inset-0 w-full h-full overflow-hidden"
+        style={{ 
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+        }}
+      >
+        {/* Placeholder background to prevent flash */}
+        <div 
+          className="absolute inset-0 bg-background" 
+          style={{ zIndex: 0 }}
+        />
         <img
           src={article.image}
           alt={article.title}
-          className="w-full h-full object-cover"
-          loading={index > 0 ? "lazy" : "eager"}
-          decoding="async"
+          className="absolute inset-0 w-full h-full object-cover"
+          loading={index === 0 ? "eager" : "lazy"}
+          decoding={index === 0 ? "sync" : "async"}
           width="1920"
           height="1080"
           // @ts-expect-error - fetchpriority is valid in DOM but missing in React types
           fetchpriority={index === 0 ? "high" : "low"}
-          style={{ aspectRatio: '16/9' }}
+          style={{ 
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%',
+            objectFit: 'cover',
+          }}
         />
         <div
           className="absolute inset-0 bg-background"
-          style={{ opacity: userPreferences.backgroundOpacity / 100 }}
+          style={{ opacity: userPreferences.backgroundOpacity / 100, zIndex: 1 }}
         />
       </div>
 
