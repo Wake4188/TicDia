@@ -22,6 +22,7 @@ import { useUserPreferences } from "@/contexts/UserPreferencesContext";
 import { AnalyticsStats } from "@/components/AnalyticsStats";
 import { Footer } from "@/components/Footer";
 import { motion, AnimatePresence } from "framer-motion";
+import { setWordOfTheDay, getWordOfTheDayRecord } from "@/services/wordOfTheDayService";
 
 interface SavedArticle {
   id: string;
@@ -82,7 +83,70 @@ const Profile = () => {
 
     setResetEmail(user.email || "");
     fetchSavedArticles();
+    checkAdminRole();
+    fetchCurrentWordOfTheDay();
   }, [user, navigate]);
+
+  const checkAdminRole = async () => {
+    if (!user) return;
+    try {
+      const { data, error } = await supabase.rpc('has_role' as any, {
+        _user_id: user.id,
+        _role: 'admin'
+      });
+      if (!error && data) {
+        setIsAdmin(true);
+      }
+    } catch (error) {
+      console.error('Error checking admin role:', error);
+    }
+  };
+
+  const fetchCurrentWordOfTheDay = async () => {
+    try {
+      const record = await getWordOfTheDayRecord();
+      setCurrentWordOfTheDay(record?.word || null);
+    } catch (error) {
+      console.error('Error fetching current word of the day:', error);
+    }
+  };
+
+  const handleSetWordOfTheDay = async () => {
+    if (!wordOfTheDay.trim()) {
+      toast({
+        title: "Error",
+        description: "Please enter a word",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!user) return;
+
+    setWordOfTheDayLoading(true);
+    try {
+      const result = await setWordOfTheDay(wordOfTheDay.trim(), new Date(), user.id);
+      if (result.success) {
+        toast({
+          title: "Success",
+          description: "Word of the day has been set successfully.",
+        });
+        setWordOfTheDayState("");
+        await fetchCurrentWordOfTheDay();
+      } else {
+        throw new Error(result.error || "Failed to set word of the day");
+      }
+    } catch (error: any) {
+      console.error('Error setting word of the day:', error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to set word of the day",
+        variant: "destructive",
+      });
+    } finally {
+      setWordOfTheDayLoading(false);
+    }
+  };
 
   useEffect(() => {
     const filtered = savedArticles.filter(article =>
@@ -368,7 +432,8 @@ const Profile = () => {
                 { id: "saved", icon: BookMarked, label: t.savedArticles, shortLabel: "Saved" },
                 { id: "analytics", icon: BarChart3, label: "Analytics", shortLabel: "Stats" },
                 { id: "settings", icon: null, label: t.title, shortLabel: "Settings" },
-                { id: "security", icon: Lock, label: "Account Security", shortLabel: "Security" }
+                { id: "security", icon: Lock, label: "Account Security", shortLabel: "Security" },
+                ...(isAdmin ? [{ id: "admin", icon: Shield, label: "Admin", shortLabel: "Admin" }] : [])
               ].map((tab) => (
                 <TabsTrigger
                   key={tab.id}
@@ -929,6 +994,67 @@ const Profile = () => {
               </Card>
             </motion.div>
           </TabsContent>
+
+          {isAdmin && (
+            <TabsContent value="admin" className="space-y-4 sm:space-y-6 focus-visible:outline-none focus-visible:ring-0">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.4 }}
+              >
+                <Card className="bg-card/50 backdrop-blur-xl border-border shadow-lg overflow-hidden">
+                  <CardHeader className="border-b border-border pb-6">
+                    <CardTitle className="text-2xl font-bold text-foreground flex items-center gap-2">
+                      <Shield className="w-6 h-6" />
+                      Admin Panel
+                    </CardTitle>
+                    <CardDescription className="text-muted-foreground mt-1">
+                      Manage word of the day
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-6 p-6">
+                    <div className="space-y-4">
+                      <div>
+                        <Label htmlFor="word-of-day" className="text-sm font-medium text-foreground mb-2 block">
+                          Word of the Day
+                        </Label>
+                        {currentWordOfTheDay && (
+                          <p className="text-sm text-muted-foreground mb-3">
+                            Current word: <span className="font-semibold text-foreground">{currentWordOfTheDay}</span>
+                          </p>
+                        )}
+                        <div className="flex gap-2">
+                          <Input
+                            id="word-of-day"
+                            placeholder="Enter word for today"
+                            value={wordOfTheDay}
+                            onChange={(e) => setWordOfTheDayState(e.target.value)}
+                            className="bg-background/50 border-border text-foreground focus:border-primary/50 focus:ring-primary/20"
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter' && !wordOfTheDayLoading) {
+                                handleSetWordOfTheDay();
+                              }
+                            }}
+                          />
+                          <Button
+                            onClick={handleSetWordOfTheDay}
+                            disabled={wordOfTheDayLoading || !wordOfTheDay.trim()}
+                            className="bg-wikitok-red hover:bg-wikitok-red/90 text-white"
+                          >
+                            {wordOfTheDayLoading ? "Setting..." : "Set Word"}
+                          </Button>
+                        </div>
+                        <p className="text-xs text-muted-foreground mt-2">
+                          This word will appear as the first word in the Word Feed for all users today.
+                        </p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            </TabsContent>
+          )}
         </Tabs>
 
         {/* Footer */}

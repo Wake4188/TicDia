@@ -510,4 +510,117 @@
   .liquid-glass [role="menuitem"] {
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
+
+  /* Word Feed Mobile Scrolling Optimizations */
+  .word-feed-scroll {
+    /* Enable smooth momentum scrolling on iOS */
+    -webkit-overflow-scrolling: touch;
+    /* Smooth scroll behavior */
+    scroll-behavior: smooth;
+    /* Prevent overscroll bounce on mobile */
+    overscroll-behavior-y: contain;
+    overscroll-behavior-x: none;
+    /* Optimize touch scrolling */
+    touch-action: pan-y;
+    /* Enable hardware acceleration */
+    transform: translateZ(0);
+    will-change: scroll-position;
+    /* Better scroll snap behavior */
+    scroll-snap-type: y mandatory;
+    scroll-snap-stop: always;
+    /* Smooth momentum */
+    -webkit-scroll-snap-type: y mandatory;
+    /* Smooth snap alignment */
+    scroll-padding: 0;
+    /* Optimize rendering */
+    contain: layout style paint;
+    /* Prevent text selection during scroll */
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  .word-feed-scroll * {
+    /* Re-enable text selection for content */
+    user-select: text;
+    -webkit-user-select: text;
+  }
+
+  .word-feed-scroll::-webkit-scrollbar {
+    display: none;
+  }
+
+  .word-feed-item {
+    /* Hardware acceleration for smooth scrolling */
+    will-change: transform, opacity;
+    transform: translateZ(0);
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    /* Optimize rendering */
+    contain: layout style paint;
+    /* Smooth snap alignment */
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
+    -webkit-scroll-snap-align: start;
+    /* Prevent layout shifts */
+    min-height: 100vh;
+    min-height: 100dvh; /* Dynamic viewport height for mobile */
+    /* Ensure proper positioning */
+    position: relative;
+    /* Smooth transitions */
+    transition: opacity 0.3s ease-in-out;
+  }
+
+  /* Optimize scroll performance on mobile */
+  @media (max-width: 768px) {
+    .word-feed-scroll {
+      /* Enhanced momentum scrolling */
+      -webkit-overflow-scrolling: touch;
+      /* Reduce scroll friction */
+      scroll-snap-type: y mandatory;
+      /* Better snap points */
+      scroll-padding: 0;
+      /* Smoother momentum */
+      scroll-behavior: smooth;
+      /* Prevent pull-to-refresh interference */
+      overscroll-behavior-y: contain;
+      overscroll-behavior-x: none;
+    }
+
+    .word-feed-item {
+      /* Ensure proper snap behavior */
+      scroll-snap-align: start;
+      scroll-snap-stop: always;
+      /* Optimize for mobile rendering */
+      contain: layout style paint;
+      content-visibility: auto;
+      /* Use dynamic viewport height */
+      height: 100dvh;
+      min-height: 100dvh;
+    }
+  }
+
+  /* Touch device optimizations */
+  @media (hover: none) and (pointer: coarse) {
+    .word-feed-scroll {
+      /* Enhanced touch scrolling */
+      -webkit-overflow-scrolling: touch;
+      /* Better touch response */
+      touch-action: pan-y pinch-zoom;
+      /* Smooth momentum */
+      scroll-behavior: smooth;
+    }
+  }
+
+  /* Prevent scroll jank on low-end devices */
+  @media (prefers-reduced-motion: no-preference) {
+    .word-feed-scroll {
+      scroll-behavior: smooth;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .word-feed-scroll {
+      scroll-behavior: auto;
+    }
+  }
 }

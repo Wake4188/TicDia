@@ -6,6 +6,7 @@ import { ArrowLeft, RefreshCw, ChevronDown, Volume2, VolumeX } from "lucide-reac
 import { motion, AnimatePresence } from "framer-motion";
 import { useUserPreferences } from "@/contexts/UserPreferencesContext";
 import { lookupWord, getDefinitions } from "@/services/wiktionaryService";
+import { getWordOfTheDay, generateWordOfTheDay } from "@/services/wordOfTheDayService";
 import Navigation from "@/components/Navigation";
 
 interface WordEntry {
@@ -83,11 +84,32 @@ const WordFeed = () => {
 
   const loadInitialWords = useCallback(async () => {
     setIsLoading(true);
-    const shuffled = [...INTERESTING_WORDS].sort(() => Math.random() - 0.5);
-    const selectedWords = shuffled.slice(0, 10);
+    const today = new Date();
+    
+    // Get word of the day (either from database or generate deterministically)
+    let wordOfTheDay: string | null = await getWordOfTheDay(today);
+    
+    // If no word of the day exists, generate one deterministically
+    if (!wordOfTheDay) {
+      wordOfTheDay = generateWordOfTheDay(today, INTERESTING_WORDS);
+    }
     
     const wordEntries: WordEntry[] = [];
     const newUsedWords = new Set<string>();
+    
+    // Fetch word of the day first
+    if (wordOfTheDay) {
+      const wordOfTheDayEntry = await fetchWordDefinition(wordOfTheDay);
+      if (wordOfTheDayEntry) {
+        wordEntries.push(wordOfTheDayEntry);
+        newUsedWords.add(wordOfTheDay);
+      }
+    }
+    
+    // Load additional words (excluding word of the day)
+    const availableWords = INTERESTING_WORDS.filter(w => !newUsedWords.has(w));
+    const shuffled = [...availableWords].sort(() => Math.random() - 0.5);
+    const selectedWords = shuffled.slice(0, 9); // 9 more words to make 10 total
     
     for (const word of selectedWords) {
       const entry = await fetchWordDefinition(word);
@@ -127,21 +149,73 @@ const WordFeed = () => {
     }
   }, [usedWords, fetchWordDefinition]);
 
+  // Use requestAnimationFrame for smooth scroll handling
+  const scrollTimeoutRef = useRef<number | null>(null);
+  const lastScrollTopRef = useRef(0);
+  const isScrollingRef = useRef(false);
+  const itemHeightRef = useRef(0);
+
+  // Update item height on resize (important for mobile viewport changes)
+  useEffect(() => {
+    const updateItemHeight = () => {
+      if (containerRef.current) {
+        // Use actual viewport height, accounting for mobile browser UI
+        itemHeightRef.current = window.innerHeight || containerRef.current.clientHeight;
+      }
+    };
+    
+    updateItemHeight();
+    window.addEventListener('resize', updateItemHeight);
+    window.addEventListener('orientationchange', updateItemHeight);
+    
+    return () => {
+      window.removeEventListener('resize', updateItemHeight);
+      window.removeEventListener('orientationchange', updateItemHeight);
+    };
+  }, []);
+
   const handleScroll = useCallback((e: React.UIEvent<HTMLDivElement>) => {
     const container = e.currentTarget;
     const scrollTop = container.scrollTop;
-    const itemHeight = window.innerHeight;
-    const newIndex = Math.round(scrollTop / itemHeight);
+    const itemHeight = itemHeightRef.current || window.innerHeight || container.clientHeight;
     
-    if (newIndex !== currentIndex) {
-      setCurrentIndex(newIndex);
-      
-      // Load more words when nearing the end
-      if (newIndex >= words.length - 3) {
-        loadMoreWords();
-      }
+    // Throttle scroll handling with requestAnimationFrame for smooth performance
+    if (scrollTimeoutRef.current !== null) {
+      cancelAnimationFrame(scrollTimeoutRef.current);
     }
+    
+    scrollTimeoutRef.current = requestAnimationFrame(() => {
+      // Use more accurate calculation with threshold for better snap detection
+      const scrollProgress = scrollTop / itemHeight;
+      const newIndex = Math.round(scrollProgress);
+      
+      // Only update if we've moved significantly (reduces unnecessary re-renders)
+      if (Math.abs(newIndex - currentIndex) > 0 || Math.abs(scrollTop - lastScrollTopRef.current) > itemHeight * 0.1) {
+        if (newIndex !== currentIndex && newIndex >= 0 && newIndex < words.length) {
+          setCurrentIndex(newIndex);
+        }
+        
+        // Load more words when nearing the end
+        if (newIndex >= words.length - 3 && newIndex < words.length) {
+          loadMoreWords();
+        }
+      }
+      
+      lastScrollTopRef.current = scrollTop;
+      isScrollingRef.current = false;
+    });
+    
+    isScrollingRef.current = true;
   }, [currentIndex, words.length, loadMoreWords]);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (scrollTimeoutRef.current !== null) {
+        cancelAnimationFrame(scrollTimeoutRef.current);
+      }
+    };
+  }, []);
 
   const speakWord = useCallback((word: string) => {
     if ('speechSynthesis' in window) {
@@ -169,7 +243,7 @@ const WordFeed = () => {
   if (!user) return null;
 
   return (
-    <div className="h-screen w-screen relative overflow-hidden bg-background">
+    <div className="h-screen h-[100dvh] w-screen relative overflow-hidden bg-background">
       <Navigation />
       
       {/* Back button and refresh */}
@@ -203,11 +277,15 @@ const WordFeed = () => {
       ) : (
         <div
           ref={containerRef}
-          className="h-full w-full overflow-y-auto snap-y snap-mandatory"
+          className="h-full w-full overflow-y-auto snap-y snap-mandatory word-feed-scroll"
           onScroll={handleScroll}
           style={{
             scrollbarWidth: 'none',
             msOverflowStyle: 'none',
+            scrollBehavior: 'smooth',
+            WebkitOverflowScrolling: 'touch',
+            overscrollBehavior: 'contain',
+            touchAction: 'pan-y',
           }}
         >
           <AnimatePresence>
@@ -216,11 +294,15 @@ const WordFeed = () => {
                 key={`${wordEntry.word}-${index}`}
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                className="h-screen w-screen snap-start snap-always relative flex items-center justify-center"
+                className="h-screen h-[100dvh] w-screen snap-start snap-always relative flex items-center justify-center word-feed-item"
                 style={{
                   background: `linear-gradient(135deg, 
                     hsl(${(index * 37) % 360}, 70%, 15%), 
                     hsl(${(index * 37 + 60) % 360}, 60%, 10%))`,
+                  willChange: 'transform',
+                  transform: 'translateZ(0)',
+                  backfaceVisibility: 'hidden',
+                  WebkitBackfaceVisibility: 'hidden',
                 }}
               >
                 <div className="relative z-10 text-foreground p-8 max-w-2xl mx-auto text-center">
@@ -231,21 +313,32 @@ const WordFeed = () => {
                     className="space-y-6"
                   >
                     {/* Word */}
-                    <div className="flex items-center justify-center gap-4">
-                      <h1 
-                        className="text-5xl sm:text-7xl font-bold text-white"
-                        style={{ fontFamily: userPreferences.fontFamily }}
-                      >
-                        {wordEntry.word}
-                      </h1>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => speakWord(wordEntry.word)}
-                        className="text-white/60 hover:text-white hover:bg-white/10"
-                      >
-                        {isSpeaking ? <VolumeX className="w-6 h-6" /> : <Volume2 className="w-6 h-6" />}
-                      </Button>
+                    <div className="flex flex-col items-center justify-center gap-4">
+                      {index === 0 && (
+                        <motion.div
+                          initial={{ opacity: 0, y: -10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          className="px-4 py-1.5 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 text-white/90 text-sm font-medium"
+                        >
+                          Word of the Day
+                        </motion.div>
+                      )}
+                      <div className="flex items-center justify-center gap-4">
+                        <h1 
+                          className="text-5xl sm:text-7xl font-bold text-white"
+                          style={{ fontFamily: userPreferences.fontFamily }}
+                        >
+                          {wordEntry.word}
+                        </h1>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => speakWord(wordEntry.word)}
+                          className="text-white/60 hover:text-white hover:bg-white/10"
+                        >
+                          {isSpeaking ? <VolumeX className="w-6 h-6" /> : <Volume2 className="w-6 h-6" />}
+                        </Button>
+                      </div>
                     </div>
                     
                     {/* Part of Speech */}
