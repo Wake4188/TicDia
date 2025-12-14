@@ -316,11 +316,19 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - **Vercel** - For hosting and edge functions
 - **shadcn/ui** - For beautiful UI components
 - **GPT Engineer** - Initial project scaffolding
+- **Ben Camewell** - For UI Ideas
 
 ## 📞 Support
 
 For support, please open an issue on GitHub or contact the development team.
 
+## License
+
+All rights reserved. No use, redistribution, or modification is permitted
+without explicit permission from the author. See LICENSE file for more information
+
 ---
 
 **Note**: This is an educational project and is not affiliated with Wikipedia or TikTok. All Wikipedia content is used under the Creative Commons license.
+
+
