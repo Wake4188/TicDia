@@ -26,8 +26,12 @@ export async function getWordOfTheDay(date: Date = new Date()): Promise<string |
         return null;
       }
       // If table doesn't exist yet (migration not run), return null gracefully
+      // Only log once to avoid console spam
       if (error.code === 'PGRST205' || error.message?.includes('Could not find the table')) {
-        console.warn('word_of_the_day table not found. Please run the migration.');
+        if (!(window as any).__wordOfDayTableWarningShown) {
+          console.warn('word_of_the_day table not found. Please run the migration in Supabase SQL Editor.');
+          (window as any).__wordOfDayTableWarningShown = true;
+        }
         return null;
       }
       console.error('Error fetching word of the day:', error);
@@ -59,8 +63,12 @@ export async function getWordOfTheDayRecord(date: Date = new Date()): Promise<Wo
         return null;
       }
       // If table doesn't exist yet (migration not run), return null gracefully
+      // Only log once to avoid console spam
       if (error.code === 'PGRST205' || error.message?.includes('Could not find the table')) {
-        console.warn('word_of_the_day table not found. Please run the migration.');
+        if (!(window as any).__wordOfDayTableWarningShown) {
+          console.warn('word_of_the_day table not found. Please run the migration in Supabase SQL Editor.');
+          (window as any).__wordOfDayTableWarningShown = true;
+        }
         return null;
       }
       console.error('Error fetching word of the day record:', error);
