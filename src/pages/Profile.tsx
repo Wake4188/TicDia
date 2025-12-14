@@ -964,7 +964,7 @@ const Profile = () => {
               </div>
             </div>
             <p className="text-xs text-gray-500">
-              Made with love in France by Noa Wilhide
+              Made with love in France by Noa Wilhide and Ben Camewell
             </p>
           </div>
         </div>
