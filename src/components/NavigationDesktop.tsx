@@ -1,6 +1,5 @@
-import { Search, User, Compass, Calendar } from "lucide-react";
+import { Search, User, Compass, Calendar, BookA } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useTheme } from "@/contexts/ThemeContext";
@@ -22,11 +21,14 @@ const NavigationDesktop = ({
   onTodayClick
 }: NavigationDesktopProps) => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { user } = useAuth();
   const { theme } = useTheme();
   const { currentLanguage, translations } = useLanguage();
   const t = translations;
   const isDark = theme === 'dark';
+
+  const isWordFeed = location.pathname === '/word-feed';
 
   const handleDiscoverClick = () => {
     navigate("/discover");
@@ -36,10 +38,14 @@ const NavigationDesktop = ({
     navigate(user ? "/profile" : "/auth");
   };
 
+  const handleWordFeedClick = () => {
+    navigate("/word-feed");
+  };
+
   return (
     <div className="fixed top-0 left-0 right-0 z-50 bg-gradient-to-b from-black/50 to-transparent backdrop-blur-sm">
       <div className="flex items-center justify-between px-3 md:px-6 py-2 max-w-7xl mx-auto gap-2 md:gap-4">
-        {/* Left Section - Sign In & Language */}
+        {/* Left Section - Sign In & Language/Word Feed */}
         <div className="flex items-center gap-2 md:gap-3 flex-shrink-0">
           <div
             className={`flex items-center gap-1 md:gap-2 cursor-pointer transition-colors duration-300 text-white hover:text-tictok-red`}
@@ -64,7 +70,20 @@ const NavigationDesktop = ({
             )}
           </div>
 
-          <LanguageSelector />
+          {/* Show Language Selector for non-logged-in users, Word Feed button for logged-in users */}
+          {user ? (
+            <Button
+              variant="ghost"
+              onClick={handleWordFeedClick}
+              className={`text-white hover:text-white hover:bg-white/5 transition-colors p-1.5 md:p-2 ${isWordFeed ? 'bg-white/10' : ''}`}
+              aria-label="Word Feed"
+            >
+              <BookA className="w-4 h-4 md:w-5 md:h-5" />
+              <span className="hidden md:inline ml-1 text-sm">Words</span>
+            </Button>
+          ) : (
+            <LanguageSelector />
+          )}
         </div>
 
         {/* Center Section - Search */}
@@ -82,7 +101,7 @@ const NavigationDesktop = ({
           </span>
         </div>
 
-        {/* Right Section - Discover, Theme, Today, Logo */}
+        {/* Right Section - Discover, Theme (for non-logged-in), Today, Logo */}
         <div className="flex items-center gap-1.5 md:gap-3 flex-shrink-0">
           <Button
             variant="ghost"
@@ -93,7 +112,8 @@ const NavigationDesktop = ({
             <Compass className="w-4 h-4 md:w-5 md:h-5" />
           </Button>
 
-          <ThemeToggle />
+          {/* Only show ThemeToggle for non-logged-in users */}
+          {!user && <ThemeToggle />}
 
           <Button
             variant="ghost"

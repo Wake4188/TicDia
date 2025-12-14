@@ -252,7 +252,9 @@ export type Database = {
       }
       user_preferences: {
         Row: {
+          allow_adult_content: boolean | null
           background_opacity: number
+          birth_year: number | null
           created_at: string
           feed_type: string | null
           font_family: string
@@ -266,7 +268,9 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          allow_adult_content?: boolean | null
           background_opacity?: number
+          birth_year?: number | null
           created_at?: string
           feed_type?: string | null
           font_family?: string
@@ -280,7 +284,9 @@ export type Database = {
           user_id: string
         }
         Update: {
+          allow_adult_content?: boolean | null
           background_opacity?: number
+          birth_year?: number | null
           created_at?: string
           feed_type?: string | null
           font_family?: string

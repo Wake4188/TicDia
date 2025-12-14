@@ -7,6 +7,8 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
 import { LogIn, User, Eye, EyeOff } from "lucide-react";
 import { validateEmail, validatePassword, sanitizeErrorMessage } from "@/utils/security";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState("");
@@ -14,24 +16,24 @@ const Auth = () => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [birthYear, setBirthYear] = useState<string>("");
   const navigate = useNavigate();
-  const {
-    toast
-  } = useToast();
+  const { toast } = useToast();
+
+  // Generate birth year options (current year - 100 to current year - 13)
+  const currentYear = new Date().getFullYear();
+  const birthYearOptions = Array.from({ length: 88 }, (_, i) => currentYear - 13 - i);
+
   useEffect(() => {
-    // Check if user is already logged in
     const checkUser = async () => {
-      const {
-        data: {
-          session
-        }
-      } = await supabase.auth.getSession();
+      const { data: { session } } = await supabase.auth.getSession();
       if (session) {
         navigate("/");
       }
     };
     checkUser();
   }, [navigate]);
+
   const validateForm = (): boolean => {
     if (!validateEmail(email)) {
       toast({
@@ -58,8 +60,17 @@ const Auth = () => {
       });
       return false;
     }
+    if (!isLogin && !birthYear) {
+      toast({
+        title: "Birth Year Required",
+        description: "Please select your birth year.",
+        variant: "destructive"
+      });
+      return false;
+    }
     return true;
   };
+
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validateForm()) {
@@ -68,9 +79,7 @@ const Auth = () => {
     setLoading(true);
     try {
       if (isLogin) {
-        const {
-          error
-        } = await supabase.auth.signInWithPassword({
+        const { error } = await supabase.auth.signInWithPassword({
           email: email.trim(),
           password
         });
@@ -98,9 +107,7 @@ const Auth = () => {
         }
       } else {
         const redirectUrl = `${window.location.origin}/`;
-        const {
-          error
-        } = await supabase.auth.signUp({
+        const { data, error } = await supabase.auth.signUp({
           email: email.trim(),
           password,
           options: {
@@ -123,6 +130,18 @@ const Auth = () => {
             });
           }
         } else {
+          // Save birth year and adult content preference after successful signup
+          if (data.user) {
+            const userAge = currentYear - parseInt(birthYear);
+            const allowAdultContent = userAge >= 18;
+            
+            await supabase.from('user_preferences').upsert({
+              user_id: data.user.id,
+              birth_year: parseInt(birthYear),
+              allow_adult_content: allowAdultContent
+            }, { onConflict: 'user_id' });
+          }
+          
           toast({
             title: "Account Created!",
             description: "You can now sign in with your credentials."
@@ -130,6 +149,7 @@ const Auth = () => {
           setIsLogin(true);
           setPassword("");
           setConfirmPassword("");
+          setBirthYear("");
         }
       }
     } catch (error) {
@@ -142,10 +162,13 @@ const Auth = () => {
       setLoading(false);
     }
   };
+
   const handleSkip = () => {
     navigate("/");
   };
-  return <div className="min-h-screen bg-wikitok-dark flex items-center justify-center px-4">
+
+  return (
+    <div className="min-h-screen bg-wikitok-dark flex items-center justify-center px-4">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-tictok-red mb-2">TicDia</h1>
@@ -160,7 +183,16 @@ const Auth = () => {
               <Label htmlFor="email" className="text-white">
                 Email
               </Label>
-              <Input id="email" type="email" value={email} onChange={e => setEmail(e.target.value)} required maxLength={254} className="bg-white/5 border-white/20 text-white placeholder:text-white/40" placeholder="Enter your email" />
+              <Input 
+                id="email" 
+                type="email" 
+                value={email} 
+                onChange={e => setEmail(e.target.value)} 
+                required 
+                maxLength={254} 
+                className="bg-white/5 border-white/20 text-white placeholder:text-white/40" 
+                placeholder="Enter your email" 
+              />
             </div>
 
             <div>
@@ -173,48 +205,117 @@ const Auth = () => {
                 </p>
               )}
               <div className="relative">
-                <Input id="password" type={showPassword ? "text" : "password"} value={password} onChange={e => setPassword(e.target.value)} required maxLength={128} className="bg-white/5 border-white/20 text-white placeholder:text-white/40 pr-10" placeholder="Enter your password" />
-                <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 transform -translate-y-1/2 text-white/40 hover:text-white/60">
+                <Input 
+                  id="password" 
+                  type={showPassword ? "text" : "password"} 
+                  value={password} 
+                  onChange={e => setPassword(e.target.value)} 
+                  required 
+                  maxLength={128} 
+                  className="bg-white/5 border-white/20 text-white placeholder:text-white/40 pr-10" 
+                  placeholder="Enter your password" 
+                />
+                <button 
+                  type="button" 
+                  onClick={() => setShowPassword(!showPassword)} 
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-white/40 hover:text-white/60"
+                >
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
               </div>
             </div>
 
-            {!isLogin && <div>
-                <Label htmlFor="confirmPassword" className="text-white">
-                  Confirm Password
-                </Label>
-                <Input id="confirmPassword" type="password" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} required maxLength={128} className="bg-white/5 border-white/20 text-white placeholder:text-white/40" placeholder="Confirm your password" />
-              </div>}
+            {!isLogin && (
+              <>
+                <div>
+                  <Label htmlFor="confirmPassword" className="text-white">
+                    Confirm Password
+                  </Label>
+                  <Input 
+                    id="confirmPassword" 
+                    type="password" 
+                    value={confirmPassword} 
+                    onChange={e => setConfirmPassword(e.target.value)} 
+                    required 
+                    maxLength={128} 
+                    className="bg-white/5 border-white/20 text-white placeholder:text-white/40" 
+                    placeholder="Confirm your password" 
+                  />
+                </div>
 
-            <Button type="submit" disabled={loading} className="w-full bg-tictok-red hover:bg-tictok-red/90 text-white">
-              {loading ? <div className="flex items-center gap-2">
+                <div>
+                  <Label htmlFor="birthYear" className="text-white">
+                    Birth Year
+                  </Label>
+                  <p className="text-xs text-white/60 mb-2">
+                    Required for content filtering (must be 13+)
+                  </p>
+                  <Select value={birthYear} onValueChange={setBirthYear}>
+                    <SelectTrigger className="bg-white/5 border-white/20 text-white">
+                      <SelectValue placeholder="Select your birth year" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-wikitok-dark border-white/20 max-h-[200px]">
+                      {birthYearOptions.map((year) => (
+                        <SelectItem 
+                          key={year} 
+                          value={year.toString()}
+                          className="text-white focus:bg-white/10 focus:text-white"
+                        >
+                          {year}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </>
+            )}
+
+            <Button 
+              type="submit" 
+              disabled={loading} 
+              className="w-full bg-tictok-red hover:bg-tictok-red/90 text-white"
+            >
+              {loading ? (
+                <div className="flex items-center gap-2">
                   <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin" />
                   {isLogin ? "Signing In..." : "Creating Account..."}
-                </div> : <div className="flex items-center gap-2">
+                </div>
+              ) : (
+                <div className="flex items-center gap-2">
                   {isLogin ? <LogIn className="w-4 h-4" /> : <User className="w-4 h-4" />}
                   {isLogin ? "Sign In" : "Sign Up"}
-                </div>}
+                </div>
+              )}
             </Button>
           </form>
 
           <div className="mt-4 text-center">
-            <button onClick={() => {
-            setIsLogin(!isLogin);
-            setPassword("");
-            setConfirmPassword("");
-          }} className="text-wikitok-blue hover:text-wikitok-blue/80 text-sm">
+            <button 
+              onClick={() => {
+                setIsLogin(!isLogin);
+                setPassword("");
+                setConfirmPassword("");
+                setBirthYear("");
+              }} 
+              className="text-wikitok-blue hover:text-wikitok-blue/80 text-sm"
+            >
               {isLogin ? "Don't have an account? Sign up" : "Already have an account? Sign in"}
             </button>
           </div>
 
           <div className="mt-6 pt-4 border-t border-white/10">
-            <Button onClick={handleSkip} variant="ghost" className="w-full text-white/60 hover:text-white hover:bg-white/5">
+            <Button 
+              onClick={handleSkip} 
+              variant="ghost" 
+              className="w-full text-white/60 hover:text-white hover:bg-white/5"
+            >
               Continue without account
             </Button>
           </div>
         </div>
       </div>
-    </div>;
+    </div>
+  );
 };
+
 export default Auth;

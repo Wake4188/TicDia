@@ -9,13 +9,15 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
-import { ArrowLeft, BookMarked, Eye, Trash2, Search, Mail, Lock, Key, BarChart3 } from "lucide-react";
+import { ArrowLeft, BookMarked, Eye, Trash2, Search, Mail, Lock, Key, BarChart3, Globe, Moon, Sun } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import SmallTic from "../components/SmallTic";
 import { loadUserPreferences, saveUserPreferences, UserPreferences } from "@/services/userPreferencesService";
 import { useLanguage } from "../contexts/LanguageContext";
+import { useTheme } from "../contexts/ThemeContext";
+import { SUPPORTED_LANGUAGES } from "../services/languageConfig";
 import { useUserPreferences } from "@/contexts/UserPreferencesContext";
 import { AnalyticsStats } from "@/components/AnalyticsStats";
 import { Footer } from "@/components/Footer";
@@ -33,7 +35,8 @@ const Profile = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { currentLanguage, translations } = useLanguage();
+  const { currentLanguage, translations, setLanguage } = useLanguage();
+  const { theme, toggleTheme } = useTheme();
   const t = translations;
 
   // Load user preferences to apply highlight color throughout the app

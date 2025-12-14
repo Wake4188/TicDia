@@ -70,6 +70,8 @@ export const UserPreferencesProvider = ({ children }: { children: ReactNode }) =
                     ttsSpeed: prefs.ttsSpeed || 1.0,
                     smokeEffect: prefs.smokeEffect !== false,
                     textAnimation: prefs.textAnimation !== false,
+                    birthYear: prefs.birthYear,
+                    allowAdultContent: prefs.allowAdultContent === true,
                 });
                 document.documentElement.style.setProperty('--progress-bar-color', prefs.highlightColor || '#FE2C55');
                 document.documentElement.style.setProperty('--highlight-color', prefs.highlightColor || '#FE2C55');
