@@ -25,6 +25,11 @@ export async function getWordOfTheDay(date: Date = new Date()): Promise<string |
       if (error.code === 'PGRST116') {
         return null;
       }
+      // If table doesn't exist yet (migration not run), return null gracefully
+      if (error.code === 'PGRST205' || error.message?.includes('Could not find the table')) {
+        console.warn('word_of_the_day table not found. Please run the migration.');
+        return null;
+      }
       console.error('Error fetching word of the day:', error);
       return null;
     }
@@ -51,6 +56,11 @@ export async function getWordOfTheDayRecord(date: Date = new Date()): Promise<Wo
 
     if (error) {
       if (error.code === 'PGRST116') {
+        return null;
+      }
+      // If table doesn't exist yet (migration not run), return null gracefully
+      if (error.code === 'PGRST205' || error.message?.includes('Could not find the table')) {
+        console.warn('word_of_the_day table not found. Please run the migration.');
         return null;
       }
       console.error('Error fetching word of the day record:', error);
@@ -88,6 +98,10 @@ export async function setWordOfTheDay(
       });
 
     if (error) {
+      // If table doesn't exist yet (migration not run), return helpful error
+      if (error.code === 'PGRST205' || error.message?.includes('Could not find the table')) {
+        return { success: false, error: 'Database table not found. Please run the migration first.' };
+      }
       console.error('Error setting word of the day:', error);
       return { success: false, error: error.message };
     }

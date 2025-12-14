@@ -9,7 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
-import { ArrowLeft, BookMarked, Eye, Trash2, Search, Mail, Lock, Key, BarChart3, Globe, Moon, Sun } from "lucide-react";
+import { ArrowLeft, BookMarked, Eye, Trash2, Search, Mail, Lock, Key, BarChart3, Globe, Moon, Sun, Shield } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
@@ -113,7 +113,9 @@ const Profile = () => {
       const record = await getWordOfTheDayRecord();
       setCurrentWordOfTheDay(record?.word || null);
     } catch (error) {
-      console.error('Error fetching current word of the day:', error);
+      // Silently handle errors (table might not exist yet)
+      console.warn('Could not fetch current word of the day:', error);
+      setCurrentWordOfTheDay(null);
     }
   };
 
