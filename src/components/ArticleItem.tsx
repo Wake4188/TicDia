@@ -210,17 +210,11 @@ const ArticleItem = ({
             )}
           </div>
         </div>
-        <div className="flex items-center space-x-2 text-xs sm:text-sm text-muted-foreground flex-shrink-0 mt-4 ml-6">
-          <span>{article.readTime} min read</span>
-          <span>•</span>
-          <span>{article.views.toLocaleString()} views</span>
-          {isCurrent && (
-            <>
-              <span>•</span>
-              <span className="text-primary/70">Swipe right for links</span>
-            </>
-          )}
-        </div>
+        {isCurrent && (
+          <div className="flex items-center text-xs sm:text-sm text-muted-foreground flex-shrink-0 mt-4 ml-6">
+            <span className="text-primary/70">Swipe right for links</span>
+          </div>
+        )}
       </div>
 
       {isCurrent && progress > 0 && !showSmartLinks && showAnimation && (
