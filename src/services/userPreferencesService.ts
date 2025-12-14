@@ -12,6 +12,8 @@ export interface UserPreferences {
   ttsSpeed: number;
   smokeEffect: boolean;
   textAnimation: boolean;
+  birthYear?: number;
+  allowAdultContent: boolean;
 }
 
 export const loadUserPreferences = async (userId: string): Promise<UserPreferences> => {
@@ -40,7 +42,9 @@ export const loadUserPreferences = async (userId: string): Promise<UserPreferenc
       liquidGlassMode: data.liquid_glass_mode || false,
       ttsSpeed: data.tts_speed || 1.0,
       smokeEffect: (data as Record<string, unknown>).smoke_effect !== false,
-      textAnimation: (data as Record<string, unknown>).text_animation !== false
+      textAnimation: (data as Record<string, unknown>).text_animation !== false,
+      birthYear: (data as Record<string, unknown>).birth_year as number | undefined,
+      allowAdultContent: (data as Record<string, unknown>).allow_adult_content === true,
     };
   } catch (error) {
     console.error('Error loading user preferences:', sanitizeErrorMessage(error));
@@ -94,6 +98,8 @@ export const getDefaultPreferences = (): UserPreferences => ({
   ttsSpeed: 1.0,
   smokeEffect: true,
   textAnimation: true,
+  birthYear: undefined,
+  allowAdultContent: false,
 });
 
 export const updateUserPreferences = async (userId: string, updates: Partial<UserPreferences>): Promise<void> => {

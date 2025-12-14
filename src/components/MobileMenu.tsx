@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Search, Compass, User, Menu, X, ChevronRight, LogOut } from 'lucide-react';
+import { Search, Compass, User, Menu, X, ChevronRight, LogOut, BookA } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -39,6 +39,11 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
     else navigate(path);
   };
 
+  const handleLogoClick = () => {
+    // Force a completely new feed by navigating with a timestamp
+    window.location.href = '/?refresh=' + Date.now();
+  };
+
   const menuItems: Array<{
     label: string;
     path: string;
@@ -69,6 +74,13 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
       path: '/discover',
       isActive: location.pathname === "/discover"
     },
+    // Only show Word Feed for logged-in users
+    ...(user ? [{
+      icon: BookA,
+      label: "Word Feed",
+      path: '/word-feed',
+      isActive: location.pathname === "/word-feed"
+    }] : []),
     {
       icon: user ? User : User,
       label: user ? t.profile : t.signIn,
@@ -87,7 +99,7 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             className="text-2xl font-black tracking-tighter text-white cursor-pointer drop-shadow-[0_2px_10px_rgba(0,0,0,0.5)]"
-            onClick={() => navigate('/')}
+            onClick={handleLogoClick}
           >
             <span className="text-white">Tic</span>
             <span className="text-tictok-red">Dia</span>
@@ -195,18 +207,20 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
                     </motion.div>
                   )}
 
-                  {/* Settings Section */}
-                  <div className="pt-4 border-t border-white/10 space-y-4">
-                    <div className="flex items-center justify-between p-3 rounded-xl bg-white/5">
-                      <span className={`text-sm font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}>Appearance</span>
-                      <ThemeToggle />
-                    </div>
+                  {/* Settings Section - Only show for non-logged-in users */}
+                  {!user && (
+                    <div className="pt-4 border-t border-white/10 space-y-4">
+                      <div className="flex items-center justify-between p-3 rounded-xl bg-white/5">
+                        <span className={`text-sm font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}>Appearance</span>
+                        <ThemeToggle />
+                      </div>
 
-                    <div className="flex flex-col gap-2 p-3 rounded-xl bg-white/5">
-                      <span className={`text-sm font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}>Language</span>
-                      <LanguageSelector />
+                      <div className="flex flex-col gap-2 p-3 rounded-xl bg-white/5">
+                        <span className={`text-sm font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}>Language</span>
+                        <LanguageSelector />
+                      </div>
                     </div>
-                  </div>
+                  )}
                 </div>
 
                 {/* Footer / Sign Out */}

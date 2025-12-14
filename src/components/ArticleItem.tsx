@@ -210,9 +210,15 @@ const ArticleItem = ({
             )}
           </div>
         </div>
-        {isCurrent && (
-          <div className="flex items-center text-xs sm:text-sm text-muted-foreground flex-shrink-0 mt-4 ml-6">
-            <span className="text-primary/70">Swipe right for links</span>
+        {isCurrent && !showSmartLinks && (
+          <div className="flex items-center gap-3 text-xs sm:text-sm text-muted-foreground flex-shrink-0 mt-4 ml-6">
+            <button
+              onClick={() => setShowSmartLinks(true)}
+              className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/20 hover:bg-primary/30 text-primary transition-colors"
+            >
+              <span>View Related Links</span>
+              <span className="text-xs opacity-70">→</span>
+            </button>
           </div>
         )}
       </div>

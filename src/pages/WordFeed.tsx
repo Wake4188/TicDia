@@ -1,0 +1,295 @@
+import { useState, useCallback, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
+import { Button } from "@/components/ui/button";
+import { ArrowLeft, RefreshCw, ChevronDown, Volume2, VolumeX } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { useUserPreferences } from "@/contexts/UserPreferencesContext";
+import { lookupWord, getDefinitions } from "@/services/wiktionaryService";
+import Navigation from "@/components/Navigation";
+
+interface WordEntry {
+  word: string;
+  partOfSpeech: string;
+  definition: string;
+  example?: string;
+  pronunciation?: string;
+}
+
+// Collection of interesting, unusual, and cool English words
+const INTERESTING_WORDS = [
+  "ephemeral", "serendipity", "mellifluous", "petrichor", "luminescent",
+  "ethereal", "effervescent", "iridescent", "phosphorescent", "quintessential",
+  "labyrinthine", "surreptitious", "clandestine", "ineffable", "ubiquitous",
+  "enigmatic", "idyllic", "pristine", "resplendent", "incandescent",
+  "eloquent", "perennial", "transcendent", "epiphany", "euphoria",
+  "sonorous", "nebulous", "seraphic", "halcyon", "gossamer",
+  "susurrus", "defenestration", "callipygian", "pulchritudinous", "logorrhea",
+  "perspicacious", "magnanimous", "ephemeron", "vellichor", "sonder",
+  "kenopsia", "liberosis", "chrysalism", "mauerbauertraurigkeit", "jouska",
+  "exulansis", "nodus tollens", "lachesism", "kuebiko", "onism",
+  "ambivalent", "cacophony", "dichotomy", "ebullience", "fastidious",
+  "gregarious", "harbinger", "iconoclast", "juxtaposition", "kaleidoscope",
+  "laconic", "meticulous", "nefarious", "obsequious", "panacea",
+  "quixotic", "recalcitrant", "sanguine", "trepidation", "umbrage",
+  "venerable", "wistful", "xenial", "yearn", "zealous",
+  "amalgamation", "benevolent", "capricious", "delineate", "elucidate",
+  "facetious", "garrulous", "hegemony", "indefatigable", "jocular",
+  "kinetic", "loquacious", "maelstrom", "nascent", "omniscient",
+  "paradigm", "querulous", "reticent", "sagacious", "taciturn",
+  "unequivocal", "vicarious", "whimsical", "xeric", "yonder",
+  "acquiesce", "bellicose", "calamity", "desultory", "exacerbate",
+  "felicitous", "gesticulate", "harangue", "immutable", "juxtapose"
+];
+
+const WordFeed = () => {
+  const navigate = useNavigate();
+  const { user } = useAuth();
+  const { userPreferences } = useUserPreferences();
+  const [words, setWords] = useState<WordEntry[]>([]);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
+  const [usedWords, setUsedWords] = useState<Set<string>>(new Set());
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [isSpeaking, setIsSpeaking] = useState(false);
+
+  // Redirect if not logged in
+  useEffect(() => {
+    if (!user) {
+      navigate("/auth");
+    }
+  }, [user, navigate]);
+
+  const fetchWordDefinition = useCallback(async (word: string): Promise<WordEntry | null> => {
+    try {
+      const response = await lookupWord(word, 'en');
+      const definitions = getDefinitions(response, 'en');
+      
+      if (definitions.length > 0) {
+        const firstDef = definitions[0];
+        return {
+          word,
+          partOfSpeech: firstDef.partOfSpeech,
+          definition: firstDef.definitions[0]?.definition?.replace(/<[^>]*>/g, '') || '',
+          example: firstDef.definitions[0]?.examples?.[0],
+        };
+      }
+      return null;
+    } catch (error) {
+      console.error('Failed to fetch word definition:', error);
+      return null;
+    }
+  }, []);
+
+  const loadInitialWords = useCallback(async () => {
+    setIsLoading(true);
+    const shuffled = [...INTERESTING_WORDS].sort(() => Math.random() - 0.5);
+    const selectedWords = shuffled.slice(0, 10);
+    
+    const wordEntries: WordEntry[] = [];
+    const newUsedWords = new Set<string>();
+    
+    for (const word of selectedWords) {
+      const entry = await fetchWordDefinition(word);
+      if (entry) {
+        wordEntries.push(entry);
+        newUsedWords.add(word);
+      }
+    }
+    
+    setWords(wordEntries);
+    setUsedWords(newUsedWords);
+    setCurrentIndex(0);
+    setIsLoading(false);
+  }, [fetchWordDefinition]);
+
+  useEffect(() => {
+    loadInitialWords();
+  }, [loadInitialWords]);
+
+  const loadMoreWords = useCallback(async () => {
+    const availableWords = INTERESTING_WORDS.filter(w => !usedWords.has(w));
+    if (availableWords.length === 0) {
+      // Reset if all words have been used
+      setUsedWords(new Set());
+      return;
+    }
+    
+    const shuffled = availableWords.sort(() => Math.random() - 0.5);
+    const newWords = shuffled.slice(0, 5);
+    
+    for (const word of newWords) {
+      const entry = await fetchWordDefinition(word);
+      if (entry) {
+        setWords(prev => [...prev, entry]);
+        setUsedWords(prev => new Set([...prev, word]));
+      }
+    }
+  }, [usedWords, fetchWordDefinition]);
+
+  const handleScroll = useCallback((e: React.UIEvent<HTMLDivElement>) => {
+    const container = e.currentTarget;
+    const scrollTop = container.scrollTop;
+    const itemHeight = window.innerHeight;
+    const newIndex = Math.round(scrollTop / itemHeight);
+    
+    if (newIndex !== currentIndex) {
+      setCurrentIndex(newIndex);
+      
+      // Load more words when nearing the end
+      if (newIndex >= words.length - 3) {
+        loadMoreWords();
+      }
+    }
+  }, [currentIndex, words.length, loadMoreWords]);
+
+  const speakWord = useCallback((word: string) => {
+    if ('speechSynthesis' in window) {
+      if (isSpeaking) {
+        window.speechSynthesis.cancel();
+        setIsSpeaking(false);
+        return;
+      }
+      
+      const utterance = new SpeechSynthesisUtterance(word);
+      utterance.lang = 'en-US';
+      utterance.rate = 0.8;
+      utterance.onend = () => setIsSpeaking(false);
+      utterance.onerror = () => setIsSpeaking(false);
+      setIsSpeaking(true);
+      window.speechSynthesis.speak(utterance);
+    }
+  }, [isSpeaking]);
+
+  const handleRefresh = useCallback(() => {
+    setUsedWords(new Set());
+    loadInitialWords();
+  }, [loadInitialWords]);
+
+  if (!user) return null;
+
+  return (
+    <div className="h-screen w-screen relative overflow-hidden bg-background">
+      <Navigation />
+      
+      {/* Back button and refresh */}
+      <div className="fixed top-20 left-4 z-50 flex gap-2">
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => navigate("/")}
+          className="bg-black/20 backdrop-blur-sm text-white hover:bg-black/40"
+        >
+          <ArrowLeft className="w-5 h-5" />
+        </Button>
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={handleRefresh}
+          className="bg-black/20 backdrop-blur-sm text-white hover:bg-black/40"
+          disabled={isLoading}
+        >
+          <RefreshCw className={`w-5 h-5 ${isLoading ? 'animate-spin' : ''}`} />
+        </Button>
+      </div>
+
+      {isLoading && words.length === 0 ? (
+        <div className="h-full flex items-center justify-center">
+          <div className="text-center">
+            <RefreshCw className="w-8 h-8 animate-spin mx-auto mb-4 text-primary" />
+            <p className="text-muted-foreground">Loading interesting words...</p>
+          </div>
+        </div>
+      ) : (
+        <div
+          ref={containerRef}
+          className="h-full w-full overflow-y-auto snap-y snap-mandatory"
+          onScroll={handleScroll}
+          style={{
+            scrollbarWidth: 'none',
+            msOverflowStyle: 'none',
+          }}
+        >
+          <AnimatePresence>
+            {words.map((wordEntry, index) => (
+              <motion.div
+                key={`${wordEntry.word}-${index}`}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="h-screen w-screen snap-start snap-always relative flex items-center justify-center"
+                style={{
+                  background: `linear-gradient(135deg, 
+                    hsl(${(index * 37) % 360}, 70%, 15%), 
+                    hsl(${(index * 37 + 60) % 360}, 60%, 10%))`,
+                }}
+              >
+                <div className="relative z-10 text-foreground p-8 max-w-2xl mx-auto text-center">
+                  <motion.div
+                    initial={{ y: 20, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    transition={{ delay: 0.1 }}
+                    className="space-y-6"
+                  >
+                    {/* Word */}
+                    <div className="flex items-center justify-center gap-4">
+                      <h1 
+                        className="text-5xl sm:text-7xl font-bold text-white"
+                        style={{ fontFamily: userPreferences.fontFamily }}
+                      >
+                        {wordEntry.word}
+                      </h1>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => speakWord(wordEntry.word)}
+                        className="text-white/60 hover:text-white hover:bg-white/10"
+                      >
+                        {isSpeaking ? <VolumeX className="w-6 h-6" /> : <Volume2 className="w-6 h-6" />}
+                      </Button>
+                    </div>
+                    
+                    {/* Part of Speech */}
+                    <p className="text-lg text-white/60 italic">
+                      {wordEntry.partOfSpeech}
+                    </p>
+                    
+                    {/* Definition */}
+                    <p 
+                      className="text-xl sm:text-2xl text-white/90 leading-relaxed"
+                      style={{ 
+                        fontFamily: userPreferences.fontFamily,
+                        fontSize: `${userPreferences.fontSize + 4}px`
+                      }}
+                    >
+                      {wordEntry.definition}
+                    </p>
+                    
+                    {/* Example */}
+                    {wordEntry.example && (
+                      <p className="text-base text-white/50 italic mt-4">
+                        "{wordEntry.example}"
+                      </p>
+                    )}
+                  </motion.div>
+                </div>
+
+                {/* Scroll hint */}
+                {index === currentIndex && index < words.length - 1 && (
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className="absolute bottom-8 left-1/2 transform -translate-x-1/2 text-white/40"
+                  >
+                    <ChevronDown className="w-8 h-8 animate-bounce" />
+                  </motion.div>
+                )}
+              </motion.div>
+            ))}
+          </AnimatePresence>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default WordFeed;
