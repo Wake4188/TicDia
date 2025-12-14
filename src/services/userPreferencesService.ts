@@ -72,6 +72,7 @@ export const saveUserPreferences = async (userId: string, preferences: UserPrefe
         feed_type: preferences.feedType || 'mixed',
         liquid_glass_mode: preferences.liquidGlassMode || false,
         tts_speed: preferences.ttsSpeed || 1.0,
+        allow_adult_content: preferences.allowAdultContent || false,
         // smoke_effect is stored but not in the DB types yet - will be ignored by Supabase if column doesn't exist
         updated_at: new Date().toISOString(),
       }, {

@@ -4,7 +4,74 @@ import { getPageViews } from './wikipediaApi';
 import { getArticleImage } from './imageService';
 import { Language } from './languageConfig';
 
-export const transformToArticle = async (page: WikipediaPage, language: Language): Promise<WikipediaArticle> => {
+// Adult content category keywords to filter out
+const ADULT_CONTENT_KEYWORDS = [
+  'pornography',
+  'pornographic',
+  'sexual',
+  'sexuality',
+  'erotic',
+  'nudity',
+  'nude',
+  'adult content',
+  'adult film',
+  'adult entertainment',
+  'sex industry',
+  'prostitution',
+  'escort',
+  'xxx',
+  'nsfw',
+  'explicit',
+  'mature content',
+  '18+',
+  'adult-only',
+  'sexual content',
+  'sexual acts',
+  'sexual practices',
+  'sexual behavior',
+  'sexual orientation',
+  'sex work',
+  'sex worker',
+  'adult website',
+  'adult magazine',
+  'adult video',
+  'adult material',
+  'sexual material',
+  'pornographic material',
+  'adult film industry',
+  'adult entertainment industry',
+];
+
+/**
+ * Check if an article contains adult content based on its categories
+ */
+export const hasAdultContent = (page: WikipediaPage): boolean => {
+  if (!page.categories || page.categories.length === 0) {
+    return false;
+  }
+
+  const categoryTitles = page.categories.map(cat => 
+    cat.title.replace("Category:", "").toLowerCase()
+  );
+
+  // Check if any category matches adult content keywords
+  return categoryTitles.some(categoryTitle => 
+    ADULT_CONTENT_KEYWORDS.some(keyword => 
+      categoryTitle.includes(keyword.toLowerCase())
+    )
+  );
+};
+
+export const transformToArticle = async (
+  page: WikipediaPage, 
+  language: Language,
+  allowAdultContent: boolean = false
+): Promise<WikipediaArticle | null> => {
+  // Filter out adult content if not allowed
+  if (!allowAdultContent && hasAdultContent(page)) {
+    return null;
+  }
+
   const views = await getPageViews(page.title, language);
   const image = await getArticleImage(page);
   

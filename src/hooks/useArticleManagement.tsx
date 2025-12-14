@@ -3,6 +3,7 @@ import { useState, useCallback, useRef, useEffect } from "react";
 import { getRandomArticles, getRelatedArticles } from "../services/wikipediaService";
 import { useImprovedArticleIntersection } from "./useImprovedArticleIntersection";
 import { useLanguage } from "../contexts/LanguageContext";
+import { useUserPreferences } from "../contexts/UserPreferencesContext";
 
 const SEEN_IDS_STORAGE_KEY = 'ticdia_seen_article_ids';
 const MAX_SEEN_IDS = 500; // Store last 500 seen article IDs
@@ -43,6 +44,7 @@ export const useArticleManagement = (
   const [isLoading, setIsLoading] = useState(false);
 
   const { currentLanguage } = useLanguage();
+  const { userPreferences } = useUserPreferences();
 
   const currentArticle = articles[currentIndex];
 
@@ -74,9 +76,9 @@ export const useArticleManagement = (
       let newArticles;
       // Try to fetch related articles first
       if (currentArticle) {
-        newArticles = await getRelatedArticles(currentArticle, currentLanguage);
+        newArticles = await getRelatedArticles(currentArticle, currentLanguage, userPreferences.allowAdultContent);
       } else {
-        newArticles = await getRandomArticles(12, undefined, currentLanguage);
+        newArticles = await getRandomArticles(12, undefined, currentLanguage, userPreferences.allowAdultContent);
       }
 
       // Filter out articles we've already seen
@@ -94,7 +96,7 @@ export const useArticleManagement = (
         failedLoadCount.current = 0; // Reset counter on success
       } else {
         // If all were duplicates, fetch random articles instead
-        const randomArticles = await getRandomArticles(12, undefined, currentLanguage);
+        const randomArticles = await getRandomArticles(12, undefined, currentLanguage, userPreferences.allowAdultContent);
         const uniqueRandomArticles = randomArticles.filter(article => {
           if (seenIds.current.has(article.id)) {
             return false;
@@ -117,7 +119,7 @@ export const useArticleManagement = (
     } finally {
       setIsLoading(false);
     }
-  }, [isLoading, currentArticle, currentLanguage]);
+  }, [isLoading, currentArticle, currentLanguage, userPreferences.allowAdultContent]);
 
   const handleCurrentIndexChange = useCallback((newIndex: number) => {
     if (newIndex !== currentIndex && newIndex >= 0 && newIndex < articles.length) {

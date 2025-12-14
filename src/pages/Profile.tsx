@@ -619,6 +619,72 @@ const Profile = () => {
                   </div>
 
                   <div className="space-y-6 pt-4 border-t border-border">
+                    {/* Language Selector */}
+                    <div className="flex items-center justify-between p-4 rounded-xl bg-muted/30 hover:bg-muted/50 transition-colors">
+                      <div className="space-y-1 flex-1">
+                        <Label className="text-base font-medium text-foreground flex items-center gap-2">
+                          <Globe className="w-4 h-4" />
+                          {t.language || "Language"}
+                        </Label>
+                        <p className="text-sm text-muted-foreground">
+                          Change the language for articles and interface
+                        </p>
+                      </div>
+                      <Select
+                        value={currentLanguage.code}
+                        onValueChange={(code) => {
+                          const lang = SUPPORTED_LANGUAGES.find(l => l.code === code);
+                          if (lang) setLanguage(lang);
+                        }}
+                      >
+                        <SelectTrigger className="w-[180px] bg-background/50 border-border transition-all duration-300 hover:border-primary/50 focus:border-primary/50 focus:ring-primary/20">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent className="bg-popover backdrop-blur-xl border-border max-h-[300px]">
+                          {SUPPORTED_LANGUAGES.map((lang) => (
+                            <SelectItem 
+                              key={lang.code} 
+                              value={lang.code}
+                              className="focus:bg-muted focus:text-foreground cursor-pointer"
+                            >
+                              {lang.nativeName} ({lang.name})
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    {/* Theme Toggle */}
+                    <div className="flex items-center justify-between p-4 rounded-xl bg-muted/30 hover:bg-muted/50 transition-colors">
+                      <div className="space-y-1 flex-1">
+                        <Label className="text-base font-medium text-foreground flex items-center gap-2">
+                          {theme === 'dark' ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
+                          {theme === 'dark' ? 'Dark Mode' : 'Light Mode'}
+                        </Label>
+                        <p className="text-sm text-muted-foreground">
+                          Switch between dark and light theme
+                        </p>
+                      </div>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={toggleTheme}
+                        className="w-[120px] bg-background/50 border-border hover:bg-muted transition-all duration-300"
+                      >
+                        {theme === 'dark' ? (
+                          <>
+                            <Moon className="w-4 h-4 mr-2" />
+                            Dark
+                          </>
+                        ) : (
+                          <>
+                            <Sun className="w-4 h-4 mr-2" />
+                            Light
+                          </>
+                        )}
+                      </Button>
+                    </div>
+
                     <div className="flex items-center justify-between p-4 rounded-xl bg-muted/30 hover:bg-muted/50 transition-colors">
                       <div className="space-y-1">
                         <Label className="text-base font-medium text-foreground">Text Animation</Label>
@@ -671,6 +737,21 @@ const Profile = () => {
                           <SelectItem value="mixed" className="focus:bg-muted focus:text-foreground cursor-pointer">Mixed</SelectItem>
                         </SelectContent>
                       </Select>
+                    </div>
+
+                    <div className="flex items-center justify-between p-4 rounded-xl bg-muted/30 hover:bg-muted/50 transition-colors">
+                      <div className="space-y-1">
+                        <Label className="text-base font-medium text-foreground">Adult Content Filter</Label>
+                        <p className="text-sm text-muted-foreground">
+                          {userPreferences.allowAdultContent 
+                            ? "Adult content is allowed (18+)" 
+                            : "Adult content is filtered out"}
+                        </p>
+                      </div>
+                      <Switch
+                        checked={userPreferences.allowAdultContent}
+                        onCheckedChange={(checked) => updateUserPrefs({ allowAdultContent: checked })}
+                      />
                     </div>
                   </div>
 

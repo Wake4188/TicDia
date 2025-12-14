@@ -8,7 +8,11 @@ import { cache } from '@/utils/performance';
 
 const getWikipediaApiBase = (language: Language) => `https://${language.wikipediaDomain}/w/api.php`;
 
-const getRelatedArticles = async (article: WikipediaArticle, language: Language = DEFAULT_LANGUAGE): Promise<WikipediaArticle[]> => {
+const getRelatedArticles = async (
+  article: WikipediaArticle, 
+  language: Language = DEFAULT_LANGUAGE,
+  allowAdultContent: boolean = false
+): Promise<WikipediaArticle[]> => {
   try {
     const categoryTitles = article.tags.map(tag => `Category:${tag}`).join('|');
     const params = new URLSearchParams({
@@ -31,28 +35,37 @@ const getRelatedArticles = async (article: WikipediaArticle, language: Language 
       ?.slice(0, 10) || [];
 
     if (relatedTitles.length === 0) {
-      return getRandomArticles(12, undefined, language);
+      return getRandomArticles(12, undefined, language, allowAdultContent);
     }
 
     const data = await fetchWikipediaContent(relatedTitles, language) as WikipediaResponse;
     const pages = Object.values(data.query?.pages || {});
 
-    const articles = await Promise.all(pages.map(page => transformToArticle(page, language)));
+    const articles = await Promise.all(pages.map(page => transformToArticle(page, language, allowAdultContent)));
     return articles.filter(Boolean) as WikipediaArticle[];
   } catch (error) {
     console.error('Error fetching related articles:', error);
-    return getRandomArticles(12, undefined, language);
+    return getRandomArticles(12, undefined, language, allowAdultContent);
   }
 };
 
-const fetchArticles = async (titles: string[], language: Language): Promise<WikipediaArticle[]> => {
+const fetchArticles = async (
+  titles: string[], 
+  language: Language, 
+  allowAdultContent: boolean = false
+): Promise<WikipediaArticle[]> => {
   const data = await fetchWikipediaContent(titles, language) as WikipediaResponse;
   const pages = Object.values(data.query?.pages || {});
-  const articles = await Promise.all(pages.map(page => transformToArticle(page, language)));
+  const articles = await Promise.all(pages.map(page => transformToArticle(page, language, allowAdultContent)));
   return articles.filter(Boolean) as WikipediaArticle[];
 };
 
-const getPersonalizedArticles = async (userId: string, count: number = 10, language: Language = DEFAULT_LANGUAGE): Promise<WikipediaArticle[]> => {
+const getPersonalizedArticles = async (
+  userId: string, 
+  count: number = 10, 
+  language: Language = DEFAULT_LANGUAGE,
+  allowAdultContent: boolean = false
+): Promise<WikipediaArticle[]> => {
   try {
     // Import getUserAnalytics dynamically to avoid circular dependencies
     const { getUserAnalytics } = await import('./analyticsService');
@@ -60,7 +73,7 @@ const getPersonalizedArticles = async (userId: string, count: number = 10, langu
 
     if (!analytics || !analytics.favorite_topics || analytics.favorite_topics.length === 0) {
       // No analytics data yet, fall back to random
-      return getRandomArticles(count, undefined, language);
+      return getRandomArticles(count, undefined, language, allowAdultContent);
     }
 
     // Load seen article IDs from localStorage to avoid showing duplicates
@@ -119,13 +132,13 @@ const getPersonalizedArticles = async (userId: string, count: number = 10, langu
 
     // Fetch personalized articles from selected topics
     const personalizedPromises = topicsToUse.map((topic: string) =>
-      getRandomArticles(Math.ceil(personalizedCount / topicsToUse.length), topic, language)
+      getRandomArticles(Math.ceil(personalizedCount / topicsToUse.length), topic, language, allowAdultContent)
         .catch(() => [] as WikipediaArticle[])
     );
 
     const [personalizedResults, discoveryResults] = await Promise.all([
       Promise.all(personalizedPromises),
-      getRandomArticles(discoveryCount, undefined, language).catch(() => [] as WikipediaArticle[])
+      getRandomArticles(discoveryCount, undefined, language, allowAdultContent).catch(() => [] as WikipediaArticle[])
     ]);
 
     // Flatten and combine
@@ -138,11 +151,11 @@ const getPersonalizedArticles = async (userId: string, count: number = 10, langu
     // Filter out articles we've already seen
     const unseenArticles = allArticles.filter(a => !seenIds.has(a.id));
 
-    // If we filtered out too many, fetch more random articles
-    if (unseenArticles.length < count * 0.7) {
-      const additionalCount = count - unseenArticles.length;
-      const additionalArticles = await getRandomArticles(additionalCount * 2, undefined, language)
-        .catch(() => [] as WikipediaArticle[]);
+      // If we filtered out too many, fetch more random articles
+      if (unseenArticles.length < count * 0.7) {
+        const additionalCount = count - unseenArticles.length;
+        const additionalArticles = await getRandomArticles(additionalCount * 2, undefined, language, allowAdultContent)
+          .catch(() => [] as WikipediaArticle[]);
 
       const unseenAdditional = additionalArticles.filter(a =>
         !seenIds.has(a.id) && !unseenArticles.find(ua => ua.id === a.id)
@@ -158,11 +171,16 @@ const getPersonalizedArticles = async (userId: string, count: number = 10, langu
   } catch (error) {
     console.error('Error fetching personalized articles:', error);
     // Fallback to random on any error
-    return getRandomArticles(count, undefined, language);
+    return getRandomArticles(count, undefined, language, allowAdultContent);
   }
 };
 
-const getRandomArticles = async (count: number = 2, category?: string, language: Language = DEFAULT_LANGUAGE): Promise<WikipediaArticle[]> => {
+const getRandomArticles = async (
+  count: number = 2, 
+  category?: string, 
+  language: Language = DEFAULT_LANGUAGE,
+  allowAdultContent: boolean = false
+): Promise<WikipediaArticle[]> => {
   // Don't use cache for random articles to prevent duplicates in infinite scroll
 
   try {
@@ -204,10 +222,10 @@ const getRandomArticles = async (count: number = 2, category?: string, language:
 
     if (!titles.length) throw new Error('No articles found');
 
-    const validArticles = await fetchArticles(titles, language);
+    const validArticles = await fetchArticles(titles, language, allowAdultContent);
 
     if (validArticles.length < count) {
-      const moreArticles = await getRandomArticles(count - validArticles.length, category, language);
+      const moreArticles = await getRandomArticles(count - validArticles.length, category, language, allowAdultContent);
       // Remove duplicates by ID before merging
       const combined = [...validArticles, ...moreArticles];
       const uniqueArticles = Array.from(new Map(combined.map(a => [a.id, a])).values());
@@ -221,7 +239,11 @@ const getRandomArticles = async (count: number = 2, category?: string, language:
   }
 };
 
-const searchArticles = async (query: string, language: Language = DEFAULT_LANGUAGE): Promise<WikipediaArticle[]> => {
+const searchArticles = async (
+  query: string, 
+  language: Language = DEFAULT_LANGUAGE,
+  allowAdultContent: boolean = false
+): Promise<WikipediaArticle[]> => {
   if (!query || query.length < 3) return [];
 
   // Check cache first
@@ -267,7 +289,7 @@ const searchArticles = async (query: string, language: Language = DEFAULT_LANGUA
     const allTitles = [...new Set([...suggestedTitles, ...searchTitles])];
     if (!allTitles.length) return [];
 
-    const validArticles = await fetchArticles(allTitles, language);
+    const validArticles = await fetchArticles(allTitles, language, allowAdultContent);
     const result = sortByRelevance(validArticles, query);
     cache.set(cacheKey, result, 600000); // Cache for 10 minutes
     return result;

@@ -4,6 +4,7 @@ import { Search, X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useLanguage } from "../contexts/LanguageContext";
 import { useTheme } from "../contexts/ThemeContext";
+import { useUserPreferences } from "../contexts/UserPreferencesContext";
 import { searchArticles } from "../services/wikipediaService";
 import { WikipediaArticle } from "../services/types";
 
@@ -19,6 +20,7 @@ const SearchModal = ({ isOpen, onClose }: SearchModalProps) => {
   const navigate = useNavigate();
   const { currentLanguage, translations } = useLanguage();
   const { theme } = useTheme();
+  const { userPreferences } = useUserPreferences();
   const t = translations;
 
   // Debounced search for preview
@@ -31,7 +33,7 @@ const SearchModal = ({ isOpen, onClose }: SearchModalProps) => {
       
       setIsLoading(true);
       try {
-        const results = await searchArticles(query, currentLanguage);
+        const results = await searchArticles(query, currentLanguage, userPreferences.allowAdultContent);
         setPreviewResults(results.slice(0, 5)); // Show top 5 results
       } catch (error) {
         console.error('Preview search failed:', error);
@@ -40,7 +42,7 @@ const SearchModal = ({ isOpen, onClose }: SearchModalProps) => {
         setIsLoading(false);
       }
     },
-    [currentLanguage]
+    [currentLanguage, userPreferences.allowAdultContent]
   );
 
   useEffect(() => {

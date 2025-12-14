@@ -34,6 +34,7 @@ const Index = () => {
 
   // Extract specific values to prevent query re-execution on every render
   const feedType = userPreferences.feedType;
+  const allowAdultContent = userPreferences.allowAdultContent;
   const userId = user?.id;
 
   // Generate unique key for fresh articles on each navigation
@@ -47,17 +48,17 @@ const Index = () => {
   }, [location.pathname, searchQuery]);
 
   const { data: articles, isLoading, error } = useQuery({
-    queryKey: ["articles", searchQuery, currentLanguage.code, feedType, userId, feedKey],
+    queryKey: ["articles", searchQuery, currentLanguage.code, feedType, userId, feedKey, allowAdultContent],
     queryFn: async () => {
       if (searchQuery) {
-        const results = location.state?.reorderedResults || await searchArticles(searchQuery, currentLanguage);
+        const results = location.state?.reorderedResults || await searchArticles(searchQuery, currentLanguage, allowAdultContent);
         return results.filter(article => article.image);
       }
 
       // Use personalized feed if feedType is 'curated' and user is logged in
       if (feedType === 'curated' && userId) {
         try {
-          const personalizedArticles = await getPersonalizedArticles(userId, 10, currentLanguage);
+          const personalizedArticles = await getPersonalizedArticles(userId, 10, currentLanguage, allowAdultContent);
           const articlesWithImages = personalizedArticles.filter(article => article.image);
           if (articlesWithImages.length > 0) {
             return articlesWithImages;
@@ -70,7 +71,7 @@ const Index = () => {
       // Resilient fetching logic - retry until we find articles with images
       let attempts = 0;
       while (attempts < 5) {
-        const randomArticles = await getRandomArticles(10, undefined, currentLanguage);
+        const randomArticles = await getRandomArticles(10, undefined, currentLanguage, allowAdultContent);
         const articlesWithImages = randomArticles.filter(article => article.image);
         if (articlesWithImages.length > 0) {
           return articlesWithImages;

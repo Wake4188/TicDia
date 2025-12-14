@@ -8,6 +8,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { useToast } from "@/components/ui/use-toast";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useUserPreferences } from "@/contexts/UserPreferencesContext";
 import { getRandomArticles, WikipediaArticle } from "@/services/wikipediaService";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -18,6 +19,7 @@ const Discover = () => {
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const { currentLanguage, translations } = useLanguage();
+  const { userPreferences } = useUserPreferences();
   const t = translations;
 
   const categories = [
@@ -54,10 +56,10 @@ const Discover = () => {
     isLoading,
     refetch
   } = useInfiniteQuery({
-    queryKey: ["discover", selectedCategory, currentLanguage.code],
+    queryKey: ["discover", selectedCategory, currentLanguage.code, userPreferences.allowAdultContent],
     queryFn: async () => {
       const englishCategory = categoryMapping[selectedCategory] || selectedCategory;
-      const articles = await getRandomArticles(12, englishCategory, currentLanguage);
+      const articles = await getRandomArticles(12, englishCategory, currentLanguage, userPreferences.allowAdultContent);
       return articles.filter(article => article.image);
     },
     initialPageParam: 1,
