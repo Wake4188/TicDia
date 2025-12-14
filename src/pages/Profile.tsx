@@ -60,6 +60,12 @@ const Profile = () => {
   const [resetEmail, setResetEmail] = useState(user?.email || "");
   const [resetLoading, setResetLoading] = useState(false);
 
+  // Admin states
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [wordOfTheDay, setWordOfTheDayState] = useState("");
+  const [wordOfTheDayLoading, setWordOfTheDayLoading] = useState(false);
+  const [currentWordOfTheDay, setCurrentWordOfTheDay] = useState<string | null>(null);
+
   const containerVariants = {
     hidden: { opacity: 0 },
     show: {
