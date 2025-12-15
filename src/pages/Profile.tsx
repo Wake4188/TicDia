@@ -9,7 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
-import { ArrowLeft, BookMarked, Eye, Trash2, Search, Mail, Lock, Key, BarChart3, Globe, Moon, Sun, Shield } from "lucide-react";
+import { ArrowLeft, BookMarked, Eye, Trash2, Search, Mail, Lock, Key, BarChart3, Globe, Moon, Sun, Shield, LogOut } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
@@ -427,10 +427,21 @@ const Profile = () => {
           >
             <ArrowLeft className="w-5 h-5" />
           </Button>
-          <div className="transition-all duration-500 ease-out text-center sm:text-left w-full sm:w-auto">
+          <div className="transition-all duration-500 ease-out text-center sm:text-left flex-1">
             <h1 className="text-2xl sm:text-3xl font-bold">{t.profile}</h1>
             <p className="text-muted-foreground text-sm sm:text-base break-all sm:break-normal">{user.email}</p>
           </div>
+          <Button
+            variant="outline"
+            onClick={async () => {
+              await supabase.auth.signOut();
+              navigate("/");
+            }}
+            className="text-destructive hover:bg-destructive/10 border-destructive/30 transition-all duration-300"
+          >
+            <LogOut className="w-4 h-4 mr-2" />
+            Log Out
+          </Button>
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4 sm:space-y-6">
