@@ -1,7 +1,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { useSearchParams, useLocation, useNavigate } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import ArticleViewer from "../components/ArticleViewer";
 import ArticleLoadingState from "../components/ArticleLoadingState";
 import RightSidebar from "../components/RightSidebar";
@@ -13,10 +13,41 @@ import { useLanguage } from "../contexts/LanguageContext";
 import { useAnalyticsTracking } from "../hooks/useAnalyticsTracking";
 import { useChallengeTracking } from "../hooks/useChallengeTracking";
 import { AnalyticsCheck } from "../components/AnalyticsCheck";
-import BadgeDisplay from "../components/BadgeDisplay";
-import DailyChallenges from "../components/DailyChallenges";
 import { useUserPreferences } from "../contexts/UserPreferencesContext";
 import { useAuth } from "../contexts/AuthContext";
+
+// Cache key for persisting articles
+const ARTICLES_CACHE_KEY = 'ticdia_cached_articles';
+const CACHE_TIMESTAMP_KEY = 'ticdia_cache_timestamp';
+const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+
+// Load cached articles from localStorage
+const loadCachedArticles = () => {
+  try {
+    const cached = localStorage.getItem(ARTICLES_CACHE_KEY);
+    const timestamp = localStorage.getItem(CACHE_TIMESTAMP_KEY);
+    
+    if (cached && timestamp) {
+      const age = Date.now() - parseInt(timestamp, 10);
+      if (age < CACHE_DURATION) {
+        return JSON.parse(cached);
+      }
+    }
+  } catch (e) {
+    console.warn('Failed to load cached articles:', e);
+  }
+  return null;
+};
+
+// Save articles to localStorage cache
+const saveCachedArticles = (articles: any[]) => {
+  try {
+    localStorage.setItem(ARTICLES_CACHE_KEY, JSON.stringify(articles));
+    localStorage.setItem(CACHE_TIMESTAMP_KEY, Date.now().toString());
+  } catch (e) {
+    console.warn('Failed to cache articles:', e);
+  }
+};
 
 const Index = () => {
   const { toast } = useToast();
@@ -37,18 +68,34 @@ const Index = () => {
   const allowAdultContent = userPreferences.allowAdultContent;
   const userId = user?.id;
 
-  // Generate unique key for fresh articles on each navigation
-  const [feedKey, setFeedKey] = useState(() => Date.now());
+  // Only regenerate feedKey when explicitly requested (e.g., logo click)
+  // Use location.key to detect fresh navigation vs back/forward
+  const [feedKey, setFeedKey] = useState(() => {
+    // Check if this is a fresh navigation to home (logo click triggers this)
+    const navState = location.state as { freshFeed?: boolean } | null;
+    return navState?.freshFeed ? Date.now() : 'initial';
+  });
 
-  // Reset feed when navigating back to home without search
+  // Listen for explicit refresh requests (logo click)
   useEffect(() => {
-    if (!searchQuery) {
+    const navState = location.state as { freshFeed?: boolean } | null;
+    if (navState?.freshFeed && !searchQuery) {
       setFeedKey(Date.now());
+      // Clear the state to prevent re-triggering
+      window.history.replaceState({}, document.title);
     }
-  }, [location.pathname, searchQuery]);
+  }, [location.state, searchQuery]);
 
-  const { data: articles, isLoading, error } = useQuery({
-    queryKey: ["articles", searchQuery, currentLanguage.code, feedType, userId, feedKey, allowAdultContent],
+  // Stable query key that doesn't change on every navigation
+  const queryKey = useMemo(() => {
+    if (searchQuery) {
+      return ["articles", "search", searchQuery, currentLanguage.code, allowAdultContent];
+    }
+    return ["articles", "feed", currentLanguage.code, feedType, userId, feedKey, allowAdultContent];
+  }, [searchQuery, currentLanguage.code, feedType, userId, feedKey, allowAdultContent]);
+
+  const { data: articles, isLoading, error, isFetching } = useQuery({
+    queryKey,
     queryFn: async () => {
       if (searchQuery) {
         const results = location.state?.reorderedResults || await searchArticles(searchQuery, currentLanguage, allowAdultContent);
@@ -61,6 +108,7 @@ const Index = () => {
           const personalizedArticles = await getPersonalizedArticles(userId, 10, currentLanguage, allowAdultContent);
           const articlesWithImages = personalizedArticles.filter(article => article.image);
           if (articlesWithImages.length > 0) {
+            saveCachedArticles(articlesWithImages);
             return articlesWithImages;
           }
         } catch (error) {
@@ -68,38 +116,59 @@ const Index = () => {
         }
       }
 
-      // Resilient fetching logic - retry until we find articles with images
-      let attempts = 0;
-      while (attempts < 5) {
-        const randomArticles = await getRandomArticles(10, undefined, currentLanguage, allowAdultContent);
-        const articlesWithImages = randomArticles.filter(article => article.image);
-        if (articlesWithImages.length > 0) {
-          return articlesWithImages;
-        }
-        attempts++;
+      // Faster fetching - single attempt with more articles
+      const randomArticles = await getRandomArticles(15, undefined, currentLanguage, allowAdultContent);
+      const articlesWithImages = randomArticles.filter(article => article.image);
+      
+      if (articlesWithImages.length > 0) {
+        saveCachedArticles(articlesWithImages);
+        return articlesWithImages;
       }
-      throw new Error("Failed to find articles with images after multiple attempts.");
+      
+      // Only retry once if needed
+      const retryArticles = await getRandomArticles(20, undefined, currentLanguage, allowAdultContent);
+      const retryWithImages = retryArticles.filter(article => article.image);
+      
+      if (retryWithImages.length > 0) {
+        saveCachedArticles(retryWithImages);
+        return retryWithImages;
+      }
+      
+      throw new Error("Failed to find articles with images.");
     },
     retry: 1,
     enabled: !languageLoading,
+    staleTime: 2 * 60 * 1000, // Consider data fresh for 2 minutes
+    gcTime: 10 * 60 * 1000, // Keep in cache for 10 minutes
+    refetchOnWindowFocus: false, // Don't refetch on tab focus
+    placeholderData: () => {
+      // Use cached articles as placeholder for instant display
+      if (!searchQuery) {
+        return loadCachedArticles();
+      }
+      return undefined;
+    },
   });
 
-  const handleTagClick = (tag: string) => {
+  const handleTagClick = useCallback((tag: string) => {
     navigate(`/?q=${encodeURIComponent(tag)}`);
-  };
+  }, [navigate]);
 
-  if (error) {
-    toast({
-      title: "Error",
-      description: "Failed to load articles. Please try again later.",
-      variant: "destructive",
-    });
-  }
+  // Show error toast only once
+  useEffect(() => {
+    if (error) {
+      toast({
+        title: "Error",
+        description: "Failed to load articles. Please try again later.",
+        variant: "destructive",
+      });
+    }
+  }, [error, toast]);
 
+  // Show loading only on initial load (not when we have placeholder data)
+  const showLoading = (isLoading && !articles) || languageLoading;
 
-  // ... existing code ...
-
-  if (isLoading || languageLoading) {
+  if (showLoading) {
     return <ArticleLoadingState />;
   }
 
@@ -116,8 +185,6 @@ const Index = () => {
   return (
     <div className="h-screen w-screen relative overflow-hidden bg-background">
       <AnalyticsCheck />
-      {/* BadgeDisplay removed as requested */}
-      {/* DailyChallenges removed as requested */}
       <Navigation currentArticle={currentDisplayArticle} />
       <div className="flex h-full">
         <LeftSidebar article={currentDisplayArticle} onTagClick={handleTagClick} />

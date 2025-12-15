@@ -1,6 +1,6 @@
 
-import { useState, useEffect } from "react";
-import { useLocation } from "react-router-dom";
+import { useState, useEffect, useCallback } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useMobileDetection } from "../hooks/useMobileDetection";
 import NavigationDesktop from "./NavigationDesktop";
 import MobileMenu from "./MobileMenu";
@@ -12,6 +12,7 @@ interface NavigationProps {
 
 const Navigation = ({ currentArticle }: NavigationProps) => {
   const location = useLocation();
+  const navigate = useNavigate();
   const isMobile = useMobileDetection();
   const [searchValue, setSearchValue] = useState("");
   const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -20,16 +21,18 @@ const Navigation = ({ currentArticle }: NavigationProps) => {
     // Reset any mobile menu state when location changes
   }, [location]);
 
+  // Navigate to fresh feed without full page reload
+  const handleFreshFeed = useCallback(() => {
+    navigate('/', { state: { freshFeed: true }, replace: false });
+  }, [navigate]);
+
   if (location.pathname === '/auth') return null;
 
   const navigationProps = {
     searchValue,
     onSearchClick: () => setIsSearchOpen(true),
-    onRandomClick: () => {
-      // Force a fresh feed by reloading
-      window.location.href = '/';
-    },
-    onTodayClick: () => window.location.href = '/today'
+    onRandomClick: handleFreshFeed,
+    onTodayClick: () => navigate('/today')
   };
 
   return (
