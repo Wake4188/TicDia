@@ -322,6 +322,36 @@ export type Database = {
         }
         Relationships: []
       }
+      word_of_the_day: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          is_admin_selected: boolean
+          updated_at: string
+          word: string
+          word_date: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_admin_selected?: boolean
+          updated_at?: string
+          word: string
+          word_date?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_admin_selected?: boolean
+          updated_at?: string
+          word?: string
+          word_date?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -339,6 +369,14 @@ export type Database = {
           article_title: string
           article_url: string
           vote_count: number
+        }[]
+      }
+      get_word_of_the_day: {
+        Args: { p_date?: string }
+        Returns: {
+          is_admin_selected: boolean
+          word: string
+          word_date: string
         }[]
       }
       has_role: {

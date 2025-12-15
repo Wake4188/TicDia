@@ -15,7 +15,7 @@ export async function getWordOfTheDay(date: Date = new Date()): Promise<string |
     const dateString = date.toISOString().split('T')[0]; // YYYY-MM-DD format
     
     const { data, error } = await supabase
-      .from('word_of_the_day')
+      .from('word_of_the_day' as any)
       .select('word')
       .eq('word_date', dateString)
       .single();
@@ -38,7 +38,7 @@ export async function getWordOfTheDay(date: Date = new Date()): Promise<string |
       return null;
     }
 
-    return data?.word || null;
+    return (data as any)?.word || null;
   } catch (error) {
     console.error('Error in getWordOfTheDay:', error);
     return null;
@@ -53,7 +53,7 @@ export async function getWordOfTheDayRecord(date: Date = new Date()): Promise<Wo
     const dateString = date.toISOString().split('T')[0];
     
     const { data, error } = await supabase
-      .from('word_of_the_day')
+      .from('word_of_the_day' as any)
       .select('word, word_date, is_admin_selected')
       .eq('word_date', dateString)
       .single();
@@ -75,7 +75,7 @@ export async function getWordOfTheDayRecord(date: Date = new Date()): Promise<Wo
       return null;
     }
 
-    return data;
+    return data as unknown as WordOfTheDay;
   } catch (error) {
     console.error('Error in getWordOfTheDayRecord:', error);
     return null;
@@ -94,14 +94,14 @@ export async function setWordOfTheDay(
     const dateString = date.toISOString().split('T')[0];
     
     const { error } = await supabase
-      .from('word_of_the_day')
+      .from('word_of_the_day' as any)
       .upsert({
         word,
         word_date: dateString,
         is_admin_selected: true,
         created_by: userId || null,
         updated_at: new Date().toISOString(),
-      }, {
+      } as any, {
         onConflict: 'word_date',
       });
 
