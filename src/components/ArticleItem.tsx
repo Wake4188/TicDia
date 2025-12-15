@@ -211,7 +211,7 @@ const ArticleItem = ({
           </div>
         </div>
         {isCurrent && !showSmartLinks && (
-          <div className="flex items-center gap-3 text-xs sm:text-sm text-muted-foreground flex-shrink-0 mt-4 ml-6">
+          <div className="flex items-center gap-3 text-xs sm:text-sm text-muted-foreground flex-shrink-0 mt-4">
             <button
               onClick={() => setShowSmartLinks(true)}
               className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/20 hover:bg-primary/30 text-primary transition-colors"
