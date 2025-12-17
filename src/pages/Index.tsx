@@ -30,11 +30,18 @@ const loadCachedArticles = () => {
     if (cached && timestamp) {
       const age = Date.now() - parseInt(timestamp, 10);
       if (age < CACHE_DURATION) {
-        return JSON.parse(cached);
+        const parsed = JSON.parse(cached);
+        // Validate the cached data is a non-empty array with required fields
+        if (Array.isArray(parsed) && parsed.length > 0 && parsed[0]?.title && parsed[0]?.image) {
+          return parsed;
+        }
       }
     }
   } catch (e) {
     console.warn('Failed to load cached articles:', e);
+    // Clear corrupted cache
+    localStorage.removeItem(ARTICLES_CACHE_KEY);
+    localStorage.removeItem(CACHE_TIMESTAMP_KEY);
   }
   return null;
 };
@@ -174,8 +181,23 @@ const Index = () => {
 
   if (error || !articles || articles.length === 0) {
     return (
-      <div className="h-screen w-screen flex items-center justify-center bg-background text-foreground">
-        <div>{t.error}</div>
+      <div className="h-screen w-screen flex flex-col items-center justify-center bg-background text-foreground gap-4">
+        <div className="text-lg font-medium">{searchQuery ? t.noResults : t.error}</div>
+        <p className="text-sm text-muted-foreground max-w-md text-center">
+          {searchQuery 
+            ? `No articles found for "${searchQuery}"`
+            : "Unable to load articles. Please check your connection and try again."}
+        </p>
+        <button 
+          onClick={() => {
+            localStorage.removeItem(ARTICLES_CACHE_KEY);
+            localStorage.removeItem(CACHE_TIMESTAMP_KEY);
+            window.location.reload();
+          }}
+          className="px-6 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
+        >
+          {t.retry}
+        </button>
       </div>
     );
   }
