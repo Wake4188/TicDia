@@ -7,6 +7,7 @@ import ArticleLoadingState from "../components/ArticleLoadingState";
 import RightSidebar from "../components/RightSidebar";
 import LeftSidebar from "../components/LeftSidebar";
 import Navigation from "../components/Navigation";
+import FunErrorScreen from "../components/FunErrorScreen";
 import { getRandomArticles, searchArticles, getPersonalizedArticles } from "../services/wikipediaService";
 import { useToast } from "@/components/ui/use-toast";
 import { useLanguage } from "../contexts/LanguageContext";
@@ -180,25 +181,23 @@ const Index = () => {
   }
 
   if (error || !articles || articles.length === 0) {
+    const errorType = searchQuery ? 'empty' : (error ? 'loading-failed' : 'empty');
+    const handleRetry = () => {
+      localStorage.removeItem(ARTICLES_CACHE_KEY);
+      localStorage.removeItem(CACHE_TIMESTAMP_KEY);
+      window.location.reload();
+    };
+    
     return (
-      <div className="h-screen w-screen flex flex-col items-center justify-center bg-background text-foreground gap-4">
-        <div className="text-lg font-medium">{searchQuery ? t.noResults : t.error}</div>
-        <p className="text-sm text-muted-foreground max-w-md text-center">
-          {searchQuery 
-            ? `No articles found for "${searchQuery}"`
-            : "Unable to load articles. Please check your connection and try again."}
-        </p>
-        <button 
-          onClick={() => {
-            localStorage.removeItem(ARTICLES_CACHE_KEY);
-            localStorage.removeItem(CACHE_TIMESTAMP_KEY);
-            window.location.reload();
-          }}
-          className="px-6 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
-        >
-          {t.retry}
-        </button>
-      </div>
+      <FunErrorScreen
+        type={errorType}
+        title={searchQuery ? t.noResults : undefined}
+        message={searchQuery 
+          ? `No articles found for "${searchQuery}". Try a different search term!`
+          : undefined}
+        onRetry={handleRetry}
+        onGoHome={() => navigate('/')}
+      />
     );
   }
 
