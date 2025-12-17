@@ -30,22 +30,49 @@ export const getPageViews = async (title: string, language: Language): Promise<n
 };
 
 export const fetchWikipediaContent = async (titles: string[], language: Language) => {
-  const titlesString = titles.join("|");
-  const params = new URLSearchParams({
-    action: 'query',
-    format: 'json',
-    origin: '*',
-    prop: 'extracts|pageimages|categories|links|images|info',
-    titles: titlesString,
-    exintro: '1',
-    explaintext: '1',
-    pithumbsize: '1000',
-    imlimit: '5',
-    inprop: 'protection'
-  });
-
-  const response = await fetch(`${getWikipediaApiBase(language)}?${params}`);
-  if (!response.ok) throw new Error(`Failed to fetch Wikipedia content in ${language.name}`);
+  // Wikipedia API has a limit of 50 titles per request
+  const BATCH_SIZE = 50;
+  const batches: string[][] = [];
   
-  return response.json();
+  for (let i = 0; i < titles.length; i += BATCH_SIZE) {
+    batches.push(titles.slice(i, i + BATCH_SIZE));
+  }
+
+  const fetchBatch = async (batchTitles: string[]) => {
+    const titlesString = batchTitles.join("|");
+    const params = new URLSearchParams({
+      action: 'query',
+      format: 'json',
+      origin: '*',
+      prop: 'extracts|pageimages|categories|links|images|info',
+      titles: titlesString,
+      exintro: '1',
+      explaintext: '1',
+      pithumbsize: '1000',
+      imlimit: '5',
+      inprop: 'protection'
+    });
+
+    const response = await fetch(`${getWikipediaApiBase(language)}?${params}`);
+    if (!response.ok) throw new Error(`Failed to fetch Wikipedia content in ${language.name}`);
+    
+    return response.json();
+  };
+
+  // Fetch all batches in parallel
+  const results = await Promise.all(batches.map(fetchBatch));
+  
+  // Merge all pages into a single response object
+  const mergedPages: Record<string, any> = {};
+  for (const result of results) {
+    if (result.query?.pages) {
+      Object.assign(mergedPages, result.query.pages);
+    }
+  }
+
+  return {
+    query: {
+      pages: mergedPages
+    }
+  };
 };
