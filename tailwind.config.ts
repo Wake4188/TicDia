@@ -12,6 +12,9 @@ export default {
   prefix: "",
   theme: {
     extend: {
+      fontFamily: {
+        'newspaper': ['OldNewspaper', 'serif'],
+      },
       colors: {
         tictok: {
           red: "#FE2C55",

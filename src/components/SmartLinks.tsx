@@ -102,46 +102,31 @@ const SmartLinks = ({ articleContent, articleTitle, onClose, onNavigateToArticle
 
   return (
     <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      className="absolute inset-0 z-30 flex flex-col overflow-hidden"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -20 }}
+      transition={{ duration: 0.3, ease: "easeOut" }}
+      className="absolute inset-0 z-30 flex flex-col overflow-hidden font-newspaper"
     >
       {/* Animated background */}
       <div className="absolute inset-0 bg-gradient-to-br from-background via-background to-primary/5" />
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-primary/10 via-transparent to-transparent" />
       
-      {/* Floating particles effect */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        {[...Array(6)].map((_, i) => (
-          <motion.div
-            key={i}
-            className="absolute w-1 h-1 bg-primary/30 rounded-full"
-            initial={{ 
-              x: Math.random() * 100 + '%', 
-              y: '110%',
-              opacity: 0 
-            }}
-            animate={{ 
-              y: '-10%',
-              opacity: [0, 1, 0]
-            }}
-            transition={{
-              duration: 4 + Math.random() * 2,
-              repeat: Infinity,
-              delay: i * 0.5,
-              ease: "linear"
-            }}
-          />
-        ))}
-      </div>
+      {/* Close button - prominent X in corner */}
+      <button
+        onClick={onClose}
+        className="absolute top-4 right-4 z-50 w-10 h-10 flex items-center justify-center rounded-full bg-destructive/20 hover:bg-destructive/40 border border-destructive/30 transition-all duration-200 hover:scale-110"
+        aria-label="Close"
+      >
+        <X className="w-5 h-5 text-destructive" />
+      </button>
 
       {/* Header */}
       <motion.div 
-        initial={{ y: -20, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ delay: 0.1 }}
-        className="relative flex items-center justify-between p-4 border-b border-border/50 backdrop-blur-sm"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.1, duration: 0.2 }}
+        className="relative flex items-center justify-between p-4 pr-16 border-b border-border/50 backdrop-blur-sm"
       >
         <div className="flex items-center gap-3">
           <div className="relative">
@@ -168,14 +153,6 @@ const SmartLinks = ({ articleContent, articleTitle, onClose, onNavigateToArticle
           >
             <Shuffle className="w-4 h-4" />
             <span className="hidden sm:inline">Shuffle</span>
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={onClose}
-            className="text-muted-foreground hover:text-foreground hover:bg-destructive/10"
-          >
-            <X className="w-5 h-5" />
           </Button>
         </div>
       </motion.div>
@@ -206,15 +183,13 @@ const SmartLinks = ({ articleContent, articleTitle, onClose, onNavigateToArticle
                   return (
                     <motion.button
                       key={item.word}
-                      layout
-                      initial={{ opacity: 0, scale: 0.8, y: 20 }}
-                      animate={{ opacity: 1, scale: 1, y: 0 }}
-                      exit={{ opacity: 0, scale: 0.8 }}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -10 }}
                       transition={{ 
-                        delay: index * 0.03,
-                        type: "spring",
-                        stiffness: 400,
-                        damping: 25
+                        delay: index * 0.02,
+                        duration: 0.2,
+                        ease: "easeOut"
                       }}
                       onClick={() => handleLinkClick(item.word)}
                       onMouseEnter={() => setHoveredWord(item.word)}

@@ -1,5 +1,5 @@
 import React, { Component, ErrorInfo, ReactNode } from 'react';
-import { AlertCircle } from 'lucide-react';
+import FunErrorScreen from './FunErrorScreen';
 
 interface Props {
   children: ReactNode;
@@ -29,6 +29,21 @@ class ErrorBoundary extends Component<Props, State> {
     window.location.reload();
   };
 
+  private handleGoHome = () => {
+    window.location.href = '/';
+  };
+
+  private getErrorType = (): 'network' | 'server' | 'unknown' => {
+    const errorMessage = this.state.error?.message?.toLowerCase() || '';
+    if (errorMessage.includes('network') || errorMessage.includes('fetch')) {
+      return 'network';
+    }
+    if (errorMessage.includes('500') || errorMessage.includes('server')) {
+      return 'server';
+    }
+    return 'unknown';
+  };
+
   public render() {
     if (this.state.hasError) {
       if (this.props.fallback) {
@@ -36,21 +51,11 @@ class ErrorBoundary extends Component<Props, State> {
       }
 
       return (
-        <div className="min-h-screen w-full flex items-center justify-center bg-background p-4">
-          <div className="max-w-md w-full text-center space-y-4">
-            <AlertCircle className="w-16 h-16 mx-auto text-destructive" />
-            <h1 className="text-2xl font-bold text-foreground">Something went wrong</h1>
-            <p className="text-muted-foreground">
-              We're sorry, but something unexpected happened. Please try reloading the page.
-            </p>
-            <button
-              onClick={this.handleReload}
-              className="px-6 py-3 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
-            >
-              Reload Page
-            </button>
-          </div>
-        </div>
+        <FunErrorScreen
+          type={this.getErrorType()}
+          onRetry={this.handleReload}
+          onGoHome={this.handleGoHome}
+        />
       );
     }
 
