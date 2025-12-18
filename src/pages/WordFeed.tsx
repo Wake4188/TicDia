@@ -8,6 +8,7 @@ import { useUserPreferences } from "@/contexts/UserPreferencesContext";
 import { lookupWord, getDefinitions } from "@/services/wiktionaryService";
 import { getWordOfTheDay, generateWordOfTheDay } from "@/services/wordOfTheDayService";
 import Navigation from "@/components/Navigation";
+import SanitizedHtml from "@/components/SanitizedHtml";
 
 interface WordEntry {
   word: string;
@@ -71,7 +72,8 @@ const WordFeed = () => {
         return {
           word,
           partOfSpeech: firstDef.partOfSpeech,
-          definition: firstDef.definitions[0]?.definition?.replace(/<[^>]*>/g, '') || '',
+          // Keep the HTML - we'll render it properly with SanitizedHtml component
+          definition: firstDef.definitions[0]?.definition || '',
           example: firstDef.definitions[0]?.examples?.[0],
         };
       }
@@ -346,16 +348,16 @@ const WordFeed = () => {
                       {wordEntry.partOfSpeech}
                     </p>
                     
-                    {/* Definition */}
-                    <p 
+                    {/* Definition - render sanitized HTML properly */}
+                    <div 
                       className="text-xl sm:text-2xl text-white/90 leading-relaxed"
                       style={{ 
                         fontFamily: userPreferences.fontFamily,
                         fontSize: `${userPreferences.fontSize + 4}px`
                       }}
                     >
-                      {wordEntry.definition}
-                    </p>
+                      <SanitizedHtml html={wordEntry.definition} className="text-white/90" />
+                    </div>
                     
                     {/* Example */}
                     {wordEntry.example && (

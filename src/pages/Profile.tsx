@@ -1109,7 +1109,16 @@ const Profile = () => {
               </div>
             </div>
             <p className="text-xs text-gray-500">
-              Made with love in France by Noa Wilhide and Ben Camewell
+              Made with love in France by{' '}
+              <a 
+                href="/portfolio" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-primary hover:underline font-medium"
+              >
+                Noa Wilhide
+              </a>{' '}
+              and Ben Camewell
             </p>
           </div>
         </div>
