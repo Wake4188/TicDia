@@ -173,14 +173,20 @@ const Index = () => {
     }
   }, [error, toast]);
 
-  // Show loading only on initial load (not when we have placeholder data)
-  const showLoading = (isLoading && !articles) || languageLoading;
+  // Show loading on initial load or when actively fetching with no data
+  // Critical: Only show loading screen during actual loading states, not during brief transitions
+  const hasArticles = articles && articles.length > 0;
+  const showLoading = languageLoading || (isLoading && !hasArticles);
+
+  // Only show error screen for actual persistent errors, not during loading transitions
+  // The key is to wait for the query to complete before deciding to show an error
+  const showError = !isLoading && !isFetching && !languageLoading && (error || !hasArticles);
 
   if (showLoading) {
     return <ArticleLoadingState />;
   }
 
-  if (error || !articles || articles.length === 0) {
+  if (showError) {
     const errorType = searchQuery ? 'empty' : (error ? 'loading-failed' : 'empty');
     const handleRetry = () => {
       localStorage.removeItem(ARTICLES_CACHE_KEY);
@@ -199,6 +205,11 @@ const Index = () => {
         onGoHome={() => navigate('/')}
       />
     );
+  }
+
+  // Ensure we have articles before rendering
+  if (!hasArticles) {
+    return <ArticleLoadingState />;
   }
 
   const currentDisplayArticle = currentArticle || articles[0];
