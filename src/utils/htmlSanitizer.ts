@@ -1,36 +1,35 @@
 // Utility to parse and sanitize MediaWiki HTML content
+import DOMPurify from 'dompurify';
 
 /**
  * Sanitizes MediaWiki HTML by:
- * - Removing mw:* attributes
- * - Keeping safe tags (i, em, b, strong, a)
+ * - Using DOMPurify for secure sanitization
+ * - Keeping safe tags (i, em, b, strong, a, p, br)
  * - Converting Wikipedia links to proper URLs
- * - Stripping other HTML tags
+ * - Stripping dangerous content and attributes
  */
 export function sanitizeMediaWikiHtml(html: string): string {
   if (!html) return '';
   
-  // Create a temporary DOM element to parse HTML
-  const doc = new DOMParser().parseFromString(html, 'text/html');
+  // Configure DOMPurify with allowed tags and attributes
+  const cleanHtml = DOMPurify.sanitize(html, {
+    ALLOWED_TAGS: ['i', 'em', 'b', 'strong', 'a', 'p', 'br', 'span'],
+    ALLOWED_ATTR: ['href', 'target', 'rel', 'class'],
+    ALLOW_DATA_ATTR: false,
+    ALLOW_UNKNOWN_PROTOCOLS: false,
+    FORBID_TAGS: ['script', 'style', 'iframe', 'object', 'embed', 'form'],
+    FORBID_ATTR: ['onclick', 'onerror', 'onload', 'onmouseover', 'onfocus']
+  });
   
-  // Process all anchor tags
+  // Create a temporary DOM element to process links
+  const doc = new DOMParser().parseFromString(cleanHtml, 'text/html');
+  
+  // Process all anchor tags to fix Wikipedia links
   const anchors = doc.querySelectorAll('a');
   anchors.forEach((anchor) => {
-    // Clean up Wikipedia-specific attributes
-    anchor.removeAttribute('rel');
-    anchor.removeAttribute('typeof');
-    anchor.removeAttribute('data-mw');
-    
-    // Get all attributes and remove mw:* ones
-    const attrs = Array.from(anchor.attributes);
-    attrs.forEach(attr => {
-      if (attr.name.startsWith('data-') || attr.value.includes('mw:')) {
-        anchor.removeAttribute(attr.name);
-      }
-    });
+    const href = anchor.getAttribute('href');
     
     // Fix relative Wikipedia links
-    const href = anchor.getAttribute('href');
     if (href && href.startsWith('/wiki/')) {
       anchor.setAttribute('href', `https://en.wikipedia.org${href}`);
       anchor.setAttribute('target', '_blank');
@@ -39,20 +38,27 @@ export function sanitizeMediaWikiHtml(html: string): string {
       anchor.setAttribute('href', `https://en.wikipedia.org/wiki/${href.slice(2)}`);
       anchor.setAttribute('target', '_blank');
       anchor.setAttribute('rel', 'noopener noreferrer');
+    } else if (href && !href.startsWith('http')) {
+      // Block non-http links for safety
+      anchor.removeAttribute('href');
+    } else if (href) {
+      // Ensure external links open safely
+      anchor.setAttribute('target', '_blank');
+      anchor.setAttribute('rel', 'noopener noreferrer');
     }
   });
   
-  // Get the cleaned HTML
-  let cleanedHtml = doc.body.innerHTML;
+  // Get the processed HTML
+  let processedHtml = doc.body.innerHTML;
   
-  // Remove any remaining typeof attributes
-  cleanedHtml = cleanedHtml.replace(/\s*typeof="[^"]*"/g, '');
-  cleanedHtml = cleanedHtml.replace(/\s*data-mw="[^"]*"/g, '');
-  cleanedHtml = cleanedHtml.replace(/\s*rel="mw:[^"]*"/g, '');
-  cleanedHtml = cleanedHtml.replace(/\s*about="[^"]*"/g, '');
-  cleanedHtml = cleanedHtml.replace(/\s*class="mw-[^"]*"/g, '');
+  // Final sanitization pass to ensure no MediaWiki-specific attributes remain
+  processedHtml = processedHtml.replace(/\s*typeof="[^"]*"/g, '');
+  processedHtml = processedHtml.replace(/\s*data-mw="[^"]*"/g, '');
+  processedHtml = processedHtml.replace(/\s*rel="mw:[^"]*"/g, '');
+  processedHtml = processedHtml.replace(/\s*about="[^"]*"/g, '');
+  processedHtml = processedHtml.replace(/\s*class="mw-[^"]*"/g, '');
   
-  return cleanedHtml;
+  return processedHtml;
 }
 
 /**
@@ -60,7 +66,7 @@ export function sanitizeMediaWikiHtml(html: string): string {
  */
 export function stripHtmlTags(html: string): string {
   if (!html) return '';
-  return html.replace(/<[^>]*>/g, '');
+  return DOMPurify.sanitize(html, { ALLOWED_TAGS: [] });
 }
 
 /**
