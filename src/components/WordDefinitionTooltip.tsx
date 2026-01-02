@@ -96,16 +96,23 @@ const WordDefinitionTooltip = ({ word, onClose, position }: WordDefinitionToolti
 
   return (
     <>
-      {/* Backdrop to close on outside click */}
+      {/* Desktop backdrop to close on outside click (no blur) */}
       <div
-        className="fixed inset-0 z-[9998]"
+        className="fixed inset-0 z-[9997] hidden md:block"
+        onClick={onClose}
+        aria-hidden="true"
+      />
+
+      {/* Mobile backdrop blur overlay */}
+      <div
+        className="fixed inset-0 z-[9998] bg-black/40 backdrop-blur-sm md:hidden"
         onClick={onClose}
         aria-hidden="true"
       />
 
       <div
         ref={tooltipRef}
-        className="fixed z-[9999] bg-card/95 backdrop-blur-md rounded-lg shadow-2xl border border-border p-4 w-[90vw] max-w-sm"
+        className="fixed z-[9999] bg-card/95 backdrop-blur-md rounded-xl shadow-2xl border border-border p-4 w-[90vw] max-w-sm md:rounded-lg"
         style={{
           left: `${adjustedPosition.x}px`,
           top: `${adjustedPosition.y}px`,

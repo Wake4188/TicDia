@@ -11,7 +11,32 @@ const UserPreferencesContext = createContext<UserPreferencesContextType | undefi
 
 export const UserPreferencesProvider = ({ children }: { children: ReactNode }) => {
     const { user } = useAuth();
-    const [userPreferences, setUserPreferences] = useState<UserPreferences>(getDefaultPreferences());
+    
+    // Initialize with localStorage immediately for instant load (no flash)
+    const [userPreferences, setUserPreferences] = useState<UserPreferences>(() => {
+        try {
+            const savedPrefs = localStorage.getItem('userPreferences');
+            if (savedPrefs) {
+                const prefs = JSON.parse(savedPrefs);
+                return {
+                    fontFamily: prefs.fontFamily || 'Times New Roman',
+                    backgroundOpacity: prefs.backgroundOpacity || 70,
+                    highlightColor: prefs.highlightColor || prefs.progressBarColor || '#FE2C55',
+                    fontSize: prefs.fontSize || 16,
+                    feedType: prefs.feedType || 'mixed',
+                    liquidGlassMode: Boolean(prefs.liquidGlassMode) || false,
+                    ttsSpeed: prefs.ttsSpeed || 1.0,
+                    smokeEffect: prefs.smokeEffect !== false,
+                    textAnimation: prefs.textAnimation !== false,
+                    birthYear: prefs.birthYear,
+                    allowAdultContent: prefs.allowAdultContent === true,
+                };
+            }
+        } catch (e) {
+            console.warn('Failed to load preferences from localStorage:', e);
+        }
+        return getDefaultPreferences();
+    });
 
     const persistLocal = (prefs: Partial<UserPreferences>) => {
         const saved = localStorage.getItem('userPreferences');

@@ -63,7 +63,10 @@ const Discover = () => {
       return articles.filter(article => article.image);
     },
     initialPageParam: 1,
-    getNextPageParam: (lastPage, allPages) => allPages.length < 3 ? allPages.length + 1 : undefined
+    getNextPageParam: (lastPage, allPages) => allPages.length < 3 ? allPages.length + 1 : undefined,
+    staleTime: 3 * 60 * 1000, // 3 minutes - reduce refetching
+    gcTime: 10 * 60 * 1000, // 10 minutes cache
+    refetchOnWindowFocus: false,
   });
 
   useEffect(() => {
@@ -164,7 +167,7 @@ const Discover = () => {
       <div className="p-2 md:p-4">
         {isLoading ? (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-            {Array.from({ length: 12 }).map((_, i) => (
+            {Array.from({ length: 8 }).map((_, i) => (
               <Skeleton key={i} className="aspect-[9/16] rounded-xl bg-white/10" />
             ))}
           </div>

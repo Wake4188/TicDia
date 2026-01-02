@@ -96,30 +96,29 @@ const WordFeed = () => {
       wordOfTheDay = generateWordOfTheDay(today, INTERESTING_WORDS);
     }
     
-    const wordEntries: WordEntry[] = [];
     const newUsedWords = new Set<string>();
-    
-    // Fetch word of the day first
     if (wordOfTheDay) {
-      const wordOfTheDayEntry = await fetchWordDefinition(wordOfTheDay);
-      if (wordOfTheDayEntry) {
-        wordEntries.push(wordOfTheDayEntry);
-        newUsedWords.add(wordOfTheDay);
-      }
+      newUsedWords.add(wordOfTheDay);
     }
     
-    // Load additional words (excluding word of the day)
+    // Select 9 additional words (for 10 total)
     const availableWords = INTERESTING_WORDS.filter(w => !newUsedWords.has(w));
     const shuffled = [...availableWords].sort(() => Math.random() - 0.5);
-    const selectedWords = shuffled.slice(0, 9); // 9 more words to make 10 total
+    const selectedWords = shuffled.slice(0, 9);
     
-    for (const word of selectedWords) {
-      const entry = await fetchWordDefinition(word);
-      if (entry) {
-        wordEntries.push(entry);
-        newUsedWords.add(word);
+    // Fetch all definitions in parallel for speed
+    const allWords = wordOfTheDay ? [wordOfTheDay, ...selectedWords] : selectedWords;
+    const results = await Promise.allSettled(
+      allWords.map(word => fetchWordDefinition(word))
+    );
+    
+    const wordEntries: WordEntry[] = [];
+    results.forEach((result, index) => {
+      if (result.status === 'fulfilled' && result.value) {
+        wordEntries.push(result.value);
+        newUsedWords.add(allWords[index]);
       }
-    }
+    });
     
     setWords(wordEntries);
     setUsedWords(newUsedWords);
@@ -142,12 +141,24 @@ const WordFeed = () => {
     const shuffled = availableWords.sort(() => Math.random() - 0.5);
     const newWords = shuffled.slice(0, 5);
     
-    for (const word of newWords) {
-      const entry = await fetchWordDefinition(word);
-      if (entry) {
-        setWords(prev => [...prev, entry]);
-        setUsedWords(prev => new Set([...prev, word]));
+    // Fetch all new word definitions in parallel
+    const results = await Promise.allSettled(
+      newWords.map(word => fetchWordDefinition(word))
+    );
+    
+    const newEntries: WordEntry[] = [];
+    const newUsedSet = new Set(usedWords);
+    
+    results.forEach((result, index) => {
+      if (result.status === 'fulfilled' && result.value) {
+        newEntries.push(result.value);
+        newUsedSet.add(newWords[index]);
       }
+    });
+    
+    if (newEntries.length > 0) {
+      setWords(prev => [...prev, ...newEntries]);
+      setUsedWords(newUsedSet);
     }
   }, [usedWords, fetchWordDefinition]);
 

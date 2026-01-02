@@ -57,18 +57,14 @@ const fetchArticleImages = async (title: string): Promise<string | undefined> =>
   }
 };
 
-export const getArticleImage = async (page: WikipediaPage): Promise<string> => {
-  // Try thumbnail first
+export const getArticleImage = async (page: WikipediaPage): Promise<string | null> => {
+  // Try thumbnail first (already fetched with article data)
   if (page.thumbnail?.source) {
     return page.thumbnail.source;
   }
 
-  // Try to find other images in the article
-  const articleImage = await fetchArticleImages(page.title);
-  if (articleImage) {
-    return articleImage;
-  }
-
-  // Fallback to placeholder
-  return getRandomPlaceholder();
+  // For performance, skip additional API calls for images
+  // Articles without thumbnails in initial fetch won't have good images anyway
+  // This drastically reduces network requests and speeds up loading
+  return null;
 };

@@ -181,10 +181,9 @@ const getRandomArticles = async (
   language: Language = DEFAULT_LANGUAGE,
   allowAdultContent: boolean = false
 ): Promise<WikipediaArticle[]> => {
-  // Don't use cache for random articles to prevent duplicates in infinite scroll
-
   try {
-    const multiplier = 5; // Increased multiplier for better variety and fewer duplicates
+    // Request more articles upfront to reduce need for retries
+    const requestCount = Math.min(count * 3, 50); // Cap at 50 to stay within API limits
     let titles: string[];
 
     if (category && category !== "All") {
@@ -194,7 +193,7 @@ const getRandomArticles = async (
         origin: '*',
         list: 'categorymembers',
         cmtitle: `Category:${category}`,
-        cmlimit: (count * multiplier).toString(),
+        cmlimit: requestCount.toString(),
         cmtype: 'page'
       });
 
@@ -210,7 +209,7 @@ const getRandomArticles = async (
         origin: '*',
         list: 'random',
         rnnamespace: '0',
-        rnlimit: (count * multiplier).toString()
+        rnlimit: requestCount.toString()
       });
 
       const response = await fetch(`${getWikipediaApiBase(language)}?${params}`);
@@ -222,17 +221,17 @@ const getRandomArticles = async (
 
     if (!titles.length) throw new Error('No articles found');
 
-    const validArticles = await fetchArticles(titles, language, allowAdultContent);
-
-    if (validArticles.length < count) {
-      const moreArticles = await getRandomArticles(count - validArticles.length, category, language, allowAdultContent);
-      // Remove duplicates by ID before merging
-      const combined = [...validArticles, ...moreArticles];
-      const uniqueArticles = Array.from(new Map(combined.map(a => [a.id, a])).values());
-      return uniqueArticles.slice(0, count);
+    // Batch fetch in chunks of 50 (Wikipedia API limit)
+    const validArticles = await fetchArticles(titles.slice(0, 50), language, allowAdultContent);
+    
+    // Filter for articles with images and return immediately if we have enough
+    const withImages = validArticles.filter(a => a.image);
+    if (withImages.length >= count) {
+      return withImages.slice(0, count);
     }
 
-    return validArticles.slice(0, count);
+    // Return what we have - avoid expensive retries
+    return withImages.length > 0 ? withImages : validArticles.slice(0, count);
   } catch (error) {
     console.error('Error fetching articles:', error);
     throw error;

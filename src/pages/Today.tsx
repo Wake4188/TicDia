@@ -138,10 +138,13 @@ const Today = () => {
     }
   });
 
-  // Fetch Wikipedia articles on component mount
+  // Fetch Wikipedia and RSS in parallel on mount
   useEffect(() => {
-    fetchWikipediaArticles();
-    fetchApNewsRSS();
+    // Parallel fetch for faster loading
+    Promise.allSettled([
+      fetchWikipediaArticles(),
+      fetchApNewsRSS()
+    ]);
   }, [currentLanguage]);
   const fetchApNewsRSS = async () => {
     try {
