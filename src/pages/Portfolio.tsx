@@ -1,7 +1,7 @@
-import { useEffect, useRef, useState, Suspense } from 'react';
+import { useEffect, useRef, useState, Suspense, useMemo } from 'react';
 import { Canvas } from '@react-three/fiber';
-import { OrbitControls, Float, Text3D, Center, Environment } from '@react-three/drei';
-import { motion, useScroll, useTransform, AnimatePresence } from 'framer-motion';
+import { OrbitControls, Float } from '@react-three/drei';
+import { motion, useScroll, useTransform } from 'framer-motion';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import * as THREE from 'three';
@@ -44,12 +44,15 @@ function Particles() {
   const particlesRef = useRef<THREE.Points>(null);
   const count = 500;
   
-  const positions = new Float32Array(count * 3);
-  for (let i = 0; i < count; i++) {
-    positions[i * 3] = (Math.random() - 0.5) * 30;
-    positions[i * 3 + 1] = (Math.random() - 0.5) * 30;
-    positions[i * 3 + 2] = (Math.random() - 0.5) * 30;
-  }
+  const positions = useMemo(() => {
+    const pos = new Float32Array(count * 3);
+    for (let i = 0; i < count; i++) {
+      pos[i * 3] = (Math.random() - 0.5) * 30;
+      pos[i * 3 + 1] = (Math.random() - 0.5) * 30;
+      pos[i * 3 + 2] = (Math.random() - 0.5) * 30;
+    }
+    return pos;
+  }, []);
   
   useEffect(() => {
     if (particlesRef.current) {
@@ -62,16 +65,14 @@ function Particles() {
     }
   }, []);
 
+  const geometry = useMemo(() => {
+    const geo = new THREE.BufferGeometry();
+    geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    return geo;
+  }, [positions]);
+
   return (
-    <points ref={particlesRef}>
-      <bufferGeometry>
-        <bufferAttribute
-          attach="attributes-position"
-          count={count}
-          array={positions}
-          itemSize={3}
-        />
-      </bufferGeometry>
+    <points ref={particlesRef} geometry={geometry}>
       <pointsMaterial size={0.05} color="#ff6b6b" sizeAttenuation transparent opacity={0.8} />
     </points>
   );
@@ -95,7 +96,6 @@ function HeroScene() {
       <FloatingSphere position={[4, 3, -4]} color="#06b6d4" scale={0.6} />
       
       <OrbitControls enableZoom={false} enablePan={false} autoRotate autoRotateSpeed={0.5} />
-      <Environment preset="night" />
     </>
   );
 }
