@@ -66,18 +66,14 @@ const NewsFeed = () => {
   }, []);
 
   const fetchAllNews = async () => {
-    try {
-      setLoading(true);
-      await Promise.all([
-        fetchNYTNews(),
-        fetchFranceInfoRSS(),
-        fetchBBCRSS(),
-      ]);
-    } catch (error) {
-      console.error('Error fetching news:', error);
-    } finally {
-      setLoading(false);
-    }
+    setLoading(true);
+    // Fire all requests in parallel with Promise.allSettled to never fail entirely
+    await Promise.allSettled([
+      fetchNYTNews(),
+      fetchFranceInfoRSS(),
+      fetchBBCRSS(),
+    ]);
+    setLoading(false);
   };
 
   const fetchNYTNews = async () => {

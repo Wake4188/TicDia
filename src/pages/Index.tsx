@@ -20,7 +20,7 @@ import { useAuth } from "../contexts/AuthContext";
 // Cache key for persisting articles
 const ARTICLES_CACHE_KEY = 'ticdia_cached_articles';
 const CACHE_TIMESTAMP_KEY = 'ticdia_cache_timestamp';
-const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+const CACHE_DURATION = 10 * 60 * 1000; // 10 minutes - longer cache for faster loads
 
 // Load cached articles from localStorage
 const loadCachedArticles = () => {
@@ -110,6 +110,9 @@ const Index = () => {
         return results.filter(article => article.image);
       }
 
+      // Check cache first for instant display
+      const cached = loadCachedArticles();
+      
       // Use personalized feed if feedType is 'curated' and user is logged in
       if (feedType === 'curated' && userId) {
         try {
@@ -124,31 +127,34 @@ const Index = () => {
         }
       }
 
-      // Faster fetching - single attempt with more articles
-      const randomArticles = await getRandomArticles(15, undefined, currentLanguage, allowAdultContent);
+      // Faster single fetch - request more articles to increase chance of images
+      const randomArticles = await getRandomArticles(20, undefined, currentLanguage, allowAdultContent);
       const articlesWithImages = randomArticles.filter(article => article.image);
       
-      if (articlesWithImages.length > 0) {
+      if (articlesWithImages.length >= 5) {
         saveCachedArticles(articlesWithImages);
         return articlesWithImages;
       }
       
-      // Only retry once if needed
-      const retryArticles = await getRandomArticles(20, undefined, currentLanguage, allowAdultContent);
-      const retryWithImages = retryArticles.filter(article => article.image);
+      // If we have cached data and fresh fetch failed, use cache
+      if (cached && cached.length > 0) {
+        return cached;
+      }
       
-      if (retryWithImages.length > 0) {
-        saveCachedArticles(retryWithImages);
-        return retryWithImages;
+      // Last resort: return whatever we got
+      if (articlesWithImages.length > 0) {
+        saveCachedArticles(articlesWithImages);
+        return articlesWithImages;
       }
       
       throw new Error("Failed to find articles with images.");
     },
     retry: 1,
     enabled: !languageLoading,
-    staleTime: 2 * 60 * 1000, // Consider data fresh for 2 minutes
-    gcTime: 10 * 60 * 1000, // Keep in cache for 10 minutes
-    refetchOnWindowFocus: false, // Don't refetch on tab focus
+    staleTime: 5 * 60 * 1000, // Consider data fresh for 5 minutes
+    gcTime: 15 * 60 * 1000, // Keep in cache for 15 minutes
+    refetchOnWindowFocus: false,
+    refetchOnMount: false, // Don't refetch on every mount
     placeholderData: () => {
       // Use cached articles as placeholder for instant display
       if (!searchQuery) {

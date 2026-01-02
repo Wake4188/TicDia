@@ -88,9 +88,13 @@ const Profile = () => {
     }
 
     setResetEmail(user.email || "");
-    fetchSavedArticles();
-    checkAdminRole();
-    fetchCurrentWordOfTheDay();
+    
+    // Fetch all data in parallel for faster load
+    Promise.allSettled([
+      fetchSavedArticles(),
+      checkAdminRole(),
+      fetchCurrentWordOfTheDay()
+    ]);
   }, [user, navigate]);
 
   const checkAdminRole = async () => {
