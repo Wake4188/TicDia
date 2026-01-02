@@ -69,9 +69,48 @@ serve(async (req) => {
 
     const { text, voiceId } = await req.json()
 
-    if (!text) {
-      console.error(`[tts-stream:${requestId}] Missing text in request`)
-      throw new Error('Text is required')
+    // Input validation
+    if (!text || typeof text !== 'string') {
+      console.error(`[tts-stream:${requestId}] Invalid or missing text parameter`)
+      return new Response(
+        JSON.stringify({ error: 'Text is required and must be a string' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+
+    // Text length validation - prevent excessive API costs
+    const MAX_TEXT_LENGTH = 2500
+    const trimmedText = text.trim()
+    if (trimmedText.length === 0) {
+      console.error(`[tts-stream:${requestId}] Empty text after trimming`)
+      return new Response(
+        JSON.stringify({ error: 'Text cannot be empty' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+    if (trimmedText.length > MAX_TEXT_LENGTH) {
+      console.error(`[tts-stream:${requestId}] Text too long: ${trimmedText.length} chars`)
+      return new Response(
+        JSON.stringify({ error: `Text exceeds maximum length of ${MAX_TEXT_LENGTH} characters` }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+
+    // Voice ID validation - whitelist allowed voices
+    const ALLOWED_VOICES = [
+      '9BWtsMINqrJLrRacOk9x', // Aria (default)
+      '21m00Tcm4TlvDq8ikWAM', // Rachel
+      'EXAVITQu4vr4xnSDxMaL', // Bella
+      'MF3mGyEYCl7XYWbV9V6O', // Elli
+      'TxGEqnHWrfWFTfGW9XjX', // Josh
+      'VR6AewLTigWG4xSOukaG', // Arnold
+      'pNInz6obpgDQGcFmaJgB', // Adam
+      'yoZ06aMxZJJ28mfd3POQ'  // Sam
+    ]
+    
+    const voice = voiceId && ALLOWED_VOICES.includes(voiceId) ? voiceId : '9BWtsMINqrJLrRacOk9x'
+    if (voiceId && !ALLOWED_VOICES.includes(voiceId)) {
+      console.warn(`[tts-stream:${requestId}] Invalid voiceId "${voiceId}", using default`)
     }
 
     const ELEVENLABS_API_KEY = Deno.env.get('ELEVENLABS_API_KEY')
@@ -80,9 +119,7 @@ serve(async (req) => {
       throw new Error('ElevenLabs API key not configured')
     }
 
-    const voice = voiceId || '9BWtsMINqrJLrRacOk9x' // Default: Aria
-
-    console.log(`[tts-stream:${requestId}] Request received. textLen=${String(text).length}, voice=${voice}`)
+    console.log(`[tts-stream:${requestId}] Request received. textLen=${trimmedText.length}, voice=${voice}`)
 
     // Proxy ElevenLabs and stream the response
     const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voice}`,
@@ -94,7 +131,7 @@ serve(async (req) => {
           'xi-api-key': ELEVENLABS_API_KEY,
         },
         body: JSON.stringify({
-          text: String(text).slice(0, 2500),
+          text: trimmedText,
           model_id: 'eleven_turbo_v2_5',
           voice_settings: {
             stability: 0.5,
