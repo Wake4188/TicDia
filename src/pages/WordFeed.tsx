@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, RefreshCw, ChevronDown, Volume2, VolumeX } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { useUserPreferences } from "@/contexts/UserPreferencesContext";
 import { lookupWord, getDefinitions } from "@/services/wiktionaryService";
 import { getWordOfTheDay, generateWordOfTheDay } from "@/services/wordOfTheDayService";
@@ -290,41 +290,28 @@ const WordFeed = () => {
       ) : (
         <div
           ref={containerRef}
-          className="h-full w-full overflow-y-auto snap-y snap-mandatory word-feed-scroll"
+          className="h-full w-full overflow-y-scroll snap-y snap-mandatory"
           onScroll={handleScroll}
           style={{
             scrollbarWidth: 'none',
             msOverflowStyle: 'none',
-            scrollBehavior: 'smooth',
             WebkitOverflowScrolling: 'touch',
-            overscrollBehavior: 'contain',
-            touchAction: 'pan-y',
+            overscrollBehavior: 'none',
           }}
         >
-          <AnimatePresence>
+          <>
             {words.map((wordEntry, index) => (
-              <motion.div
+              <div
                 key={`${wordEntry.word}-${index}`}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className="h-screen h-[100dvh] w-screen snap-start snap-always relative flex items-center justify-center word-feed-item"
+                className="h-[100dvh] w-full snap-start snap-always relative flex items-center justify-center flex-shrink-0"
                 style={{
                   background: `linear-gradient(135deg, 
                     hsl(${(index * 37) % 360}, 70%, 15%), 
                     hsl(${(index * 37 + 60) % 360}, 60%, 10%))`,
-                  willChange: 'transform',
-                  transform: 'translateZ(0)',
-                  backfaceVisibility: 'hidden',
-                  WebkitBackfaceVisibility: 'hidden',
                 }}
               >
                 <div className="relative z-10 text-foreground p-8 max-w-2xl mx-auto text-center">
-                  <motion.div
-                    initial={{ y: 20, opacity: 0 }}
-                    animate={{ y: 0, opacity: 1 }}
-                    transition={{ delay: 0.1 }}
-                    className="space-y-6"
-                  >
+                  <div className="space-y-6">
                     {/* Word */}
                     <div className="flex flex-col items-center justify-center gap-4">
                       {index === 0 && (
@@ -376,22 +363,18 @@ const WordFeed = () => {
                         "{wordEntry.example}"
                       </p>
                     )}
-                  </motion.div>
+                  </div>
                 </div>
 
                 {/* Scroll hint */}
                 {index === currentIndex && index < words.length - 1 && (
-                  <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    className="absolute bottom-8 left-1/2 transform -translate-x-1/2 text-white/40"
-                  >
+                  <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 text-white/40">
                     <ChevronDown className="w-8 h-8 animate-bounce" />
-                  </motion.div>
+                  </div>
                 )}
-              </motion.div>
+              </div>
             ))}
-          </AnimatePresence>
+          </>
         </div>
       )}
     </div>
