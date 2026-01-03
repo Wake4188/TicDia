@@ -1,104 +1,9 @@
-import { useEffect, useRef, useState, Suspense, useMemo } from 'react';
-import { Canvas } from '@react-three/fiber';
-import { OrbitControls, Float } from '@react-three/drei';
-import { motion, useScroll, useTransform } from 'framer-motion';
+import { useEffect, useRef, useState } from 'react';
+import { motion } from 'framer-motion';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import * as THREE from 'three';
 
 gsap.registerPlugin(ScrollTrigger);
-
-// 3D Floating Sphere Component
-function FloatingSphere({ position, color, scale = 1 }: { position: [number, number, number]; color: string; scale?: number }) {
-  const meshRef = useRef<THREE.Mesh>(null);
-  
-  useEffect(() => {
-    if (meshRef.current) {
-      gsap.to(meshRef.current.rotation, {
-        y: Math.PI * 2,
-        duration: 20,
-        repeat: -1,
-        ease: 'none',
-      });
-    }
-  }, []);
-
-  return (
-    <Float speed={2} rotationIntensity={0.5} floatIntensity={1}>
-      <mesh ref={meshRef} position={position} scale={scale}>
-        <sphereGeometry args={[1, 64, 64]} />
-        <meshStandardMaterial 
-          color={color} 
-          metalness={0.8} 
-          roughness={0.2}
-          emissive={color}
-          emissiveIntensity={0.2}
-        />
-      </mesh>
-    </Float>
-  );
-}
-
-// Animated particles
-function Particles() {
-  const particlesRef = useRef<THREE.Points>(null);
-  const count = 500;
-  
-  const positions = useMemo(() => {
-    const pos = new Float32Array(count * 3);
-    for (let i = 0; i < count; i++) {
-      pos[i * 3] = (Math.random() - 0.5) * 30;
-      pos[i * 3 + 1] = (Math.random() - 0.5) * 30;
-      pos[i * 3 + 2] = (Math.random() - 0.5) * 30;
-    }
-    return pos;
-  }, []);
-  
-  useEffect(() => {
-    if (particlesRef.current) {
-      gsap.to(particlesRef.current.rotation, {
-        y: Math.PI * 2,
-        duration: 100,
-        repeat: -1,
-        ease: 'none',
-      });
-    }
-  }, []);
-
-  const geometry = useMemo(() => {
-    const geo = new THREE.BufferGeometry();
-    geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-    return geo;
-  }, [positions]);
-
-  return (
-    <points ref={particlesRef} geometry={geometry}>
-      <pointsMaterial size={0.05} color="#ff6b6b" sizeAttenuation transparent opacity={0.8} />
-    </points>
-  );
-}
-
-// Hero 3D Scene
-function HeroScene() {
-  return (
-    <>
-      <ambientLight intensity={0.3} />
-      <pointLight position={[10, 10, 10]} intensity={1} color="#ff6b6b" />
-      <pointLight position={[-10, -10, -10]} intensity={0.5} color="#4ecdc4" />
-      <spotLight position={[0, 20, 0]} angle={0.3} penumbra={1} intensity={2} color="#ffd93d" />
-      
-      <Particles />
-      
-      <FloatingSphere position={[-4, 2, -5]} color="#ff6b6b" scale={1.5} />
-      <FloatingSphere position={[5, -1, -3]} color="#4ecdc4" scale={1} />
-      <FloatingSphere position={[0, -3, -8]} color="#ffd93d" scale={2} />
-      <FloatingSphere position={[-6, -2, -6]} color="#a855f7" scale={0.8} />
-      <FloatingSphere position={[4, 3, -4]} color="#06b6d4" scale={0.6} />
-      
-      <OrbitControls enableZoom={false} enablePan={false} autoRotate autoRotateSpeed={0.5} />
-    </>
-  );
-}
 
 // Project Card
 interface Project {
@@ -169,16 +74,15 @@ function ProjectCard({ project, index }: { project: Project; index: number }) {
   return (
     <motion.div
       ref={cardRef}
-      className="relative group cursor-pointer perspective-1000"
+      className="relative group cursor-pointer"
+      style={{ perspective: 1000 }}
       whileHover={{ scale: 1.05, rotateY: 5 }}
       transition={{ type: 'spring', stiffness: 300, damping: 20 }}
     >
       <div className={`absolute inset-0 bg-gradient-to-br ${project.gradient} rounded-3xl blur-xl opacity-50 group-hover:opacity-75 transition-opacity duration-500`} />
       <div className="relative bg-black/80 backdrop-blur-xl border border-white/10 rounded-3xl p-8 h-full overflow-hidden">
-        {/* Animated border */}
         <div className={`absolute inset-0 bg-gradient-to-br ${project.gradient} opacity-0 group-hover:opacity-20 transition-opacity duration-500 rounded-3xl`} />
         
-        {/* Floating number */}
         <span className="absolute top-4 right-4 text-8xl font-bold text-white/5 group-hover:text-white/10 transition-colors duration-500">
           0{index + 1}
         </span>
@@ -256,15 +160,51 @@ function SkillBar({ skill, index }: { skill: { name: string; level: number }; in
   );
 }
 
+// Animated background particles (CSS-based, no Three.js)
+function ParticleBackground() {
+  const particles = Array.from({ length: 50 }, (_, i) => ({
+    id: i,
+    left: Math.random() * 100,
+    top: Math.random() * 100,
+    size: Math.random() * 4 + 2,
+    duration: Math.random() * 20 + 10,
+    delay: Math.random() * 5,
+  }));
+
+  return (
+    <div className="fixed inset-0 pointer-events-none overflow-hidden">
+      {particles.map((p) => (
+        <motion.div
+          key={p.id}
+          className="absolute rounded-full bg-gradient-to-r from-pink-500 to-purple-500 opacity-30"
+          style={{
+            left: `${p.left}%`,
+            top: `${p.top}%`,
+            width: p.size,
+            height: p.size,
+          }}
+          animate={{
+            y: [0, -30, 0],
+            x: [0, 15, 0],
+            opacity: [0.2, 0.5, 0.2],
+          }}
+          transition={{
+            duration: p.duration,
+            delay: p.delay,
+            repeat: Infinity,
+            ease: 'easeInOut',
+          }}
+        />
+      ))}
+    </div>
+  );
+}
+
 // Main Portfolio Component
 const Portfolio = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const heroRef = useRef<HTMLDivElement>(null);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
-  
-  const { scrollYProgress } = useScroll();
-  const heroOpacity = useTransform(scrollYProgress, [0, 0.2], [1, 0]);
-  const heroScale = useTransform(scrollYProgress, [0, 0.2], [1, 0.8]);
   
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
@@ -278,36 +218,20 @@ const Portfolio = () => {
   }, []);
   
   useEffect(() => {
-    // Cinematic page entrance
-    const tl = gsap.timeline();
-    tl.fromTo(
-      '.hero-title',
-      { opacity: 0, y: 100, skewY: 10 },
-      { opacity: 1, y: 0, skewY: 0, duration: 1.5, ease: 'power4.out' }
-    )
-    .fromTo(
-      '.hero-subtitle',
-      { opacity: 0, y: 50 },
-      { opacity: 1, y: 0, duration: 1, ease: 'power3.out' },
-      '-=0.8'
-    )
-    .fromTo(
-      '.hero-cta',
-      { opacity: 0, scale: 0.8 },
-      { opacity: 1, scale: 1, duration: 0.8, ease: 'back.out(1.7)' },
-      '-=0.5'
-    );
-    
+    // Kill any existing ScrollTrigger instances on unmount
     return () => {
       ScrollTrigger.getAll().forEach(trigger => trigger.kill());
     };
   }, []);
 
   return (
-    <div ref={containerRef} className="bg-black min-h-screen overflow-x-hidden">
+    <div ref={containerRef} className="bg-black min-h-screen overflow-x-hidden overflow-y-auto">
+      {/* CSS-based particle background */}
+      <ParticleBackground />
+      
       {/* Custom cursor follower */}
       <motion.div
-        className="fixed w-8 h-8 rounded-full border-2 border-pink-500 pointer-events-none z-50 mix-blend-difference"
+        className="fixed w-8 h-8 rounded-full border-2 border-pink-500 pointer-events-none z-50 mix-blend-difference hidden md:block"
         animate={{
           x: mousePosition.x * 20,
           y: mousePosition.y * 20,
@@ -321,50 +245,64 @@ const Portfolio = () => {
       />
       
       {/* Hero Section */}
-      <motion.section
+      <section
         ref={heroRef}
         className="h-screen relative flex items-center justify-center overflow-hidden"
-        style={{ opacity: heroOpacity, scale: heroScale }}
       >
-        {/* 3D Background */}
-        <div className="absolute inset-0">
-          <Canvas camera={{ position: [0, 0, 10], fov: 60 }}>
-            <Suspense fallback={null}>
-              <HeroScene />
-            </Suspense>
-          </Canvas>
+        {/* Gradient orbs background */}
+        <div className="absolute inset-0 overflow-hidden">
+          <motion.div 
+            className="absolute w-96 h-96 rounded-full bg-pink-500/30 blur-3xl"
+            animate={{ 
+              x: [0, 100, 0], 
+              y: [0, -50, 0],
+            }}
+            transition={{ duration: 10, repeat: Infinity, ease: 'easeInOut' }}
+            style={{ left: '20%', top: '30%' }}
+          />
+          <motion.div 
+            className="absolute w-80 h-80 rounded-full bg-cyan-500/30 blur-3xl"
+            animate={{ 
+              x: [0, -80, 0], 
+              y: [0, 80, 0],
+            }}
+            transition={{ duration: 12, repeat: Infinity, ease: 'easeInOut' }}
+            style={{ right: '20%', top: '40%' }}
+          />
+          <motion.div 
+            className="absolute w-64 h-64 rounded-full bg-purple-500/30 blur-3xl"
+            animate={{ 
+              x: [0, 50, 0], 
+              y: [0, 100, 0],
+            }}
+            transition={{ duration: 8, repeat: Infinity, ease: 'easeInOut' }}
+            style={{ left: '50%', bottom: '20%' }}
+          />
         </div>
         
         {/* Hero Content */}
         <div className="relative z-10 text-center px-8">
-          <motion.div
-            className="overflow-hidden mb-4"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-          >
-            <h1 className="hero-title text-7xl md:text-9xl font-black text-transparent bg-clip-text bg-gradient-to-r from-pink-500 via-purple-500 to-cyan-500 tracking-tighter">
+          <div className="overflow-hidden mb-4">
+            <h1 className="text-7xl md:text-9xl font-black text-transparent bg-clip-text bg-gradient-to-r from-pink-500 via-purple-500 to-cyan-500 tracking-tighter animate-fade-in">
               NOA WILHIDE
             </h1>
-          </motion.div>
+          </div>
           
-          <p className="hero-subtitle text-xl md:text-2xl text-gray-400 mb-12 max-w-2xl mx-auto">
+          <p className="text-xl md:text-2xl text-gray-400 mb-12 max-w-2xl mx-auto animate-fade-in" style={{ animationDelay: '0.2s' }}>
             Franco-American developer passionate about{' '}
             <span className="text-pink-500">AI</span>,{' '}
             <span className="text-purple-500">creative coding</span>, and{' '}
             <span className="text-cyan-500">interactive experiences</span>
           </p>
           
-          <motion.div 
-            className="hero-cta flex flex-wrap gap-4 justify-center"
-            whileHover={{ scale: 1.05 }}
-          >
+          <div className="flex flex-wrap gap-4 justify-center animate-fade-in" style={{ animationDelay: '0.4s' }}>
             <button className="px-8 py-4 bg-gradient-to-r from-pink-500 to-purple-500 rounded-full text-white font-bold text-lg hover:shadow-lg hover:shadow-pink-500/50 transition-all duration-300">
               View Projects
             </button>
             <button className="px-8 py-4 border-2 border-white/20 rounded-full text-white font-bold text-lg hover:bg-white/10 hover:border-white/40 transition-all duration-300">
               Contact Me
             </button>
-          </motion.div>
+          </div>
         </div>
         
         {/* Scroll indicator */}
@@ -377,7 +315,7 @@ const Portfolio = () => {
             <div className="w-2 h-2 bg-white rounded-full animate-bounce" />
           </div>
         </motion.div>
-      </motion.section>
+      </section>
       
       {/* About Section */}
       <section className="min-h-screen py-32 px-8 relative">
@@ -386,7 +324,7 @@ const Portfolio = () => {
             className="text-5xl md:text-7xl font-bold text-white mb-16"
             initial={{ opacity: 0, x: -100 }}
             whileInView={{ opacity: 1, x: 0 }}
-            transition={{ duration: 1, ease: 'power3.out' }}
+            transition={{ duration: 1, ease: 'easeOut' }}
             viewport={{ once: true }}
           >
             About <span className="text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-purple-500">Me</span>
@@ -435,7 +373,7 @@ const Portfolio = () => {
             className="text-5xl md:text-7xl font-bold text-white mb-16"
             initial={{ opacity: 0, x: 100 }}
             whileInView={{ opacity: 1, x: 0 }}
-            transition={{ duration: 1, ease: 'power3.out' }}
+            transition={{ duration: 1, ease: 'easeOut' }}
             viewport={{ once: true }}
           >
             Featured <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-500 to-purple-500">Projects</span>
@@ -489,13 +427,19 @@ const Portfolio = () => {
       </section>
       
       {/* Footer */}
-      <footer className="py-12 border-t border-white/10">
-        <div className="max-w-6xl mx-auto px-8 flex flex-col md:flex-row items-center justify-between gap-4">
+      <footer className="py-12 px-8 border-t border-white/10">
+        <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
           <p className="text-gray-500">© 2024 Noa Wilhide. All rights reserved.</p>
           <div className="flex gap-6">
-            <a href="#" className="text-gray-400 hover:text-white transition-colors">GitHub</a>
-            <a href="#" className="text-gray-400 hover:text-white transition-colors">LinkedIn</a>
-            <a href="#" className="text-gray-400 hover:text-white transition-colors">Twitter</a>
+            <a href="https://github.com" target="_blank" rel="noopener noreferrer" className="text-gray-500 hover:text-white transition-colors">
+              GitHub
+            </a>
+            <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" className="text-gray-500 hover:text-white transition-colors">
+              LinkedIn
+            </a>
+            <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" className="text-gray-500 hover:text-white transition-colors">
+              Twitter
+            </a>
           </div>
         </div>
       </footer>
