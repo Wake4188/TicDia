@@ -9,6 +9,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { CookieConsent } from "@/components/CookieConsent";
 import { GoogleAnalyticsTracker } from "./components/GoogleAnalyticsTracker";
 import { useReferralTracking } from "./hooks/useReferralTracking";
+import { AnnouncementDisplay } from "./components/AnnouncementDisplay";
 
 import { useUserPreferences, UserPreferencesProvider } from "./contexts/UserPreferencesContext";
 
@@ -21,6 +22,7 @@ const Today = lazy(() => import("./pages/Today"));
 const Recap = lazy(() => import("./pages/Recap"));
 const WordFeed = lazy(() => import("./pages/WordFeed"));
 const Portfolio = lazy(() => import("./pages/Portfolio"));
+const AdminPanel = lazy(() => import("./pages/AdminPanel"));
 
 // Lazy load heavy components that hurt performance
 const FluidSmokeEffect = lazy(() => import("./components/FluidSmokeEffect"));
@@ -68,6 +70,9 @@ function AppContent() {
       className={`min-h-screen bg-background ${userPreferences.liquidGlassMode ? 'liquid-glass' : ''}`}
       style={{ contain: 'layout style' }}
     >
+      {/* Announcements from admin panel */}
+      <AnnouncementDisplay />
+      
       {/* Defer heavy WebGL effect to after LCP */}
       {showSmoke && (
         <Suspense fallback={null}>
@@ -84,6 +89,7 @@ function AppContent() {
           <Route path="/recap" element={<Recap />} />
           <Route path="/word-feed" element={<WordFeed />} />
           <Route path="/portfolio" element={<Portfolio />} />
+          <Route path="/admin" element={<AdminPanel />} />
         </Routes>
       </Suspense>
       <Toaster />

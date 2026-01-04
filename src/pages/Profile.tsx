@@ -1025,12 +1025,37 @@ const Profile = () => {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -20 }}
                 transition={{ duration: 0.4 }}
+                className="space-y-4"
               >
+                {/* Full Admin Panel Link */}
+                <Card className="bg-destructive/10 backdrop-blur-xl border-destructive/30 shadow-lg overflow-hidden">
+                  <CardContent className="p-6">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <Shield className="w-8 h-8 text-destructive" />
+                        <div>
+                          <h3 className="font-bold text-lg text-foreground">Full Admin Panel</h3>
+                          <p className="text-sm text-muted-foreground">
+                            Access announcements, moderation, feature flags, metrics and more
+                          </p>
+                        </div>
+                      </div>
+                      <Button
+                        onClick={() => navigate("/admin")}
+                        className="bg-destructive hover:bg-destructive/90 text-destructive-foreground"
+                      >
+                        Open Admin Panel
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Quick Word of the Day */}
                 <Card className="bg-card/50 backdrop-blur-xl border-border shadow-lg overflow-hidden">
                   <CardHeader className="border-b border-border pb-6">
                     <CardTitle className="text-2xl font-bold text-foreground flex items-center gap-2">
-                      <Shield className="w-6 h-6" />
-                      Admin Panel
+                      <Globe className="w-6 h-6" />
+                      Quick Actions
                     </CardTitle>
                     <CardDescription className="text-muted-foreground mt-1">
                       Manage word of the day
