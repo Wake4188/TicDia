@@ -14,6 +14,114 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_activity_log: {
+        Row: {
+          action_description: string
+          action_type: string
+          admin_id: string
+          created_at: string
+          id: string
+          metadata: Json | null
+          target_id: string | null
+          target_type: string | null
+        }
+        Insert: {
+          action_description: string
+          action_type: string
+          admin_id: string
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          target_id?: string | null
+          target_type?: string | null
+        }
+        Update: {
+          action_description?: string
+          action_type?: string
+          admin_id?: string
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          target_id?: string | null
+          target_type?: string | null
+        }
+        Relationships: []
+      }
+      announcements: {
+        Row: {
+          announcement_type: string
+          content: string
+          created_at: string
+          created_by: string | null
+          ends_at: string | null
+          id: string
+          is_active: boolean
+          priority: number
+          starts_at: string | null
+          target_audience: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          announcement_type?: string
+          content: string
+          created_at?: string
+          created_by?: string | null
+          ends_at?: string | null
+          id?: string
+          is_active?: boolean
+          priority?: number
+          starts_at?: string | null
+          target_audience?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          announcement_type?: string
+          content?: string
+          created_at?: string
+          created_by?: string | null
+          ends_at?: string | null
+          id?: string
+          is_active?: boolean
+          priority?: number
+          starts_at?: string | null
+          target_audience?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      app_metrics: {
+        Row: {
+          created_at: string
+          id: string
+          metadata: Json | null
+          metric_date: string
+          metric_type: string
+          metric_value: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          metric_date?: string
+          metric_type: string
+          metric_value?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          metric_date?: string
+          metric_type?: string
+          metric_value?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       article_votes: {
         Row: {
           article_id: string
@@ -47,6 +155,81 @@ export type Database = {
         }
         Relationships: []
       }
+      content_moderation: {
+        Row: {
+          admin_notes: string | null
+          content_id: string
+          content_title: string | null
+          content_type: string
+          created_at: string
+          id: string
+          is_hidden: boolean
+          moderated_by: string | null
+          moderation_status: string
+          updated_at: string
+        }
+        Insert: {
+          admin_notes?: string | null
+          content_id: string
+          content_title?: string | null
+          content_type: string
+          created_at?: string
+          id?: string
+          is_hidden?: boolean
+          moderated_by?: string | null
+          moderation_status?: string
+          updated_at?: string
+        }
+        Update: {
+          admin_notes?: string | null
+          content_id?: string
+          content_title?: string | null
+          content_type?: string
+          created_at?: string
+          id?: string
+          is_hidden?: boolean
+          moderated_by?: string | null
+          moderation_status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      content_rules: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          is_active: boolean
+          reason: string | null
+          rule_type: string
+          target_type: string
+          target_value: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_active?: boolean
+          reason?: string | null
+          rule_type: string
+          target_type: string
+          target_value: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_active?: boolean
+          reason?: string | null
+          rule_type?: string
+          target_type?: string
+          target_value?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       daily_challenges: {
         Row: {
           category: string | null
@@ -74,6 +257,84 @@ export type Database = {
           challenge_type?: string
           created_at?: string
           id?: string
+        }
+        Relationships: []
+      }
+      feature_flags: {
+        Row: {
+          created_at: string
+          description: string | null
+          flag_key: string
+          flag_name: string
+          id: string
+          is_enabled: boolean
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          flag_key: string
+          flag_name: string
+          id?: string
+          is_enabled?: boolean
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          flag_key?: string
+          flag_name?: string
+          id?: string
+          is_enabled?: boolean
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
+      feed_curation: {
+        Row: {
+          article_id: string
+          article_title: string
+          article_url: string | null
+          created_at: string
+          curated_by: string | null
+          curation_type: string
+          ends_at: string | null
+          id: string
+          is_active: boolean
+          priority: number
+          starts_at: string | null
+          updated_at: string
+        }
+        Insert: {
+          article_id: string
+          article_title: string
+          article_url?: string | null
+          created_at?: string
+          curated_by?: string | null
+          curation_type?: string
+          ends_at?: string | null
+          id?: string
+          is_active?: boolean
+          priority?: number
+          starts_at?: string | null
+          updated_at?: string
+        }
+        Update: {
+          article_id?: string
+          article_title?: string
+          article_url?: string | null
+          created_at?: string
+          curated_by?: string | null
+          curation_type?: string
+          ends_at?: string | null
+          id?: string
+          is_active?: boolean
+          priority?: number
+          starts_at?: string | null
+          updated_at?: string
         }
         Relationships: []
       }
