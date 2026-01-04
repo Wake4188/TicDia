@@ -8,6 +8,7 @@ import { ThemeProvider } from "./contexts/ThemeContext";
 import { Toaster } from "@/components/ui/toaster";
 import { CookieConsent } from "@/components/CookieConsent";
 import { GoogleAnalyticsTracker } from "./components/GoogleAnalyticsTracker";
+import { useReferralTracking } from "./hooks/useReferralTracking";
 
 import { useUserPreferences, UserPreferencesProvider } from "./contexts/UserPreferencesContext";
 
@@ -38,6 +39,12 @@ const queryClient = new QueryClient({
 });
 
 import LoadingScreen from "./components/LoadingScreen";
+
+// Component to track referrals
+function ReferralTrackerComponent() {
+  useReferralTracking();
+  return null;
+}
 
 function AppContent() {
   const { userPreferences } = useUserPreferences();
@@ -95,6 +102,7 @@ function App() {
               <AuthProvider>
                 <Router>
                   <GoogleAnalyticsTracker />
+                  <ReferralTrackerComponent />
                   <AppContent />
                 </Router>
               </AuthProvider>
