@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
@@ -14,15 +13,16 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import SmallTic from "../components/SmallTic";
-import { loadUserPreferences, saveUserPreferences, UserPreferences } from "@/services/userPreferencesService";
 import { useLanguage } from "../contexts/LanguageContext";
 import { useTheme } from "../contexts/ThemeContext";
 import { SUPPORTED_LANGUAGES } from "../services/languageConfig";
 import { useUserPreferences } from "@/contexts/UserPreferencesContext";
 import { AnalyticsStats } from "@/components/AnalyticsStats";
 import { Footer } from "@/components/Footer";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { setWordOfTheDay, getWordOfTheDayRecord } from "@/services/wordOfTheDayService";
+import { useMobileDetection } from "@/hooks/useMobileDetection";
+import { ProfileDesktop } from "@/components/profile/ProfileDesktop";
 
 interface SavedArticle {
   id: string;
@@ -419,6 +419,14 @@ const Profile = () => {
 
   if (!user) return null;
 
+  const isMobile = window.innerWidth < 1024;
+  
+  // Desktop: Use new modern ProfileDesktop component
+  if (!isMobile) {
+    return <ProfileDesktop fontOptions={fontOptions} colorOptions={colorOptions} />;
+  }
+
+  // Mobile: Keep existing UI
   return (
     <div className="min-h-screen bg-background text-foreground transition-colors duration-300">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-8 max-w-7xl">

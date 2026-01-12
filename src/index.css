@@ -15,25 +15,27 @@
 
   /* Light Theme Variables */
   body.light {
-    --background: 0 0% 100%;
+    --background: 0 0% 98%;
     --foreground: 222.2 84% 4.9%;
     --card: 0 0% 100%;
     --card-foreground: 222.2 84% 4.9%;
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
-    --secondary: 210 40% 96.1%;
+    --primary: 346 77% 50%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 220 14% 96%;
     --secondary-foreground: 222.2 47.4% 11.2%;
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 210 40% 96.1%;
+    --muted: 220 14% 96%;
+    --muted-foreground: 220 9% 46%;
+    --accent: 220 14% 96%;
     --accent-foreground: 222.2 47.4% 11.2%;
     --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 220 13% 91%;
+    --input: 220 13% 91%;
+    --ring: 346 77% 50%;
+    --progress-bar-color: #FE2C55;
+    --highlight-color: var(--progress-bar-color);
   }
 
   body {
@@ -42,7 +44,100 @@
 
   /* Light theme body styling */
   body.light {
-    @apply bg-white text-gray-900;
+    @apply text-gray-900;
+    background-color: hsl(0 0% 98%);
+  }
+  
+  /* Light mode specific fixes for readability */
+  body.light .text-white {
+    color: hsl(222.2 84% 4.9%) !important;
+  }
+  
+  body.light .text-gray-400,
+  body.light .text-gray-500 {
+    color: hsl(220 9% 46%) !important;
+  }
+  
+  body.light .text-gray-300 {
+    color: hsl(220 9% 56%) !important;
+  }
+  
+  body.light .bg-black,
+  body.light .bg-tictok-dark {
+    background-color: hsl(0 0% 100%) !important;
+  }
+  
+  body.light .bg-gray-900 {
+    background-color: hsl(220 14% 96%) !important;
+  }
+  
+  body.light .bg-gray-800 {
+    background-color: hsl(220 13% 93%) !important;
+  }
+  
+  body.light .border-gray-800,
+  body.light .border-white\/10,
+  body.light .border-white\/5 {
+    border-color: hsl(220 13% 91%) !important;
+  }
+  
+  /* Fix image brightness in light mode */
+  body.light img {
+    filter: brightness(0.97) contrast(1.02);
+  }
+  
+  body.light .bg-black\/40,
+  body.light .bg-black\/50,
+  body.light .bg-black\/60 {
+    background-color: hsla(220, 14%, 20%, 0.7) !important;
+  }
+  
+  /* Cards and panels in light mode */
+  body.light .bg-card\/50,
+  body.light .bg-card {
+    background-color: hsl(0 0% 100%) !important;
+    border-color: hsl(220 13% 91%) !important;
+  }
+  
+  body.light .bg-muted\/50,
+  body.light .bg-muted\/30 {
+    background-color: hsl(220 14% 97%) !important;
+  }
+  
+  /* Shadow adjustments for light mode */
+  body.light .shadow-lg {
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.04) !important;
+  }
+  
+  /* Ensure inputs are readable */
+  body.light input,
+  body.light textarea,
+  body.light select {
+    background-color: hsl(0 0% 100%) !important;
+    border-color: hsl(220 13% 85%) !important;
+    color: hsl(222.2 84% 4.9%) !important;
+  }
+  
+  body.light input::placeholder,
+  body.light textarea::placeholder {
+    color: hsl(220 9% 60%) !important;
+  }
+  
+  /* Buttons in light mode */
+  body.light .bg-wikitok-red {
+    background-color: #FE2C55 !important;
+    color: white !important;
+  }
+  
+  body.light button[variant="outline"],
+  body.light .border-white\/10 {
+    border-color: hsl(220 13% 85%) !important;
+  }
+  
+  /* Light mode header/nav */
+  body.light .backdrop-blur-xl {
+    backdrop-filter: blur(20px) saturate(180%);
+    background-color: hsla(0, 0%, 100%, 0.85) !important;
   }
 
   /* Font loading is handled via Google Fonts in index.html */
