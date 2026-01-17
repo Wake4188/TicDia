@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { 
   BookMarked, Eye, Trash2, Search, Mail, Lock, Key, 
   BarChart3, Globe, Moon, Sun, Shield, LogOut, Settings,
-  Sparkles, Palette, Type, Volume2, ChevronRight, User
+  Sparkles, Palette, Type, Volume2, ChevronRight, User, Users, Share2, Heart, MessageCircle
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -187,11 +187,17 @@ export const ProfileDesktop = ({ fontOptions, colorOptions }: ProfileDesktopProp
     { id: "overview", label: "Overview", icon: User },
     { id: "saved", label: "Saved Articles", icon: BookMarked },
     { id: "analytics", label: "Analytics", icon: BarChart3 },
+    { id: "social", label: "Social", icon: Users },
     { id: "appearance", label: "Appearance", icon: Palette },
     { id: "preferences", label: "Preferences", icon: Settings },
     { id: "security", label: "Security", icon: Lock },
     ...(isAdmin ? [{ id: "admin", label: "Admin", icon: Shield }] : [])
   ];
+
+  // Check if user is 16 or older (can use social features)
+  const currentYear = new Date().getFullYear();
+  const userAge = userPreferences.birthYear ? currentYear - userPreferences.birthYear : null;
+  const canUseSocialFeatures = userAge !== null && userAge >= 16;
 
   if (!user) return null;
 
@@ -327,12 +333,12 @@ export const ProfileDesktop = ({ fontOptions, colorOptions }: ProfileDesktopProp
                     <Card className="bg-card/50 backdrop-blur-sm border-border/50 hover:border-primary/30 transition-all duration-300 hover:shadow-lg hover:shadow-primary/5">
                       <CardContent className="p-6">
                         <div className="flex items-center gap-4">
-                          <div className="p-3 rounded-xl bg-green-500/10">
-                            <Sparkles className="w-6 h-6 text-green-500" />
+                          <div className="p-3 rounded-xl bg-purple-500/10">
+                            <Eye className="w-6 h-6 text-purple-500" />
                           </div>
                           <div>
-                            <p className="text-3xl font-bold text-foreground">Pro</p>
-                            <p className="text-sm text-muted-foreground">Member Status</p>
+                            <p className="text-3xl font-bold text-foreground">142</p>
+                            <p className="text-sm text-muted-foreground">Articles Read</p>
                           </div>
                         </div>
                       </CardContent>
@@ -521,6 +527,118 @@ export const ProfileDesktop = ({ fontOptions, colorOptions }: ProfileDesktopProp
                   exit={{ opacity: 0, y: -20 }}
                 >
                   <AnalyticsStats />
+                </motion.div>
+              )}
+
+              {/* Social Section */}
+              {activeSection === "social" && (
+                <motion.div
+                  key="social"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  className="space-y-6"
+                >
+                  {!canUseSocialFeatures ? (
+                    <Card className="bg-card/50 backdrop-blur-sm border-border/50">
+                      <CardContent className="py-16 text-center">
+                        <div className="w-20 h-20 rounded-full bg-muted/50 flex items-center justify-center mx-auto mb-4">
+                          <Shield className="w-10 h-10 text-muted-foreground" />
+                        </div>
+                        <h3 className="text-xl font-bold text-foreground mb-2">Age Verification Required</h3>
+                        <p className="text-muted-foreground mb-4 max-w-md mx-auto">
+                          Social features are available for users 16 and older. Please set your birth year in Preferences to unlock this feature.
+                        </p>
+                        <Button onClick={() => setActiveSection("preferences")}>
+                          Go to Preferences
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  ) : (
+                    <>
+                      {/* Profile Sharing */}
+                      <Card className="bg-card/50 backdrop-blur-sm border-border/50">
+                        <CardHeader>
+                          <CardTitle className="text-2xl flex items-center gap-2">
+                            <Share2 className="w-6 h-6" />
+                            Share Your Profile
+                          </CardTitle>
+                          <CardDescription>Let others see what you're reading</CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                          <div className="flex items-center justify-between p-4 rounded-xl bg-muted/30">
+                            <div className="flex items-center gap-3">
+                              <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center">
+                                <span className="text-lg font-bold text-primary-foreground">
+                                  {user.email?.charAt(0).toUpperCase()}
+                                </span>
+                              </div>
+                              <div>
+                                <p className="font-medium text-foreground">{user.email?.split('@')[0]}</p>
+                                <p className="text-sm text-muted-foreground">Your public profile name</p>
+                              </div>
+                            </div>
+                            <Button variant="outline" size="sm" onClick={() => {
+                              navigator.clipboard.writeText(`${window.location.origin}/profile/${user.id}`);
+                              toast({ title: "Copied!", description: "Profile link copied to clipboard" });
+                            }}>
+                              <Share2 className="w-4 h-4 mr-2" />
+                              Copy Link
+                            </Button>
+                          </div>
+                          
+                          <div className="grid grid-cols-2 gap-4">
+                            <div className="p-4 rounded-xl bg-muted/30 text-center">
+                              <p className="text-2xl font-bold text-foreground">{savedArticles.length}</p>
+                              <p className="text-sm text-muted-foreground">Public Saves</p>
+                            </div>
+                            <div className="p-4 rounded-xl bg-muted/30 text-center">
+                              <p className="text-2xl font-bold text-foreground">0</p>
+                              <p className="text-sm text-muted-foreground">Followers</p>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+
+                      {/* Discover Profiles */}
+                      <Card className="bg-card/50 backdrop-blur-sm border-border/50">
+                        <CardHeader>
+                          <CardTitle className="text-xl flex items-center gap-2">
+                            <Users className="w-5 h-5" />
+                            Discover Readers
+                          </CardTitle>
+                          <CardDescription>Find people with similar interests</CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="space-y-3">
+                            {[
+                              { name: "BookWorm42", interests: ["History", "Science"], articles: 234 },
+                              { name: "CuriousMind", interests: ["Philosophy", "Art"], articles: 189 },
+                              { name: "TechExplorer", interests: ["Technology", "Space"], articles: 312 },
+                            ].map((profile, i) => (
+                              <div key={i} className="flex items-center justify-between p-3 rounded-xl bg-muted/30 hover:bg-muted/50 transition-colors">
+                                <div className="flex items-center gap-3">
+                                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center">
+                                    <span className="text-sm font-bold text-white">{profile.name.charAt(0)}</span>
+                                  </div>
+                                  <div>
+                                    <p className="font-medium text-foreground">{profile.name}</p>
+                                    <p className="text-xs text-muted-foreground">{profile.interests.join(" • ")} • {profile.articles} articles</p>
+                                  </div>
+                                </div>
+                                <Button variant="ghost" size="sm">
+                                  <Heart className="w-4 h-4" />
+                                </Button>
+                              </div>
+                            ))}
+                          </div>
+                          <Button variant="outline" className="w-full mt-4">
+                            Discover More Readers
+                          </Button>
+                        </CardContent>
+                      </Card>
+                    </>
+                  )}
                 </motion.div>
               )}
 

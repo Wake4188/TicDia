@@ -186,6 +186,59 @@
   .focus\:ring-tictok-red:focus {
     --tw-ring-color: var(--highlight-color);
   }
+
+  /* Apply highlight color to primary UI elements */
+  .bg-primary {
+    background-color: var(--highlight-color) !important;
+  }
+  
+  .text-primary {
+    color: var(--highlight-color) !important;
+  }
+  
+  .border-primary {
+    border-color: var(--highlight-color) !important;
+  }
+  
+  /* Tabs and badges with highlight */
+  [data-state="active"].bg-wikitok-red,
+  .bg-wikitok-red {
+    background-color: var(--highlight-color) !important;
+  }
+  
+  /* Progress bars */
+  .bg-wikitok-red,
+  [role="progressbar"] > div {
+    background-color: var(--highlight-color) !important;
+  }
+  
+  /* Switches when checked */
+  [data-state="checked"][role="switch"] {
+    background-color: var(--highlight-color) !important;
+  }
+  
+  /* Active tab indicators */
+  [data-state="active"] .bg-primary,
+  [data-state="active"].data-\\[state\\=active\\]\\:bg-primary {
+    background-color: var(--highlight-color) !important;
+  }
+  
+  /* Slider thumb */
+  [role="slider"] {
+    background-color: var(--highlight-color) !important;
+    border-color: var(--highlight-color) !important;
+  }
+  
+  /* Links with highlight on hover */
+  .story-link:hover {
+    color: var(--highlight-color) !important;
+  }
+  
+  /* Badge variants using highlight */
+  .badge-highlight {
+    background-color: color-mix(in srgb, var(--highlight-color) 20%, transparent);
+    color: var(--highlight-color);
+  }
 }
 
 @layer components {

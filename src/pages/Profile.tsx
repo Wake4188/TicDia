@@ -23,6 +23,7 @@ import { motion } from "framer-motion";
 import { setWordOfTheDay, getWordOfTheDayRecord } from "@/services/wordOfTheDayService";
 import { useMobileDetection } from "@/hooks/useMobileDetection";
 import { ProfileDesktop } from "@/components/profile/ProfileDesktop";
+import { ProfileMobile } from "@/components/profile/ProfileMobile";
 
 interface SavedArticle {
   id: string;
@@ -421,13 +422,13 @@ const Profile = () => {
 
   const isMobile = window.innerWidth < 1024;
   
-  // Desktop: Use new modern ProfileDesktop component
+  // Desktop: Use modern ProfileDesktop component
   if (!isMobile) {
     return <ProfileDesktop fontOptions={fontOptions} colorOptions={colorOptions} />;
   }
 
-  // Mobile: Keep existing UI
-  return (
+  // Mobile: Use Apple Settings-style ProfileMobile component
+  return <ProfileMobile fontOptions={fontOptions} colorOptions={colorOptions} />;
     <div className="min-h-screen bg-background text-foreground transition-colors duration-300">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-8 max-w-7xl">
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 mb-6 sm:mb-8">

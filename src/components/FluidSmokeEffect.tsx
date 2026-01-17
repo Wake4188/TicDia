@@ -7,6 +7,9 @@ const FluidSmokeEffect = () => {
         const canvas = canvasRef.current;
         if (!canvas) return;
 
+        // Check if we're in light mode
+        const isLightMode = () => document.body.classList.contains('light');
+
         let config = {
             SIM_RESOLUTION: 64,  // Reduced from 128 (50% less computation)
             DYE_RESOLUTION: 720, // Reduced from 1440 (50% less computation)
@@ -890,8 +893,12 @@ const FluidSmokeEffect = () => {
         }
 
         function generateColor() {
-            // Grayscale / White smoke
-            // High RGB values for white/bright gray
+            // In light mode, use subtle gray smoke
+            if (isLightMode()) {
+                const brightness = Math.random() * 0.15 + 0.25; // 0.25 to 0.4 (subtle gray)
+                return { r: brightness, g: brightness, b: brightness };
+            }
+            // In dark mode, use white/bright gray smoke
             const brightness = Math.random() * 0.5 + 0.5; // 0.5 to 1.0
             return { r: brightness, g: brightness, b: brightness };
         }

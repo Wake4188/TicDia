@@ -94,7 +94,7 @@ export const getDefaultPreferences = (): UserPreferences => ({
   backgroundOpacity: 70,
   highlightColor: '#FE2C55',
   fontSize: 16,
-  feedType: 'mixed',
+  feedType: 'random', // Default to 'Recent' instead of 'AI Curated'
   liquidGlassMode: false,
   ttsSpeed: 1.0,
   smokeEffect: true,

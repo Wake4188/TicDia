@@ -23,7 +23,7 @@ export const UserPreferencesProvider = ({ children }: { children: ReactNode }) =
                     backgroundOpacity: prefs.backgroundOpacity || 70,
                     highlightColor: prefs.highlightColor || prefs.progressBarColor || '#FE2C55',
                     fontSize: prefs.fontSize || 16,
-                    feedType: prefs.feedType || 'mixed',
+                    feedType: prefs.feedType || 'random', // Default to 'Recent'
                     liquidGlassMode: Boolean(prefs.liquidGlassMode) || false,
                     ttsSpeed: prefs.ttsSpeed || 1.0,
                     smokeEffect: prefs.smokeEffect !== false,
@@ -90,7 +90,7 @@ export const UserPreferencesProvider = ({ children }: { children: ReactNode }) =
                     backgroundOpacity: prefs.backgroundOpacity || 70,
                     highlightColor: prefs.highlightColor || '#FE2C55',
                     fontSize: prefs.fontSize || 16,
-                    feedType: prefs.feedType || 'mixed',
+                    feedType: prefs.feedType || 'random', // Default to 'Recent'
                     liquidGlassMode: Boolean(prefs.liquidGlassMode) || false,
                     ttsSpeed: prefs.ttsSpeed || 1.0,
                     smokeEffect: prefs.smokeEffect !== false,
