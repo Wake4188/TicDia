@@ -160,12 +160,13 @@
     }
   </style>
 
-  <!-- Google Fonts - Load async to prevent render blocking -->
+  <!-- Google Fonts - Load async to prevent render blocking using media swap pattern -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="preload" as="style"
+  <!-- Use media="print" and swap to "all" on load - most reliable non-render-blocking pattern -->
+  <link rel="stylesheet"
     href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Roboto:wght@400;700&family=Merriweather:wght@400;700&display=swap"
-    onload="this.onload=null;this.rel='stylesheet'">
+    media="print" onload="this.media='all'">
   <noscript>
     <link
       href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Roboto:wght@400;700&family=Merriweather:wght@400;700&display=swap"
