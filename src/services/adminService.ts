@@ -336,22 +336,17 @@ export const getAdminActivityLog = async (limit = 50): Promise<AdminActivity[]> 
 // =============================================
 // ACTIVE ANNOUNCEMENTS FOR USERS
 // =============================================
-export const getActiveAnnouncements = async (isAuthenticated: boolean): Promise<Announcement[]> => {
-  const now = new Date().toISOString();
-  
-  let query = supabase
-    .from('announcements')
-    .select('*')
-    .eq('is_active', true)
-    .or(`starts_at.is.null,starts_at.lte.${now}`)
-    .or(`ends_at.is.null,ends_at.gt.${now}`)
+export const getActiveAnnouncements = async (isAuthenticated: boolean): Promise<Omit<Announcement, 'created_by'>[]> => {
+  // Use the secure public_announcements view which excludes admin user IDs
+  const { data, error } = await supabase
+    .from('public_announcements')
+    .select('id, title, content, announcement_type, target_audience, is_active, priority, starts_at, ends_at, created_at, updated_at')
     .order('priority', { ascending: false });
   
-  const { data, error } = await query;
   if (error) throw error;
   
   // Filter by audience
-  return ((data || []) as Announcement[]).filter(a => {
+  return ((data || []) as Omit<Announcement, 'created_by'>[]).filter(a => {
     if (a.target_audience === 'all') return true;
     if (a.target_audience === 'authenticated' && isAuthenticated) return true;
     if (a.target_audience === 'anonymous' && !isAuthenticated) return true;

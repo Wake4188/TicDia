@@ -2,9 +2,12 @@ import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { getActiveAnnouncements, Announcement } from '@/services/adminService';
 
+// Public announcements don't include created_by for security
+type PublicAnnouncement = Omit<Announcement, 'created_by'>;
+
 export const useAnnouncements = () => {
   const { user } = useAuth();
-  const [announcements, setAnnouncements] = useState<Announcement[]>([]);
+  const [announcements, setAnnouncements] = useState<PublicAnnouncement[]>([]);
   const [dismissedIds, setDismissedIds] = useState<Set<string>>(() => {
     try {
       const stored = localStorage.getItem('dismissed_announcements');

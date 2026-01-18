@@ -615,7 +615,48 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      public_announcements: {
+        Row: {
+          announcement_type: string | null
+          content: string | null
+          created_at: string | null
+          ends_at: string | null
+          id: string | null
+          is_active: boolean | null
+          priority: number | null
+          starts_at: string | null
+          target_audience: string | null
+          title: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          announcement_type?: string | null
+          content?: string | null
+          created_at?: string | null
+          ends_at?: string | null
+          id?: string | null
+          is_active?: boolean | null
+          priority?: number | null
+          starts_at?: string | null
+          target_audience?: string | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          announcement_type?: string | null
+          content?: string | null
+          created_at?: string | null
+          ends_at?: string | null
+          id?: string | null
+          is_active?: boolean | null
+          priority?: number | null
+          starts_at?: string | null
+          target_audience?: string | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       cleanup_old_data: { Args: never; Returns: undefined }
