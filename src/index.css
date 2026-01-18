@@ -282,7 +282,58 @@
 
 @layer utilities {
   .glass-panel {
-    @apply bg-black/40 backdrop-blur-xl border border-white/10 shadow-xl;
+    @apply bg-black/40 backdrop-blur-xl border border-white/10 shadow-xl rounded-xl;
+  }
+
+  /* Global rounded corners for all interactive elements */
+  button,
+  [role="button"],
+  input,
+  textarea,
+  select,
+  [role="dialog"],
+  [role="alertdialog"],
+  [role="menu"],
+  [role="listbox"],
+  [role="tablist"],
+  [role="tab"],
+  [role="switch"],
+  [role="slider"],
+  [role="progressbar"],
+  [data-radix-popper-content-wrapper] > div,
+  [data-sonner-toast],
+  .card,
+  .bg-card,
+  .bg-popover,
+  img,
+  video,
+  iframe {
+    border-radius: 0.75rem; /* rounded-xl */
+  }
+
+  /* Larger rounded corners for cards and modals */
+  [role="dialog"] > div,
+  [data-radix-dialog-content],
+  .rounded-2xl,
+  .modal,
+  .card-lg {
+    border-radius: 1rem; /* rounded-2xl */
+  }
+
+  /* Smaller rounded corners for small elements */
+  [role="menuitem"],
+  [role="option"],
+  .badge,
+  .chip,
+  .tag {
+    border-radius: 0.5rem; /* rounded-lg */
+  }
+
+  /* Full rounded for avatars and circular elements */
+  .avatar,
+  [class*="avatar"],
+  .rounded-full {
+    border-radius: 9999px;
   }
 
   /* Apple Liquid Glass - Comprehensive Styling */
