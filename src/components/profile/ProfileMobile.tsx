@@ -128,28 +128,33 @@ export const ProfileMobile = ({ fontOptions, colorOptions }: ProfileMobileProps)
   }: { 
     icon: any; label: string; value?: string; onClick?: () => void; 
     toggle?: boolean; onToggle?: (v: boolean) => void; color?: string; bgColor?: string;
-  }) => (
-    <button 
-      className="w-full flex items-center justify-between px-4 py-3.5 active:bg-muted/50 transition-colors"
-      onClick={onClick}
-      type="button"
-    >
-      <div className="flex items-center gap-3">
-        <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${bgColor}`}>
-          <Icon className={`w-4 h-4 ${color}`} />
+  }) => {
+    // Use div for toggle items to avoid nested button issue (Switch renders a button)
+    const Wrapper = toggle !== undefined ? 'div' : 'button';
+    
+    return (
+      <Wrapper 
+        className="w-full flex items-center justify-between px-4 py-3.5 active:bg-muted/50 transition-colors cursor-pointer"
+        onClick={toggle !== undefined ? undefined : onClick}
+        {...(toggle === undefined ? { type: 'button' as const } : {})}
+      >
+        <div className="flex items-center gap-3">
+          <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${bgColor}`}>
+            <Icon className={`w-4 h-4 ${color}`} />
+          </div>
+          <span className="font-medium text-foreground">{label}</span>
         </div>
-        <span className="font-medium text-foreground">{label}</span>
-      </div>
-      {toggle !== undefined ? (
-        <Switch checked={toggle} onCheckedChange={onToggle} onClick={(e) => e.stopPropagation()} />
-      ) : (
-        <div className="flex items-center gap-2">
-          {value && <span className="text-sm text-muted-foreground">{value}</span>}
-          {onClick && <ChevronRight className="w-4 h-4 text-muted-foreground" />}
-        </div>
-      )}
-    </button>
-  );
+        {toggle !== undefined ? (
+          <Switch checked={toggle} onCheckedChange={onToggle} />
+        ) : (
+          <div className="flex items-center gap-2">
+            {value && <span className="text-sm text-muted-foreground">{value}</span>}
+            {onClick && <ChevronRight className="w-4 h-4 text-muted-foreground" />}
+          </div>
+        )}
+      </Wrapper>
+    );
+  };
 
   const SubPageHeader = ({ title, onBack }: { title: string; onBack: () => void }) => (
     <div className="sticky top-0 z-50 bg-background/80 backdrop-blur-xl border-b border-border">
