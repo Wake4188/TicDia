@@ -807,6 +807,7 @@ export const ProfileDesktop = ({ fontOptions, colorOptions }: ProfileDesktopProp
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -20 }}
+                  className="space-y-6"
                 >
                   <Card className="bg-card/50 backdrop-blur-sm border-border/50">
                     <CardHeader>
@@ -884,6 +885,51 @@ export const ProfileDesktop = ({ fontOptions, colorOptions }: ProfileDesktopProp
                           </SelectContent>
                         </Select>
                       </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* Birth Year for Social Features */}
+                  <Card className="bg-card/50 backdrop-blur-sm border-border/50">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <User className="w-5 h-5" />
+                        Age Verification
+                      </CardTitle>
+                      <CardDescription>Required for social features (must be 16+)</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="flex items-center justify-between p-4 rounded-xl bg-muted/30">
+                        <div>
+                          <p className="font-medium text-foreground">Birth Year</p>
+                          <p className="text-sm text-muted-foreground">
+                            {userPreferences.birthYear 
+                              ? `Age: ${currentYear - userPreferences.birthYear} years old`
+                              : "Not set - social features locked"}
+                          </p>
+                        </div>
+                        <Select
+                          value={userPreferences.birthYear?.toString() || ""}
+                          onValueChange={(value) => updateUserPrefs({ birthYear: parseInt(value) })}
+                        >
+                          <SelectTrigger className="w-[120px]">
+                            <SelectValue placeholder="Select" />
+                          </SelectTrigger>
+                          <SelectContent className="max-h-[200px]">
+                            {Array.from({ length: 100 }, (_, i) => currentYear - i - 5).map((year) => (
+                              <SelectItem key={year} value={year.toString()}>
+                                {year}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      {canUseSocialFeatures && (
+                        <div className="p-3 rounded-lg bg-green-500/10 border border-green-500/20">
+                          <p className="text-sm text-green-600 dark:text-green-400 font-medium">
+                            ✓ Social features unlocked
+                          </p>
+                        </div>
+                      )}
                     </CardContent>
                   </Card>
                 </motion.div>

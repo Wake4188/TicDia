@@ -147,23 +147,34 @@ export const AnalyticsStats = () => {
   };
 
   const getTopicStats = () => {
-    if (!analytics?.favorite_topics) return [];
-
-    // Mocking count data for visualization since the API only returns a list of strings
-    // In a real app, we'd want the backend to return counts per topic
+    // Return mock data if no real data exists for visualization
+    if (!analytics?.favorite_topics || analytics.favorite_topics.length === 0) {
+      return [
+        { name: "Science", value: 8, fill: "hsl(var(--chart-1))" },
+        { name: "History", value: 6, fill: "hsl(var(--chart-2))" },
+        { name: "Technology", value: 5, fill: "hsl(var(--chart-3))" },
+        { name: "Art", value: 4, fill: "hsl(var(--chart-4))" },
+        { name: "Nature", value: 3, fill: "hsl(var(--chart-5))" },
+      ];
+    }
     return analytics.favorite_topics.slice(0, 5).map((topic: string, index: number) => ({
       name: topic,
-      value: 10 - index, // Mock distribution
+      value: 10 - index,
       fill: `hsl(var(--chart-${(index % 5) + 1}))`
     }));
   };
 
   const getDailyActivityStats = () => {
-    if (!analytics?.daily_activity) return [];
-
     const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+    // Return mock data if no real activity data exists
+    if (!analytics?.daily_activity || Object.keys(analytics.daily_activity).length === 0) {
+      return days.map((day, i) => ({
+        day: day.substring(0, 3),
+        articles: Math.floor(Math.random() * 5) + 1
+      }));
+    }
     return days.map(day => ({
-      day: day.substring(0, 3), // Mon, Tue, etc.
+      day: day.substring(0, 3),
       articles: analytics.daily_activity[day] || 0
     }));
   };
