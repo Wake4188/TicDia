@@ -14,8 +14,9 @@ export async function getWordOfTheDay(date: Date = new Date()): Promise<string |
   try {
     const dateString = date.toISOString().split('T')[0]; // YYYY-MM-DD format
     
+    // Use public view to avoid exposing admin UUIDs
     const { data, error } = await supabase
-      .from('word_of_the_day' as any)
+      .from('public_word_of_the_day' as any)
       .select('word')
       .eq('word_date', dateString)
       .single();
@@ -52,8 +53,9 @@ export async function getWordOfTheDayRecord(date: Date = new Date()): Promise<Wo
   try {
     const dateString = date.toISOString().split('T')[0];
     
+    // Use public view to avoid exposing admin UUIDs
     const { data, error } = await supabase
-      .from('word_of_the_day' as any)
+      .from('public_word_of_the_day' as any)
       .select('word, word_date, is_admin_selected')
       .eq('word_date', dateString)
       .single();
