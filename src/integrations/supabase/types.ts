@@ -657,6 +657,33 @@ export type Database = {
         }
         Relationships: []
       }
+      public_word_of_the_day: {
+        Row: {
+          created_at: string | null
+          id: string | null
+          is_admin_selected: boolean | null
+          updated_at: string | null
+          word: string | null
+          word_date: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string | null
+          is_admin_selected?: boolean | null
+          updated_at?: string | null
+          word?: string | null
+          word_date?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string | null
+          is_admin_selected?: boolean | null
+          updated_at?: string | null
+          word?: string | null
+          word_date?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       cleanup_old_data: { Args: never; Returns: undefined }
