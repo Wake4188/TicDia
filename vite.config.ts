@@ -63,7 +63,12 @@ export default defineConfig(({ mode }) => ({
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
+      // Ensure all deps use the same React instance (React 19 compatibility)
+      "react": path.resolve(__dirname, "./node_modules/react"),
+      "react-dom": path.resolve(__dirname, "./node_modules/react-dom"),
     },
+    // Dedupe React to prevent multiple instances
+    dedupe: ['react', 'react-dom'],
   },
 
   build: {
