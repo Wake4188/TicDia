@@ -82,13 +82,9 @@ export default defineConfig(({ mode }) => ({
         entryFileNames: 'assets/[name]-[hash].js',
         assetFileNames: 'assets/[name]-[hash].[ext]',
         manualChunks: (id) => {
-          // Core vendor - load first
-          if (id.includes('node_modules/react/') || id.includes('node_modules/react-dom/')) {
+          // Core vendor + router together to prevent createContext error
+          if (id.includes('node_modules/react/') || id.includes('node_modules/react-dom/') || id.includes('react-router')) {
             return 'vendor';
-          }
-          // Router - needed for navigation
-          if (id.includes('react-router')) {
-            return 'router';
           }
           // Heavy animations - defer load
           if (id.includes('framer-motion') || id.includes('gsap')) {
