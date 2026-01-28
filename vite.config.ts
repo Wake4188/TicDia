@@ -81,12 +81,31 @@ export default defineConfig(({ mode }) => ({
         chunkFileNames: 'assets/[name]-[hash].js',
         entryFileNames: 'assets/[name]-[hash].js',
         assetFileNames: 'assets/[name]-[hash].[ext]',
-        manualChunks: {
-          vendor: ['react', 'react-dom', 'react-router-dom'],
-          ui: ['@radix-ui/react-dialog', '@radix-ui/react-slot', '@radix-ui/react-toast', 'lucide-react'],
-          animations: ['framer-motion'],
-          supabase: ['@supabase/supabase-js'],
-          query: ['@tanstack/react-query'],
+        manualChunks: (id) => {
+          // Core vendor - load first
+          if (id.includes('node_modules/react/') || id.includes('node_modules/react-dom/')) {
+            return 'vendor';
+          }
+          // Router - needed for navigation
+          if (id.includes('react-router')) {
+            return 'router';
+          }
+          // Heavy animations - defer load
+          if (id.includes('framer-motion') || id.includes('gsap')) {
+            return 'animations';
+          }
+          // Supabase - defer until needed
+          if (id.includes('@supabase')) {
+            return 'supabase';
+          }
+          // React Query - needed early but can be separate
+          if (id.includes('@tanstack')) {
+            return 'query';
+          }
+          // UI components - can load after initial render
+          if (id.includes('@radix-ui') || id.includes('lucide-react')) {
+            return 'ui';
+          }
         },
       },
     },
