@@ -336,6 +336,19 @@
     border-radius: 9999px;
   }
 
+  /* Rounded corners for all SVG icons */
+  svg {
+    border-radius: 0.25rem; /* rounded */
+  }
+
+  /* Icon containers in settings/profile pages */
+  .p-3.rounded-xl,
+  .w-8.h-8.rounded-lg,
+  div[class*="rounded-xl"][class*="bg-"] > svg,
+  div[class*="rounded-lg"][class*="bg-"] > svg {
+    border-radius: inherit;
+  }
+
   /* Apple Liquid Glass - Comprehensive Styling */
   .liquid-glass {
     /* Dynamic gradient background */
