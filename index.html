@@ -160,18 +160,9 @@
     }
   </style>
 
-  <!-- Google Fonts - Load async to prevent render blocking using media swap pattern -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <!-- Use media="print" and swap to "all" on load - most reliable non-render-blocking pattern -->
-  <link rel="stylesheet"
-    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Roboto:wght@400;700&family=Merriweather:wght@400;700&display=swap"
-    media="print" onload="this.media='all'">
-  <noscript>
-    <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Roboto:wght@400;700&family=Merriweather:wght@400;700&display=swap"
-      rel="stylesheet">
-  </noscript>
+  <!-- Google Fonts - Non-blocking async load with preload -->
+  <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap"></noscript>
 
   <!-- Performance and resource hints - optimized -->
   <link rel="preconnect" href="https://rtuxaekhfwvpwmvmdaul.supabase.co" crossorigin>
