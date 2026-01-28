@@ -63,18 +63,17 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="theme-color" content="#FE2C55" />
 
-  <!-- Preconnect to critical origins for faster LCP - must be before other resources -->
-  <link rel="preconnect" href="https://en.wikipedia.org" crossorigin>
-  <link rel="preconnect" href="https://wikimedia.org" crossorigin>
-  <link rel="preconnect" href="https://upload.wikimedia.org" crossorigin>
-  <link rel="preconnect" href="https://rtuxaekhfwvpwmvmdaul.supabase.co" crossorigin>
+  <!-- Preconnect to critical origins for faster LCP - highest priority -->
+  <link rel="preconnect" href="https://en.wikipedia.org" crossorigin="anonymous">
+  <link rel="preconnect" href="https://upload.wikimedia.org" crossorigin="anonymous">
+  <link rel="preconnect" href="https://rtuxaekhfwvpwmvmdaul.supabase.co" crossorigin="anonymous">
   
-  <!-- DNS prefetch for additional origins -->
-  <link rel="dns-prefetch" href="https://en.wikipedia.org">
-  <link rel="dns-prefetch" href="https://wikimedia.org">
-  <link rel="dns-prefetch" href="https://upload.wikimedia.org">
-  <link rel="dns-prefetch" href="https://cdn.gpteng.co">
-  <link rel="dns-prefetch" href="https://www.googletagmanager.com">
+  <!-- DNS prefetch as fallback and for additional origins -->
+  <link rel="dns-prefetch" href="//en.wikipedia.org">
+  <link rel="dns-prefetch" href="//upload.wikimedia.org">
+  <link rel="dns-prefetch" href="//rtuxaekhfwvpwmvmdaul.supabase.co">
+  <link rel="dns-prefetch" href="//cdn.gpteng.co">
+  <link rel="dns-prefetch" href="//www.googletagmanager.com">
 
   <!-- Critical CSS for initial paint - Enhanced for CLS prevention -->
   <style>
