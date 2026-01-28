@@ -63,16 +63,17 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="theme-color" content="#FE2C55" />
 
-  <!-- Preconnect to Wikipedia API for faster article loading -->
+  <!-- Preconnect to critical origins for faster LCP - must be before other resources -->
   <link rel="preconnect" href="https://en.wikipedia.org" crossorigin>
-  <link rel="dns-prefetch" href="https://en.wikipedia.org">
   <link rel="preconnect" href="https://wikimedia.org" crossorigin>
-  <link rel="dns-prefetch" href="https://wikimedia.org">
+  <link rel="preconnect" href="https://upload.wikimedia.org" crossorigin>
+  <link rel="preconnect" href="https://rtuxaekhfwvpwmvmdaul.supabase.co" crossorigin>
   
-  <!-- Preconnect to external CDNs for faster resource loading -->
-  <link rel="preconnect" href="https://cdn.gpteng.co" crossorigin>
+  <!-- DNS prefetch for additional origins -->
+  <link rel="dns-prefetch" href="https://en.wikipedia.org">
+  <link rel="dns-prefetch" href="https://wikimedia.org">
+  <link rel="dns-prefetch" href="https://upload.wikimedia.org">
   <link rel="dns-prefetch" href="https://cdn.gpteng.co">
-  <link rel="preconnect" href="https://www.googletagmanager.com" crossorigin>
   <link rel="dns-prefetch" href="https://www.googletagmanager.com">
 
   <!-- Critical CSS for initial paint - Enhanced for CLS prevention -->
@@ -174,16 +175,19 @@
   <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
   <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap"></noscript>
 
-  <!-- Performance and resource hints - optimized -->
-  <link rel="preconnect" href="https://rtuxaekhfwvpwmvmdaul.supabase.co" crossorigin>
-  <link rel="preconnect" href="https://upload.wikimedia.org">
-  <link rel="dns-prefetch" href="https://upload.wikimedia.org">
-
+  <!-- Remove duplicate preconnects - consolidated above -->
 
 </head>
 
 <body>
-  <div id="root" role="main"></div>
+  <!-- Initial content serves as early LCP candidate while JS loads -->
+  <div id="root" role="main">
+    <div style="min-height:100vh;display:flex;align-items:center;justify-content:center;background:#0a0a0f;">
+      <p style="font-size:1.25rem;color:#a0a0a0;text-align:center;max-width:600px;padding:2rem;line-height:1.6;">
+        Loading knowledge...
+      </p>
+    </div>
+  </div>
   <noscript>
     <div
       style="text-align: center; padding: 50px; font-family: system-ui, sans-serif; background: #0a0a0f; color: #f5f5f5; min-height: 100vh;">
