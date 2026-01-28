@@ -1,14 +1,15 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, lazy, Suspense } from "react";
 import { Progress } from "./ui/progress";
 import { UserPreferences } from "@/services/userPreferencesService";
 import AudioPlayer from "./AudioPlayer";
 import { useAuth } from "@/contexts/AuthContext";
 import { ExportMenu } from "./ExportMenu";
 import HighlightedText from "./HighlightedText";
-import SmartLinks from "./SmartLinks";
 import { useSwipeGesture } from "@/hooks/useSwipeGesture";
-import { AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
+
+// Lazy load SmartLinks to reduce initial bundle
+const SmartLinks = lazy(() => import("./SmartLinks"));
 
 interface ArticleItemProps {
   article: any;
@@ -67,17 +68,17 @@ const ArticleItem = ({
       style={{ minHeight: '100vh', contain: 'layout style paint' }}
       {...swipeHandlers}
     >
-      {/* Smart Links Overlay */}
-      <AnimatePresence>
-        {showSmartLinks && isCurrent && (
+      {/* Smart Links Overlay - lazy loaded */}
+      {showSmartLinks && isCurrent && (
+        <Suspense fallback={<div className="fixed inset-0 z-50 bg-background/80 flex items-center justify-center"><span className="text-muted-foreground">Loading...</span></div>}>
           <SmartLinks
             articleContent={article.content}
             articleTitle={article.title}
             onClose={() => setShowSmartLinks(false)}
             onNavigateToArticle={handleNavigateToArticle}
           />
-        )}
-      </AnimatePresence>
+        </Suspense>
+      )}
 
       {/* Fixed aspect ratio container prevents CLS */}
       <div 

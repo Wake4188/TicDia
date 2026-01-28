@@ -52,14 +52,19 @@ function AppContent() {
   const { userPreferences } = useUserPreferences();
   const [showSmoke, setShowSmoke] = useState(false);
 
-  // Defer smoke effect loading to after initial paint (reduces INP/LCP)
+  // Defer smoke effect loading using requestIdleCallback for lower priority
   useEffect(() => {
     if (userPreferences.smokeEffect) {
-      // Use requestIdleCallback or setTimeout to defer heavy component
-      const timer = setTimeout(() => {
-        setShowSmoke(true);
-      }, 2000); // Load smoke effect 2s after initial render
-      return () => clearTimeout(timer);
+      // Use requestIdleCallback for truly idle-time loading
+      const loadSmoke = () => setShowSmoke(true);
+      if ('requestIdleCallback' in window) {
+        const id = requestIdleCallback(loadSmoke, { timeout: 5000 });
+        return () => cancelIdleCallback(id);
+      } else {
+        // Fallback for Safari
+        const timer = setTimeout(loadSmoke, 3000);
+        return () => clearTimeout(timer);
+      }
     } else {
       setShowSmoke(false);
     }
