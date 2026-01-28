@@ -150,6 +150,17 @@
   /* Avoid global content-visibility to prevent blank screen on some browsers */
   /* Apply content-visibility selectively on heavy, off-screen sections if needed */
 
+  /* Prevent CLS in article sections */
+  .article-section {
+    contain: layout style paint;
+    contain-intrinsic-size: 100vw 100vh;
+  }
+  
+  /* Reserve consistent height for content to prevent shifts */
+  .article-section > div {
+    contain: layout;
+  }
+
   /* Apply highlight color to various elements */
   .text-tictok-red {
     color: var(--highlight-color) !important;
