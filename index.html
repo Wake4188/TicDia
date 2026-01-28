@@ -6,21 +6,31 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <meta http-equiv="Content-Language" content="en" />
 
-  <!-- Google Analytics - Defer loading to not block render -->
-  <script defer src="https://www.googletagmanager.com/gtag/js?id=G-6HFC6Q72F9"></script>
+  <!-- Google Analytics - Load on user interaction to reduce initial JS -->
   <script>
     window.dataLayer = window.dataLayer || [];
     function gtag() { dataLayer.push(arguments); }
-    gtag('js', new Date());
-    gtag('config', 'G-6HFC6Q72F9', { 'send_page_view': false });
-    // Defer page view to after LCP
-    if (document.readyState === 'complete') {
-      gtag('event', 'page_view');
-    } else {
-      window.addEventListener('load', function() {
-        setTimeout(function() { gtag('event', 'page_view'); }, 100);
-      });
+    
+    // Defer GA loading until user interacts or after 5 seconds
+    var gaLoaded = false;
+    function loadGA() {
+      if (gaLoaded) return;
+      gaLoaded = true;
+      var script = document.createElement('script');
+      script.src = 'https://www.googletagmanager.com/gtag/js?id=G-6HFC6Q72F9';
+      script.async = true;
+      document.head.appendChild(script);
+      gtag('js', new Date());
+      gtag('config', 'G-6HFC6Q72F9');
     }
+    
+    // Load on first interaction
+    ['mousedown', 'keydown', 'touchstart', 'scroll'].forEach(function(e) {
+      document.addEventListener(e, loadGA, { once: true, passive: true });
+    });
+    
+    // Fallback: load after 5 seconds if no interaction
+    setTimeout(loadGA, 5000);
   </script>
 
   <!-- PWA and App Identity -->
