@@ -5,6 +5,7 @@ import { transformToArticle } from './articleTransformer';
 import { sortByRelevance } from './searchUtils';
 import { Language, DEFAULT_LANGUAGE } from './languageConfig';
 import { cache } from '@/utils/performance';
+import { applyAdminRules } from './feedFilteringService';
 
 const getWikipediaApiBase = (language: Language) => `https://${language.wikipediaDomain}/w/api.php`;
 
@@ -52,12 +53,19 @@ const getRelatedArticles = async (
 const fetchArticles = async (
   titles: string[], 
   language: Language, 
-  allowAdultContent: boolean = false
+  allowAdultContent: boolean = false,
+  applyRules: boolean = true
 ): Promise<WikipediaArticle[]> => {
   const data = await fetchWikipediaContent(titles, language) as WikipediaResponse;
   const pages = Object.values(data.query?.pages || {});
   const articles = await Promise.all(pages.map(page => transformToArticle(page, language, allowAdultContent)));
-  return articles.filter(Boolean) as WikipediaArticle[];
+  const validArticles = articles.filter(Boolean) as WikipediaArticle[];
+  
+  // Apply admin content rules if enabled
+  if (applyRules) {
+    return applyAdminRules(validArticles);
+  }
+  return validArticles;
 };
 
 const getPersonalizedArticles = async (
@@ -222,7 +230,8 @@ const getRandomArticles = async (
     if (!titles.length) throw new Error('No articles found');
 
     // Batch fetch in chunks of 50 (Wikipedia API limit)
-    const validArticles = await fetchArticles(titles.slice(0, 50), language, allowAdultContent);
+    // Apply admin rules to filter content
+    const validArticles = await fetchArticles(titles.slice(0, 50), language, allowAdultContent, true);
     
     // Filter for articles with images and return immediately if we have enough
     const withImages = validArticles.filter(a => a.image);
@@ -288,7 +297,8 @@ const searchArticles = async (
     const allTitles = [...new Set([...suggestedTitles, ...searchTitles])];
     if (!allTitles.length) return [];
 
-    const validArticles = await fetchArticles(allTitles, language, allowAdultContent);
+    // Apply admin rules to search results too
+    const validArticles = await fetchArticles(allTitles, language, allowAdultContent, true);
     const result = sortByRelevance(validArticles, query);
     cache.set(cacheKey, result, 600000); // Cache for 10 minutes
     return result;
