@@ -187,6 +187,40 @@ async function fetchFromWiktionary(word: string, langCode: string): Promise<Wikt
   }
 }
 
+// Fetch from Merriam-Webster via Edge Function (English only)
+async function fetchFromMerriamWebster(word: string): Promise<WiktionaryResponse | null> {
+  try {
+    const response = await fetch(
+      `https://rtuxaekhfwvpwmvmdaul.supabase.co/functions/v1/dictionary-lookup?word=${encodeURIComponent(word)}`
+    );
+
+    if (!response.ok) {
+      return null;
+    }
+
+    const data = await response.json();
+
+    if (!data.success || !data.definitions || data.definitions.length === 0) {
+      return null;
+    }
+
+    // Transform to WiktionaryResponse format
+    const wordDefinitions: WordDefinition[] = data.definitions.map((def: any) => ({
+      partOfSpeech: def.partOfSpeech || 'unknown',
+      language: 'en',
+      definitions: def.definitions?.map((d: any) => ({
+        definition: d.definition || '',
+        examples: d.examples || []
+      })) || []
+    }));
+
+    return { en: wordDefinitions };
+  } catch (error) {
+    console.error('Merriam-Webster lookup error:', error);
+    return null;
+  }
+}
+
 export async function lookupWord(word: string, languageCode: string = 'en'): Promise<WiktionaryResponse | null> {
   const normalizedWord = word.toLowerCase().trim();
   const cacheKey = `${languageCode}:${normalizedWord}`;
@@ -197,30 +231,43 @@ export async function lookupWord(word: string, languageCode: string = 'en'): Pro
   }
 
   try {
-    // Try language-specific Wiktionary first
-    const wiktionaryResult = await fetchFromWiktionary(normalizedWord, languageCode);
-
-    if (wiktionaryResult) {
-      cache.set(cacheKey, wiktionaryResult);
-      return wiktionaryResult;
-    }
-
-    // For English, try the Dictionary API as fallback
+    // For English, try Merriam-Webster first via Edge Function
     if (languageCode === 'en') {
+      const mwResult = await fetchFromMerriamWebster(normalizedWord);
+      if (mwResult) {
+        cache.set(cacheKey, mwResult);
+        return mwResult;
+      }
+
+      // Fallback to Wiktionary for English
+      const wiktionaryResult = await fetchFromWiktionary(normalizedWord, 'en');
+      if (wiktionaryResult) {
+        cache.set(cacheKey, wiktionaryResult);
+        return wiktionaryResult;
+      }
+
+      // Final fallback to free Dictionary API
       const dictionaryResult = await fetchFromDictionaryAPI(normalizedWord);
       if (dictionaryResult) {
         cache.set(cacheKey, dictionaryResult);
         return dictionaryResult;
       }
+
+      return null;
+    }
+
+    // For non-English, use Wiktionary
+    const wiktionaryResult = await fetchFromWiktionary(normalizedWord, languageCode);
+    if (wiktionaryResult) {
+      cache.set(cacheKey, wiktionaryResult);
+      return wiktionaryResult;
     }
 
     // Try English Wiktionary as final fallback (it often has entries for foreign words)
-    if (languageCode !== 'en') {
-      const englishWiktionaryResult = await fetchFromWiktionary(normalizedWord, 'en');
-      if (englishWiktionaryResult) {
-        cache.set(cacheKey, englishWiktionaryResult);
-        return englishWiktionaryResult;
-      }
+    const englishWiktionaryResult = await fetchFromWiktionary(normalizedWord, 'en');
+    if (englishWiktionaryResult) {
+      cache.set(cacheKey, englishWiktionaryResult);
+      return englishWiktionaryResult;
     }
 
     return null;
