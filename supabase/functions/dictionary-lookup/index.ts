@@ -78,7 +78,7 @@ serve(async (req) => {
           error: 'Word not found',
           suggestions: data.slice(0, 5) // Return up to 5 spelling suggestions
         }),
-        { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
@@ -86,7 +86,7 @@ serve(async (req) => {
     if (!Array.isArray(data) || data.length === 0) {
       return new Response(
         JSON.stringify({ success: false, error: 'No definitions found' }),
-        { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
@@ -141,7 +141,7 @@ serve(async (req) => {
     if (definitions.length === 0) {
       return new Response(
         JSON.stringify({ success: false, error: 'No valid definitions found' }),
-        { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
