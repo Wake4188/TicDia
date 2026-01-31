@@ -9,6 +9,7 @@ import { lookupWord, getDefinitions } from "@/services/wiktionaryService";
 import { getWordOfTheDay, generateWordOfTheDay } from "@/services/wordOfTheDayService";
 import Navigation from "@/components/Navigation";
 import SanitizedHtml from "@/components/SanitizedHtml";
+import { INTERESTING_WORDS, getDailyWordPool, getRandomWordsFromPool } from "@/data/interestingWords";
 
 interface WordEntry {
   word: string;
@@ -18,31 +19,41 @@ interface WordEntry {
   pronunciation?: string;
 }
 
-// Collection of interesting, unusual, and cool English words
-const INTERESTING_WORDS = [
-  "ephemeral", "serendipity", "mellifluous", "petrichor", "luminescent",
-  "ethereal", "effervescent", "iridescent", "phosphorescent", "quintessential",
-  "labyrinthine", "surreptitious", "clandestine", "ineffable", "ubiquitous",
-  "enigmatic", "idyllic", "pristine", "resplendent", "incandescent",
-  "eloquent", "perennial", "transcendent", "epiphany", "euphoria",
-  "sonorous", "nebulous", "seraphic", "halcyon", "gossamer",
-  "susurrus", "defenestration", "callipygian", "pulchritudinous", "logorrhea",
-  "perspicacious", "magnanimous", "ephemeron", "vellichor", "sonder",
-  "kenopsia", "liberosis", "chrysalism", "mauerbauertraurigkeit", "jouska",
-  "exulansis", "nodus tollens", "lachesism", "kuebiko", "onism",
-  "ambivalent", "cacophony", "dichotomy", "ebullience", "fastidious",
-  "gregarious", "harbinger", "iconoclast", "juxtaposition", "kaleidoscope",
-  "laconic", "meticulous", "nefarious", "obsequious", "panacea",
-  "quixotic", "recalcitrant", "sanguine", "trepidation", "umbrage",
-  "venerable", "wistful", "xenial", "yearn", "zealous",
-  "amalgamation", "benevolent", "capricious", "delineate", "elucidate",
-  "facetious", "garrulous", "hegemony", "indefatigable", "jocular",
-  "kinetic", "loquacious", "maelstrom", "nascent", "omniscient",
-  "paradigm", "querulous", "reticent", "sagacious", "taciturn",
-  "unequivocal", "vicarious", "whimsical", "xeric", "yonder",
-  "acquiesce", "bellicose", "calamity", "desultory", "exacerbate",
-  "felicitous", "gesticulate", "harangue", "immutable", "juxtapose"
-];
+const WORD_FEED_SEEN_KEY = 'ticdia_word_feed_seen';
+const WORD_FEED_DATE_KEY = 'ticdia_word_feed_date';
+
+// Load seen words from localStorage (reset daily)
+function loadSeenWords(): Set<string> {
+  try {
+    const storedDate = localStorage.getItem(WORD_FEED_DATE_KEY);
+    const today = new Date().toISOString().split('T')[0];
+    
+    // Reset if it's a new day
+    if (storedDate !== today) {
+      localStorage.setItem(WORD_FEED_DATE_KEY, today);
+      localStorage.removeItem(WORD_FEED_SEEN_KEY);
+      return new Set();
+    }
+    
+    const stored = localStorage.getItem(WORD_FEED_SEEN_KEY);
+    if (stored) {
+      return new Set(JSON.parse(stored));
+    }
+  } catch (error) {
+    console.error('Error loading seen words:', error);
+  }
+  return new Set();
+}
+
+// Save seen words to localStorage
+function saveSeenWords(seen: Set<string>): void {
+  try {
+    localStorage.setItem(WORD_FEED_SEEN_KEY, JSON.stringify([...seen]));
+    localStorage.setItem(WORD_FEED_DATE_KEY, new Date().toISOString().split('T')[0]);
+  } catch (error) {
+    console.error('Error saving seen words:', error);
+  }
+}
 
 const WordFeed = () => {
   const navigate = useNavigate();
@@ -51,7 +62,8 @@ const WordFeed = () => {
   const [words, setWords] = useState<WordEntry[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
-  const [usedWords, setUsedWords] = useState<Set<string>>(new Set());
+  const [usedWords, setUsedWords] = useState<Set<string>>(() => loadSeenWords());
+  const [dailyPool, setDailyPool] = useState<string[]>([]);
   const containerRef = useRef<HTMLDivElement>(null);
   const [isSpeaking, setIsSpeaking] = useState(false);
 
@@ -72,7 +84,6 @@ const WordFeed = () => {
         return {
           word,
           partOfSpeech: firstDef.partOfSpeech,
-          // Keep the HTML - we'll render it properly with SanitizedHtml component
           definition: firstDef.definitions[0]?.definition || '',
           example: firstDef.definitions[0]?.examples?.[0],
         };
@@ -88,23 +99,28 @@ const WordFeed = () => {
     setIsLoading(true);
     const today = new Date();
     
+    // Get a daily word pool (different set each day, 100 words)
+    const pool = getDailyWordPool(today, 100);
+    setDailyPool(pool);
+    
     // Get word of the day (either from database or generate deterministically)
     let wordOfTheDay: string | null = await getWordOfTheDay(today);
     
-    // If no word of the day exists, generate one deterministically
+    // If no word of the day exists, generate one deterministically from full list
     if (!wordOfTheDay) {
       wordOfTheDay = generateWordOfTheDay(today, INTERESTING_WORDS);
     }
     
-    const newUsedWords = new Set<string>();
+    // Load previously seen words (reset daily)
+    const seenWords = loadSeenWords();
+    const newUsedWords = new Set(seenWords);
+    
     if (wordOfTheDay) {
       newUsedWords.add(wordOfTheDay);
     }
     
-    // Select 9 additional words (for 10 total)
-    const availableWords = INTERESTING_WORDS.filter(w => !newUsedWords.has(w));
-    const shuffled = [...availableWords].sort(() => Math.random() - 0.5);
-    const selectedWords = shuffled.slice(0, 9);
+    // Select 9 additional words from today's pool, excluding seen words
+    const selectedWords = getRandomWordsFromPool(pool, 9, newUsedWords);
     
     // Fetch all definitions in parallel for speed
     const allWords = wordOfTheDay ? [wordOfTheDay, ...selectedWords] : selectedWords;
@@ -122,6 +138,7 @@ const WordFeed = () => {
     
     setWords(wordEntries);
     setUsedWords(newUsedWords);
+    saveSeenWords(newUsedWords);
     setCurrentIndex(0);
     setIsLoading(false);
   }, [fetchWordDefinition]);
@@ -131,15 +148,24 @@ const WordFeed = () => {
   }, [loadInitialWords]);
 
   const loadMoreWords = useCallback(async () => {
-    const availableWords = INTERESTING_WORDS.filter(w => !usedWords.has(w));
+    // First try to get words from today's pool
+    let availableWords = dailyPool.filter(w => !usedWords.has(w));
+    
+    // If daily pool exhausted, fall back to full list
+    if (availableWords.length < 5) {
+      availableWords = INTERESTING_WORDS.filter(w => !usedWords.has(w));
+    }
+    
     if (availableWords.length === 0) {
-      // Reset if all words have been used
+      // Reset if all words have been used (very rare)
+      const newPool = getDailyWordPool(new Date(), 100);
+      setDailyPool(newPool);
       setUsedWords(new Set());
+      saveSeenWords(new Set());
       return;
     }
     
-    const shuffled = availableWords.sort(() => Math.random() - 0.5);
-    const newWords = shuffled.slice(0, 5);
+    const newWords = getRandomWordsFromPool(availableWords, 5, usedWords);
     
     // Fetch all new word definitions in parallel
     const results = await Promise.allSettled(
@@ -159,8 +185,9 @@ const WordFeed = () => {
     if (newEntries.length > 0) {
       setWords(prev => [...prev, ...newEntries]);
       setUsedWords(newUsedSet);
+      saveSeenWords(newUsedSet);
     }
-  }, [usedWords, fetchWordDefinition]);
+  }, [dailyPool, usedWords, fetchWordDefinition]);
 
   // Use requestAnimationFrame for smooth scroll handling
   const scrollTimeoutRef = useRef<number | null>(null);
@@ -249,7 +276,10 @@ const WordFeed = () => {
   }, [isSpeaking]);
 
   const handleRefresh = useCallback(() => {
+    // Clear seen words and get fresh daily pool
+    localStorage.removeItem(WORD_FEED_SEEN_KEY);
     setUsedWords(new Set());
+    setDailyPool(getDailyWordPool(new Date(), 100));
     loadInitialWords();
   }, [loadInitialWords]);
 
