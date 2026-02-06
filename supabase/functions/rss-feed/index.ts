@@ -15,50 +15,51 @@ interface RSSArticle {
   source: string;
 }
 
-// Rate limiting
+// Rate limiting with cleanup
 const rateLimitStore = new Map<string, number[]>();
-const RATE_LIMIT_WINDOW = 60000; // 1 minute
+const RATE_LIMIT_WINDOW = 60000;
 const MAX_REQUESTS_PER_WINDOW = 15;
+let lastCleanup = Date.now();
+const CLEANUP_INTERVAL = 300000;
 
 function checkRateLimit(userId: string): boolean {
   const now = Date.now();
+
+  if (now - lastCleanup > CLEANUP_INTERVAL) {
+    for (const [key, timestamps] of rateLimitStore) {
+      const recent = timestamps.filter(t => now - t < RATE_LIMIT_WINDOW);
+      if (recent.length === 0) rateLimitStore.delete(key);
+      else rateLimitStore.set(key, recent);
+    }
+    lastCleanup = now;
+  }
+
   const userRequests = rateLimitStore.get(userId) || [];
   const recentRequests = userRequests.filter(timestamp => now - timestamp < RATE_LIMIT_WINDOW);
   
-  if (recentRequests.length >= MAX_REQUESTS_PER_WINDOW) {
-    return false;
-  }
+  if (recentRequests.length >= MAX_REQUESTS_PER_WINDOW) return false;
   
   recentRequests.push(now);
   rateLimitStore.set(userId, recentRequests);
   return true;
 }
 
-let cache = new Map<string, { data: RSSArticle[]; timestamp: number }>();
-const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+// Response cache to reduce upstream load under high traffic
+const cache = new Map<string, { data: RSSArticle[]; timestamp: number }>();
+const CACHE_TTL = 5 * 60 * 1000;
 
-// SECURITY: Whitelist allowed RSS feed domains to prevent SSRF attacks
 const ALLOWED_DOMAINS = [
-  'rss.nytimes.com',
-  'feeds.bbci.co.uk',
-  'www.france24.com',
-  'feeds.skynews.com',
-  'feeds.reuters.com',
-  'feeds.cnn.com',
-  'feeds.theguardian.com',
-  'rss.cbc.ca',
-  'rss.app',
-  'www.franceinfo.fr'
+  'rss.nytimes.com', 'feeds.bbci.co.uk', 'www.france24.com',
+  'feeds.skynews.com', 'feeds.reuters.com', 'feeds.cnn.com',
+  'feeds.theguardian.com', 'rss.cbc.ca', 'rss.app', 'www.franceinfo.fr'
 ];
 
 serve(async (req) => {
-  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    // Authenticate user
     const authHeader = req.headers.get('Authorization');
     if (!authHeader) {
       return new Response(
@@ -81,11 +82,10 @@ serve(async (req) => {
       );
     }
 
-    // Check rate limit
     if (!checkRateLimit(user.id)) {
       return new Response(
         JSON.stringify({ error: 'Rate limit exceeded. Please try again later.' }),
-        { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json', 'Retry-After': '60' } }
       );
     }
 
@@ -109,7 +109,6 @@ serve(async (req) => {
       );
     }
 
-    // Validate source parameter
     if (typeof source !== 'string' || source.length > 100) {
       return new Response(
         JSON.stringify({ error: 'Invalid source parameter' }),
@@ -120,7 +119,6 @@ serve(async (req) => {
     try {
       const urlObj = new URL(feedUrl);
 
-      // Only allow HTTP and HTTPS protocols
       if (urlObj.protocol !== 'http:' && urlObj.protocol !== 'https:') {
         return new Response(
           JSON.stringify({ error: 'Invalid protocol. Only HTTP and HTTPS are allowed.' }),
@@ -128,39 +126,28 @@ serve(async (req) => {
         );
       }
 
-      // Check if domain is in whitelist
       if (!ALLOWED_DOMAINS.includes(urlObj.hostname)) {
         return new Response(
-          JSON.stringify({
-            error: 'Domain not allowed. Only whitelisted RSS feeds are supported.',
-            allowed_domains: ALLOWED_DOMAINS
-          }),
+          JSON.stringify({ error: 'Domain not allowed. Only whitelisted RSS feeds are supported.' }),
           { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       }
 
-      // Block private IP ranges
       const hostname = urlObj.hostname;
-      if (
-        hostname.startsWith('127.') ||
-        hostname.startsWith('10.') ||
-        hostname.startsWith('192.168.') ||
-        hostname.startsWith('169.254.') ||
-        hostname === 'localhost'
-      ) {
+      if (hostname.startsWith('127.') || hostname.startsWith('10.') || hostname.startsWith('192.168.') || hostname.startsWith('169.254.') || hostname === 'localhost') {
         return new Response(
           JSON.stringify({ error: 'Access to private IP ranges is not allowed.' }),
           { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       }
-    } catch (urlError) {
+    } catch {
       return new Response(
         JSON.stringify({ error: 'Invalid URL format' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    // Check cache first
+    // Check cache
     const cacheKey = feedUrl;
     const cached = cache.get(cacheKey);
     if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
@@ -170,17 +157,14 @@ serve(async (req) => {
       );
     }
 
-    // Add timeout to prevent hanging requests
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+    const timeoutId = setTimeout(() => controller.abort(), 10000);
 
     try {
       const response = await fetch(feedUrl, {
         signal: controller.signal,
         redirect: 'follow',
-        headers: {
-          'User-Agent': 'Ticdia RSS Feed Reader/1.0'
-        }
+        headers: { 'User-Agent': 'Ticdia RSS Feed Reader/1.0' }
       });
       clearTimeout(timeoutId);
 
@@ -202,71 +186,54 @@ serve(async (req) => {
         const title = item.querySelector('title')?.textContent?.trim() || 'Untitled';
         let summary = item.querySelector('description, summary, content')?.textContent?.trim() || '';
 
-        // Clean HTML tags from summary
         summary = summary.replace(/<[^>]*>/g, '').trim();
-        if (summary.length > 200) {
-          summary = summary.substring(0, 200) + '...';
-        }
+        if (summary.length > 200) summary = summary.substring(0, 200) + '...';
 
         const link = item.querySelector('link')?.textContent?.trim() ||
           item.querySelector('link')?.getAttribute('href') || '#';
 
-        // Try multiple ways to get images
         let image: string | undefined;
 
-        // Try enclosure
         const enclosure = item.querySelector('enclosure[type^="image"]');
-        if (enclosure) {
-          image = enclosure.getAttribute('url') || undefined;
-        }
+        if (enclosure) image = enclosure.getAttribute('url') || undefined;
 
-        // Try media:content or media:thumbnail
         if (!image) {
           const mediaContent = item.querySelector('media\\:content[medium="image"], content[medium="image"]');
-          if (mediaContent) {
-            image = mediaContent.getAttribute('url') || undefined;
-          }
+          if (mediaContent) image = mediaContent.getAttribute('url') || undefined;
         }
 
         if (!image) {
           const mediaThumbnail = item.querySelector('media\\:thumbnail, thumbnail');
-          if (mediaThumbnail) {
-            image = mediaThumbnail.getAttribute('url') || undefined;
-          }
+          if (mediaThumbnail) image = mediaThumbnail.getAttribute('url') || undefined;
         }
 
-        // Try to extract image from description/content HTML
         if (!image) {
           const descContent = item.querySelector('description, content')?.textContent || '';
           const imgMatch = descContent.match(/<img[^>]+src=["']([^"']+)["'][^>]*>/i);
-          if (imgMatch) {
-            image = imgMatch[1];
-          }
+          if (imgMatch) image = imgMatch[1];
         }
 
-        const pubDate = item.querySelector('pubDate, published, updated')?.textContent?.trim() ||
-          new Date().toISOString();
+        const pubDate = item.querySelector('pubDate, published, updated')?.textContent?.trim() || new Date().toISOString();
 
         if (title && summary) {
-          articles.push({
-            title,
-            summary,
-            link,
-            image,
-            publishedAt: pubDate,
-            source
-          });
+          articles.push({ title, summary, link, image, publishedAt: pubDate, source });
         }
       }
 
-      // Cache the results
+      // Cache results - prevents thundering herd under high traffic
       cache.set(cacheKey, { data: articles, timestamp: Date.now() });
+
+      // Cap cache size to prevent memory issues
+      if (cache.size > 50) {
+        const oldest = [...cache.entries()].sort((a, b) => a[1].timestamp - b[1].timestamp);
+        for (let i = 0; i < oldest.length - 50; i++) cache.delete(oldest[i][0]);
+      }
 
       return new Response(
         JSON.stringify(articles),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
-    } catch (fetchError) {
+    } catch (fetchError: any) {
       clearTimeout(timeoutId);
       if (fetchError.name === 'AbortError') {
         return new Response(

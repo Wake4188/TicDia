@@ -6,19 +6,29 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
-// Rate limiting
+// Rate limiting with cleanup
 const rateLimitStore = new Map<string, number[]>()
-const RATE_LIMIT_WINDOW = 60000 // 1 minute
+const RATE_LIMIT_WINDOW = 60000
 const MAX_REQUESTS_PER_WINDOW = 20
+let lastCleanup = Date.now()
+const CLEANUP_INTERVAL = 300000
 
 function checkRateLimit(userId: string): boolean {
   const now = Date.now()
+
+  if (now - lastCleanup > CLEANUP_INTERVAL) {
+    for (const [key, timestamps] of rateLimitStore) {
+      const recent = timestamps.filter(t => now - t < RATE_LIMIT_WINDOW)
+      if (recent.length === 0) rateLimitStore.delete(key)
+      else rateLimitStore.set(key, recent)
+    }
+    lastCleanup = now
+  }
+
   const userRequests = rateLimitStore.get(userId) || []
   const recentRequests = userRequests.filter(timestamp => now - timestamp < RATE_LIMIT_WINDOW)
 
-  if (recentRequests.length >= MAX_REQUESTS_PER_WINDOW) {
-    return false
-  }
+  if (recentRequests.length >= MAX_REQUESTS_PER_WINDOW) return false
 
   recentRequests.push(now)
   rateLimitStore.set(userId, recentRequests)
@@ -31,7 +41,6 @@ serve(async (req) => {
   }
 
   try {
-    // Authenticate user
     const authHeader = req.headers.get('Authorization')
     if (!authHeader) {
       return new Response(
@@ -54,18 +63,16 @@ serve(async (req) => {
       )
     }
 
-    // Check rate limit
     if (!checkRateLimit(user.id)) {
       return new Response(
         JSON.stringify({ error: 'Rate limit exceeded. Please try again later.' }),
-        { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json', 'Retry-After': '60' } }
       )
     }
 
     const body = await req.json()
     const { text, voice } = body
 
-    // Input validation
     if (!text || typeof text !== 'string') {
       return new Response(
         JSON.stringify({ error: 'Missing or invalid text parameter' }),
@@ -73,8 +80,7 @@ serve(async (req) => {
       )
     }
 
-    // Length limit - already enforced at 2500 but validate early
-    const MAX_TEXT_LENGTH = 2500;
+    const MAX_TEXT_LENGTH = 2500
     if (text.length > MAX_TEXT_LENGTH) {
       return new Response(
         JSON.stringify({ error: `Text exceeds maximum length of ${MAX_TEXT_LENGTH} characters` }),
@@ -82,8 +88,7 @@ serve(async (req) => {
       )
     }
 
-    // Validate voice parameter if provided
-    const ALLOWED_VOICES = ['pNInz6obpgDQGcFmaJgB', 'EXAVITQu4vr4xnSDxMaL', '21m00Tcm4TlvDq8ikWAM', 'AZnzlk1XvdvUeBnXmlld'];
+    const ALLOWED_VOICES = ['pNInz6obpgDQGcFmaJgB', 'EXAVITQu4vr4xnSDxMaL', '21m00Tcm4TlvDq8ikWAM', 'AZnzlk1XvdvUeBnXmlld']
     if (voice && !ALLOWED_VOICES.includes(voice)) {
       return new Response(
         JSON.stringify({ error: 'Invalid voice parameter' }),
@@ -93,10 +98,12 @@ serve(async (req) => {
 
     const ELEVENLABS_API_KEY = Deno.env.get('ELEVENLABS_API_KEY')
     if (!ELEVENLABS_API_KEY) {
-      throw new Error('ElevenLabs API key not configured')
+      return new Response(
+        JSON.stringify({ error: 'TTS service not configured' }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
     }
 
-    // Generate speech from text using ElevenLabs
     const response = await fetch('https://api.elevenlabs.io/v1/text-to-speech/' + (voice || 'pNInz6obpgDQGcFmaJgB'), {
       method: 'POST',
       headers: {
@@ -105,7 +112,7 @@ serve(async (req) => {
         'xi-api-key': ELEVENLABS_API_KEY,
       },
       body: JSON.stringify({
-        text: text.slice(0, 2500), // Limit text length for better performance
+        text: text.slice(0, 2500),
         model_id: 'eleven_multilingual_v2',
         voice_settings: {
           stability: 0.5,
@@ -117,11 +124,18 @@ serve(async (req) => {
     })
 
     if (!response.ok) {
-      const error = await response.text()
-      throw new Error(`ElevenLabs API error: ${error}`)
+      if (response.status === 429) {
+        return new Response(
+          JSON.stringify({ error: 'TTS provider rate limited. Please try again shortly.' }),
+          { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json', 'Retry-After': '30' } }
+        )
+      }
+      return new Response(
+        JSON.stringify({ error: 'TTS generation failed' }),
+        { status: 502, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
     }
 
-    // Convert audio buffer to base64
     const arrayBuffer = await response.arrayBuffer()
     const uint8Array = new Uint8Array(arrayBuffer)
 
@@ -136,9 +150,7 @@ serve(async (req) => {
 
     return new Response(
       JSON.stringify({ audioContent: base64Audio }),
-      {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      },
+      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
     )
   } catch (error) {
     return new Response(

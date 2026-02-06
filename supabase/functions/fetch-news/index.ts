@@ -7,13 +7,25 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
-// Simple in-memory rate limiting
+// Rate limiting with cleanup
 const rateLimitStore = new Map<string, number[]>()
-const RATE_LIMIT_WINDOW = 60000 // 1 minute
+const RATE_LIMIT_WINDOW = 60000
 const MAX_REQUESTS_PER_WINDOW = 10
+let lastCleanup = Date.now()
+const CLEANUP_INTERVAL = 300000
 
 function checkRateLimit(userId: string): boolean {
   const now = Date.now()
+
+  if (now - lastCleanup > CLEANUP_INTERVAL) {
+    for (const [key, timestamps] of rateLimitStore) {
+      const recent = timestamps.filter(t => now - t < RATE_LIMIT_WINDOW)
+      if (recent.length === 0) rateLimitStore.delete(key)
+      else rateLimitStore.set(key, recent)
+    }
+    lastCleanup = now
+  }
+
   const userRequests = rateLimitStore.get(userId) || []
   const recentRequests = userRequests.filter((t) => now - t < RATE_LIMIT_WINDOW)
   if (recentRequests.length >= MAX_REQUESTS_PER_WINDOW) return false
@@ -22,13 +34,16 @@ function checkRateLimit(userId: string): boolean {
   return true
 }
 
+// Response cache to prevent hammering upstream under traffic spikes
+let newsCache: { data: any; timestamp: number } | null = null
+const CACHE_TTL = 5 * 60 * 1000 // 5 minutes
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
   }
 
   try {
-    // 1. Verify Authentication
     const authHeader = req.headers.get('Authorization')
     if (!authHeader) {
       return new Response(JSON.stringify({ error: 'Missing Authorization header' }), {
@@ -43,10 +58,7 @@ serve(async (req) => {
       { global: { headers: { Authorization: authHeader } } }
     )
 
-    const {
-      data: { user },
-      error: authError,
-    } = await supabaseClient.auth.getUser()
+    const { data: { user }, error: authError } = await supabaseClient.auth.getUser()
 
     if (authError || !user) {
       return new Response(JSON.stringify({ error: 'Unauthorized' }), {
@@ -55,23 +67,28 @@ serve(async (req) => {
       })
     }
 
-    // 2. Check Rate Limit
     if (!checkRateLimit(user.id)) {
       return new Response(JSON.stringify({ error: 'Too many requests' }), {
         status: 429,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        headers: { ...corsHeaders, 'Content-Type': 'application/json', 'Retry-After': '60' },
       })
     }
 
     const body = await req.json().catch(() => ({}))
     const source = body?.source || 'nyt'
 
-    // Only NYT is supported; remove NewsAPI to avoid key errors
     if (source !== 'nyt') {
       return new Response(
         JSON.stringify({ error: 'Only NYT source is supported' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
+    }
+
+    // Return cached response if fresh
+    if (newsCache && Date.now() - newsCache.timestamp < CACHE_TTL) {
+      return new Response(JSON.stringify(newsCache.data), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      })
     }
 
     const response = await fetch('https://rss.nytimes.com/services/xml/rss/nyt/World.xml')
@@ -90,19 +107,17 @@ serve(async (req) => {
     const items = Array.isArray(itemsRaw) ? itemsRaw : [itemsRaw]
 
     const pickImage = (item: any): string | null => {
-      // enclosure url
       if (item?.enclosure?.url) return item.enclosure.url
-      // media:content or media:thumbnail (after removeNSPrefix: true => content/thumbnail)
       const contents = item?.content
       if (Array.isArray(contents)) {
-        const found = contents.find((c) => c?.url)
+        const found = contents.find((c: any) => c?.url)
         if (found?.url) return found.url
       } else if (contents?.url) {
         return contents.url
       }
       const thumb = item?.thumbnail
       if (Array.isArray(thumb)) {
-        const found = thumb.find((t) => t?.url)
+        const found = thumb.find((t: any) => t?.url)
         if (found?.url) return found.url
       } else if (thumb?.url) {
         return thumb.url
@@ -123,29 +138,21 @@ serve(async (req) => {
         url: item?.link || '#',
         published_date: item?.pubDate || new Date().toISOString(),
         multimedia: imageUrl
-          ? [
-            {
-              url: imageUrl,
-              format: 'mediumThreeByTwo440',
-              height: 293,
-              width: 440,
-              type: 'image',
-              subtype: 'photo',
-              caption: '',
-            },
-          ]
+          ? [{ url: imageUrl, format: 'mediumThreeByTwo440', height: 293, width: 440, type: 'image', subtype: 'photo', caption: '' }]
           : [],
         byline: item?.creator || 'NYT',
         section: 'World',
       }
     })
 
+    // Cache the result
+    newsCache = { data: articles, timestamp: Date.now() }
+
     return new Response(JSON.stringify(articles), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     })
   } catch (error: any) {
-    console.error('Error fetching news:', error)
-    return new Response(JSON.stringify({ error: error?.message || 'Unknown error' }), {
+    return new Response(JSON.stringify({ error: 'Failed to fetch news' }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     })

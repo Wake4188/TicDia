@@ -6,19 +6,29 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-// Rate limiting
+// Rate limiting with cleanup
 const rateLimitStore = new Map<string, number[]>()
 const RATE_LIMIT_WINDOW = 60000
 const MAX_REQUESTS_PER_WINDOW = 10
+let lastCleanup = Date.now()
+const CLEANUP_INTERVAL = 300000
 
 function checkRateLimit(userId: string): boolean {
   const now = Date.now()
+
+  if (now - lastCleanup > CLEANUP_INTERVAL) {
+    for (const [key, timestamps] of rateLimitStore) {
+      const recent = timestamps.filter(t => now - t < RATE_LIMIT_WINDOW)
+      if (recent.length === 0) rateLimitStore.delete(key)
+      else rateLimitStore.set(key, recent)
+    }
+    lastCleanup = now
+  }
+
   const userRequests = rateLimitStore.get(userId) || []
   const recentRequests = userRequests.filter(timestamp => now - timestamp < RATE_LIMIT_WINDOW)
   
-  if (recentRequests.length >= MAX_REQUESTS_PER_WINDOW) {
-    return false
-  }
+  if (recentRequests.length >= MAX_REQUESTS_PER_WINDOW) return false
   
   recentRequests.push(now)
   rateLimitStore.set(userId, recentRequests)
@@ -31,7 +41,6 @@ serve(async (req) => {
   }
 
   try {
-    // Authenticate user
     const authHeader = req.headers.get('Authorization')
     if (!authHeader) {
       return new Response(
@@ -54,18 +63,16 @@ serve(async (req) => {
       )
     }
 
-    // Check rate limit
     if (!checkRateLimit(user.id)) {
       return new Response(
         JSON.stringify({ error: 'Rate limit exceeded. Please try again later.' }),
-        { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json', 'Retry-After': '60' } }
       )
     }
 
     const body = await req.json();
     const { articleContent, articleTitle, language } = body;
     
-    // Input validation
     if (!articleContent || typeof articleContent !== 'string') {
       return new Response(
         JSON.stringify({ error: "Missing or invalid articleContent" }),
@@ -87,7 +94,6 @@ serve(async (req) => {
       );
     }
 
-    // Length limits to prevent abuse
     const MAX_CONTENT_LENGTH = 50000;
     const MAX_TITLE_LENGTH = 500;
     
@@ -105,7 +111,6 @@ serve(async (req) => {
       );
     }
 
-    // Validate language code
     const langCodeRegex = /^[a-z]{2,3}$/i;
     if (!langCodeRegex.test(language)) {
       return new Response(
@@ -123,26 +128,11 @@ serve(async (req) => {
     }
 
     const languageNames: Record<string, string> = {
-      en: "English",
-      es: "Spanish",
-      fr: "French",
-      de: "German",
-      it: "Italian",
-      pt: "Portuguese",
-      ru: "Russian",
-      ja: "Japanese",
-      zh: "Chinese",
-      ar: "Arabic",
-      hi: "Hindi",
-      ko: "Korean",
-      nl: "Dutch",
-      pl: "Polish",
-      tr: "Turkish",
-      vi: "Vietnamese",
-      th: "Thai",
-      sv: "Swedish",
-      uk: "Ukrainian",
-      he: "Hebrew"
+      en: "English", es: "Spanish", fr: "French", de: "German",
+      it: "Italian", pt: "Portuguese", ru: "Russian", ja: "Japanese",
+      zh: "Chinese", ar: "Arabic", hi: "Hindi", ko: "Korean",
+      nl: "Dutch", pl: "Polish", tr: "Turkish", vi: "Vietnamese",
+      th: "Thai", sv: "Swedish", uk: "Ukrainian", he: "Hebrew"
     };
 
     const languageName = languageNames[language] || "English";
@@ -177,7 +167,7 @@ Your task is to explain Wikipedia articles in a way that's easier to understand 
       if (response.status === 429) {
         return new Response(
           JSON.stringify({ error: "Rate limit exceeded. Please try again later." }),
-          { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json", "Retry-After": "60" } }
         );
       }
       if (response.status === 402) {
@@ -188,7 +178,7 @@ Your task is to explain Wikipedia articles in a way that's easier to understand 
       }
       return new Response(
         JSON.stringify({ error: "AI service error" }),
-        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        { status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
