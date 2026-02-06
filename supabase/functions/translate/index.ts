@@ -9,19 +9,29 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-// Rate limiting
+// Rate limiting with cleanup
 const rateLimitStore = new Map<string, number[]>()
 const RATE_LIMIT_WINDOW = 60000
 const MAX_REQUESTS_PER_WINDOW = 30
+let lastCleanup = Date.now()
+const CLEANUP_INTERVAL = 300000
 
 function checkRateLimit(userId: string): boolean {
   const now = Date.now()
+
+  if (now - lastCleanup > CLEANUP_INTERVAL) {
+    for (const [key, timestamps] of rateLimitStore) {
+      const recent = timestamps.filter(t => now - t < RATE_LIMIT_WINDOW)
+      if (recent.length === 0) rateLimitStore.delete(key)
+      else rateLimitStore.set(key, recent)
+    }
+    lastCleanup = now
+  }
+
   const userRequests = rateLimitStore.get(userId) || []
   const recentRequests = userRequests.filter(timestamp => now - timestamp < RATE_LIMIT_WINDOW)
   
-  if (recentRequests.length >= MAX_REQUESTS_PER_WINDOW) {
-    return false
-  }
+  if (recentRequests.length >= MAX_REQUESTS_PER_WINDOW) return false
   
   recentRequests.push(now)
   rateLimitStore.set(userId, recentRequests)
@@ -34,7 +44,6 @@ serve(async (req) => {
   }
 
   try {
-    // Authenticate user
     const authHeader = req.headers.get('Authorization')
     if (!authHeader) {
       return new Response(
@@ -57,18 +66,16 @@ serve(async (req) => {
       )
     }
 
-    // Check rate limit
     if (!checkRateLimit(user.id)) {
       return new Response(
         JSON.stringify({ error: 'Rate limit exceeded. Please try again later.' }),
-        { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json', 'Retry-After': '60' } }
       )
     }
 
     const body = await req.json();
     const { text, from = 'en', to } = body;
 
-    // Input validation
     if (!text || typeof text !== 'string') {
       return new Response(
         JSON.stringify({ error: 'Missing or invalid text parameter' }),
@@ -83,7 +90,6 @@ serve(async (req) => {
       );
     }
 
-    // Length limit to prevent abuse
     const MAX_TEXT_LENGTH = 10000;
     if (text.length > MAX_TEXT_LENGTH) {
       return new Response(
@@ -92,7 +98,6 @@ serve(async (req) => {
       );
     }
 
-    // Validate language codes (2-3 letter codes)
     const langCodeRegex = /^[a-z]{2,3}$/i;
     if (!langCodeRegex.test(from) || !langCodeRegex.test(to)) {
       return new Response(
@@ -101,15 +106,12 @@ serve(async (req) => {
       );
     }
 
-    // If translating to the same language, return original text
     if (from === to) {
       return new Response(
         JSON.stringify({ translatedText: text }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
-
-    // Removed logging of user input for security
 
     const url = `https://free-google-translator.p.rapidapi.com/external-api/free-google-translator?from=${from}&to=${to}&query=${encodeURIComponent(text)}`;
     
@@ -122,23 +124,16 @@ serve(async (req) => {
     });
 
     if (!response.ok) {
-      // Log error without exposing sensitive details
-      
       return new Response(
         JSON.stringify({ 
           error: `Translation API error: ${response.status}`,
-          fallback: text // Return original text as fallback
+          fallback: text
         }),
-        { 
-          status: 500, 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-        }
+        { status: 502, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
     const data = await response.json();
-
-    // Extract translated text from the response
     const translatedText = data.translation || data.result || text;
 
     return new Response(
@@ -148,10 +143,7 @@ serve(async (req) => {
 
   } catch (error) {
     return new Response(
-      JSON.stringify({ 
-        error: 'Translation failed',
-        fallback: 'Translation failed' 
-      }),
+      JSON.stringify({ error: 'Translation failed', fallback: 'Translation failed' }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }

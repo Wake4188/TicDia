@@ -1,7 +1,7 @@
 import React, { useState, useCallback, lazy, Suspense } from "react";
 import { Progress } from "./ui/progress";
 import { UserPreferences } from "@/services/userPreferencesService";
-import AudioPlayer from "./AudioPlayer";
+import InlineAudioButton from "./InlineAudioButton";
 import { useAuth } from "@/contexts/AuthContext";
 import { ExportMenu } from "./ExportMenu";
 import HighlightedText from "./HighlightedText";
@@ -32,9 +32,6 @@ const ArticleItem = ({
 }: ArticleItemProps) => {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const [hideTts, setHideTts] = useState<boolean>(() => {
-    try { return localStorage.getItem('ticdia_hide_tts') === 'true'; } catch { return false; }
-  });
   const [showSmartLinks, setShowSmartLinks] = useState(false);
   
   // Use text animation preference - show full text if disabled
@@ -178,36 +175,23 @@ const ArticleItem = ({
               )}
             </div>
 
-            {/* Audio Player */}
-            {isCurrent && user && !hideTts && !showSmartLinks && (
-              <div className="mt-4">
-                <div className="flex items-center justify-between mb-2 text-xs opacity-70">
-                  <span>Text to Speech</span>
-                  <button
-                    onClick={() => {
-                      try { localStorage.setItem('ticdia_hide_tts', 'true'); } catch { }
-                      setHideTts(true);
-                    }}
-                    className="underline hover:opacity-100"
-                  >
-                    Hide
-                  </button>
-                </div>
-                <AudioPlayer
+            {/* Inline Audio Button - elegant minimal style */}
+            {isCurrent && user && !showSmartLinks && (
+              <div className="mt-3 flex items-center gap-2">
+                <InlineAudioButton
                   text={article.content || ''}
                   onAudioStart={() => {
-                    // Handle TTS start for tracking purposes
                     if (typeof window !== 'undefined' && (window as any).handleTtsStart) {
                       (window as any).handleTtsStart(index);
                     }
                   }}
                   onAudioEnd={() => {
-                    // Handle TTS end for tracking purposes
                     if (typeof window !== 'undefined' && (window as any).handleTtsStop) {
                       (window as any).handleTtsStop();
                     }
                   }}
                 />
+                <span className="text-xs text-muted-foreground/60">Listen</span>
               </div>
             )}
           </div>
