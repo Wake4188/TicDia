@@ -190,8 +190,21 @@ async function fetchFromWiktionary(word: string, langCode: string): Promise<Wikt
 // Fetch from Merriam-Webster via Edge Function (English only)
 async function fetchFromMerriamWebster(word: string): Promise<WiktionaryResponse | null> {
   try {
+    const { supabase } = await import('@/integrations/supabase/client');
+    const { data: { session } } = await supabase.auth.getSession();
+    
+    if (!session?.access_token) {
+      return null; // Can't call authenticated endpoint without a session
+    }
+
     const response = await fetch(
-      `https://rtuxaekhfwvpwmvmdaul.supabase.co/functions/v1/dictionary-lookup?word=${encodeURIComponent(word)}`
+      `https://rtuxaekhfwvpwmvmdaul.supabase.co/functions/v1/dictionary-lookup?word=${encodeURIComponent(word)}`,
+      {
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`,
+          'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ0dXhhZWtoZnd2cHdtdm1kYXVsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDk5MTc1NzMsImV4cCI6MjA2NTQ5MzU3M30.C6vl_5xJ69JuRIwSyK8H_uvdSU6CPEm4lYDkdhGn7lw',
+        }
+      }
     );
 
     if (!response.ok) {
