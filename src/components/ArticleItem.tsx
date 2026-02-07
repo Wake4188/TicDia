@@ -134,9 +134,8 @@ const ArticleItem = ({
       <div
         className="relative z-10 text-foreground p-4 sm:p-8 max-w-3xl mx-auto h-full flex flex-col justify-center"
         style={{
-          minHeight: '300px',
-          contain: 'layout',
-          willChange: 'opacity',
+          height: '100%',
+          contain: 'strict',
           opacity: 1,
         }}
       >
