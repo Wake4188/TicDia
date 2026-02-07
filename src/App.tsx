@@ -6,12 +6,14 @@ import { AuthProvider } from "./contexts/AuthContext";
 import { LanguageProvider } from "./contexts/LanguageContext";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { Toaster } from "@/components/ui/toaster";
-import { CookieConsent } from "@/components/CookieConsent";
 import { GoogleAnalyticsTracker } from "./components/GoogleAnalyticsTracker";
 import { useReferralTracking } from "./hooks/useReferralTracking";
-import { AnnouncementDisplay } from "./components/AnnouncementDisplay";
 
 import { useUserPreferences, UserPreferencesProvider } from "./contexts/UserPreferencesContext";
+
+// Lazy load non-critical UI that isn't needed for initial render
+const CookieConsent = lazy(() => import("./components/CookieConsent").then(m => ({ default: m.CookieConsent })));
+const AnnouncementDisplay = lazy(() => import("./components/AnnouncementDisplay").then(m => ({ default: m.AnnouncementDisplay })));
 
 // Lazy load all pages for code splitting with error handling
 const Index = lazy(() => import("./pages/Index"));
@@ -75,8 +77,10 @@ function AppContent() {
       className={`min-h-screen bg-background ${userPreferences.liquidGlassMode ? 'liquid-glass' : ''}`}
       style={{ contain: 'layout style' }}
     >
-      {/* Announcements from admin panel */}
-      <AnnouncementDisplay />
+      {/* Announcements from admin panel - lazy loaded */}
+      <Suspense fallback={null}>
+        <AnnouncementDisplay />
+      </Suspense>
       
       {/* Defer heavy WebGL effect to after LCP */}
       {showSmoke && (
@@ -98,7 +102,9 @@ function AppContent() {
         </Routes>
       </Suspense>
       <Toaster />
-      <CookieConsent />
+      <Suspense fallback={null}>
+        <CookieConsent />
+      </Suspense>
     </div>
   );
 }
