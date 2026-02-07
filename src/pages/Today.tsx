@@ -302,55 +302,47 @@ const Today = () => {
       }
     }
   };
-  return <div className="min-h-screen bg-gradient-to-b from-black via-[#0a0a0f] to-black text-white pt-20 pb-10 overflow-x-hidden">
+  return <div className="min-h-screen bg-background text-foreground pt-20 pb-10 overflow-x-hidden">
+      {/* Gradient background matching profile design */}
+      <div className="fixed inset-0 -z-10">
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-background to-background" />
+        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-primary/10 rounded-full blur-[120px] -translate-y-1/2 translate-x-1/2" />
+        <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-primary/5 rounded-full blur-[100px] translate-y-1/2 -translate-x-1/2" />
+      </div>
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
         {/* Header Section */}
-        <motion.div initial={{
-        opacity: 0,
-        y: -20
-      }} animate={{
-        opacity: 1,
-        y: 0
-      }} className="flex flex-col md:flex-row items-start md:items-center justify-between mb-12 gap-4">
+        <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="flex flex-col md:flex-row items-start md:items-center justify-between mb-12 gap-4">
           <div>
-            <Button variant="ghost" onClick={() => navigate('/')} className="mb-4 text-gray-400 hover:text-white pl-0 hover:bg-transparent transition-colors">
+            <Button variant="ghost" onClick={() => navigate('/')} className="mb-4 text-muted-foreground hover:text-foreground pl-0 hover:bg-transparent transition-colors">
               ← {t('backToHome')}
             </Button>
-            <h1 className="text-4xl md:text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-500 mb-2">
+            <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-2">
               {t('todayHighlights')}
             </h1>
-            <p className="text-gray-400 flex items-center gap-2 text-lg">
-              <Calendar className="w-5 h-5 text-tictok-red" />
+            <p className="text-muted-foreground flex items-center gap-2 text-lg">
+              <Calendar className="w-5 h-5 text-primary" />
               {dateString}
             </p>
           </div>
 
           {isAdmin && <Dialog open={isAddingArticle} onOpenChange={setIsAddingArticle}>
               <DialogTrigger asChild>
-                <Button className="bg-tictok-red hover:bg-tictok-red/90 shadow-lg shadow-tictok-red/20 transition-all hover:scale-105">
+                <Button className="bg-primary hover:bg-primary/90 shadow-lg shadow-primary/20 transition-all hover:scale-105">
                   <Plus className="w-4 h-4 mr-2" />
                   {t('addArticle')}
                 </Button>
               </DialogTrigger>
-              <DialogContent className="bg-gray-900/95 backdrop-blur-xl border-gray-800">
+              <DialogContent className="bg-card/95 backdrop-blur-xl border-border">
                 <DialogHeader>
                   <DialogTitle>{t('addNewArticle')}</DialogTitle>
                 </DialogHeader>
                 <div className="space-y-4">
-                  <Input placeholder={t('articleTitle')} value={newArticle.title} onChange={e => setNewArticle(prev => ({
-                ...prev,
-                title: e.target.value
-              }))} className="bg-gray-800/50 border-gray-700 focus:border-tictok-red/50 transition-colors" />
-                  <Textarea placeholder={t('articleContent')} value={newArticle.content} onChange={e => setNewArticle(prev => ({
-                ...prev,
-                content: e.target.value
-              }))} className="bg-gray-800/50 border-gray-700 min-h-32 focus:border-tictok-red/50 transition-colors" />
-                  <Input placeholder={t('articleUrl')} value={newArticle.url} onChange={e => setNewArticle(prev => ({
-                ...prev,
-                url: e.target.value
-              }))} className="bg-gray-800/50 border-gray-700 focus:border-tictok-red/50 transition-colors" />
-                  <Button onClick={handleAddArticle} className="w-full bg-tictok-red hover:bg-tictok-red/90">
+                  <Input placeholder={t('articleTitle')} value={newArticle.title} onChange={e => setNewArticle(prev => ({ ...prev, title: e.target.value }))} className="bg-muted/50 border-border focus:border-primary/50 transition-colors" />
+                  <Textarea placeholder={t('articleContent')} value={newArticle.content} onChange={e => setNewArticle(prev => ({ ...prev, content: e.target.value }))} className="bg-muted/50 border-border min-h-32 focus:border-primary/50 transition-colors" />
+                  <Input placeholder={t('articleUrl')} value={newArticle.url} onChange={e => setNewArticle(prev => ({ ...prev, url: e.target.value }))} className="bg-muted/50 border-border focus:border-primary/50 transition-colors" />
+                  <Button onClick={handleAddArticle} className="w-full bg-primary hover:bg-primary/90">
                     {t('addArticle')}
                   </Button>
                 </div>
@@ -359,8 +351,6 @@ const Today = () => {
         </motion.div>
 
         <motion.div variants={containerVariants} initial="hidden" animate="visible" className="space-y-12">
-          {/* Voting Progress Bar */}
-          
 
           {/* News Feed Section */}
           <motion.div variants={itemVariants}>
@@ -370,45 +360,38 @@ const Today = () => {
           {/* AP News RSS Section */}
           {apNewsArticles.length > 0 && <motion.div variants={itemVariants} className="space-y-6">
               <div className="flex items-center gap-3 mb-6">
-                <div className="p-2 bg-tictok-red/10 rounded-lg">
-                  <TrendingUp className="w-6 h-6 text-tictok-red" />
+                <div className="p-2 bg-primary/10 rounded-lg">
+                  <TrendingUp className="w-6 h-6 text-primary" />
                 </div>
-                <h2 className="text-2xl font-bold text-white">{t('apNews')}</h2>
+                <h2 className="text-2xl font-bold text-foreground">{t('apNews')}</h2>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {(showAllArticles ? apNewsArticles : apNewsArticles.slice(0, 9)).map((article, index) => <motion.div key={`ap-${index}`} variants={itemVariants} whileHover={{
-              y: -5,
-              transition: {
-                duration: 0.2
-              }
-            }}>
-                    <Card className="h-full bg-white/5 backdrop-blur-md border-white/10 hover:bg-white/10 transition-all duration-300 overflow-hidden group">
+                {(showAllArticles ? apNewsArticles : apNewsArticles.slice(0, 9)).map((article, index) => <motion.div key={`ap-${index}`} variants={itemVariants} whileHover={{ y: -5, transition: { duration: 0.2 } }}>
+                    <Card className="h-full bg-card/50 backdrop-blur-md border-border/50 hover:bg-card/70 transition-all duration-300 overflow-hidden group hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5">
                       <CardContent className="p-0 flex flex-col h-full">
                         {article.image && <div className="relative w-full h-48 overflow-hidden">
-                            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent z-10" />
-                            <img src={article.image} alt={article.title} loading="lazy" className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-500" onError={e => {
-                      e.currentTarget.style.display = 'none';
-                    }} />
+                            <div className="absolute inset-0 bg-gradient-to-t from-background/60 to-transparent z-10" />
+                            <img src={article.image} alt={article.title} loading="lazy" className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-500" onError={e => { e.currentTarget.style.display = 'none'; }} />
                             <div className="absolute bottom-3 left-3 z-20">
-                              <span className="text-xs font-medium px-2 py-1 bg-black/50 backdrop-blur-sm rounded-full text-white border border-white/20">
+                              <span className="text-xs font-medium px-2 py-1 bg-background/50 backdrop-blur-sm rounded-full text-foreground border border-border/30">
                                 {article.source}
                               </span>
                             </div>
                           </div>}
                         <div className="p-5 flex-1 flex flex-col">
-                          <h3 className="text-lg font-bold text-white mb-3 line-clamp-2 group-hover:text-tictok-red transition-colors">
+                          <h3 className="text-lg font-bold text-foreground mb-3 line-clamp-2 group-hover:text-primary transition-colors">
                             {article.title}
                           </h3>
-                          <p className="text-gray-400 text-sm mb-4 line-clamp-3 flex-1">
+                          <p className="text-muted-foreground text-sm mb-4 line-clamp-3 flex-1">
                             {article.summary}
                           </p>
-                          <div className="flex items-center justify-between pt-4 border-t border-white/5 mt-auto">
-                            <span className="text-xs text-gray-500 flex items-center gap-1">
+                          <div className="flex items-center justify-between pt-4 border-t border-border/30 mt-auto">
+                            <span className="text-xs text-muted-foreground flex items-center gap-1">
                               <Calendar className="w-3 h-3" />
                               {new Date(article.publishedAt).toLocaleDateString()}
                             </span>
-                            <a href={article.link} target="_blank" rel="noopener noreferrer" className="text-white hover:text-tictok-red text-sm font-medium flex items-center gap-1 transition-colors">
+                            <a href={article.link} target="_blank" rel="noopener noreferrer" className="text-foreground hover:text-primary text-sm font-medium flex items-center gap-1 transition-colors">
                               {t('readMore')} <ExternalLink className="w-3 h-3" />
                             </a>
                           </div>
@@ -419,7 +402,7 @@ const Today = () => {
               </div>
 
               {apNewsArticles.length > 9 && <div className="flex justify-center mt-8">
-                  <Button variant="outline" onClick={() => setShowAllArticles(!showAllArticles)} className="bg-transparent border-white/20 text-white hover:bg-white/10 hover:text-tictok-red transition-all">
+                  <Button variant="outline" onClick={() => setShowAllArticles(!showAllArticles)} className="bg-transparent border-border text-foreground hover:bg-muted hover:text-primary transition-all">
                     {showAllArticles ? <>
                         <ChevronUp className="w-4 h-4 mr-2" />
                         {t('showLess')}
@@ -434,31 +417,27 @@ const Today = () => {
           {/* Wikipedia Articles Section */}
           <motion.div variants={itemVariants} className="space-y-6">
             <div className="flex items-center gap-3 mb-6">
-              <div className="p-2 bg-blue-500/10 rounded-lg">
-                <Globe className="w-6 h-6 text-blue-400" />
+              <div className="p-2 bg-primary/10 rounded-lg">
+                <Globe className="w-6 h-6 text-primary" />
               </div>
-              <h2 className="text-2xl font-bold text-white">{t('fromWikipedia')}</h2>
+              <h2 className="text-2xl font-bold text-foreground">{t('fromWikipedia')}</h2>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {wikipediaArticles.map((article, index) => <motion.div key={index} variants={itemVariants} whileHover={{
-              scale: 1.02
-            }} whileTap={{
-              scale: 0.98
-            }}>
-                  <Card className="h-full bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-md border-white/10 hover:border-white/20 transition-all cursor-pointer group" onClick={() => handleWikipediaClick(article)}>
+              {wikipediaArticles.map((article, index) => <motion.div key={index} variants={itemVariants} whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                  <Card className="h-full bg-card/50 backdrop-blur-md border-border/50 hover:border-primary/30 transition-all cursor-pointer group hover:shadow-lg hover:shadow-primary/5" onClick={() => handleWikipediaClick(article)}>
                     <CardContent className="p-6">
                       <div className="flex items-start justify-between gap-4">
                         <div className="flex-1">
-                          <h3 className="text-xl font-bold text-white mb-3 group-hover:text-blue-400 transition-colors">
+                          <h3 className="text-xl font-bold text-foreground mb-3 group-hover:text-primary transition-colors">
                             {article.title}
                           </h3>
-                          <p className="text-gray-300 text-sm line-clamp-4 leading-relaxed">
+                          <p className="text-muted-foreground text-sm line-clamp-4 leading-relaxed">
                             {article.extract}
                           </p>
                         </div>
-                        <div className="p-2 bg-white/5 rounded-full group-hover:bg-blue-500/20 transition-colors">
-                          <ExternalLink className="w-5 h-5 text-gray-400 group-hover:text-blue-400" />
+                        <div className="p-2 bg-muted/30 rounded-full group-hover:bg-primary/20 transition-colors">
+                          <ExternalLink className="w-5 h-5 text-muted-foreground group-hover:text-primary" />
                         </div>
                       </div>
                     </CardContent>
@@ -470,26 +449,26 @@ const Today = () => {
           {/* Admin Articles Section */}
           {adminArticles && adminArticles.length > 0 && <motion.div variants={itemVariants} className="space-y-6">
               <div className="flex items-center gap-3 mb-6">
-                <div className="p-2 bg-purple-500/10 rounded-lg">
-                  <Sparkles className="w-6 h-6 text-purple-400" />
+                <div className="p-2 bg-accent/10 rounded-lg">
+                  <Sparkles className="w-6 h-6 text-accent-foreground" />
                 </div>
-                <h2 className="text-2xl font-bold text-white">{t('editorialHighlights')}</h2>
+                <h2 className="text-2xl font-bold text-foreground">{t('editorialHighlights')}</h2>
               </div>
 
               <div className="grid grid-cols-1 gap-4">
                 {adminArticles.map(article => <motion.div key={article.id} variants={itemVariants}>
-                    <Card className="bg-purple-900/10 border-purple-500/20 backdrop-blur-sm">
+                    <Card className="bg-card/50 backdrop-blur-sm border-border/50">
                       <CardHeader className="pb-3">
                         <div className="flex items-start justify-between">
-                          <CardTitle className="text-xl text-white">{article.title}</CardTitle>
-                          {isAdmin && <Button variant="ghost" size="sm" onClick={() => handleDeleteArticle(article.id)} className="text-red-400 hover:text-red-300 hover:bg-red-900/20">
+                          <CardTitle className="text-xl text-foreground">{article.title}</CardTitle>
+                          {isAdmin && <Button variant="ghost" size="sm" onClick={() => handleDeleteArticle(article.id)} className="text-destructive hover:text-destructive hover:bg-destructive/10">
                               <Trash2 className="w-4 h-4" />
                             </Button>}
                         </div>
                       </CardHeader>
                       <CardContent className="pt-0">
-                        <p className="text-gray-300 text-sm mb-4 leading-relaxed">{article.content}</p>
-                        {article.url && <a href={article.url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-purple-500/10 text-purple-300 hover:bg-purple-500/20 transition-colors text-sm font-medium">
+                        <p className="text-muted-foreground text-sm mb-4 leading-relaxed">{article.content}</p>
+                        {article.url && <a href={article.url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary hover:bg-primary/20 transition-colors text-sm font-medium">
                             {t('readMore')} <ExternalLink className="w-4 h-4" />
                           </a>}
                       </CardContent>
