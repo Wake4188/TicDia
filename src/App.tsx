@@ -25,6 +25,7 @@ const Recap = lazy(() => import("./pages/Recap"));
 const WordFeed = lazy(() => import("./pages/WordFeed"));
 const Portfolio = lazy(() => import("./pages/Portfolio"));
 const AdminPanel = lazy(() => import("./pages/AdminPanel"));
+const Explore = lazy(() => import("./pages/Explore"));
 
 // Lazy load heavy components that hurt performance
 const FluidSmokeEffect = lazy(() => import("./components/FluidSmokeEffect"));
@@ -99,6 +100,7 @@ function AppContent() {
           <Route path="/word-feed" element={<WordFeed />} />
           <Route path="/portfolio" element={<Portfolio />} />
           <Route path="/admin" element={<AdminPanel />} />
+          <Route path="/explore" element={<Explore />} />
         </Routes>
       </Suspense>
       <Toaster />

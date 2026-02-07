@@ -191,6 +191,7 @@ export const ProfileDesktop = ({ fontOptions, colorOptions }: ProfileDesktopProp
     { id: "appearance", label: "Appearance", icon: Palette },
     { id: "preferences", label: "Preferences", icon: Settings },
     { id: "security", label: "Security", icon: Lock },
+    { id: "explore", label: "Explore", icon: Sparkles },
     ...(isAdmin ? [{ id: "admin", label: "Admin", icon: Shield }] : [])
   ];
 
@@ -996,6 +997,59 @@ export const ProfileDesktop = ({ fontOptions, colorOptions }: ProfileDesktopProp
                       >
                         {passwordLoading ? "Updating..." : "Update Password"}
                       </Button>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              )}
+
+              {/* Explore Section */}
+              {activeSection === "explore" && (
+                <motion.div
+                  key="explore"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  className="space-y-6"
+                >
+                  <Card className="bg-card/50 backdrop-blur-sm border-border/50">
+                    <CardContent className="p-6">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-4">
+                          <div className="p-3 rounded-xl bg-primary/10">
+                            <Sparkles className="w-8 h-8 text-primary" />
+                          </div>
+                          <div>
+                            <h3 className="text-xl font-bold text-foreground">Explore</h3>
+                            <p className="text-muted-foreground">On This Day events, Did You Know facts, and more</p>
+                          </div>
+                        </div>
+                        <Button onClick={() => navigate("/explore")} className="gap-2">
+                          <Sparkles className="w-4 h-4" />
+                          Open Explore
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  <Card className="bg-card/50 backdrop-blur-sm border-border/50">
+                    <CardHeader>
+                      <CardTitle>What's Inside</CardTitle>
+                      <CardDescription>Discover curated content from Wikipedia</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-3">
+                      {[
+                        { title: "On This Day", desc: "Historical events, births, and deaths that happened today", icon: "📅" },
+                        { title: "Did You Know?", desc: "Random fascinating facts from Wikipedia articles", icon: "💡" },
+                        { title: "Holidays", desc: "Holidays and observances celebrated around the world today", icon: "🎉" },
+                      ].map((item) => (
+                        <div key={item.title} className="flex items-start gap-3 p-4 rounded-xl bg-muted/30 hover:bg-muted/50 transition-colors">
+                          <span className="text-2xl">{item.icon}</span>
+                          <div>
+                            <p className="font-medium text-foreground">{item.title}</p>
+                            <p className="text-sm text-muted-foreground">{item.desc}</p>
+                          </div>
+                        </div>
+                      ))}
                     </CardContent>
                   </Card>
                 </motion.div>

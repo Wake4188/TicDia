@@ -20,52 +20,33 @@ const Auth = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  // Generate birth year options (current year - 100 to current year - 13)
   const currentYear = new Date().getFullYear();
   const birthYearOptions = Array.from({ length: 88 }, (_, i) => currentYear - 13 - i);
 
   useEffect(() => {
     const checkUser = async () => {
       const { data: { session } } = await supabase.auth.getSession();
-      if (session) {
-        navigate("/");
-      }
+      if (session) navigate("/");
     };
     checkUser();
   }, [navigate]);
 
   const validateForm = (): boolean => {
     if (!validateEmail(email)) {
-      toast({
-        title: "Invalid Email",
-        description: "Please enter a valid email address.",
-        variant: "destructive"
-      });
+      toast({ title: "Invalid Email", description: "Please enter a valid email address.", variant: "destructive" });
       return false;
     }
     const passwordValidation = validatePassword(password);
     if (!passwordValidation.isValid) {
-      toast({
-        title: "Invalid Password",
-        description: passwordValidation.message,
-        variant: "destructive"
-      });
+      toast({ title: "Invalid Password", description: passwordValidation.message, variant: "destructive" });
       return false;
     }
     if (!isLogin && password !== confirmPassword) {
-      toast({
-        title: "Password Mismatch",
-        description: "Passwords do not match. Please try again.",
-        variant: "destructive"
-      });
+      toast({ title: "Password Mismatch", description: "Passwords do not match.", variant: "destructive" });
       return false;
     }
     if (!isLogin && !birthYear) {
-      toast({
-        title: "Birth Year Required",
-        description: "Please select your birth year.",
-        variant: "destructive"
-      });
+      toast({ title: "Birth Year Required", description: "Please select your birth year.", variant: "destructive" });
       return false;
     }
     return true;
@@ -73,152 +54,109 @@ const Auth = () => {
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!validateForm()) {
-      return;
-    }
+    if (!validateForm()) return;
     setLoading(true);
     try {
       if (isLogin) {
-        const { error } = await supabase.auth.signInWithPassword({
-          email: email.trim(),
-          password
-        });
+        const { error } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
         if (error) {
           const errorMessage = sanitizeErrorMessage(error);
-          if (errorMessage.includes("Invalid login credentials")) {
-            toast({
-              title: "Login Failed",
-              description: "Invalid email or password. Please try again.",
-              variant: "destructive"
-            });
-          } else {
-            toast({
-              title: "Login Failed",
-              description: "Unable to sign in. Please try again.",
-              variant: "destructive"
-            });
-          }
-        } else {
           toast({
-            title: "Welcome back!",
-            description: "You've been successfully logged in."
+            title: "Login Failed",
+            description: errorMessage.includes("Invalid login credentials") ? "Invalid email or password." : "Unable to sign in.",
+            variant: "destructive"
           });
+        } else {
+          toast({ title: "Welcome back!", description: "You've been successfully logged in." });
           navigate("/");
         }
       } else {
         const redirectUrl = `${window.location.origin}/`;
-        const { data, error } = await supabase.auth.signUp({
-          email: email.trim(),
-          password,
-          options: {
-            emailRedirectTo: redirectUrl
-          }
-        });
+        const { data, error } = await supabase.auth.signUp({ email: email.trim(), password, options: { emailRedirectTo: redirectUrl } });
         if (error) {
           const errorMessage = sanitizeErrorMessage(error);
-          if (errorMessage.includes("User already registered")) {
-            toast({
-              title: "Account Exists",
-              description: "An account with this email already exists. Try logging in instead.",
-              variant: "destructive"
-            });
-          } else {
-            toast({
-              title: "Sign Up Failed",
-              description: "Unable to create account. Please try again.",
-              variant: "destructive"
-            });
-          }
+          toast({
+            title: errorMessage.includes("User already registered") ? "Account Exists" : "Sign Up Failed",
+            description: errorMessage.includes("User already registered") ? "Try logging in instead." : "Unable to create account.",
+            variant: "destructive"
+          });
         } else {
-          // Save birth year and adult content preference after successful signup
           if (data.user) {
             const userAge = currentYear - parseInt(birthYear);
-            const allowAdultContent = userAge >= 18;
-            
             await supabase.from('user_preferences').upsert({
               user_id: data.user.id,
               birth_year: parseInt(birthYear),
-              allow_adult_content: allowAdultContent
+              allow_adult_content: userAge >= 18
             }, { onConflict: 'user_id' });
           }
-          
-          toast({
-            title: "Account Created!",
-            description: "You can now sign in with your credentials."
-          });
+          toast({ title: "Account Created!", description: "You can now sign in." });
           setIsLogin(true);
           setPassword("");
           setConfirmPassword("");
           setBirthYear("");
         }
       }
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "An unexpected error occurred. Please try again.",
-        variant: "destructive"
-      });
+    } catch {
+      toast({ title: "Error", description: "An unexpected error occurred.", variant: "destructive" });
     } finally {
       setLoading(false);
     }
   };
 
-  const handleSkip = () => {
-    navigate("/");
-  };
-
   return (
-    <div className="min-h-screen bg-wikitok-dark flex items-center justify-center px-4">
+    <div className="min-h-screen bg-background flex items-center justify-center px-4">
+      {/* Gradient background */}
+      <div className="fixed inset-0 -z-10">
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-background to-background" />
+        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-primary/10 rounded-full blur-[120px] -translate-y-1/2 translate-x-1/2" />
+        <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-primary/5 rounded-full blur-[100px] translate-y-1/2 -translate-x-1/2" />
+      </div>
+
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-tictok-red mb-2">TicDia</h1>
-          <p className="text-white/60">
+          <h1 className="text-3xl font-bold text-primary mb-2">TicDia</h1>
+          <p className="text-muted-foreground">
             {isLogin ? "Welcome back!" : "Join the community"}
           </p>
         </div>
 
-        <div className="bg-black/20 backdrop-blur-sm rounded-lg p-6 border border-white/10">
+        <div className="bg-card/50 backdrop-blur-sm rounded-2xl p-6 border border-border/50">
           <form onSubmit={handleAuth} className="space-y-4">
             <div>
-              <Label htmlFor="email" className="text-white">
-                Email
-              </Label>
-              <Input 
-                id="email" 
-                type="email" 
-                value={email} 
-                onChange={e => setEmail(e.target.value)} 
-                required 
-                maxLength={254} 
-                className="bg-white/5 border-white/20 text-white placeholder:text-white/40" 
-                placeholder="Enter your email" 
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                value={email}
+                onChange={e => setEmail(e.target.value)}
+                required
+                maxLength={254}
+                placeholder="Enter your email"
               />
             </div>
 
             <div>
-              <Label htmlFor="password" className="text-white">
-                Password
-              </Label>
+              <Label htmlFor="password">Password</Label>
               {!isLogin && (
-                <p className="text-xs text-white/60 mb-2">
+                <p className="text-xs text-muted-foreground mb-2">
                   Must be 8+ characters with uppercase, lowercase, number, and special character
                 </p>
               )}
               <div className="relative">
-                <Input 
-                  id="password" 
-                  type={showPassword ? "text" : "password"} 
-                  value={password} 
-                  onChange={e => setPassword(e.target.value)} 
-                  required 
-                  maxLength={128} 
-                  className="bg-white/5 border-white/20 text-white placeholder:text-white/40 pr-10" 
-                  placeholder="Enter your password" 
+                <Input
+                  id="password"
+                  type={showPassword ? "text" : "password"}
+                  value={password}
+                  onChange={e => setPassword(e.target.value)}
+                  required
+                  maxLength={128}
+                  placeholder="Enter your password"
+                  className="pr-10"
                 />
-                <button 
-                  type="button" 
-                  onClick={() => setShowPassword(!showPassword)} 
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-white/40 hover:text-white/60"
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground"
                 >
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
@@ -228,41 +166,28 @@ const Auth = () => {
             {!isLogin && (
               <>
                 <div>
-                  <Label htmlFor="confirmPassword" className="text-white">
-                    Confirm Password
-                  </Label>
-                  <Input 
-                    id="confirmPassword" 
-                    type="password" 
-                    value={confirmPassword} 
-                    onChange={e => setConfirmPassword(e.target.value)} 
-                    required 
-                    maxLength={128} 
-                    className="bg-white/5 border-white/20 text-white placeholder:text-white/40" 
-                    placeholder="Confirm your password" 
+                  <Label htmlFor="confirmPassword">Confirm Password</Label>
+                  <Input
+                    id="confirmPassword"
+                    type="password"
+                    value={confirmPassword}
+                    onChange={e => setConfirmPassword(e.target.value)}
+                    required
+                    maxLength={128}
+                    placeholder="Confirm your password"
                   />
                 </div>
 
                 <div>
-                  <Label htmlFor="birthYear" className="text-white">
-                    Birth Year
-                  </Label>
-                  <p className="text-xs text-white/60 mb-2">
-                    Required for content filtering (must be 13+)
-                  </p>
+                  <Label htmlFor="birthYear">Birth Year</Label>
+                  <p className="text-xs text-muted-foreground mb-2">Required for content filtering (must be 13+)</p>
                   <Select value={birthYear} onValueChange={setBirthYear}>
-                    <SelectTrigger className="bg-white/5 border-white/20 text-white">
+                    <SelectTrigger>
                       <SelectValue placeholder="Select your birth year" />
                     </SelectTrigger>
-                    <SelectContent className="bg-wikitok-dark border-white/20 max-h-[200px]">
+                    <SelectContent className="max-h-[200px]">
                       {birthYearOptions.map((year) => (
-                        <SelectItem 
-                          key={year} 
-                          value={year.toString()}
-                          className="text-white focus:bg-white/10 focus:text-white"
-                        >
-                          {year}
-                        </SelectItem>
+                        <SelectItem key={year} value={year.toString()}>{year}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
@@ -270,14 +195,10 @@ const Auth = () => {
               </>
             )}
 
-            <Button 
-              type="submit" 
-              disabled={loading} 
-              className="w-full bg-tictok-red hover:bg-tictok-red/90 text-white"
-            >
+            <Button type="submit" disabled={loading} className="w-full">
               {loading ? (
                 <div className="flex items-center gap-2">
-                  <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin" />
+                  <div className="w-4 h-4 border-2 border-primary-foreground/20 border-t-primary-foreground rounded-full animate-spin" />
                   {isLogin ? "Signing In..." : "Creating Account..."}
                 </div>
               ) : (
@@ -290,25 +211,16 @@ const Auth = () => {
           </form>
 
           <div className="mt-4 text-center">
-            <button 
-              onClick={() => {
-                setIsLogin(!isLogin);
-                setPassword("");
-                setConfirmPassword("");
-                setBirthYear("");
-              }} 
-              className="text-wikitok-blue hover:text-wikitok-blue/80 text-sm"
+            <button
+              onClick={() => { setIsLogin(!isLogin); setPassword(""); setConfirmPassword(""); setBirthYear(""); }}
+              className="text-primary hover:text-primary/80 text-sm"
             >
               {isLogin ? "Don't have an account? Sign up" : "Already have an account? Sign in"}
             </button>
           </div>
 
-          <div className="mt-6 pt-4 border-t border-white/10">
-            <Button 
-              onClick={handleSkip} 
-              variant="ghost" 
-              className="w-full text-white/60 hover:text-white hover:bg-white/5"
-            >
+          <div className="mt-6 pt-4 border-t border-border/50">
+            <Button onClick={() => navigate("/")} variant="ghost" className="w-full text-muted-foreground hover:text-foreground">
               Continue without account
             </Button>
           </div>

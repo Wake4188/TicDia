@@ -3,7 +3,7 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.3'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
 }
 
 // Rate limiting with cleanup
@@ -37,12 +37,12 @@ function checkRateLimit(userId: string): boolean {
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders })
+    return new Response(null, { headers: corsHeaders })
   }
 
   try {
     const authHeader = req.headers.get('Authorization')
-    if (!authHeader) {
+    if (!authHeader?.startsWith('Bearer ')) {
       return new Response(
         JSON.stringify({ error: 'Authentication required' }),
         { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -50,20 +50,24 @@ serve(async (req) => {
     }
 
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!
-    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
-    const supabase = createClient(supabaseUrl, supabaseKey)
+    const supabaseKey = Deno.env.get('SUPABASE_ANON_KEY')!
+    const supabase = createClient(supabaseUrl, supabaseKey, {
+      global: { headers: { Authorization: authHeader } }
+    })
 
     const token = authHeader.replace('Bearer ', '')
-    const { data: { user }, error: authError } = await supabase.auth.getUser(token)
+    const { data: claimsData, error: authError } = await supabase.auth.getClaims(token)
 
-    if (authError || !user) {
+    if (authError || !claimsData?.claims) {
       return new Response(
         JSON.stringify({ error: 'Invalid authentication' }),
         { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
 
-    if (!checkRateLimit(user.id)) {
+    const userId = claimsData.claims.sub as string
+
+    if (!checkRateLimit(userId)) {
       return new Response(
         JSON.stringify({ error: 'Rate limit exceeded. Please try again later.' }),
         { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json', 'Retry-After': '60' } }
@@ -104,7 +108,7 @@ serve(async (req) => {
       )
     }
 
-    const response = await fetch('https://api.elevenlabs.io/v1/text-to-speech/' + (voice || 'pNInz6obpgDQGcFmaJgB'), {
+    const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voice || 'pNInz6obpgDQGcFmaJgB'}?output_format=mp3_44100_128`, {
       method: 'POST',
       headers: {
         'Accept': 'audio/mpeg',
@@ -137,16 +141,10 @@ serve(async (req) => {
     }
 
     const arrayBuffer = await response.arrayBuffer()
-    const uint8Array = new Uint8Array(arrayBuffer)
 
-    // Process in chunks to avoid stack overflow
-    let binaryString = ''
-    const chunkSize = 8192
-    for (let i = 0; i < uint8Array.length; i += chunkSize) {
-      const chunk = uint8Array.slice(i, i + chunkSize)
-      binaryString += String.fromCharCode(...chunk)
-    }
-    const base64Audio = btoa(binaryString)
+    // Use Deno's base64 encoding to avoid stack overflow
+    const { encode: base64Encode } = await import("https://deno.land/std@0.168.0/encoding/base64.ts")
+    const base64Audio = base64Encode(arrayBuffer)
 
     return new Response(
       JSON.stringify({ audioContent: base64Audio }),

@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { 
   BookMarked, Eye, Trash2, Search, Mail, Lock, 
   BarChart3, Globe, Moon, Sun, Shield, LogOut, Settings,
-  Palette, ChevronRight, User, Users, Share2, ArrowLeft, Heart, X, Type
+  Palette, ChevronRight, User, Users, Share2, ArrowLeft, Heart, X, Type, Compass
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
@@ -413,6 +413,7 @@ export const ProfileMobile = ({ fontOptions, colorOptions }: ProfileMobileProps)
           <SettingsItem icon={BookMarked} label="Saved Articles" value={savedArticles.length.toString()} onClick={() => setSubPage('saved')} />
           <SettingsItem icon={BarChart3} label="Reading Analytics" onClick={() => setSubPage('analytics')} />
           <SettingsItem icon={Users} label="Social" onClick={() => setSubPage('social')} />
+          <SettingsItem icon={Compass} label="Explore" value="On This Day & More" onClick={() => navigate('/explore')} color="text-emerald-500" bgColor="bg-emerald-500/10" />
         </SettingsGroup>
 
         <SettingsGroup title="Appearance">

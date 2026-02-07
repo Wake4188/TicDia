@@ -3,21 +3,20 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.3'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
 }
 
-// Rate limiting with automatic cleanup to prevent memory leaks at scale
+// Rate limiting with automatic cleanup
 const rateLimitStore = new Map<string, number[]>()
 const RATE_LIMIT_WINDOW = 60000
 const MAX_REQUESTS_PER_WINDOW = 20
 let lastCleanup = Date.now()
-const CLEANUP_INTERVAL = 300000 // 5 minutes
+const CLEANUP_INTERVAL = 300000
 
 function checkRateLimit(userId: string): boolean {
   const now = Date.now()
 
-  // Periodic cleanup to prevent unbounded memory growth
   if (now - lastCleanup > CLEANUP_INTERVAL) {
     for (const [key, timestamps] of rateLimitStore) {
       const recent = timestamps.filter(t => now - t < RATE_LIMIT_WINDOW)
@@ -30,9 +29,7 @@ function checkRateLimit(userId: string): boolean {
   const userRequests = rateLimitStore.get(userId) || []
   const recentRequests = userRequests.filter(timestamp => now - timestamp < RATE_LIMIT_WINDOW)
 
-  if (recentRequests.length >= MAX_REQUESTS_PER_WINDOW) {
-    return false
-  }
+  if (recentRequests.length >= MAX_REQUESTS_PER_WINDOW) return false
 
   recentRequests.push(now)
   rateLimitStore.set(userId, recentRequests)
@@ -41,12 +38,12 @@ function checkRateLimit(userId: string): boolean {
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders })
+    return new Response(null, { headers: corsHeaders })
   }
 
   try {
     const authHeader = req.headers.get('Authorization')
-    if (!authHeader) {
+    if (!authHeader?.startsWith('Bearer ')) {
       return new Response(
         JSON.stringify({ error: 'Authentication required' }),
         { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -54,20 +51,24 @@ serve(async (req) => {
     }
 
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!
-    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
-    const supabase = createClient(supabaseUrl, supabaseKey)
+    const supabaseKey = Deno.env.get('SUPABASE_ANON_KEY')!
+    const supabase = createClient(supabaseUrl, supabaseKey, {
+      global: { headers: { Authorization: authHeader } }
+    })
 
     const token = authHeader.replace('Bearer ', '')
-    const { data: { user }, error: authError } = await supabase.auth.getUser(token)
+    const { data: claimsData, error: authError } = await supabase.auth.getClaims(token)
 
-    if (authError || !user) {
+    if (authError || !claimsData?.claims) {
       return new Response(
         JSON.stringify({ error: 'Invalid authentication' }),
         { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
 
-    if (!checkRateLimit(user.id)) {
+    const userId = claimsData.claims.sub as string
+
+    if (!checkRateLimit(userId)) {
       return new Response(
         JSON.stringify({ error: 'Rate limit exceeded. Please try again later.' }),
         { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json', 'Retry-After': '60' } }
@@ -115,7 +116,7 @@ serve(async (req) => {
       )
     }
 
-    const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voice}`, {
+    const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voice}/stream?output_format=mp3_44100_128`, {
       method: 'POST',
       headers: {
         'Accept': 'audio/mpeg',
@@ -135,8 +136,7 @@ serve(async (req) => {
     })
 
     if (!response.ok) {
-      const status = response.status
-      if (status === 429) {
+      if (response.status === 429) {
         return new Response(
           JSON.stringify({ error: 'TTS provider rate limited. Please try again shortly.' }),
           { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json', 'Retry-After': '30' } }
@@ -155,7 +155,7 @@ serve(async (req) => {
         'Cache-Control': 'no-store',
       },
     })
-  } catch (error: any) {
+  } catch (error) {
     return new Response(
       JSON.stringify({ error: 'Failed to generate speech' }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }

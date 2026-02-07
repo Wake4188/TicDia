@@ -120,22 +120,28 @@ const Discover = () => {
   };
 
   return (
-    <div className="min-h-screen bg-black text-white pb-20">
+    <div className="min-h-screen bg-background text-foreground pb-20">
+      {/* Gradient background */}
+      <div className="fixed inset-0 -z-10">
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-background to-background" />
+        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-primary/10 rounded-full blur-[120px] -translate-y-1/2 translate-x-1/2" />
+      </div>
+
       {/* Header Section */}
-      <div className="sticky top-0 z-20 bg-black/80 backdrop-blur-xl border-b border-white/10">
+      <div className="sticky top-0 z-20 bg-background/80 backdrop-blur-xl border-b border-border">
         <div className="flex items-center justify-between px-4 py-3">
           <Button
             variant="ghost"
             onClick={() => navigate('/')}
-            className="text-white/70 hover:text-white hover:bg-white/10 rounded-full w-10 h-10 p-0"
+            className="text-muted-foreground hover:text-foreground hover:bg-muted rounded-full w-10 h-10 p-0"
             aria-label="Back to Home"
           >
             <ArrowLeft className="w-6 h-6" />
           </Button>
-          <h1 className="text-lg font-bold bg-gradient-to-r from-white via-white/90 to-white/70 bg-clip-text text-transparent">
+          <h1 className="text-lg font-bold text-foreground">
             {t.discover}
           </h1>
-          <div className="w-10" /> {/* Spacer */}
+          <div className="w-10" />
         </div>
 
         {/* Categories */}
@@ -149,8 +155,8 @@ const Discover = () => {
                   className={`
                     px-5 py-2 rounded-full text-sm font-medium transition-all duration-300 border
                     ${selectedCategory === category
-                      ? "bg-white text-black border-white shadow-[0_0_15px_rgba(255,255,255,0.3)] scale-105"
-                      : "bg-white/5 text-white/70 border-white/10 hover:bg-white/10 hover:border-white/20 hover:text-white"
+                      ? "bg-primary text-primary-foreground border-primary shadow-lg shadow-primary/20 scale-105"
+                      : "bg-muted/30 text-muted-foreground border-border hover:bg-muted hover:border-border hover:text-foreground"
                     }
                   `}
                 >
@@ -168,7 +174,7 @@ const Discover = () => {
         {isLoading ? (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
             {Array.from({ length: 8 }).map((_, i) => (
-              <Skeleton key={i} className="aspect-[9/16] rounded-xl bg-white/10" />
+              <Skeleton key={i} className="aspect-[9/16] rounded-xl bg-muted" />
             ))}
           </div>
         ) : (
@@ -184,7 +190,7 @@ const Discover = () => {
                 variants={itemVariants}
                 whileHover={{ scale: 1.02, transition: { duration: 0.2 } }}
                 whileTap={{ scale: 0.98 }}
-                className="relative aspect-[9/16] group cursor-pointer overflow-hidden rounded-xl bg-gray-900 shadow-lg border border-white/5"
+                className="relative aspect-[9/16] group cursor-pointer overflow-hidden rounded-2xl bg-card shadow-lg border border-border/50 hover:border-primary/30 hover:shadow-primary/5"
                 onClick={() => handleArticleClick(article)}
               >
                 {/* Image */}
@@ -196,26 +202,26 @@ const Discover = () => {
                 />
 
                 {/* Gradient Overlay */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent opacity-90" />
+                <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent opacity-90" />
 
                 {/* Content */}
                 <div className="absolute bottom-0 left-0 right-0 p-4 transform transition-transform duration-300">
-                  <div className="flex items-center gap-1 text-xs text-tictok-red font-medium mb-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300 -translate-y-2 group-hover:translate-y-0">
+                  <div className="flex items-center gap-1 text-xs text-primary font-medium mb-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300 -translate-y-2 group-hover:translate-y-0">
                     <TrendingUp className="w-3 h-3" />
                     <span>Trending</span>
                   </div>
 
-                  <h3 className="text-sm font-bold text-white leading-tight line-clamp-2 mb-1 drop-shadow-md">
+                  <h3 className="text-sm font-bold text-foreground leading-tight line-clamp-2 mb-1 drop-shadow-md">
                     {article.title}
                   </h3>
 
-                  <p className="text-xs text-white/60 font-medium flex items-center gap-1">
+                  <p className="text-xs text-muted-foreground font-medium flex items-center gap-1">
                     {article.views.toLocaleString()} {t.views}
                   </p>
                 </div>
 
                 {/* Shine Effect on Hover */}
-                <div className="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/0 to-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+                <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-transparent to-primary/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
               </motion.div>
             ))}
           </motion.div>
@@ -226,8 +232,8 @@ const Discover = () => {
       {isFetchingNextPage && (
         <div className="flex justify-center p-8">
           <div className="relative w-10 h-10">
-            <div className="absolute inset-0 border-4 border-white/20 rounded-full"></div>
-            <div className="absolute inset-0 border-4 border-t-tictok-red rounded-full animate-spin"></div>
+            <div className="absolute inset-0 border-4 border-muted rounded-full"></div>
+            <div className="absolute inset-0 border-4 border-t-primary rounded-full animate-spin"></div>
           </div>
         </div>
       )}

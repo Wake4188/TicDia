@@ -1,13 +1,13 @@
 project_id = "rtuxaekhfwvpwmvmdaul"
 
 [functions.text-to-speech]
-verify_jwt = true
+verify_jwt = false
 
 [functions.daily-article-selection]
 verify_jwt = true
 
 [functions.tts-stream]
-verify_jwt = true
+verify_jwt = false
 
 [functions.translate]
 verify_jwt = true
@@ -22,4 +22,4 @@ verify_jwt = true
 verify_jwt = true
 
 [functions.dictionary-lookup]
-verify_jwt = true
+verify_jwt = false
