@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.3';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -7,9 +8,9 @@ const corsHeaders = {
 
 interface MerriamWebsterEntry {
   meta?: { id: string };
-  fl?: string; // part of speech
-  shortdef?: string[]; // short definitions
-  def?: unknown[]; // detailed definitions
+  fl?: string;
+  shortdef?: string[];
+  def?: unknown[];
 }
 
 interface WordDefinition {
@@ -21,6 +22,35 @@ interface WordDefinition {
   }[];
 }
 
+// Rate limiting with cleanup
+const rateLimitStore = new Map<string, number[]>();
+const RATE_LIMIT_WINDOW = 60000;
+const MAX_REQUESTS_PER_WINDOW = 20;
+let lastCleanup = Date.now();
+const CLEANUP_INTERVAL = 300000;
+
+function checkRateLimit(userId: string): boolean {
+  const now = Date.now();
+
+  if (now - lastCleanup > CLEANUP_INTERVAL) {
+    for (const [key, timestamps] of rateLimitStore) {
+      const recent = timestamps.filter(t => now - t < RATE_LIMIT_WINDOW);
+      if (recent.length === 0) rateLimitStore.delete(key);
+      else rateLimitStore.set(key, recent);
+    }
+    lastCleanup = now;
+  }
+
+  const userRequests = rateLimitStore.get(userId) || [];
+  const recentRequests = userRequests.filter(t => now - t < RATE_LIMIT_WINDOW);
+
+  if (recentRequests.length >= MAX_REQUESTS_PER_WINDOW) return false;
+
+  recentRequests.push(now);
+  rateLimitStore.set(userId, recentRequests);
+  return true;
+}
+
 serve(async (req) => {
   // Handle CORS preflight
   if (req.method === 'OPTIONS') {
@@ -28,6 +58,38 @@ serve(async (req) => {
   }
 
   try {
+    // Authenticate user
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader) {
+      return new Response(
+        JSON.stringify({ success: false, error: 'Authentication required' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+    const supabaseKey = Deno.env.get('SUPABASE_ANON_KEY')!;
+    const supabase = createClient(supabaseUrl, supabaseKey, {
+      global: { headers: { Authorization: authHeader } }
+    });
+
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+
+    if (authError || !user) {
+      return new Response(
+        JSON.stringify({ success: false, error: 'Invalid authentication' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Rate limit per user
+    if (!checkRateLimit(user.id)) {
+      return new Response(
+        JSON.stringify({ success: false, error: 'Rate limit exceeded. Please try again later.' }),
+        { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json', 'Retry-After': '60' } }
+      );
+    }
+
     const url = new URL(req.url);
     const word = url.searchParams.get('word');
 
@@ -48,7 +110,6 @@ serve(async (req) => {
 
     const apiKey = Deno.env.get('MERRIAM_WEBSTER_API_KEY');
     if (!apiKey) {
-      console.error('MERRIAM_WEBSTER_API_KEY not configured');
       return new Response(
         JSON.stringify({ success: false, error: 'Dictionary service not configured' }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -61,7 +122,6 @@ serve(async (req) => {
     const response = await fetch(apiUrl);
 
     if (!response.ok) {
-      console.error(`Merriam-Webster API error: ${response.status}`);
       return new Response(
         JSON.stringify({ success: false, error: 'Dictionary API error' }),
         { status: 502, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -76,13 +136,12 @@ serve(async (req) => {
         JSON.stringify({ 
           success: false, 
           error: 'Word not found',
-          suggestions: data.slice(0, 5) // Return up to 5 spelling suggestions
+          suggestions: data.slice(0, 5)
         }),
         { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    // Check if we have valid entries
     if (!Array.isArray(data) || data.length === 0) {
       return new Response(
         JSON.stringify({ success: false, error: 'No definitions found' }),
@@ -90,48 +149,34 @@ serve(async (req) => {
       );
     }
 
-    // Transform Merriam-Webster format to our WordDefinition format
+    // Transform Merriam-Webster format
     const definitions: WordDefinition[] = [];
     const seenPartsOfSpeech = new Set<string>();
 
     for (const entry of data as MerriamWebsterEntry[]) {
-      // Skip entries without part of speech or definitions
-      if (!entry.fl || !entry.shortdef || entry.shortdef.length === 0) {
-        continue;
-      }
+      if (!entry.fl || !entry.shortdef || entry.shortdef.length === 0) continue;
 
       const partOfSpeech = entry.fl;
       
-      // Group definitions by part of speech
       if (seenPartsOfSpeech.has(partOfSpeech)) {
-        // Add definitions to existing entry
         const existingEntry = definitions.find(d => d.partOfSpeech === partOfSpeech);
         if (existingEntry) {
           for (const def of entry.shortdef) {
-            // Avoid duplicate definitions
             if (!existingEntry.definitions.some(d => d.definition === def)) {
-              existingEntry.definitions.push({
-                definition: def,
-                examples: []
-              });
+              existingEntry.definitions.push({ definition: def, examples: [] });
             }
           }
         }
       } else {
-        // Create new entry for this part of speech
         seenPartsOfSpeech.add(partOfSpeech);
         definitions.push({
           partOfSpeech,
           language: 'en',
-          definitions: entry.shortdef.map(def => ({
-            definition: def,
-            examples: []
-          }))
+          definitions: entry.shortdef.map(def => ({ definition: def, examples: [] }))
         });
       }
     }
 
-    // Limit definitions per part of speech to keep response size reasonable
     for (const def of definitions) {
       if (def.definitions.length > 5) {
         def.definitions = def.definitions.slice(0, 5);
@@ -151,7 +196,6 @@ serve(async (req) => {
     );
 
   } catch (error) {
-    console.error('Dictionary lookup error:', error);
     return new Response(
       JSON.stringify({ success: false, error: 'Internal server error' }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
