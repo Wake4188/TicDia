@@ -1,4 +1,4 @@
-import { Search, User, Compass, Calendar, BookA } from "lucide-react";
+import { Search, User, Compass, Calendar } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -6,6 +6,7 @@ import { useTheme } from "@/contexts/ThemeContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import LanguageSelector from "./LanguageSelector";
 import { ThemeToggle } from "./ThemeToggle";
+import FeedDropdown from "./FeedDropdown";
 
 interface NavigationDesktopProps {
   searchValue: string;
@@ -28,18 +29,12 @@ const NavigationDesktop = ({
   const t = translations;
   const isDark = theme === 'dark';
 
-  const isWordFeed = location.pathname === '/word-feed';
-
   const handleDiscoverClick = () => {
     navigate("/discover");
   };
 
   const handleAuthClick = () => {
     navigate(user ? "/profile" : "/auth");
-  };
-
-  const handleWordFeedClick = () => {
-    navigate("/word-feed");
   };
 
   return (
@@ -72,15 +67,7 @@ const NavigationDesktop = ({
 
           {/* Show Language Selector for non-logged-in users, Word Feed button for logged-in users */}
           {user ? (
-            <Button
-              variant="ghost"
-              onClick={handleWordFeedClick}
-              className={`text-white hover:text-white hover:bg-white/5 transition-colors p-1.5 md:p-2 ${isWordFeed ? 'bg-white/10' : ''}`}
-              aria-label="Word Feed"
-            >
-              <BookA className="w-4 h-4 md:w-5 md:h-5" />
-              <span className="hidden md:inline ml-1 text-sm">Words</span>
-            </Button>
+            <FeedDropdown variant="desktop" />
           ) : (
             <LanguageSelector />
           )}
