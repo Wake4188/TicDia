@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Search, Compass, User, Menu, X, ChevronRight, LogOut, BookA } from 'lucide-react';
+import { Search, Compass, User, Menu, X, ChevronRight, LogOut } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -9,6 +9,7 @@ import { formatDate } from '../services/translations';
 import LanguageSelector from './LanguageSelector';
 import VoteButton from './VoteButton';
 import { ThemeToggle } from './ThemeToggle';
+import FeedDropdown from './FeedDropdown';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface MobileMenuProps {
@@ -74,13 +75,6 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
       path: '/discover',
       isActive: location.pathname === "/discover"
     },
-    // Only show Word Feed for logged-in users
-    ...(user ? [{
-      icon: BookA,
-      label: "Word Feed",
-      path: '/word-feed',
-      isActive: location.pathname === "/word-feed"
-    }] : []),
     {
       icon: user ? User : User,
       label: user ? t.profile : t.signIn,
@@ -191,7 +185,15 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
                     ))}
                   </div>
 
-                  {/* Current Article Actions */}
+                    {/* Feed Options (for logged-in users) */}
+                    {user && (
+                      <div className={`p-4 rounded-2xl ${isDark ? 'bg-white/5' : 'bg-gray-50'}`}>
+                        <div className="text-xs font-medium text-gray-500 mb-3 uppercase tracking-wider">Feeds</div>
+                        <FeedDropdown variant="mobile" />
+                      </div>
+                    )}
+
+                    {/* Current Article Actions */}
                   {currentArticle && (
                     <motion.div
                       initial={{ opacity: 0 }}
