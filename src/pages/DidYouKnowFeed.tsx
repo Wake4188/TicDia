@@ -183,6 +183,16 @@ const DidYouKnowFeed = () => {
                       {fact.extract}
                     </p>
 
+                    {/* Why it's interesting */}
+                    {fact.description && fact.extract && (
+                      <div className="mt-2 px-5 py-4 rounded-2xl bg-white/10 backdrop-blur-sm border border-white/15 text-left">
+                        <p className="text-xs uppercase tracking-widest text-white/50 mb-2 font-semibold">Why it's interesting</p>
+                        <p className="text-sm text-white/70 leading-relaxed">
+                          This {fact.description.toLowerCase()} is notable for its significance in its field. Tap "Read more" to explore the full story.
+                        </p>
+                      </div>
+                    )}
+
                     {url && (
                       <a
                         href={url}

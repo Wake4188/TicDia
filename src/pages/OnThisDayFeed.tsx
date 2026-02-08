@@ -171,7 +171,17 @@ const OnThisDayFeed = () => {
                       {event.text}
                     </p>
 
-                    {page?.description && (
+                    {/* Why it matters */}
+                    {page?.extract && (
+                      <div className="mt-4 px-5 py-4 rounded-2xl bg-white/10 backdrop-blur-sm border border-white/15 text-left">
+                        <p className="text-xs uppercase tracking-widest text-white/50 mb-2 font-semibold">Why it matters</p>
+                        <p className="text-sm sm:text-base text-white/75 leading-relaxed line-clamp-4">
+                          {page.extract}
+                        </p>
+                      </div>
+                    )}
+
+                    {page?.description && !page?.extract && (
                       <p className="text-base text-white/50 italic">{page.description}</p>
                     )}
 
