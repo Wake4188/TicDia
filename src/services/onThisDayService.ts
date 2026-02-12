@@ -80,13 +80,8 @@ export async function fetchOnThisDay(month?: number, day?: number): Promise<OnTh
 }
 
 export async function fetchRandomFacts(count: number = 8): Promise<RandomFact[]> {
-  const today = new Date().toISOString().split('T')[0];
-
-  if (randomFactsCache.has(today) && (randomFactsCache.get(today)?.length || 0) >= count) {
-    return randomFactsCache.get(today)!.slice(0, count);
-  }
-
   try {
+    // Always fetch fresh random articles - no caching to avoid duplicates
     const promises = Array.from({ length: count }, () =>
       fetch('https://en.wikipedia.org/api/rest_v1/page/random/summary', {
         headers: { 'Accept': 'application/json' },
@@ -105,7 +100,6 @@ export async function fetchRandomFacts(count: number = 8): Promise<RandomFact[]>
       }))
       .filter(f => f.extract.length > 50); // Filter out stubs
 
-    randomFactsCache.set(today, facts);
     return facts;
   } catch (error) {
     console.error('Failed to fetch random facts:', error);
