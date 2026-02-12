@@ -7,10 +7,12 @@ import { fetchOnThisDay, type OnThisDayEvent } from "@/services/onThisDayService
 import { useUserPreferences } from "@/contexts/UserPreferencesContext";
 import Navigation from "@/components/Navigation";
 
+type TaggedEvent = OnThisDayEvent & { eventType: 'event' | 'birth' | 'death' };
+
 const OnThisDayFeed = () => {
   const navigate = useNavigate();
   const { userPreferences } = useUserPreferences();
-  const [events, setEvents] = useState<OnThisDayEvent[]>([]);
+  const [events, setEvents] = useState<TaggedEvent[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -38,11 +40,10 @@ const OnThisDayFeed = () => {
     setIsLoading(true);
     const data = await fetchOnThisDay();
     if (data) {
-      // Merge all event types, sorted by year descending
-      const allEvents = [
-        ...data.events,
-        ...data.births.map(e => ({ ...e, text: `🎂 ${e.text}` })),
-        ...data.deaths.map(e => ({ ...e, text: `✝ ${e.text}` })),
+      const allEvents: TaggedEvent[] = [
+        ...data.events.map(e => ({ ...e, eventType: 'event' as const })),
+        ...data.births.map(e => ({ ...e, eventType: 'birth' as const })),
+        ...data.deaths.map(e => ({ ...e, eventType: 'death' as const })),
       ].sort((a, b) => (b.year || 0) - (a.year || 0));
       setEvents(allEvents);
     }
@@ -76,6 +77,27 @@ const OnThisDayFeed = () => {
       if (scrollTimeoutRef.current !== null) cancelAnimationFrame(scrollTimeoutRef.current);
     };
   }, []);
+
+  const getEventLabel = (event: TaggedEvent) => {
+    const yearsAgo = today.getFullYear() - event.year;
+    const suffix = yearsAgo === 1 ? 'year' : 'years';
+    switch (event.eventType) {
+      case 'birth':
+        return `Born on this day, ${yearsAgo} ${suffix} ago`;
+      case 'death':
+        return `Died on this day, ${yearsAgo} ${suffix} ago`;
+      default:
+        return `${yearsAgo} ${suffix} ago today`;
+    }
+  };
+
+  const getEventIcon = (type: string) => {
+    switch (type) {
+      case 'birth': return '🎂';
+      case 'death': return '✝';
+      default: return '📜';
+    }
+  };
 
   return (
     <div className="h-screen h-[100dvh] w-screen relative overflow-hidden bg-background">
@@ -122,7 +144,8 @@ const OnThisDayFeed = () => {
         >
           {events.map((event, index) => {
             const page = event.pages?.[0];
-            const url = page?.content_urls?.desktop?.page;
+            const url = page?.content_urls?.desktop?.page
+              || (page?.title ? `https://en.wikipedia.org/wiki/${encodeURIComponent(page.title.replace(/ /g, '_'))}` : null);
 
             return (
               <div
@@ -148,7 +171,7 @@ const OnThisDayFeed = () => {
                 )}
 
                 <div className="relative z-10 text-foreground p-8 max-w-2xl mx-auto text-center">
-                  <div className="space-y-6">
+                  <div className="space-y-5">
                     {index === 0 && (
                       <motion.div
                         initial={{ opacity: 0, y: -10 }}
@@ -158,6 +181,14 @@ const OnThisDayFeed = () => {
                         On This Day · {dateStr}
                       </motion.div>
                     )}
+
+                    {/* Date context badge */}
+                    <div className="flex items-center justify-center gap-2">
+                      <span className="text-2xl">{getEventIcon(event.eventType)}</span>
+                      <span className="px-3 py-1 rounded-full bg-white/15 backdrop-blur-sm text-white/80 text-sm font-medium">
+                        {getEventLabel(event)}
+                      </span>
+                    </div>
 
                     <h2 className="text-6xl sm:text-8xl font-bold text-white/30">{event.year}</h2>
 
