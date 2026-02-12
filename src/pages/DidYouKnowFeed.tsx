@@ -17,6 +17,8 @@ const DidYouKnowFeed = () => {
   const itemHeightRef = useRef(0);
   const scrollTimeoutRef = useRef<number | null>(null);
 
+  const imageOpacity = (userPreferences.backgroundOpacity || 70) / 100;
+
   useEffect(() => {
     const updateItemHeight = () => {
       itemHeightRef.current = window.innerHeight;
@@ -130,13 +132,14 @@ const DidYouKnowFeed = () => {
                     hsl(${(index * 41 + 90) % 360}, 50%, 8%))`,
                 }}
               >
-                {/* Background thumbnail */}
+                {/* Background thumbnail with user-controlled opacity */}
                 {fact.thumbnail && (
                   <div className="absolute inset-0 overflow-hidden">
                     <img
                       src={fact.thumbnail.source}
                       alt=""
-                      className="w-full h-full object-cover opacity-15 blur-sm scale-110"
+                      className="w-full h-full object-cover blur-sm scale-110"
+                      style={{ opacity: imageOpacity * 0.25 }}
                       loading="lazy"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/60" />
@@ -176,6 +179,18 @@ const DidYouKnowFeed = () => {
                     >
                       {fact.extract}
                     </p>
+
+                    {/* Why it's interesting card */}
+                    {fact.description && fact.extract && (
+                      <div className="mt-4 px-5 py-4 rounded-2xl bg-white/10 backdrop-blur-sm border border-white/15 text-left">
+                        <p className="text-xs uppercase tracking-widest text-white/50 mb-2 font-semibold">Why it's interesting</p>
+                        <p className="text-sm sm:text-base text-white/75 leading-relaxed line-clamp-4">
+                          {fact.extract.length > 200
+                            ? `${fact.title} — ${fact.description}. ${fact.extract.substring(0, 200)}...`
+                            : `${fact.title} — ${fact.description}.`}
+                        </p>
+                      </div>
+                    )}
 
                     {url && (
                       <a

@@ -12,6 +12,7 @@ type TaggedEvent = OnThisDayEvent & { eventType: 'event' | 'birth' | 'death' };
 const OnThisDayFeed = () => {
   const navigate = useNavigate();
   const { userPreferences } = useUserPreferences();
+  const imageOpacity = (userPreferences.backgroundOpacity || 70) / 100;
   const [events, setEvents] = useState<TaggedEvent[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
@@ -163,7 +164,8 @@ const OnThisDayFeed = () => {
                     <img
                       src={page.thumbnail.source}
                       alt=""
-                      className="w-full h-full object-cover opacity-15 blur-sm scale-110"
+                      className="w-full h-full object-cover blur-sm scale-110"
+                      style={{ opacity: imageOpacity * 0.25 }}
                       loading="lazy"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/60" />
