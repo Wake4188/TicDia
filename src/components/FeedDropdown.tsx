@@ -1,5 +1,5 @@
 import { useNavigate, useLocation } from "react-router-dom";
-import { BookA, Calendar, Lightbulb, ChevronDown } from "lucide-react";
+import { Layers, BookA, Calendar, Lightbulb, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Popover,
@@ -59,7 +59,7 @@ const FeedDropdown = ({ variant = "desktop" }: FeedDropdownProps) => {
           className={`text-white hover:text-white hover:bg-white/5 transition-colors p-1.5 md:p-2 gap-1 ${isActive ? 'bg-white/10' : ''}`}
           aria-label="Feeds"
         >
-          <BookA className="w-4 h-4 md:w-5 md:h-5" />
+          <Layers className="w-4 h-4 md:w-5 md:h-5" />
           <span className="hidden md:inline text-sm">Feeds</span>
           <ChevronDown className="w-3 h-3 opacity-60" />
         </Button>

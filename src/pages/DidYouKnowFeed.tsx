@@ -32,14 +32,8 @@ const DidYouKnowFeed = () => {
 
   const loadFacts = useCallback(async (refresh = false) => {
     setIsLoading(true);
-    if (refresh) {
-      // Clear cache by fetching with a unique count
-      const newFacts = await fetchRandomFacts(15);
-      setFacts(newFacts);
-    } else {
-      const newFacts = await fetchRandomFacts(15);
-      setFacts(newFacts);
-    }
+    const newFacts = await fetchRandomFacts(15);
+    setFacts(newFacts);
     setCurrentIndex(0);
     setIsLoading(false);
   }, []);
@@ -67,7 +61,6 @@ const DidYouKnowFeed = () => {
       if (newIndex !== currentIndex && newIndex >= 0 && newIndex < facts.length) {
         setCurrentIndex(newIndex);
       }
-      // Load more when nearing end
       if (newIndex >= facts.length - 3) {
         loadMoreFacts();
       }
@@ -124,7 +117,8 @@ const DidYouKnowFeed = () => {
           }}
         >
           {facts.map((fact, index) => {
-            const url = fact.content_urls?.desktop?.page;
+            const url = fact.content_urls?.desktop?.page
+              || (fact.title ? `https://en.wikipedia.org/wiki/${encodeURIComponent(fact.title.replace(/ /g, '_'))}` : null);
 
             return (
               <div
@@ -183,16 +177,6 @@ const DidYouKnowFeed = () => {
                       {fact.extract}
                     </p>
 
-                    {/* Why it's interesting */}
-                    {fact.description && fact.extract && (
-                      <div className="mt-2 px-5 py-4 rounded-2xl bg-white/10 backdrop-blur-sm border border-white/15 text-left">
-                        <p className="text-xs uppercase tracking-widest text-white/50 mb-2 font-semibold">Why it's interesting</p>
-                        <p className="text-sm text-white/70 leading-relaxed">
-                          This {fact.description.toLowerCase()} is notable for its significance in its field. Tap "Read more" to explore the full story.
-                        </p>
-                      </div>
-                    )}
-
                     {url && (
                       <a
                         href={url}
@@ -200,7 +184,7 @@ const DidYouKnowFeed = () => {
                         rel="noopener noreferrer"
                         className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 text-white/70 hover:text-white hover:bg-white/20 transition-all text-sm"
                       >
-                        Read more <ExternalLink className="w-3.5 h-3.5" />
+                        Read more on Wikipedia <ExternalLink className="w-3.5 h-3.5" />
                       </a>
                     )}
                   </div>
