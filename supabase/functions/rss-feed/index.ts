@@ -183,37 +183,38 @@ serve(async (req) => {
       const articles: RSSArticle[] = [];
 
       for (const item of items) {
-        const title = item.querySelector('title')?.textContent?.trim() || 'Untitled';
-        let summary = item.querySelector('description, summary, content')?.textContent?.trim() || '';
+        const el = item as Element;
+        const title = el.querySelector('title')?.textContent?.trim() || 'Untitled';
+        let summary = el.querySelector('description, summary, content')?.textContent?.trim() || '';
 
         summary = summary.replace(/<[^>]*>/g, '').trim();
         if (summary.length > 200) summary = summary.substring(0, 200) + '...';
 
-        const link = item.querySelector('link')?.textContent?.trim() ||
-          item.querySelector('link')?.getAttribute('href') || '#';
+        const link = el.querySelector('link')?.textContent?.trim() ||
+          el.querySelector('link')?.getAttribute('href') || '#';
 
         let image: string | undefined;
 
-        const enclosure = item.querySelector('enclosure[type^="image"]');
+        const enclosure = el.querySelector('enclosure[type^="image"]');
         if (enclosure) image = enclosure.getAttribute('url') || undefined;
 
         if (!image) {
-          const mediaContent = item.querySelector('media\\:content[medium="image"], content[medium="image"]');
+          const mediaContent = el.querySelector('media\\:content[medium="image"], content[medium="image"]');
           if (mediaContent) image = mediaContent.getAttribute('url') || undefined;
         }
 
         if (!image) {
-          const mediaThumbnail = item.querySelector('media\\:thumbnail, thumbnail');
+          const mediaThumbnail = el.querySelector('media\\:thumbnail, thumbnail');
           if (mediaThumbnail) image = mediaThumbnail.getAttribute('url') || undefined;
         }
 
         if (!image) {
-          const descContent = item.querySelector('description, content')?.textContent || '';
+          const descContent = el.querySelector('description, content')?.textContent || '';
           const imgMatch = descContent.match(/<img[^>]+src=["']([^"']+)["'][^>]*>/i);
           if (imgMatch) image = imgMatch[1];
         }
 
-        const pubDate = item.querySelector('pubDate, published, updated')?.textContent?.trim() || new Date().toISOString();
+        const pubDate = el.querySelector('pubDate, published, updated')?.textContent?.trim() || new Date().toISOString();
 
         if (title && summary) {
           articles.push({ title, summary, link, image, publishedAt: pubDate, source });
