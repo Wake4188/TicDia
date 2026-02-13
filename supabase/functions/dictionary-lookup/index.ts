@@ -74,16 +74,16 @@ serve(async (req) => {
     });
 
     const token = authHeader.replace('Bearer ', '');
-    const { data: claimsData, error: authError } = await supabase.auth.getClaims(token);
+    const { data: claimsData, error: authError } = await supabase.auth.getUser(token);
 
-    if (authError || !claimsData?.claims) {
+    if (authError || !claimsData?.user) {
       return new Response(
         JSON.stringify({ success: false, error: 'Invalid authentication' }),
         { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    const userId = claimsData.claims.sub as string;
+    const userId = claimsData.user.id;
 
     // Rate limit per user
     if (!checkRateLimit(userId)) {
