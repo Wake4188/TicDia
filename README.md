@@ -231,7 +231,7 @@ See [SECURITY_PERFORMANCE_REVIEW.md](SECURITY_PERFORMANCE_REVIEW.md) for the ful
 
 ## License
 
-[MIT](LICENSE)
+see licence tab.
 
 ---
 
