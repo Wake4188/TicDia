@@ -1,11 +1,13 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
-  BookMarked, Eye, Trash2, Search, Mail, Lock, Key, 
+  BookMarked, Eye, Trash2, Search, Mail, Lock,
   BarChart3, Globe, Moon, Sun, Shield, LogOut, Settings,
-  Sparkles, Palette, Type, Volume2, ChevronRight, User, Users, Share2, Heart, MessageCircle
+  Sparkles, Palette, Type, Volume2, ChevronRight, User, Users, Share2, Heart, MessageCircle,
+  Camera, Upload
 } from "lucide-react";
+import { ContactModal } from "@/components/ContactModal";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -54,6 +56,12 @@ export const ProfileDesktop = ({ fontOptions, colorOptions }: ProfileDesktopProp
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedArticle, setSelectedArticle] = useState<SavedArticle | null>(null);
   const [isSmallTicOpen, setIsSmallTicOpen] = useState(false);
+  const [contactOpen, setContactOpen] = useState(false);
+
+  // Avatar upload
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [avatarUploading, setAvatarUploading] = useState(false);
+  const avatarInputRef = useRef<HTMLInputElement>(null);
 
   // Account Security states
   const [newEmail, setNewEmail] = useState("");
@@ -76,9 +84,42 @@ export const ProfileDesktop = ({ fontOptions, colorOptions }: ProfileDesktopProp
     Promise.allSettled([
       fetchSavedArticles(),
       checkAdminRole(),
-      fetchCurrentWordOfTheDay()
+      fetchCurrentWordOfTheDay(),
+      loadAvatar()
     ]);
   }, [user, navigate]);
+
+  const loadAvatar = async () => {
+    if (!user) return;
+    const { data } = await supabase.storage.from('avatars').list(`${user.id}/`, { limit: 1 });
+    if (data && data.length > 0) {
+      const { data: urlData } = supabase.storage.from('avatars').getPublicUrl(`${user.id}/${data[0].name}`);
+      setAvatarUrl(urlData.publicUrl + '?t=' + Date.now());
+    }
+  };
+
+  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !user) return;
+    if (file.size > 5 * 1024 * 1024) {
+      toast({ title: "File too large", description: "Max size is 5MB", variant: "destructive" });
+      return;
+    }
+    setAvatarUploading(true);
+    try {
+      const ext = file.name.split('.').pop();
+      const path = `${user.id}/avatar.${ext}`;
+      const { error } = await supabase.storage.from('avatars').upload(path, file, { upsert: true });
+      if (error) throw error;
+      const { data } = supabase.storage.from('avatars').getPublicUrl(path);
+      setAvatarUrl(data.publicUrl + '?t=' + Date.now());
+      toast({ title: "Avatar updated", description: "Your profile picture has been updated." });
+    } catch (err: any) {
+      toast({ title: "Upload failed", description: err.message, variant: "destructive" });
+    } finally {
+      setAvatarUploading(false);
+    }
+  };
 
   useEffect(() => {
     const filtered = savedArticles.filter(article =>
@@ -192,6 +233,7 @@ export const ProfileDesktop = ({ fontOptions, colorOptions }: ProfileDesktopProp
     { id: "preferences", label: "Preferences", icon: Settings },
     { id: "security", label: "Security", icon: Lock },
     { id: "explore", label: "Explore", icon: Sparkles },
+    { id: "contact", label: "Contact & Support", icon: MessageCircle },
     ...(isAdmin ? [{ id: "admin", label: "Admin", icon: Shield }] : [])
   ];
 
@@ -221,15 +263,28 @@ export const ProfileDesktop = ({ fontOptions, colorOptions }: ProfileDesktopProp
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-6">
               <motion.div 
-                className="relative"
+                className="relative group cursor-pointer"
                 whileHover={{ scale: 1.05 }}
                 transition={{ type: "spring", stiffness: 400 }}
+                onClick={() => avatarInputRef.current?.click()}
               >
-                <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center shadow-xl shadow-primary/20">
-                  <span className="text-3xl font-bold text-primary-foreground">
-                    {user.email?.charAt(0).toUpperCase()}
-                  </span>
+                <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center shadow-xl shadow-primary/20 overflow-hidden">
+                  {avatarUrl ? (
+                    <img src={avatarUrl} alt="Profile" className="w-full h-full object-cover" />
+                  ) : (
+                    <span className="text-3xl font-bold text-primary-foreground">
+                      {user.email?.charAt(0).toUpperCase()}
+                    </span>
+                  )}
                 </div>
+                <div className="absolute inset-0 rounded-2xl bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                  {avatarUploading ? (
+                    <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1, ease: "linear" }} className="w-6 h-6 border-2 border-white border-t-transparent rounded-full" />
+                  ) : (
+                    <Camera className="w-6 h-6 text-white" />
+                  )}
+                </div>
+                <input ref={avatarInputRef} type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={handleAvatarUpload} />
                 <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-green-500 rounded-full border-4 border-background" />
               </motion.div>
               <div>
@@ -886,6 +941,31 @@ export const ProfileDesktop = ({ fontOptions, colorOptions }: ProfileDesktopProp
                           </SelectContent>
                         </Select>
                       </div>
+                      {/* TTS Speed */}
+                      <div className="p-4 rounded-xl bg-muted/30 space-y-3">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium text-foreground flex items-center gap-2">
+                              <Volume2 className="w-4 h-4" />
+                              TTS Speed
+                            </p>
+                            <p className="text-sm text-muted-foreground">Text-to-speech playback speed</p>
+                          </div>
+                          <span className="text-sm font-bold text-primary">{userPreferences.ttsSpeed.toFixed(1)}x</span>
+                        </div>
+                        <Slider
+                          value={[userPreferences.ttsSpeed]}
+                          onValueChange={([v]) => updateUserPrefs({ ttsSpeed: v })}
+                          min={0.5}
+                          max={2.0}
+                          step={0.1}
+                        />
+                        <div className="flex justify-between text-xs text-muted-foreground">
+                          <span>0.5x Slow</span>
+                          <span>1.0x Normal</span>
+                          <span>2.0x Fast</span>
+                        </div>
+                      </div>
                     </CardContent>
                   </Card>
 
@@ -1055,6 +1135,52 @@ export const ProfileDesktop = ({ fontOptions, colorOptions }: ProfileDesktopProp
                 </motion.div>
               )}
 
+              {/* Contact & Support Section */}
+              {activeSection === "contact" && (
+                <motion.div
+                  key="contact"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  className="space-y-6"
+                >
+                  <Card className="bg-card/50 backdrop-blur-sm border-border/50">
+                    <CardHeader>
+                      <CardTitle className="text-2xl flex items-center gap-2">
+                        <MessageCircle className="w-6 h-6" />
+                        Contact & Support
+                      </CardTitle>
+                      <CardDescription>Get help, report a bug, or share feedback</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      {[
+                        { title: "General Feedback", desc: "Share your thoughts on TicDia", action: "Send Feedback" },
+                        { title: "Report a Bug", desc: "Found something broken? Let us know", action: "Report Bug" },
+                        { title: "Feature Request", desc: "Suggest a new feature or improvement", action: "Request Feature" },
+                        { title: "Privacy / GDPR Request", desc: "Data access, deletion, or correction requests", action: "Submit Request" },
+                      ].map((item) => (
+                        <div key={item.title} className="flex items-center justify-between p-4 rounded-xl bg-muted/30 hover:bg-muted/50 transition-colors">
+                          <div>
+                            <p className="font-medium text-foreground">{item.title}</p>
+                            <p className="text-sm text-muted-foreground">{item.desc}</p>
+                          </div>
+                          <Button variant="outline" size="sm" onClick={() => setContactOpen(true)}>
+                            {item.action}
+                          </Button>
+                        </div>
+                      ))}
+                    </CardContent>
+                  </Card>
+
+                  <Card className="bg-card/50 backdrop-blur-sm border-border/50">
+                    <CardContent className="p-6 text-center space-y-2">
+                      <p className="text-sm text-muted-foreground">Average response time: within 48 hours</p>
+                      <p className="text-xs text-muted-foreground">We read every message personally.</p>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              )}
+
               {/* Admin Section */}
               {activeSection === "admin" && isAdmin && (
                 <motion.div
@@ -1125,6 +1251,8 @@ export const ProfileDesktop = ({ fontOptions, colorOptions }: ProfileDesktopProp
         article={selectedArticle}
         onOpenFull={(title) => navigate(`/?q=${encodeURIComponent(title)}`)}
       />
+      <ContactModal isOpen={contactOpen} onClose={() => setContactOpen(false)} />
     </div>
   );
 };
+

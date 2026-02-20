@@ -1,11 +1,13 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
   BookMarked, Eye, Trash2, Search, Mail, Lock, 
   BarChart3, Globe, Moon, Sun, Shield, LogOut, Settings,
-  Palette, ChevronRight, User, Users, Share2, ArrowLeft, Heart, X, Type, Compass
+  Palette, ChevronRight, User, Users, Share2, ArrowLeft, Heart, X, Type, Compass,
+  Volume2, Camera, MessageCircle, Sparkles
 } from "lucide-react";
+import { ContactModal } from "@/components/ContactModal";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Input } from "@/components/ui/input";
@@ -24,7 +26,7 @@ interface ProfileMobileProps {
   colorOptions: { value: string; label: string; color: string }[];
 }
 
-type SubPage = null | 'saved' | 'analytics' | 'social' | 'language' | 'appearance' | 'email' | 'password';
+type SubPage = null | 'saved' | 'analytics' | 'social' | 'language' | 'appearance' | 'email' | 'password' | 'tts';
 
 export const ProfileMobile = ({ fontOptions, colorOptions }: ProfileMobileProps) => {
   const { user } = useAuth();
@@ -40,6 +42,10 @@ export const ProfileMobile = ({ fontOptions, colorOptions }: ProfileMobileProps)
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [contactOpen, setContactOpen] = useState(false);
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [avatarUploading, setAvatarUploading] = useState(false);
+  const avatarInputRef = useRef<HTMLInputElement>(null);
 
   const currentYear = new Date().getFullYear();
   const userAge = userPreferences.birthYear ? currentYear - userPreferences.birthYear : null;
@@ -52,7 +58,40 @@ export const ProfileMobile = ({ fontOptions, colorOptions }: ProfileMobileProps)
     }
     checkAdminRole();
     fetchSavedArticles();
+    loadAvatar();
   }, [user, navigate]);
+
+  const loadAvatar = async () => {
+    if (!user) return;
+    const { data } = await supabase.storage.from('avatars').list(`${user.id}/`, { limit: 1 });
+    if (data && data.length > 0) {
+      const { data: urlData } = supabase.storage.from('avatars').getPublicUrl(`${user.id}/${data[0].name}`);
+      setAvatarUrl(urlData.publicUrl + '?t=' + Date.now());
+    }
+  };
+
+  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !user) return;
+    if (file.size > 5 * 1024 * 1024) {
+      toast({ title: "File too large", description: "Max 5MB" });
+      return;
+    }
+    setAvatarUploading(true);
+    try {
+      const ext = file.name.split('.').pop();
+      const path = `${user.id}/avatar.${ext}`;
+      const { error } = await supabase.storage.from('avatars').upload(path, file, { upsert: true });
+      if (error) throw error;
+      const { data } = supabase.storage.from('avatars').getPublicUrl(path);
+      setAvatarUrl(data.publicUrl + '?t=' + Date.now());
+      toast({ title: "Avatar updated" });
+    } catch (err: any) {
+      toast({ title: "Upload failed", description: err.message, variant: "destructive" });
+    } finally {
+      setAvatarUploading(false);
+    }
+  };
 
   const checkAdminRole = async () => {
     if (!user) return;
@@ -276,6 +315,45 @@ export const ProfileMobile = ({ fontOptions, colorOptions }: ProfileMobileProps)
     </div>
   );
 
+  if (subPage === 'tts') return (
+    <div className="min-h-screen bg-background">
+      <SubPageHeader title="TTS Speed" onBack={() => setSubPage(null)} />
+      <div className="p-4 space-y-6">
+        <div className="bg-card rounded-2xl p-5 space-y-4">
+          <div className="flex justify-between items-center">
+            <p className="font-medium text-foreground">Playback Speed</p>
+            <span className="text-2xl font-bold text-primary">{userPreferences.ttsSpeed.toFixed(1)}x</span>
+          </div>
+          <Slider
+            value={[userPreferences.ttsSpeed]}
+            onValueChange={([v]) => updatePreferences({ ttsSpeed: v })}
+            min={0.5}
+            max={2.0}
+            step={0.1}
+          />
+          <div className="flex justify-between text-xs text-muted-foreground">
+            <span>0.5x Slow</span>
+            <span>1.0x Normal</span>
+            <span>2.0x Fast</span>
+          </div>
+        </div>
+        <div className="grid grid-cols-3 gap-2">
+          {[0.75, 1.0, 1.25, 1.5, 1.75, 2.0].map((speed) => (
+            <button
+              key={speed}
+              onClick={() => updatePreferences({ ttsSpeed: speed })}
+              className={`py-3 rounded-xl font-medium text-sm transition-all ${
+                userPreferences.ttsSpeed === speed ? 'bg-primary text-primary-foreground' : 'bg-card text-muted-foreground hover:bg-muted'
+              }`}
+            >
+              {speed}x
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+
   if (subPage === 'social') return (
     <div className="min-h-screen bg-background">
       <SubPageHeader title="Social" onBack={() => setSubPage(null)} />
@@ -377,15 +455,28 @@ export const ProfileMobile = ({ fontOptions, colorOptions }: ProfileMobileProps)
         </div>
       </div>
 
+      <ContactModal isOpen={contactOpen} onClose={() => setContactOpen(false)} />
       <div className="px-4 pt-6 pb-24">
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="bg-card rounded-2xl p-4 mb-6">
           <div className="flex items-center gap-4">
-            <div className="w-16 h-16 rounded-full bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center shadow-lg">
-              <span className="text-2xl font-bold text-primary-foreground">{user.email?.charAt(0).toUpperCase()}</span>
+            <div
+              className="relative w-16 h-16 rounded-full overflow-hidden bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center shadow-lg cursor-pointer group"
+              onClick={() => avatarInputRef.current?.click()}
+            >
+              {avatarUrl ? (
+                <img src={avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
+              ) : (
+                <span className="text-2xl font-bold text-primary-foreground">{user.email?.charAt(0).toUpperCase()}</span>
+              )}
+              <div className="absolute inset-0 bg-black/40 opacity-0 group-active:opacity-100 flex items-center justify-center transition-opacity">
+                <Camera className="w-5 h-5 text-white" />
+              </div>
+              <input ref={avatarInputRef} type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={handleAvatarUpload} />
             </div>
             <div className="flex-1 min-w-0">
               <p className="font-semibold text-foreground text-lg truncate">{user.email?.split('@')[0]}</p>
               <p className="text-sm text-muted-foreground truncate">{user.email}</p>
+              {avatarUploading && <p className="text-xs text-primary mt-0.5">Uploading...</p>}
             </div>
           </div>
         </motion.div>
@@ -418,13 +509,16 @@ export const ProfileMobile = ({ fontOptions, colorOptions }: ProfileMobileProps)
 
         <SettingsGroup title="Appearance">
           <SettingsItem icon={Palette} label="Customize" onClick={() => setSubPage('appearance')} />
+          <SettingsItem icon={Sparkles} label="Liquid Glass" toggle={userPreferences.liquidGlassMode} onToggle={async (v) => { await updatePreferences({ liquidGlassMode: v }); window.location.reload(); }} color="text-blue-500" bgColor="bg-blue-500/10" />
           <SettingsItem icon={Palette} label="Smoke Effect" toggle={userPreferences.smokeEffect} onToggle={(v) => updatePreferences({ smokeEffect: v })} />
           <SettingsItem icon={Type} label="Text Animation" toggle={userPreferences.textAnimation !== false} onToggle={(v) => updatePreferences({ textAnimation: v })} />
+          <SettingsItem icon={Volume2} label="TTS Speed" value={`${userPreferences.ttsSpeed.toFixed(1)}x`} onClick={() => setSubPage('tts')} color="text-purple-500" bgColor="bg-purple-500/10" />
         </SettingsGroup>
 
         <SettingsGroup title="Account">
           <SettingsItem icon={Mail} label="Change Email" onClick={() => setSubPage('email')} />
           <SettingsItem icon={Lock} label="Change Password" onClick={() => setSubPage('password')} />
+          <SettingsItem icon={MessageCircle} label="Contact & Feedback" onClick={() => setContactOpen(true)} color="text-teal-500" bgColor="bg-teal-500/10" />
           {isAdmin && (
             <SettingsItem icon={Shield} label="Admin Panel" onClick={() => navigate("/admin")} color="text-amber-500" bgColor="bg-amber-500/10" />
           )}
