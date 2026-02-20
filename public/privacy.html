@@ -5,144 +5,144 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Privacy Policy - TicDia</title>
     <style>
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            line-height: 1.6;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-            background: #000;
-            color: #fff;
-        }
-        h1 {
-            color: #FE2C55;
-            border-bottom: 2px solid #FE2C55;
-            padding-bottom: 10px;
-        }
-        h2 {
-            color: #FE2C55;
-            margin-top: 30px;
-        }
-        .last-updated {
-            color: #888;
-            font-style: italic;
-        }
-        a {
-            color: #FE2C55;
-            text-decoration: none;
-        }
-        a:hover {
-            text-decoration: underline;
-        }
+        :root { --red: #FE2C55; --bg: #0a0a0a; --card: #141414; --text: #e8e8e8; --muted: #888; --border: #2a2a2a; }
+        * { box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.7; max-width: 800px; margin: 0 auto; padding: 32px 20px 60px; background: var(--bg); color: var(--text); }
+        header { margin-bottom: 48px; }
+        .logo { font-size: 1.25rem; font-weight: 700; color: var(--red); letter-spacing: -0.5px; text-decoration: none; }
+        h1 { font-size: 2rem; font-weight: 800; color: #fff; margin: 24px 0 8px; letter-spacing: -0.5px; }
+        .meta { color: var(--muted); font-size: 0.875rem; margin-bottom: 40px; }
+        h2 { font-size: 1.1rem; font-weight: 700; color: #fff; margin: 40px 0 12px; padding-top: 24px; border-top: 1px solid var(--border); }
+        h3 { font-size: 0.95rem; font-weight: 600; color: var(--text); margin: 24px 0 8px; }
+        p, li { font-size: 0.9rem; color: var(--muted); }
+        ul { padding-left: 20px; }
+        li { margin-bottom: 4px; }
+        .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px 24px; margin: 24px 0; }
+        .card p { margin: 0; }
+        .rights-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 16px 0; }
+        .right-item { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; }
+        .right-item strong { display: block; color: #fff; font-size: 0.85rem; margin-bottom: 4px; }
+        .right-item span { color: var(--muted); font-size: 0.8rem; }
+        .contact-btn { display: inline-block; background: var(--red); color: #fff; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-size: 0.875rem; font-weight: 600; margin-top: 12px; cursor: pointer; border: none; }
+        .back-link { display: inline-flex; align-items: center; gap: 6px; color: var(--muted); text-decoration: none; font-size: 0.875rem; margin-top: 48px; }
+        .back-link:hover { color: var(--red); }
+        footer { margin-top: 60px; padding-top: 24px; border-top: 1px solid var(--border); text-align: center; }
+        footer p { color: var(--muted); font-size: 0.8rem; margin: 0; }
+        @media (max-width: 600px) { .rights-grid { grid-template-columns: 1fr; } h1 { font-size: 1.5rem; } }
     </style>
 </head>
 <body>
+    <header>
+        <a class="logo" href="/">TicDia</a>
+    </header>
+
     <h1>Privacy Policy</h1>
-    <p class="last-updated">Last Updated: January 15, 2025</p>
-    
-    <h2>1. Introduction</h2>
-    <p>Welcome to TicDia. We respect your privacy and are committed to protecting your personal data. This privacy policy explains how we collect, use, and safeguard your information when you use our service.</p>
-    
-    <h2>2. Data Controller</h2>
-    <p>TicDia is the data controller responsible for your personal data. For any privacy-related inquiries, please contact us at: <a href="mailto:noa.wilhide@gmail.com">noa.wilhide@gmail.com</a></p>
-    
-    <h2>3. Information We Collect</h2>
-    <h3>3.1 Personal Information</h3>
+    <p class="meta">Last updated: February 20, 2026 &nbsp;·&nbsp; Effective date: February 20, 2026</p>
+
+    <div class="card">
+        <p><strong style="color:#fff">TL;DR:</strong> We collect only what we need to run TicDia. We never sell your data. You can delete your account and all associated data at any time.</p>
+    </div>
+
+    <h2>1. Who We Are</h2>
+    <p>TicDia is an independent knowledge application that presents Wikipedia content in an engaging, short-form format. For privacy-related inquiries, please use our <a href="/" onclick="history.back(); return false;" style="color:var(--red)">in-app contact form</a> (found in the footer or profile settings).</p>
+
+    <h2>2. Data We Collect</h2>
+    <h3>Account Information</h3>
     <ul>
-        <li>Email address (when you create an account)</li>
-        <li>Authentication credentials</li>
-        <li>Profile preferences (font, colors, reading settings)</li>
+        <li>Email address (to identify your account and send security notifications)</li>
+        <li>Hashed password (via Supabase Auth — we never see your plaintext password)</li>
+        <li>Birth year (optional — used only to gate age-restricted social features)</li>
     </ul>
-    
-    <h3>3.2 Usage Data</h3>
+    <h3>Preferences & Personalization</h3>
     <ul>
-        <li>Articles you read and save</li>
-        <li>Reading time and scroll distance</li>
-        <li>Topics you explore</li>
-        <li>Audio articles you listen to</li>
-        <li>Device information and browser type</li>
-        <li>IP address and general location data</li>
+        <li>Reading preferences: font, highlight color, text size, background opacity, language</li>
+        <li>Feature toggles: smoke effect, text animation, liquid glass mode, adult content filter</li>
+        <li>TTS speed and feed preference (random / curated / mixed)</li>
     </ul>
-    
-    <h2>4. Legal Basis for Processing (GDPR)</h2>
-    <p>We process your personal data under the following legal bases:</p>
+    <h3>Reading Activity</h3>
     <ul>
-        <li><strong>Consent:</strong> You provide consent when creating an account and accepting cookies</li>
-        <li><strong>Contract:</strong> Processing necessary to provide our services</li>
-        <li><strong>Legitimate Interests:</strong> To improve our service and user experience</li>
+        <li>Articles you save (title, URL, timestamp)</li>
+        <li>Reading analytics: articles viewed, scroll distance, streaks, audio listening time</li>
+        <li>Votes you cast on articles</li>
+        <li>Daily challenge progress and earned achievements</li>
     </ul>
-    
-    <h2>5. How We Use Your Information</h2>
+    <h3>Technical Data</h3>
     <ul>
-        <li>Provide and maintain our service</li>
-        <li>Personalize your reading experience</li>
-        <li>Track reading analytics and achievements</li>
-        <li>Send important service notifications</li>
-        <li>Improve our platform and develop new features</li>
-        <li>Ensure security and prevent fraud</li>
+        <li>Browser type and device category (via Vercel Analytics — anonymized)</li>
+        <li>General geographic region (country-level, not precise location)</li>
+        <li>Page visit timestamps and session data</li>
     </ul>
-    
-    <h2>6. Data Storage and Security</h2>
-    <p>Your data is stored securely using Supabase infrastructure with the following measures:</p>
+
+    <h2>3. Legal Basis for Processing (GDPR)</h2>
     <ul>
-        <li>Encrypted data transmission (HTTPS/TLS)</li>
-        <li>Row-Level Security (RLS) policies</li>
-        <li>Regular security audits</li>
-        <li>Access controls and authentication</li>
+        <li><strong style="color:#fff">Contract performance:</strong> Processing required to provide the service (account management, preferences, saved articles)</li>
+        <li><strong style="color:#fff">Legitimate interests:</strong> Service improvement, security monitoring, and abuse prevention</li>
+        <li><strong style="color:#fff">Consent:</strong> Cookie preferences and optional analytics tracking</li>
     </ul>
-    
+
+    <h2>4. How We Use Your Data</h2>
+    <ul>
+        <li>Deliver and personalize the TicDia experience</li>
+        <li>Maintain reading streaks, challenges, and achievement badges</li>
+        <li>Send essential account notifications (email verification, password reset)</li>
+        <li>Detect and prevent abuse or unauthorized access</li>
+        <li>Improve the platform based on aggregate (not individual) usage patterns</li>
+    </ul>
+
+    <h2>5. Data Sharing & Third Parties</h2>
+    <p>We do not sell, rent, or trade your personal data. We use the following sub-processors:</p>
+    <ul>
+        <li><strong style="color:#fff">Supabase</strong> (EU-hosted option available) — Database, authentication, and file storage</li>
+        <li><strong style="color:#fff">Vercel</strong> — Web hosting and privacy-first analytics (no fingerprinting, GDPR-compliant)</li>
+        <li><strong style="color:#fff">ElevenLabs</strong> — Text-to-speech audio generation (article text sent to their API, no personal data)</li>
+        <li><strong style="color:#fff">Wikipedia / Wikimedia Foundation</strong> — Article content (governed by their own privacy policy)</li>
+    </ul>
+
+    <h2>6. Data Storage & Security</h2>
+    <ul>
+        <li>All data is encrypted in transit via HTTPS/TLS 1.3</li>
+        <li>Database access is protected by Row-Level Security (RLS) — your data is only accessible to you</li>
+        <li>Passwords are hashed using bcrypt via Supabase Auth</li>
+        <li>API keys are stored as encrypted server-side secrets, never in client code</li>
+        <li>Regular security reviews are conducted</li>
+    </ul>
+
     <h2>7. Data Retention</h2>
-    <p>We retain your personal data for as long as your account is active. If you delete your account, we will delete your personal data within 30 days, except where we are required to retain it for legal obligations.</p>
-    
+    <p>Your data is retained as long as your account is active. Analytics data older than 1 year and vote data older than 2 years are automatically purged. Upon account deletion, all personal data is removed within 30 days.</p>
+
     <h2>8. Your Rights (GDPR)</h2>
-    <p>Under GDPR, you have the following rights:</p>
-    <ul>
-        <li><strong>Right to Access:</strong> Request a copy of your personal data</li>
-        <li><strong>Right to Rectification:</strong> Correct inaccurate personal data</li>
-        <li><strong>Right to Erasure:</strong> Request deletion of your personal data</li>
-        <li><strong>Right to Restriction:</strong> Limit how we use your data</li>
-        <li><strong>Right to Data Portability:</strong> Receive your data in a structured format</li>
-        <li><strong>Right to Object:</strong> Object to data processing</li>
-        <li><strong>Right to Withdraw Consent:</strong> Withdraw consent at any time</li>
-    </ul>
-    <p>To exercise these rights, contact us at <a href="mailto:noa.wilhide@gmail.com">noa.wilhide@gmail.com</a></p>
-    
-    <h2>9. Cookies and Tracking</h2>
-    <p>We use essential cookies and local storage to:</p>
-    <ul>
-        <li>Maintain your login session</li>
-        <li>Remember your preferences</li>
-        <li>Provide analytics (anonymized)</li>
-    </ul>
-    <p>You can manage cookie preferences through our cookie consent banner.</p>
-    
-    <h2>10. Third-Party Services</h2>
-    <p>We use the following third-party services:</p>
-    <ul>
-        <li><strong>Supabase:</strong> Database and authentication</li>
-        <li><strong>Vercel:</strong> Hosting and analytics</li>
-        <li><strong>Wikipedia API:</strong> Article content</li>
-    </ul>
-    <p>These services have their own privacy policies and data processing agreements.</p>
-    
-    <h2>11. International Data Transfers</h2>
-    <p>Your data may be transferred to and processed in countries outside the EU. We ensure appropriate safeguards are in place, including Standard Contractual Clauses (SCCs) and adequacy decisions.</p>
-    
-    <h2>12. Children's Privacy</h2>
-    <p>Our service is not intended for users under 16 years of age. We do not knowingly collect personal data from children under 16.</p>
-    
-    <h2>13. Changes to This Policy</h2>
-    <p>We may update this privacy policy periodically. We will notify you of significant changes via email or through our service.</p>
-    
-    <h2>14. Contact & Data Protection Officer</h2>
-    <p>For privacy inquiries or to exercise your rights:</p>
-    <p>Email: <a href="mailto:noa.wilhide@gmail.com">noa.wilhide@gmail.com</a></p>
-    
-    <h2>15. Supervisory Authority</h2>
-    <p>You have the right to lodge a complaint with your local data protection authority if you believe your data protection rights have been violated.</p>
-    
-    <p style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #333; text-align: center;">
-        <a href="/">Return to TicDia</a>
-    </p>
+    <div class="rights-grid">
+        <div class="right-item"><strong>Access</strong><span>Request a copy of your personal data</span></div>
+        <div class="right-item"><strong>Rectification</strong><span>Correct inaccurate data</span></div>
+        <div class="right-item"><strong>Erasure</strong><span>Request deletion of your account and data</span></div>
+        <div class="right-item"><strong>Restriction</strong><span>Limit how we process your data</span></div>
+        <div class="right-item"><strong>Portability</strong><span>Receive your data in a structured format</span></div>
+        <div class="right-item"><strong>Object</strong><span>Object to data processing</span></div>
+    </div>
+    <p>To exercise any of these rights, use the Contact form in the app or at the footer of this page.</p>
+
+    <h2>9. Cookies & Local Storage</h2>
+    <p>We use essential cookies for authentication sessions and local storage to persist your preferences between visits. We use privacy-first analytics (Vercel Analytics) that do not track individuals or use fingerprinting. You can manage cookie preferences via the cookie banner shown on first visit.</p>
+
+    <h2>10. Children's Privacy</h2>
+    <p>TicDia is not directed at users under 16. We do not knowingly collect personal data from minors. If you believe we have collected data from a child, please contact us immediately.</p>
+
+    <h2>11. International Transfers</h2>
+    <p>Your data may be processed in the United States and EU. We ensure appropriate safeguards including Standard Contractual Clauses (SCCs) where required.</p>
+
+    <h2>12. Changes to This Policy</h2>
+    <p>We will notify registered users of material changes to this policy via email with at least 14 days' notice before changes take effect.</p>
+
+    <h2>13. Supervisory Authority</h2>
+    <p>If you are in the EU/EEA, you have the right to lodge a complaint with your local data protection authority (e.g., CNIL in France, ICO in the UK).</p>
+
+    <h2>14. Contact</h2>
+    <p>For all privacy inquiries, GDPR requests, or data deletion requests, please use our in-app contact form — no email address required.</p>
+
+    <a href="/" class="back-link">← Return to TicDia</a>
+
+    <footer>
+        <p>© 2026 TicDia &nbsp;·&nbsp; <a href="/terms" style="color:var(--muted)">Terms of Service</a></p>
+    </footer>
 </body>
 </html>
