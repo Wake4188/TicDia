@@ -179,23 +179,19 @@ export const registerServiceWorker = async (): Promise<void> => {
   }
 };
 
-// Critical resource hints
+// Critical resource hints - only add dns-prefetch for non-critical origins
+// (preconnects are already in index.html to avoid duplicates)
 export const addResourceHints = (): void => {
   if (typeof document === 'undefined') return;
 
   const hints = [
-    { rel: 'preconnect', href: 'https://rtuxaekhfwvpwmvmdaul.supabase.co' },
-    { rel: 'preconnect', href: 'https://upload.wikimedia.org' },
-    { rel: 'dns-prefetch', href: 'https://en.wikipedia.org' },
+    { rel: 'dns-prefetch', href: 'https://dictionaryapi.com' },
   ];
 
   hints.forEach(({ rel, href }) => {
     const link = document.createElement('link');
     link.rel = rel;
     link.href = href;
-    if (rel === 'preconnect') {
-      link.crossOrigin = 'anonymous';
-    }
     document.head.appendChild(link);
   });
 };
