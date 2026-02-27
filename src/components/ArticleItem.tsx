@@ -134,7 +134,7 @@ const ArticleItem = ({
       <div
         className="absolute inset-0 z-10 text-foreground p-4 sm:p-8 flex items-center justify-center"
         style={{
-          contain: 'layout style',
+          contain: 'size layout style paint',
         }}
       >
         <div className="max-w-3xl w-full flex flex-col justify-center" style={{ maxHeight: '100%' }}>
