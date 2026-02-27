@@ -12,8 +12,10 @@ import { AnalyticsCheck } from "../components/AnalyticsCheck";
 import { useUserPreferences } from "../contexts/UserPreferencesContext";
 import { useAuth } from "../contexts/AuthContext";
 
-// Lazy load heavy components to reduce initial JS payload
-const ArticleViewer = lazy(() => import("../components/ArticleViewer"));
+// Eagerly import ArticleViewer - it contains the LCP element (article text)
+import ArticleViewer from "../components/ArticleViewer";
+
+// Lazy load non-LCP components to reduce initial JS payload
 const Navigation = lazy(() => import("../components/Navigation"));
 const LeftSidebar = lazy(() => import("../components/LeftSidebar"));
 const RightSidebar = lazy(() => import("../components/RightSidebar"));
@@ -234,9 +236,7 @@ const Index = () => {
         <Suspense fallback={null}>
           <LeftSidebar article={currentDisplayArticle} onTagClick={handleTagClick} />
         </Suspense>
-        <Suspense fallback={<ArticleLoadingState />}>
-          <ArticleViewer articles={articles} onArticleChange={setCurrentArticle} onArticleView={trackArticleView} />
-        </Suspense>
+        <ArticleViewer articles={articles} onArticleChange={setCurrentArticle} onArticleView={trackArticleView} />
         <Suspense fallback={null}>
           <RightSidebar article={currentDisplayArticle} />
         </Suspense>
