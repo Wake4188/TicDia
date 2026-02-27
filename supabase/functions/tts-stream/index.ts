@@ -136,6 +136,8 @@ serve(async (req) => {
     })
 
     if (!response.ok) {
+      const errBody = await response.text()
+      console.error(`ElevenLabs API error: status=${response.status} body=${errBody}`)
       if (response.status === 429) {
         return new Response(
           JSON.stringify({ error: 'TTS provider rate limited. Please try again shortly.' }),
@@ -143,7 +145,7 @@ serve(async (req) => {
         )
       }
       return new Response(
-        JSON.stringify({ error: 'TTS generation failed' }),
+        JSON.stringify({ error: `TTS generation failed: ${response.status}` }),
         { status: 502, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
