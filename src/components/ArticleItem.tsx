@@ -140,12 +140,29 @@ const ArticleItem = ({
         <div className="max-w-3xl w-full flex flex-col justify-center" style={{ maxHeight: '100%' }}>
         <div className={`${isMobile ? 'bg-background/40 backdrop-blur-sm rounded-lg p-4 max-h-[70vh] overflow-y-auto' : 'text-center max-h-[80vh] overflow-y-auto'}`} style={{ minHeight: '200px' }}>
           <div className="space-y-4" style={{ minHeight: '150px' }}>
-            <h1
-              className="text-2xl sm:text-4xl font-bold"
-              style={{ fontFamily: userPreferences.fontFamily }}
-            >
-              {article.title}
-            </h1>
+            <div className="flex items-center justify-center gap-2">
+              <h1
+                className="text-2xl sm:text-4xl font-bold"
+                style={{ fontFamily: userPreferences.fontFamily }}
+              >
+                {article.title}
+              </h1>
+              {isCurrent && user && !showSmartLinks && (
+                <InlineAudioButton
+                  text={article.content || ''}
+                  onAudioStart={() => {
+                    if (typeof window !== 'undefined' && (window as any).handleTtsStart) {
+                      (window as any).handleTtsStart(index);
+                    }
+                  }}
+                  onAudioEnd={() => {
+                    if (typeof window !== 'undefined' && (window as any).handleTtsStop) {
+                      (window as any).handleTtsStop();
+                    }
+                  }}
+                />
+              )}
+            </div>
             <div className="max-w-2xl" style={{ minHeight: '100px' }}>
               {user ? (
                 <HighlightedText
@@ -173,25 +190,6 @@ const ArticleItem = ({
               )}
             </div>
 
-            {/* Inline Audio Button - elegant minimal style */}
-            {isCurrent && user && !showSmartLinks && (
-              <div className="mt-3 flex items-center gap-2">
-                <InlineAudioButton
-                  text={article.content || ''}
-                  onAudioStart={() => {
-                    if (typeof window !== 'undefined' && (window as any).handleTtsStart) {
-                      (window as any).handleTtsStart(index);
-                    }
-                  }}
-                  onAudioEnd={() => {
-                    if (typeof window !== 'undefined' && (window as any).handleTtsStop) {
-                      (window as any).handleTtsStop();
-                    }
-                  }}
-                />
-                <span className="text-xs text-muted-foreground/60">Listen</span>
-              </div>
-            )}
           </div>
         </div>
         {isCurrent && !showSmartLinks && (
