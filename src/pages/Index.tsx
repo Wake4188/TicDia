@@ -1,13 +1,8 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { useSearchParams, useLocation, useNavigate } from "react-router-dom";
-import { useState, useEffect, useCallback, useMemo } from "react";
-import ArticleViewer from "../components/ArticleViewer";
+import { useState, useEffect, useCallback, useMemo, lazy, Suspense } from "react";
 import ArticleLoadingState from "../components/ArticleLoadingState";
-import RightSidebar from "../components/RightSidebar";
-import LeftSidebar from "../components/LeftSidebar";
-import Navigation from "../components/Navigation";
-import FunErrorScreen from "../components/FunErrorScreen";
 import { getRandomArticles, searchArticles, getPersonalizedArticles } from "../services/wikipediaService";
 import { useToast } from "@/components/ui/use-toast";
 import { useLanguage } from "../contexts/LanguageContext";
@@ -16,6 +11,13 @@ import { useChallengeTracking } from "../hooks/useChallengeTracking";
 import { AnalyticsCheck } from "../components/AnalyticsCheck";
 import { useUserPreferences } from "../contexts/UserPreferencesContext";
 import { useAuth } from "../contexts/AuthContext";
+
+// Lazy load heavy components to reduce initial JS payload
+const ArticleViewer = lazy(() => import("../components/ArticleViewer"));
+const Navigation = lazy(() => import("../components/Navigation"));
+const LeftSidebar = lazy(() => import("../components/LeftSidebar"));
+const RightSidebar = lazy(() => import("../components/RightSidebar"));
+const FunErrorScreen = lazy(() => import("../components/FunErrorScreen"));
 
 // Cache key for persisting articles
 const ARTICLES_CACHE_KEY = 'ticdia_cached_articles';
@@ -201,15 +203,17 @@ const Index = () => {
     };
     
     return (
-      <FunErrorScreen
-        type={errorType}
-        title={searchQuery ? t.noResults : undefined}
-        message={searchQuery 
-          ? `No articles found for "${searchQuery}". Try a different search term!`
-          : undefined}
-        onRetry={handleRetry}
-        onGoHome={() => navigate('/')}
-      />
+      <Suspense fallback={<ArticleLoadingState />}>
+        <FunErrorScreen
+          type={errorType}
+          title={searchQuery ? t.noResults : undefined}
+          message={searchQuery 
+            ? `No articles found for "${searchQuery}". Try a different search term!`
+            : undefined}
+          onRetry={handleRetry}
+          onGoHome={() => navigate('/')}
+        />
+      </Suspense>
     );
   }
 
@@ -223,11 +227,19 @@ const Index = () => {
   return (
     <div className="h-screen w-screen relative overflow-hidden bg-background">
       <AnalyticsCheck />
-      <Navigation currentArticle={currentDisplayArticle} />
+      <Suspense fallback={null}>
+        <Navigation currentArticle={currentDisplayArticle} />
+      </Suspense>
       <div className="flex h-full">
-        <LeftSidebar article={currentDisplayArticle} onTagClick={handleTagClick} />
-        <ArticleViewer articles={articles} onArticleChange={setCurrentArticle} onArticleView={trackArticleView} />
-        <RightSidebar article={currentDisplayArticle} />
+        <Suspense fallback={null}>
+          <LeftSidebar article={currentDisplayArticle} onTagClick={handleTagClick} />
+        </Suspense>
+        <Suspense fallback={<ArticleLoadingState />}>
+          <ArticleViewer articles={articles} onArticleChange={setCurrentArticle} onArticleView={trackArticleView} />
+        </Suspense>
+        <Suspense fallback={null}>
+          <RightSidebar article={currentDisplayArticle} />
+        </Suspense>
       </div>
     </div>
   );
