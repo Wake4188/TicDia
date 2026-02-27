@@ -29,8 +29,8 @@
       document.addEventListener(e, loadGA, { once: true, passive: true });
     });
     
-    // Fallback: load after 5 seconds if no interaction
-    setTimeout(loadGA, 5000);
+    // Fallback: load after 10 seconds if no interaction
+    setTimeout(loadGA, 10000);
   </script>
 
   <!-- PWA and App Identity -->
@@ -65,9 +65,9 @@
 
   <!-- Preconnect to critical origins (max 4) -->
   <link rel="preconnect" href="https://cdn.gpteng.co">
-  <link rel="preconnect" href="https://en.wikipedia.org" crossorigin>
+  <link rel="preconnect" href="https://en.wikipedia.org">
   <link rel="preconnect" href="https://upload.wikimedia.org">
-  <link rel="preconnect" href="https://rtuxaekhfwvpwmvmdaul.supabase.co">
+  <link rel="dns-prefetch" href="//rtuxaekhfwvpwmvmdaul.supabase.co">
   
   <!-- DNS prefetch for additional origins -->
   <link rel="dns-prefetch" href="//www.googletagmanager.com">
@@ -147,10 +147,6 @@
     }
   </style>
 
-  <!-- Preload polyfill for CSS loading -->
-  <script>
-    !function (e) { "use strict"; var t = function (t, n, r) { function o(e) { return i.body ? e() : void setTimeout(function () { o(e) }) } function a() { d.addEventListener && d.removeEventListener("load", a), d.media = r || "all" } var l, i = e.document, d = i.createElement("link"); if (n) l = n; else { var s = (i.body || i.getElementsByTagName("head")[0]).childNodes; l = s[s.length - 1] } var u = i.styleSheets; d.rel = "stylesheet", d.href = t, d.media = "only x", o(function () { l.parentNode.insertBefore(d, n ? l : l.nextSibling) }); var f = function (e) { for (var t = d.href, n = u.length; n--;)if (u[n].href === t) return e(); setTimeout(function () { f(e) }) }; return d.addEventListener && d.addEventListener("load", a), d.onloadcssdefined = f, f(a), d }; "undefined" != typeof exports ? exports.loadCSS = t : e.loadCSS = t }("undefined" != typeof global ? global : this);
-  </script>
 
   <!-- Icons for mobile and desktop -->
   <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32px32px-v2.png">
