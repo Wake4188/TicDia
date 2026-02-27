@@ -132,14 +132,12 @@ const ArticleItem = ({
       )}
 
       <div
-        className="relative z-10 text-foreground p-4 sm:p-8 max-w-3xl mx-auto h-full flex flex-col justify-center"
+        className="absolute inset-0 z-10 text-foreground p-4 sm:p-8 flex items-center justify-center"
         style={{
-          minHeight: '300px',
-          contain: 'layout',
-          willChange: 'opacity',
-          opacity: 1,
+          contain: 'layout style',
         }}
       >
+        <div className="max-w-3xl w-full flex flex-col justify-center" style={{ maxHeight: '100%' }}>
         <div className={`${isMobile ? 'bg-background/40 backdrop-blur-sm rounded-lg p-4 max-h-[70vh] overflow-y-auto' : 'text-center max-h-[80vh] overflow-y-auto'}`} style={{ minHeight: '200px' }}>
           <div className="space-y-4" style={{ minHeight: '150px' }}>
             <h1
@@ -207,6 +205,7 @@ const ArticleItem = ({
             </button>
           </div>
         )}
+        </div>
       </div>
 
       {isCurrent && progress > 0 && !showSmartLinks && showAnimation && (
