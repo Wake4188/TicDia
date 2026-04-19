@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ChevronDown, ChevronUp, Trash2, Plus, ExternalLink, Calendar, Sparkles, TrendingUp, Globe } from "lucide-react";
+import { Trash2, Plus, ExternalLink, Calendar, Sparkles, TrendingUp } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -10,7 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import SmallTic from "@/components/SmallTic";
-import NewsFeed from "@/components/NewsFeed";
+import NewsFeedCards from "@/components/NewsFeedCards";
 import VotingProgressBar from "@/components/VotingProgressBar";
 import { useNavigate } from "react-router-dom";
 import { useUserPreferences } from "@/contexts/UserPreferencesContext";
@@ -23,19 +23,6 @@ interface TodayArticle {
   url: string;
   created_at: string;
   is_admin_added: boolean;
-}
-interface WikipediaArticle {
-  title: string;
-  extract: string;
-  fullurl: string;
-}
-interface RSSArticle {
-  title: string;
-  summary: string;
-  link: string;
-  image?: string;
-  publishedAt: string;
-  source: string;
 }
 const Today = () => {
   const {
@@ -73,14 +60,11 @@ const Today = () => {
     content: "",
     url: ""
   });
-  const [wikipediaArticles, setWikipediaArticles] = useState<WikipediaArticle[]>([]);
-  const [apNewsArticles, setApNewsArticles] = useState<RSSArticle[]>([]);
   const [smallTicOpen, setSmallTicOpen] = useState(false);
   const [selectedArticle, setSelectedArticle] = useState<{
     article_title: string;
     article_url: string;
   } | null>(null);
-  const [showAllArticles, setShowAllArticles] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
 
   // Check if user is admin using has_role function
@@ -137,79 +121,6 @@ const Today = () => {
       return data as TodayArticle[];
     }
   });
-
-  // Fetch Wikipedia and RSS in parallel on mount
-  useEffect(() => {
-    // Parallel fetch for faster loading
-    Promise.allSettled([
-      fetchWikipediaArticles(),
-      fetchApNewsRSS()
-    ]);
-  }, [currentLanguage]);
-  const fetchApNewsRSS = async () => {
-    try {
-      const response = await fetch('/api/rss?url=' + encodeURIComponent('https://rss.app/feeds/6Hnucl2wxDJEwGrt.xml') + '&source=AP News');
-      if (response.ok) {
-        const articles = await response.json();
-        setApNewsArticles(articles);
-      }
-    } catch (error) {
-      console.error('Error fetching AP News RSS:', error);
-    }
-  };
-  const fetchWikipediaArticles = async () => {
-    try {
-      // Get current events from Wikipedia in the selected language
-      const currentDate = new Date();
-      const month = currentDate.toLocaleString(currentLanguage.code, {
-        month: 'long'
-      });
-      const day = currentDate.getDate();
-      const wikipediaDomain = currentLanguage.wikipediaDomain;
-      const response = await fetch(`https://${wikipediaDomain}/api/rest_v1/page/summary/${month}_${day}`);
-      if (!response.ok) {
-        // Fallback to "Current events" page
-        const fallbackResponse = await fetch(`https://${wikipediaDomain}/api/rest_v1/page/summary/Current_events`);
-        if (fallbackResponse.ok) {
-          const data = await fallbackResponse.json();
-          setWikipediaArticles([{
-            title: data.title,
-            extract: data.extract,
-            fullurl: data.content_urls?.desktop?.page || `https://${wikipediaDomain}/wiki/${encodeURIComponent(data.title)}`
-          }]);
-        }
-        return;
-      }
-      const data = await response.json();
-      setWikipediaArticles([{
-        title: data.title,
-        extract: data.extract,
-        fullurl: data.content_urls?.desktop?.page || `https://${wikipediaDomain}/wiki/${encodeURIComponent(data.title)}`
-      }]);
-
-      // Try to get more current events
-      const eventsResponse = await fetch(`https://${wikipediaDomain}/w/api.php?action=query&format=json&prop=extracts&exintro=true&explaintext=true&titles=Portal:Current_events&origin=*`);
-      if (eventsResponse.ok) {
-        const eventsData = await eventsResponse.json();
-        const pages = eventsData.query?.pages;
-        if (pages) {
-          const pageIds = Object.keys(pages);
-          pageIds.forEach(pageId => {
-            const page = pages[pageId];
-            if (page.extract) {
-              setWikipediaArticles(prev => [...prev, {
-                title: page.title,
-                extract: page.extract,
-                fullurl: `https://${wikipediaDomain}/wiki/${encodeURIComponent(page.title)}`
-              }]);
-            }
-          });
-        }
-      }
-    } catch (error) {
-      console.error('Error fetching Wikipedia articles:', error);
-    }
-  };
   const handleAddArticle = async () => {
     if (!newArticle.title || !newArticle.content) {
       toast({
@@ -266,13 +177,6 @@ const Today = () => {
         variant: "destructive"
       });
     }
-  };
-  const handleWikipediaClick = (article: WikipediaArticle) => {
-    setSelectedArticle({
-      article_title: article.title,
-      article_url: article.fullurl
-    });
-    setSmallTicOpen(true);
   };
   const handleOpenFull = (title: string) => {
     navigate(`/?q=${encodeURIComponent(title)}`);
@@ -352,99 +256,17 @@ const Today = () => {
 
         <motion.div variants={containerVariants} initial="hidden" animate="visible" className="space-y-12">
 
-          {/* News Feed Section */}
+          {/* News Feed Cards (NYT • BBC • France Info) */}
           <motion.div variants={itemVariants}>
-            <NewsFeed />
-          </motion.div>
-
-          {/* AP News RSS Section */}
-          {apNewsArticles.length > 0 && <motion.div variants={itemVariants} className="space-y-6">
-              <div className="flex items-center gap-3 mb-6">
-                <div className="p-2 bg-primary/10 rounded-lg">
-                  <TrendingUp className="w-6 h-6 text-primary" />
-                </div>
-                <h2 className="text-2xl font-bold text-foreground">{t('apNews')}</h2>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {(showAllArticles ? apNewsArticles : apNewsArticles.slice(0, 9)).map((article, index) => <motion.div key={`ap-${index}`} variants={itemVariants} whileHover={{ y: -5, transition: { duration: 0.2 } }}>
-                    <Card className="h-full bg-card/50 backdrop-blur-md border-border/50 hover:bg-card/70 transition-all duration-300 overflow-hidden group hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5">
-                      <CardContent className="p-0 flex flex-col h-full">
-                        {article.image && <div className="relative w-full h-48 overflow-hidden">
-                            <div className="absolute inset-0 bg-gradient-to-t from-background/60 to-transparent z-10" />
-                            <img src={article.image} alt={article.title} loading="lazy" className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-500" onError={e => { e.currentTarget.style.display = 'none'; }} />
-                            <div className="absolute bottom-3 left-3 z-20">
-                              <span className="text-xs font-medium px-2 py-1 bg-background/50 backdrop-blur-sm rounded-full text-foreground border border-border/30">
-                                {article.source}
-                              </span>
-                            </div>
-                          </div>}
-                        <div className="p-5 flex-1 flex flex-col">
-                          <h3 className="text-lg font-bold text-foreground mb-3 line-clamp-2 group-hover:text-primary transition-colors">
-                            {article.title}
-                          </h3>
-                          <p className="text-muted-foreground text-sm mb-4 line-clamp-3 flex-1">
-                            {article.summary}
-                          </p>
-                          <div className="flex items-center justify-between pt-4 border-t border-border/30 mt-auto">
-                            <span className="text-xs text-muted-foreground flex items-center gap-1">
-                              <Calendar className="w-3 h-3" />
-                              {new Date(article.publishedAt).toLocaleDateString()}
-                            </span>
-                            <a href={article.link} target="_blank" rel="noopener noreferrer" className="text-foreground hover:text-primary text-sm font-medium flex items-center gap-1 transition-colors">
-                              {t('readMore')} <ExternalLink className="w-3 h-3" />
-                            </a>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </motion.div>)}
-              </div>
-
-              {apNewsArticles.length > 9 && <div className="flex justify-center mt-8">
-                  <Button variant="outline" onClick={() => setShowAllArticles(!showAllArticles)} className="bg-transparent border-border text-foreground hover:bg-muted hover:text-primary transition-all">
-                    {showAllArticles ? <>
-                        <ChevronUp className="w-4 h-4 mr-2" />
-                        {t('showLess')}
-                      </> : <>
-                        <ChevronDown className="w-4 h-4 mr-2" />
-                        {t('showAll')} ({apNewsArticles.length - 9} {t('more')})
-                      </>}
-                  </Button>
-                </div>}
-            </motion.div>}
-
-          {/* Wikipedia Articles Section */}
-          <motion.div variants={itemVariants} className="space-y-6">
-            <div className="flex items-center gap-3 mb-6">
+            <div className="flex items-center gap-3 mb-4">
               <div className="p-2 bg-primary/10 rounded-lg">
-                <Globe className="w-6 h-6 text-primary" />
+                <TrendingUp className="w-5 h-5 text-primary" />
               </div>
-              <h2 className="text-2xl font-bold text-foreground">{t('fromWikipedia')}</h2>
+              <h2 className="text-2xl font-bold text-foreground">{t('latestNews')}</h2>
             </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {wikipediaArticles.map((article, index) => <motion.div key={index} variants={itemVariants} whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-                  <Card className="h-full bg-card/50 backdrop-blur-md border-border/50 hover:border-primary/30 transition-all cursor-pointer group hover:shadow-lg hover:shadow-primary/5" onClick={() => handleWikipediaClick(article)}>
-                    <CardContent className="p-6">
-                      <div className="flex items-start justify-between gap-4">
-                        <div className="flex-1">
-                          <h3 className="text-xl font-bold text-foreground mb-3 group-hover:text-primary transition-colors">
-                            {article.title}
-                          </h3>
-                          <p className="text-muted-foreground text-sm line-clamp-4 leading-relaxed">
-                            {article.extract}
-                          </p>
-                        </div>
-                        <div className="p-2 bg-muted/30 rounded-full group-hover:bg-primary/20 transition-colors">
-                          <ExternalLink className="w-5 h-5 text-muted-foreground group-hover:text-primary" />
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </motion.div>)}
-            </div>
+            <NewsFeedCards />
           </motion.div>
+
 
           {/* Admin Articles Section */}
           {adminArticles && adminArticles.length > 0 && <motion.div variants={itemVariants} className="space-y-6">

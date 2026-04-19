@@ -1,4 +1,5 @@
 import React, { useState, useCallback, lazy, Suspense } from "react";
+import { Sparkles } from "lucide-react";
 import { Progress } from "./ui/progress";
 import { UserPreferences } from "@/services/userPreferencesService";
 import InlineAudioButton from "./InlineAudioButton";
@@ -65,13 +66,14 @@ const ArticleItem = ({
       style={{ minHeight: '100vh', contain: 'layout style paint' }}
       {...swipeHandlers}
     >
-      {/* Smart Links Overlay - lazy loaded */}
-      {showSmartLinks && isCurrent && (
-        <Suspense fallback={<div className="fixed inset-0 z-50 bg-background/80 flex items-center justify-center"><span className="text-muted-foreground">Loading...</span></div>}>
+      {/* Smart Links Drawer - lazy loaded, only mount when needed */}
+      {showSmartLinks && (
+        <Suspense fallback={null}>
           <SmartLinks
             articleContent={article.content}
             articleTitle={article.title}
-            onClose={() => setShowSmartLinks(false)}
+            open={showSmartLinks}
+            onOpenChange={setShowSmartLinks}
             onNavigateToArticle={handleNavigateToArticle}
           />
         </Suspense>
@@ -119,7 +121,7 @@ const ArticleItem = ({
       </div>
 
       {/* Export Menu - positioned in top-right corner */}
-      {isCurrent && !showSmartLinks && (
+      {isCurrent && (
         <div className="absolute top-20 right-4 z-20">
           <ExportMenu article={{
             id: article.id?.toString() || article.title,
@@ -147,7 +149,7 @@ const ArticleItem = ({
               >
                 {article.title}
               </h1>
-              {isCurrent && user && !showSmartLinks && (
+              {isCurrent && user && (
                 <InlineAudioButton
                   text={article.content || ''}
                   onAudioStart={() => {
@@ -192,21 +194,22 @@ const ArticleItem = ({
 
           </div>
         </div>
-        {isCurrent && !showSmartLinks && (
-          <div className="flex items-center gap-3 text-xs sm:text-sm text-muted-foreground flex-shrink-0 mt-4">
+        {isCurrent && (
+          <div className="flex items-center justify-center gap-3 text-xs sm:text-sm flex-shrink-0 mt-4">
             <button
               onClick={() => setShowSmartLinks(true)}
-              className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/20 hover:bg-primary/30 text-primary transition-colors"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/15 hover:bg-primary/25 backdrop-blur-sm text-primary border border-primary/20 transition-all duration-200 hover:scale-105 active:scale-95"
+              aria-label="Open related links drawer"
             >
-              <span>View Related Links</span>
-              <span className="text-xs opacity-70">→</span>
+              <Sparkles className="w-3.5 h-3.5" />
+              <span className="font-medium">Related Links</span>
             </button>
           </div>
         )}
         </div>
       </div>
 
-      {isCurrent && progress > 0 && !showSmartLinks && showAnimation && (
+      {isCurrent && progress > 0 && showAnimation && (
         <div className="absolute bottom-0 left-0 right-0 z-20">
           <Progress
             value={progress}
