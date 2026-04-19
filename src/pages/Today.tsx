@@ -178,13 +178,6 @@ const Today = () => {
       });
     }
   };
-  const handleWikipediaClick = (article: WikipediaArticle) => {
-    setSelectedArticle({
-      article_title: article.title,
-      article_url: article.fullurl
-    });
-    setSmallTicOpen(true);
-  };
   const handleOpenFull = (title: string) => {
     navigate(`/?q=${encodeURIComponent(title)}`);
   };
