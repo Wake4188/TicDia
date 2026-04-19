@@ -5,11 +5,13 @@ import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { fetchRandomFacts, type RandomFact } from "@/services/onThisDayService";
 import { useUserPreferences } from "@/contexts/UserPreferencesContext";
+import { useMobileDetection } from "@/hooks/useMobileDetection";
 import Navigation from "@/components/Navigation";
 
 const DidYouKnowFeed = () => {
   const navigate = useNavigate();
   const { userPreferences } = useUserPreferences();
+  const isMobile = useMobileDetection();
   const [facts, setFacts] = useState<RandomFact[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
@@ -146,42 +148,44 @@ const DidYouKnowFeed = () => {
                   </div>
                 )}
 
-                <div className="relative z-10 text-foreground p-8 max-w-2xl mx-auto text-center">
-                  <div className="space-y-6">
+                <div className={`relative z-10 text-foreground max-w-2xl mx-auto text-center ${isMobile ? 'px-5 py-6' : 'p-8'}`}>
+                  <div className={isMobile ? 'space-y-4' : 'space-y-6'}>
                     {index === 0 && (
                       <motion.div
                         initial={{ opacity: 0, y: -10 }}
                         animate={{ opacity: 1, y: 0 }}
-                        className="px-4 py-1.5 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 text-white/90 text-sm font-medium inline-flex items-center gap-2"
+                        className="px-4 py-1.5 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 text-white/90 text-xs sm:text-sm font-medium inline-flex items-center gap-2"
                       >
-                        <Lightbulb className="w-4 h-4" />
+                        <Lightbulb className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                         Did You Know?
                       </motion.div>
                     )}
 
                     <h1
-                      className="text-4xl sm:text-6xl font-bold text-white"
+                      className={`font-bold text-white ${isMobile ? 'text-3xl' : 'text-4xl sm:text-6xl'}`}
                       style={{ fontFamily: userPreferences.fontFamily }}
                     >
                       {fact.title}
                     </h1>
 
                     {fact.description && (
-                      <p className="text-lg text-white/60 italic">{fact.description}</p>
+                      <p className={`text-white/60 italic ${isMobile ? 'text-sm' : 'text-lg'}`}>{fact.description}</p>
                     )}
 
                     <p
-                      className="text-lg sm:text-xl text-white/90 leading-relaxed"
+                      className="text-white/90 leading-relaxed"
                       style={{
                         fontFamily: userPreferences.fontFamily,
                         fontSize: `${userPreferences.fontSize}px`,
                       }}
                     >
-                      {fact.extract}
+                      {isMobile && fact.extract && fact.extract.length > 280
+                        ? `${fact.extract.substring(0, 280)}…`
+                        : fact.extract}
                     </p>
 
-                    {/* Why it's interesting card */}
-                    {fact.description && fact.extract && (
+                    {/* Why it's interesting card - desktop only to reduce mobile clutter */}
+                    {fact.description && fact.extract && !isMobile && (
                       <div className="mt-4 px-5 py-4 rounded-2xl bg-white/10 backdrop-blur-sm border border-white/15 text-left">
                         <p className="text-xs uppercase tracking-widest text-white/50 mb-2 font-semibold">Why it's interesting</p>
                         <p className="text-sm sm:text-base text-white/75 leading-relaxed line-clamp-4">
@@ -197,7 +201,7 @@ const DidYouKnowFeed = () => {
                         href={url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 text-white/70 hover:text-white hover:bg-white/20 transition-all text-sm"
+                        className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 text-white/70 hover:text-white hover:bg-white/20 transition-all text-xs sm:text-sm"
                       >
                         Read more on Wikipedia <ExternalLink className="w-3.5 h-3.5" />
                       </a>
