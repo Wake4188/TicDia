@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { fetchOnThisDay, type OnThisDayEvent } from "@/services/onThisDayService";
 import { useUserPreferences } from "@/contexts/UserPreferencesContext";
+import { useMobileDetection } from "@/hooks/useMobileDetection";
 import Navigation from "@/components/Navigation";
 
 type TaggedEvent = OnThisDayEvent & { eventType: 'event' | 'birth' | 'death' };
@@ -12,6 +13,7 @@ type TaggedEvent = OnThisDayEvent & { eventType: 'event' | 'birth' | 'death' };
 const OnThisDayFeed = () => {
   const navigate = useNavigate();
   const { userPreferences } = useUserPreferences();
+  const isMobile = useMobileDetection();
   const imageOpacity = (userPreferences.backgroundOpacity || 70) / 100;
   const [events, setEvents] = useState<TaggedEvent[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -172,13 +174,13 @@ const OnThisDayFeed = () => {
                   </div>
                 )}
 
-                <div className="relative z-10 text-foreground p-8 max-w-2xl mx-auto text-center">
-                  <div className="space-y-5">
+                <div className={`relative z-10 text-foreground max-w-2xl mx-auto text-center ${isMobile ? 'px-5 py-6' : 'p-8'}`}>
+                  <div className={isMobile ? 'space-y-4' : 'space-y-5'}>
                     {index === 0 && (
                       <motion.div
                         initial={{ opacity: 0, y: -10 }}
                         animate={{ opacity: 1, y: 0 }}
-                        className="px-4 py-1.5 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 text-white/90 text-sm font-medium inline-block"
+                        className="px-4 py-1.5 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 text-white/90 text-xs sm:text-sm font-medium inline-block"
                       >
                         On This Day · {dateStr}
                       </motion.div>
@@ -186,26 +188,26 @@ const OnThisDayFeed = () => {
 
                     {/* Date context badge */}
                     <div className="flex items-center justify-center gap-2">
-                      <span className="text-2xl">{getEventIcon(event.eventType)}</span>
-                      <span className="px-3 py-1 rounded-full bg-white/15 backdrop-blur-sm text-white/80 text-sm font-medium">
+                      <span className={isMobile ? 'text-xl' : 'text-2xl'}>{getEventIcon(event.eventType)}</span>
+                      <span className="px-3 py-1 rounded-full bg-white/15 backdrop-blur-sm text-white/80 text-xs sm:text-sm font-medium">
                         {getEventLabel(event)}
                       </span>
                     </div>
 
-                    <h2 className="text-6xl sm:text-8xl font-bold text-white/30">{event.year}</h2>
+                    <h2 className={`font-bold text-white/30 ${isMobile ? 'text-5xl' : 'text-6xl sm:text-8xl'}`}>{event.year}</h2>
 
                     <p
-                      className="text-xl sm:text-2xl text-white/90 leading-relaxed"
+                      className="text-white/90 leading-relaxed"
                       style={{
                         fontFamily: userPreferences.fontFamily,
-                        fontSize: `${userPreferences.fontSize + 2}px`,
+                        fontSize: `${userPreferences.fontSize + (isMobile ? 0 : 2)}px`,
                       }}
                     >
                       {event.text}
                     </p>
 
-                    {/* Why it matters */}
-                    {page?.extract && (
+                    {/* Why it matters - hidden on mobile to reduce clutter */}
+                    {page?.extract && !isMobile && (
                       <div className="mt-4 px-5 py-4 rounded-2xl bg-white/10 backdrop-blur-sm border border-white/15 text-left">
                         <p className="text-xs uppercase tracking-widest text-white/50 mb-2 font-semibold">Why it matters</p>
                         <p className="text-sm sm:text-base text-white/75 leading-relaxed line-clamp-4">
@@ -215,7 +217,7 @@ const OnThisDayFeed = () => {
                     )}
 
                     {page?.description && !page?.extract && (
-                      <p className="text-base text-white/50 italic">{page.description}</p>
+                      <p className={`text-white/50 italic ${isMobile ? 'text-sm' : 'text-base'}`}>{page.description}</p>
                     )}
 
                     {url && (
@@ -223,7 +225,7 @@ const OnThisDayFeed = () => {
                         href={url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 text-white/70 hover:text-white hover:bg-white/20 transition-all text-sm"
+                        className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 text-white/70 hover:text-white hover:bg-white/20 transition-all text-xs sm:text-sm"
                       >
                         Read more <ExternalLink className="w-3.5 h-3.5" />
                       </a>
