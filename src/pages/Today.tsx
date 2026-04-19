@@ -10,7 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import SmallTic from "@/components/SmallTic";
-import NewsFeed from "@/components/NewsFeed";
+import NewsFeedCards from "@/components/NewsFeedCards";
 import VotingProgressBar from "@/components/VotingProgressBar";
 import { useNavigate } from "react-router-dom";
 import { useUserPreferences } from "@/contexts/UserPreferencesContext";
