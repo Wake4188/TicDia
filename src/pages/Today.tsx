@@ -352,67 +352,16 @@ const Today = () => {
 
         <motion.div variants={containerVariants} initial="hidden" animate="visible" className="space-y-12">
 
-          {/* News Feed Section */}
+          {/* News Feed Cards (NYT • BBC • France Info) */}
           <motion.div variants={itemVariants}>
-            <NewsFeed />
+            <div className="flex items-center gap-3 mb-4">
+              <div className="p-2 bg-primary/10 rounded-lg">
+                <TrendingUp className="w-5 h-5 text-primary" />
+              </div>
+              <h2 className="text-2xl font-bold text-foreground">{t('latestNews')}</h2>
+            </div>
+            <NewsFeedCards />
           </motion.div>
-
-          {/* AP News RSS Section */}
-          {apNewsArticles.length > 0 && <motion.div variants={itemVariants} className="space-y-6">
-              <div className="flex items-center gap-3 mb-6">
-                <div className="p-2 bg-primary/10 rounded-lg">
-                  <TrendingUp className="w-6 h-6 text-primary" />
-                </div>
-                <h2 className="text-2xl font-bold text-foreground">{t('apNews')}</h2>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {(showAllArticles ? apNewsArticles : apNewsArticles.slice(0, 9)).map((article, index) => <motion.div key={`ap-${index}`} variants={itemVariants} whileHover={{ y: -5, transition: { duration: 0.2 } }}>
-                    <Card className="h-full bg-card/50 backdrop-blur-md border-border/50 hover:bg-card/70 transition-all duration-300 overflow-hidden group hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5">
-                      <CardContent className="p-0 flex flex-col h-full">
-                        {article.image && <div className="relative w-full h-48 overflow-hidden">
-                            <div className="absolute inset-0 bg-gradient-to-t from-background/60 to-transparent z-10" />
-                            <img src={article.image} alt={article.title} loading="lazy" className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-500" onError={e => { e.currentTarget.style.display = 'none'; }} />
-                            <div className="absolute bottom-3 left-3 z-20">
-                              <span className="text-xs font-medium px-2 py-1 bg-background/50 backdrop-blur-sm rounded-full text-foreground border border-border/30">
-                                {article.source}
-                              </span>
-                            </div>
-                          </div>}
-                        <div className="p-5 flex-1 flex flex-col">
-                          <h3 className="text-lg font-bold text-foreground mb-3 line-clamp-2 group-hover:text-primary transition-colors">
-                            {article.title}
-                          </h3>
-                          <p className="text-muted-foreground text-sm mb-4 line-clamp-3 flex-1">
-                            {article.summary}
-                          </p>
-                          <div className="flex items-center justify-between pt-4 border-t border-border/30 mt-auto">
-                            <span className="text-xs text-muted-foreground flex items-center gap-1">
-                              <Calendar className="w-3 h-3" />
-                              {new Date(article.publishedAt).toLocaleDateString()}
-                            </span>
-                            <a href={article.link} target="_blank" rel="noopener noreferrer" className="text-foreground hover:text-primary text-sm font-medium flex items-center gap-1 transition-colors">
-                              {t('readMore')} <ExternalLink className="w-3 h-3" />
-                            </a>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </motion.div>)}
-              </div>
-
-              {apNewsArticles.length > 9 && <div className="flex justify-center mt-8">
-                  <Button variant="outline" onClick={() => setShowAllArticles(!showAllArticles)} className="bg-transparent border-border text-foreground hover:bg-muted hover:text-primary transition-all">
-                    {showAllArticles ? <>
-                        <ChevronUp className="w-4 h-4 mr-2" />
-                        {t('showLess')}
-                      </> : <>
-                        <ChevronDown className="w-4 h-4 mr-2" />
-                        {t('showAll')} ({apNewsArticles.length - 9} {t('more')})
-                      </>}
-                  </Button>
-                </div>}
-            </motion.div>}
 
           {/* Wikipedia Articles Section */}
           <motion.div variants={itemVariants} className="space-y-6">
