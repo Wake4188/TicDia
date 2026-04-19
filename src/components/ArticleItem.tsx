@@ -1,4 +1,5 @@
 import React, { useState, useCallback, lazy, Suspense } from "react";
+import { Sparkles } from "lucide-react";
 import { Progress } from "./ui/progress";
 import { UserPreferences } from "@/services/userPreferencesService";
 import InlineAudioButton from "./InlineAudioButton";
