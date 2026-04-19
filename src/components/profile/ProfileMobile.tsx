@@ -285,6 +285,20 @@ export const ProfileMobile = ({ fontOptions, colorOptions }: ProfileMobileProps)
           </div>
           <Slider value={[userPreferences.fontSize]} onValueChange={([v]) => updatePreferences({ fontSize: v })} min={12} max={24} step={1} />
         </div>
+        <div>
+          <div className="flex justify-between mb-2">
+            <p className="text-sm font-medium">Background Transparency</p>
+            <span className="text-sm text-primary">{userPreferences.backgroundOpacity}%</span>
+          </div>
+          <Slider
+            value={[userPreferences.backgroundOpacity]}
+            onValueChange={([v]) => updatePreferences({ backgroundOpacity: v })}
+            min={0}
+            max={100}
+            step={5}
+          />
+          <p className="text-xs text-muted-foreground mt-1.5">Controls article background dimming in the main feed</p>
+        </div>
       </div>
     </div>
   );
