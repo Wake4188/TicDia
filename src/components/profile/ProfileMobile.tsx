@@ -154,9 +154,9 @@ export const ProfileMobile = ({ fontOptions, colorOptions }: ProfileMobileProps)
   if (!user) return null;
 
   const SettingsGroup = ({ title, children }: { title: string; children: React.ReactNode }) => (
-    <div className="mb-6">
-      <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider px-4 mb-2">{title}</p>
-      <div className="bg-card rounded-2xl overflow-hidden divide-y divide-border">
+    <div className="mb-7">
+      <p className="text-[11px] font-semibold text-muted-foreground/80 uppercase tracking-[0.08em] px-4 mb-2.5">{title}</p>
+      <div className="bg-card/80 backdrop-blur-sm border border-border/50 rounded-2xl overflow-hidden divide-y divide-border/40 shadow-sm">
         {children}
       </div>
     </div>
@@ -460,21 +460,32 @@ export const ProfileMobile = ({ fontOptions, colorOptions }: ProfileMobileProps)
 
   // Main settings page
   return (
-    <div className="min-h-screen bg-background">
-      <div className="sticky top-0 z-50 bg-background/80 backdrop-blur-xl border-b border-border">
+    <div className="min-h-screen bg-background relative">
+      {/* Subtle gradient backdrop */}
+      <div className="fixed inset-0 -z-10 pointer-events-none">
+        <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-primary/5 rounded-full blur-[120px] -translate-y-1/3 translate-x-1/3" />
+        <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-blue-500/5 rounded-full blur-[100px] translate-y-1/3 -translate-x-1/3" />
+      </div>
+
+      <div className="sticky top-0 z-50 bg-background/70 backdrop-blur-xl border-b border-border/50">
         <div className="flex items-center justify-between px-4 py-3">
           <Button variant="ghost" size="icon" onClick={() => navigate("/")}><ArrowLeft className="w-5 h-5" /></Button>
-          <h1 className="text-lg font-semibold">Settings</h1>
+          <h1 className="text-lg font-semibold tracking-tight">Settings</h1>
           <div className="w-10" />
         </div>
       </div>
 
       <ContactModal isOpen={contactOpen} onClose={() => setContactOpen(false)} />
       <div className="px-4 pt-6 pb-24">
-        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="bg-card rounded-2xl p-4 mb-6">
-          <div className="flex items-center gap-4">
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="relative bg-gradient-to-br from-card to-card/60 border border-border/50 rounded-3xl p-5 mb-6 shadow-sm overflow-hidden"
+        >
+          <div className="absolute top-0 right-0 w-32 h-32 bg-primary/10 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2" />
+          <div className="relative flex items-center gap-4">
             <div
-              className="relative w-16 h-16 rounded-full overflow-hidden bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center shadow-lg cursor-pointer group"
+              className="relative w-16 h-16 rounded-2xl overflow-hidden bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center shadow-lg shadow-primary/20 cursor-pointer group"
               onClick={() => avatarInputRef.current?.click()}
             >
               {avatarUrl ? (
@@ -488,23 +499,31 @@ export const ProfileMobile = ({ fontOptions, colorOptions }: ProfileMobileProps)
               <input ref={avatarInputRef} type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={handleAvatarUpload} />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="font-semibold text-foreground text-lg truncate">{user.email?.split('@')[0]}</p>
+              <p className="font-semibold text-foreground text-lg truncate tracking-tight">{user.email?.split('@')[0]}</p>
               <p className="text-sm text-muted-foreground truncate">{user.email}</p>
               {avatarUploading && <p className="text-xs text-primary mt-0.5">Uploading...</p>}
             </div>
           </div>
         </motion.div>
 
-        <div className="grid grid-cols-3 gap-3 mb-6">
+        <div className="grid grid-cols-3 gap-2.5 mb-7">
           {[
-            { label: "Saved", value: savedArticles.length.toString(), icon: BookMarked },
-            { label: "Streak", value: "7", icon: BarChart3 },
-            { label: "Read", value: "142", icon: Eye },
+            { label: "Saved", value: savedArticles.length.toString(), icon: BookMarked, color: "text-primary", bg: "bg-primary/10" },
+            { label: "Streak", value: "7", icon: BarChart3, color: "text-blue-500", bg: "bg-blue-500/10" },
+            { label: "Read", value: "142", icon: Eye, color: "text-purple-500", bg: "bg-purple-500/10" },
           ].map((stat, i) => (
-            <motion.div key={stat.label} initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: i * 0.05 }} className="bg-card rounded-2xl p-4 text-center">
-              <stat.icon className="w-5 h-5 mx-auto mb-2 text-primary" />
-              <p className="text-xl font-bold text-foreground">{stat.value}</p>
-              <p className="text-xs text-muted-foreground">{stat.label}</p>
+            <motion.div
+              key={stat.label}
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: i * 0.05 }}
+              className="bg-card/80 backdrop-blur-sm border border-border/50 rounded-2xl p-3.5 text-center shadow-sm"
+            >
+              <div className={`w-8 h-8 rounded-lg flex items-center justify-center mx-auto mb-1.5 ${stat.bg}`}>
+                <stat.icon className={`w-4 h-4 ${stat.color}`} />
+              </div>
+              <p className="text-xl font-bold text-foreground tracking-tight">{stat.value}</p>
+              <p className="text-[11px] text-muted-foreground uppercase tracking-wider">{stat.label}</p>
             </motion.div>
           ))}
         </div>
