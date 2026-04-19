@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ChevronDown, ChevronUp, Trash2, Plus, ExternalLink, Calendar, Sparkles, TrendingUp, Globe } from "lucide-react";
+import { Trash2, Plus, ExternalLink, Calendar, Sparkles, TrendingUp } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -23,19 +23,6 @@ interface TodayArticle {
   url: string;
   created_at: string;
   is_admin_added: boolean;
-}
-interface WikipediaArticle {
-  title: string;
-  extract: string;
-  fullurl: string;
-}
-interface RSSArticle {
-  title: string;
-  summary: string;
-  link: string;
-  image?: string;
-  publishedAt: string;
-  source: string;
 }
 const Today = () => {
   const {
@@ -73,14 +60,11 @@ const Today = () => {
     content: "",
     url: ""
   });
-  const [wikipediaArticles, setWikipediaArticles] = useState<WikipediaArticle[]>([]);
-  const [apNewsArticles, setApNewsArticles] = useState<RSSArticle[]>([]);
   const [smallTicOpen, setSmallTicOpen] = useState(false);
   const [selectedArticle, setSelectedArticle] = useState<{
     article_title: string;
     article_url: string;
   } | null>(null);
-  const [showAllArticles, setShowAllArticles] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
 
   // Check if user is admin using has_role function
@@ -137,79 +121,6 @@ const Today = () => {
       return data as TodayArticle[];
     }
   });
-
-  // Fetch Wikipedia and RSS in parallel on mount
-  useEffect(() => {
-    // Parallel fetch for faster loading
-    Promise.allSettled([
-      fetchWikipediaArticles(),
-      fetchApNewsRSS()
-    ]);
-  }, [currentLanguage]);
-  const fetchApNewsRSS = async () => {
-    try {
-      const response = await fetch('/api/rss?url=' + encodeURIComponent('https://rss.app/feeds/6Hnucl2wxDJEwGrt.xml') + '&source=AP News');
-      if (response.ok) {
-        const articles = await response.json();
-        setApNewsArticles(articles);
-      }
-    } catch (error) {
-      console.error('Error fetching AP News RSS:', error);
-    }
-  };
-  const fetchWikipediaArticles = async () => {
-    try {
-      // Get current events from Wikipedia in the selected language
-      const currentDate = new Date();
-      const month = currentDate.toLocaleString(currentLanguage.code, {
-        month: 'long'
-      });
-      const day = currentDate.getDate();
-      const wikipediaDomain = currentLanguage.wikipediaDomain;
-      const response = await fetch(`https://${wikipediaDomain}/api/rest_v1/page/summary/${month}_${day}`);
-      if (!response.ok) {
-        // Fallback to "Current events" page
-        const fallbackResponse = await fetch(`https://${wikipediaDomain}/api/rest_v1/page/summary/Current_events`);
-        if (fallbackResponse.ok) {
-          const data = await fallbackResponse.json();
-          setWikipediaArticles([{
-            title: data.title,
-            extract: data.extract,
-            fullurl: data.content_urls?.desktop?.page || `https://${wikipediaDomain}/wiki/${encodeURIComponent(data.title)}`
-          }]);
-        }
-        return;
-      }
-      const data = await response.json();
-      setWikipediaArticles([{
-        title: data.title,
-        extract: data.extract,
-        fullurl: data.content_urls?.desktop?.page || `https://${wikipediaDomain}/wiki/${encodeURIComponent(data.title)}`
-      }]);
-
-      // Try to get more current events
-      const eventsResponse = await fetch(`https://${wikipediaDomain}/w/api.php?action=query&format=json&prop=extracts&exintro=true&explaintext=true&titles=Portal:Current_events&origin=*`);
-      if (eventsResponse.ok) {
-        const eventsData = await eventsResponse.json();
-        const pages = eventsData.query?.pages;
-        if (pages) {
-          const pageIds = Object.keys(pages);
-          pageIds.forEach(pageId => {
-            const page = pages[pageId];
-            if (page.extract) {
-              setWikipediaArticles(prev => [...prev, {
-                title: page.title,
-                extract: page.extract,
-                fullurl: `https://${wikipediaDomain}/wiki/${encodeURIComponent(page.title)}`
-              }]);
-            }
-          });
-        }
-      }
-    } catch (error) {
-      console.error('Error fetching Wikipedia articles:', error);
-    }
-  };
   const handleAddArticle = async () => {
     if (!newArticle.title || !newArticle.content) {
       toast({
