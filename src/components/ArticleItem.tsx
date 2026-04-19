@@ -65,13 +65,14 @@ const ArticleItem = ({
       style={{ minHeight: '100vh', contain: 'layout style paint' }}
       {...swipeHandlers}
     >
-      {/* Smart Links Overlay - lazy loaded */}
-      {showSmartLinks && isCurrent && (
-        <Suspense fallback={<div className="fixed inset-0 z-50 bg-background/80 flex items-center justify-center"><span className="text-muted-foreground">Loading...</span></div>}>
+      {/* Smart Links Drawer - lazy loaded, only mount when needed */}
+      {showSmartLinks && (
+        <Suspense fallback={null}>
           <SmartLinks
             articleContent={article.content}
             articleTitle={article.title}
-            onClose={() => setShowSmartLinks(false)}
+            open={showSmartLinks}
+            onOpenChange={setShowSmartLinks}
             onNavigateToArticle={handleNavigateToArticle}
           />
         </Suspense>
