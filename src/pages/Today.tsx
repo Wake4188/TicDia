@@ -363,37 +363,6 @@ const Today = () => {
             <NewsFeedCards />
           </motion.div>
 
-          {/* Wikipedia Articles Section */}
-          <motion.div variants={itemVariants} className="space-y-6">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="p-2 bg-primary/10 rounded-lg">
-                <Globe className="w-6 h-6 text-primary" />
-              </div>
-              <h2 className="text-2xl font-bold text-foreground">{t('fromWikipedia')}</h2>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {wikipediaArticles.map((article, index) => <motion.div key={index} variants={itemVariants} whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-                  <Card className="h-full bg-card/50 backdrop-blur-md border-border/50 hover:border-primary/30 transition-all cursor-pointer group hover:shadow-lg hover:shadow-primary/5" onClick={() => handleWikipediaClick(article)}>
-                    <CardContent className="p-6">
-                      <div className="flex items-start justify-between gap-4">
-                        <div className="flex-1">
-                          <h3 className="text-xl font-bold text-foreground mb-3 group-hover:text-primary transition-colors">
-                            {article.title}
-                          </h3>
-                          <p className="text-muted-foreground text-sm line-clamp-4 leading-relaxed">
-                            {article.extract}
-                          </p>
-                        </div>
-                        <div className="p-2 bg-muted/30 rounded-full group-hover:bg-primary/20 transition-colors">
-                          <ExternalLink className="w-5 h-5 text-muted-foreground group-hover:text-primary" />
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </motion.div>)}
-            </div>
-          </motion.div>
 
           {/* Admin Articles Section */}
           {adminArticles && adminArticles.length > 0 && <motion.div variants={itemVariants} className="space-y-6">
