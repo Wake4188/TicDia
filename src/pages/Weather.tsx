@@ -570,8 +570,9 @@ const Weather = () => {
               {bundle && desc && (
                 <>
                   <div className="flex items-center gap-3 mb-4">
-                    <WeatherIcon name={desc.icon} className="w-10 h-10" />
-                    <div style={{ color: palette.accent }}>__SENTINEL__</div>
+                    <div style={{ color: palette.accent }}>
+                      <WeatherIcon name={desc.icon} className="w-10 h-10" />
+                    </div>
                     <div>
                       <div className="text-3xl font-light leading-none">
                         {Math.round(bundle.current.temperature)}°
