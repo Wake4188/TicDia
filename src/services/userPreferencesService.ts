@@ -73,9 +73,11 @@ export const saveUserPreferences = async (userId: string, preferences: UserPrefe
         liquid_glass_mode: preferences.liquidGlassMode || false,
         tts_speed: preferences.ttsSpeed || 1.0,
         allow_adult_content: preferences.allowAdultContent || false,
-        // smoke_effect is stored but not in the DB types yet - will be ignored by Supabase if column doesn't exist
+        smoke_effect: preferences.smokeEffect !== false,
+        text_animation: preferences.textAnimation !== false,
+        ...(preferences.birthYear !== undefined ? { birth_year: preferences.birthYear } : {}),
         updated_at: new Date().toISOString(),
-      }, {
+      } as never, {
         onConflict: 'user_id'
       });
 

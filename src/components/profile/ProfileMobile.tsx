@@ -63,10 +63,17 @@ export const ProfileMobile = ({ fontOptions, colorOptions }: ProfileMobileProps)
 
   const loadAvatar = async () => {
     if (!user) return;
-    const { data } = await supabase.storage.from('avatars').list(`${user.id}/`, { limit: 1 });
-    if (data && data.length > 0) {
-      const { data: urlData } = supabase.storage.from('avatars').getPublicUrl(`${user.id}/${data[0].name}`);
-      setAvatarUrl(urlData.publicUrl + '?t=' + Date.now());
+    try {
+      const { data } = await supabase.storage.from('avatars').list(`${user.id}/`, {
+        limit: 10,
+        sortBy: { column: 'updated_at', order: 'desc' },
+      });
+      if (data && data.length > 0) {
+        const { data: urlData } = supabase.storage.from('avatars').getPublicUrl(`${user.id}/${data[0].name}`);
+        setAvatarUrl(urlData.publicUrl + '?t=' + Date.now());
+      }
+    } catch (err) {
+      console.error('Failed to load avatar:', err);
     }
   };
 
@@ -74,22 +81,33 @@ export const ProfileMobile = ({ fontOptions, colorOptions }: ProfileMobileProps)
     const file = e.target.files?.[0];
     if (!file || !user) return;
     if (file.size > 5 * 1024 * 1024) {
-      toast({ title: "File too large", description: "Max 5MB" });
+      toast({ title: "File too large", description: "Maximum size is 5MB", variant: "destructive" });
+      return;
+    }
+    if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
+      toast({ title: "Invalid file type", description: "Please select a JPEG, PNG, or WebP image", variant: "destructive" });
       return;
     }
     setAvatarUploading(true);
     try {
-      const ext = file.name.split('.').pop();
+      const ext = (file.name.split('.').pop() || 'jpg').toLowerCase();
       const path = `${user.id}/avatar.${ext}`;
-      const { error } = await supabase.storage.from('avatars').upload(path, file, { upsert: true });
-      if (error) throw error;
-      const { data } = supabase.storage.from('avatars').getPublicUrl(path);
-      setAvatarUrl(data.publicUrl + '?t=' + Date.now());
-      toast({ title: "Avatar updated" });
+      const { error: uploadError } = await supabase.storage.from('avatars').upload(path, file, {
+        upsert: true,
+        contentType: file.type,
+        cacheControl: '3600',
+      });
+      if (uploadError) throw uploadError;
+      const { data: urlData } = supabase.storage.from('avatars').getPublicUrl(path);
+      setAvatarUrl(urlData.publicUrl + '?t=' + Date.now());
+      toast({ title: "Avatar updated", description: "Your profile picture has been changed" });
     } catch (err: any) {
-      toast({ title: "Upload failed", description: err.message, variant: "destructive" });
+      console.error('Avatar upload error:', err);
+      toast({ title: "Upload failed", description: err?.message || "Please try again", variant: "destructive" });
     } finally {
       setAvatarUploading(false);
+      // Reset input so the same file can be selected again
+      if (e.target) e.target.value = '';
     }
   };
 
@@ -463,101 +481,104 @@ export const ProfileMobile = ({ fontOptions, colorOptions }: ProfileMobileProps)
     <div className="min-h-screen bg-background relative">
       {/* Subtle gradient backdrop */}
       <div className="fixed inset-0 -z-10 pointer-events-none">
-        <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-primary/5 rounded-full blur-[120px] -translate-y-1/3 translate-x-1/3" />
-        <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-blue-500/5 rounded-full blur-[100px] translate-y-1/3 -translate-x-1/3" />
+        <div className="absolute top-0 right-0 w-[420px] h-[420px] bg-primary/10 rounded-full blur-[120px] -translate-y-1/3 translate-x-1/3" />
+        <div className="absolute bottom-0 left-0 w-[320px] h-[320px] bg-blue-500/5 rounded-full blur-[100px] translate-y-1/3 -translate-x-1/3" />
       </div>
 
-      <div className="sticky top-0 z-50 bg-background/70 backdrop-blur-xl border-b border-border/50">
+      <div className="sticky top-0 z-50 bg-background/80 backdrop-blur-xl border-b border-border/40">
         <div className="flex items-center justify-between px-4 py-3">
-          <Button variant="ghost" size="icon" onClick={() => navigate("/")}><ArrowLeft className="w-5 h-5" /></Button>
-          <h1 className="text-lg font-semibold tracking-tight">Settings</h1>
+          <Button variant="ghost" size="icon" onClick={() => navigate("/")} aria-label="Back">
+            <ArrowLeft className="w-5 h-5" />
+          </Button>
+          <h1 className="text-base font-semibold tracking-tight">Settings</h1>
           <div className="w-10" />
         </div>
       </div>
 
       <ContactModal isOpen={contactOpen} onClose={() => setContactOpen(false)} />
-      <div className="px-4 pt-6 pb-24">
+
+      <div className="px-4 pt-8 pb-24">
+        {/* Avatar + identity — large, centered, iOS-style */}
         <motion.div
-          initial={{ opacity: 0, y: 10 }}
+          initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
-          className="relative bg-gradient-to-br from-card to-card/60 border border-border/50 rounded-3xl p-5 mb-6 shadow-sm overflow-hidden"
+          className="flex flex-col items-center mb-8"
         >
-          <div className="absolute top-0 right-0 w-32 h-32 bg-primary/10 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2" />
-          <div className="relative flex items-center gap-4">
-            <div
-              className="relative w-16 h-16 rounded-2xl overflow-hidden bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center shadow-lg shadow-primary/20 cursor-pointer group"
-              onClick={() => avatarInputRef.current?.click()}
-            >
-              {avatarUrl ? (
-                <img src={avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
-              ) : (
-                <span className="text-2xl font-bold text-primary-foreground">{user.email?.charAt(0).toUpperCase()}</span>
-              )}
-              <div className="absolute inset-0 bg-black/40 opacity-0 group-active:opacity-100 flex items-center justify-center transition-opacity">
-                <Camera className="w-5 h-5 text-white" />
-              </div>
-              <input ref={avatarInputRef} type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={handleAvatarUpload} />
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="font-semibold text-foreground text-lg truncate tracking-tight">{user.email?.split('@')[0]}</p>
-              <p className="text-sm text-muted-foreground truncate">{user.email}</p>
-              {avatarUploading && <p className="text-xs text-primary mt-0.5">Uploading...</p>}
-            </div>
-          </div>
+          <button
+            type="button"
+            onClick={() => avatarInputRef.current?.click()}
+            disabled={avatarUploading}
+            className="relative w-24 h-24 rounded-full overflow-hidden bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center shadow-xl shadow-primary/20 active:scale-95 transition-transform disabled:opacity-70"
+            aria-label="Change profile picture"
+          >
+            {avatarUrl ? (
+              <img src={avatarUrl} alt="Profile" className="w-full h-full object-cover" />
+            ) : (
+              <span className="text-3xl font-bold text-primary-foreground">{user.email?.charAt(0).toUpperCase()}</span>
+            )}
+            <span className="absolute bottom-0 right-0 w-7 h-7 rounded-full bg-foreground text-background flex items-center justify-center border-[3px] border-background shadow-md">
+              <Camera className="w-3.5 h-3.5" />
+            </span>
+            {avatarUploading && (
+              <span className="absolute inset-0 bg-black/50 flex items-center justify-center text-white text-xs font-medium">
+                Uploading…
+              </span>
+            )}
+          </button>
+          {/* Visible-but-hidden file input — fully functional on iOS/Android */}
+          <input
+            ref={avatarInputRef}
+            type="file"
+            accept="image/jpeg,image/png,image/webp"
+            onChange={handleAvatarUpload}
+            className="sr-only"
+            aria-hidden="true"
+          />
+          <p className="mt-4 font-semibold text-foreground text-lg tracking-tight text-center">
+            {user.email?.split('@')[0]}
+          </p>
+          <p className="text-sm text-muted-foreground truncate max-w-[260px]">{user.email}</p>
+          {isAdmin && (
+            <span className="mt-2 inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-500 text-[11px] font-semibold uppercase tracking-wider">
+              <Shield className="w-3 h-3" /> Admin
+            </span>
+          )}
         </motion.div>
 
-        <div className="grid grid-cols-3 gap-2.5 mb-7">
-          {[
-            { label: "Saved", value: savedArticles.length.toString(), icon: BookMarked, color: "text-primary", bg: "bg-primary/10" },
-            { label: "Streak", value: "7", icon: BarChart3, color: "text-blue-500", bg: "bg-blue-500/10" },
-            { label: "Read", value: "142", icon: Eye, color: "text-purple-500", bg: "bg-purple-500/10" },
-          ].map((stat, i) => (
-            <motion.div
-              key={stat.label}
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: i * 0.05 }}
-              className="bg-card/80 backdrop-blur-sm border border-border/50 rounded-2xl p-3.5 text-center shadow-sm"
-            >
-              <div className={`w-8 h-8 rounded-lg flex items-center justify-center mx-auto mb-1.5 ${stat.bg}`}>
-                <stat.icon className={`w-4 h-4 ${stat.color}`} />
-              </div>
-              <p className="text-xl font-bold text-foreground tracking-tight">{stat.value}</p>
-              <p className="text-[11px] text-muted-foreground uppercase tracking-wider">{stat.label}</p>
-            </motion.div>
-          ))}
-        </div>
-
         <SettingsGroup title="General">
-          <SettingsItem icon={theme === 'dark' ? Moon : Sun} label="Dark Mode" toggle={theme === 'dark'} onToggle={toggleTheme} />
-          <SettingsItem icon={Globe} label="Language" value={currentLanguage.nativeName} onClick={() => setSubPage('language')} />
+          <SettingsItem icon={theme === 'dark' ? Moon : Sun} label="Dark Mode" toggle={theme === 'dark'} onToggle={toggleTheme} color="text-amber-500" bgColor="bg-amber-500/10" />
+          <SettingsItem icon={Globe} label="Language" value={currentLanguage.nativeName} onClick={() => setSubPage('language')} color="text-blue-500" bgColor="bg-blue-500/10" />
         </SettingsGroup>
 
         <SettingsGroup title="Content">
-          <SettingsItem icon={BookMarked} label="Saved Articles" value={savedArticles.length.toString()} onClick={() => setSubPage('saved')} />
-          <SettingsItem icon={BarChart3} label="Reading Analytics" onClick={() => setSubPage('analytics')} />
-          <SettingsItem icon={Users} label="Social" onClick={() => setSubPage('social')} />
-          <SettingsItem icon={Compass} label="Explore" value="On This Day & More" onClick={() => navigate('/explore')} color="text-emerald-500" bgColor="bg-emerald-500/10" />
+          <SettingsItem icon={BookMarked} label="Saved Articles" value={savedArticles.length.toString()} onClick={() => setSubPage('saved')} color="text-rose-500" bgColor="bg-rose-500/10" />
+          <SettingsItem icon={BarChart3} label="Reading Analytics" onClick={() => setSubPage('analytics')} color="text-purple-500" bgColor="bg-purple-500/10" />
+          <SettingsItem icon={Compass} label="Explore Feeds" onClick={() => navigate('/explore')} color="text-emerald-500" bgColor="bg-emerald-500/10" />
+          <SettingsItem icon={Users} label="Social" onClick={() => setSubPage('social')} color="text-pink-500" bgColor="bg-pink-500/10" />
         </SettingsGroup>
 
         <SettingsGroup title="Appearance">
-          <SettingsItem icon={Palette} label="Customize" onClick={() => setSubPage('appearance')} />
+          <SettingsItem icon={Palette} label="Customize" onClick={() => setSubPage('appearance')} color="text-primary" bgColor="bg-primary/10" />
           <SettingsItem icon={Sparkles} label="Liquid Glass" toggle={userPreferences.liquidGlassMode} onToggle={async (v) => { await updatePreferences({ liquidGlassMode: v }); window.location.reload(); }} color="text-blue-500" bgColor="bg-blue-500/10" />
-          <SettingsItem icon={Palette} label="Smoke Effect" toggle={userPreferences.smokeEffect} onToggle={(v) => updatePreferences({ smokeEffect: v })} />
-          <SettingsItem icon={Type} label="Text Animation" toggle={userPreferences.textAnimation !== false} onToggle={(v) => updatePreferences({ textAnimation: v })} />
+          <SettingsItem icon={Palette} label="Smoke Effect" toggle={userPreferences.smokeEffect} onToggle={(v) => updatePreferences({ smokeEffect: v })} color="text-cyan-500" bgColor="bg-cyan-500/10" />
+          <SettingsItem icon={Type} label="Text Animation" toggle={userPreferences.textAnimation !== false} onToggle={(v) => updatePreferences({ textAnimation: v })} color="text-indigo-500" bgColor="bg-indigo-500/10" />
           <SettingsItem icon={Volume2} label="TTS Speed" value={`${userPreferences.ttsSpeed.toFixed(1)}x`} onClick={() => setSubPage('tts')} color="text-purple-500" bgColor="bg-purple-500/10" />
         </SettingsGroup>
 
         <SettingsGroup title="Account">
-          <SettingsItem icon={Mail} label="Change Email" onClick={() => setSubPage('email')} />
-          <SettingsItem icon={Lock} label="Change Password" onClick={() => setSubPage('password')} />
+          <SettingsItem icon={Mail} label="Change Email" onClick={() => setSubPage('email')} color="text-blue-500" bgColor="bg-blue-500/10" />
+          <SettingsItem icon={Lock} label="Change Password" onClick={() => setSubPage('password')} color="text-slate-500" bgColor="bg-slate-500/10" />
           <SettingsItem icon={MessageCircle} label="Contact & Feedback" onClick={() => setContactOpen(true)} color="text-teal-500" bgColor="bg-teal-500/10" />
           {isAdmin && (
             <SettingsItem icon={Shield} label="Admin Panel" onClick={() => navigate("/admin")} color="text-amber-500" bgColor="bg-amber-500/10" />
           )}
         </SettingsGroup>
 
-        <Button variant="outline" className="w-full mt-4 text-destructive border-destructive/30 hover:bg-destructive/10" onClick={async () => { await supabase.auth.signOut(); navigate("/"); }}>
+        <Button
+          variant="outline"
+          className="w-full mt-6 h-12 text-destructive border-destructive/30 hover:bg-destructive/10 rounded-2xl font-medium"
+          onClick={async () => { await supabase.auth.signOut(); navigate("/"); }}
+        >
           <LogOut className="w-4 h-4 mr-2" />Sign Out
         </Button>
       </div>
