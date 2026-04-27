@@ -1,5 +1,5 @@
 import { useNavigate, useLocation } from "react-router-dom";
-import { Layers, BookA, Calendar, Lightbulb, ChevronDown } from "lucide-react";
+import { Layers, BookA, Calendar, Lightbulb, ChevronDown, CloudSun } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Popover,
@@ -12,6 +12,7 @@ const feedItems = [
   { label: "Words", icon: BookA, path: "/word-feed" },
   { label: "On This Day", icon: Calendar, path: "/on-this-day" },
   { label: "Did You Know?", icon: Lightbulb, path: "/did-you-know" },
+  { label: "Weather", icon: CloudSun, path: "/weather" },
 ];
 
 interface FeedDropdownProps {
