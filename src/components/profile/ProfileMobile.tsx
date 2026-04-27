@@ -63,10 +63,17 @@ export const ProfileMobile = ({ fontOptions, colorOptions }: ProfileMobileProps)
 
   const loadAvatar = async () => {
     if (!user) return;
-    const { data } = await supabase.storage.from('avatars').list(`${user.id}/`, { limit: 1 });
-    if (data && data.length > 0) {
-      const { data: urlData } = supabase.storage.from('avatars').getPublicUrl(`${user.id}/${data[0].name}`);
-      setAvatarUrl(urlData.publicUrl + '?t=' + Date.now());
+    try {
+      const { data } = await supabase.storage.from('avatars').list(`${user.id}/`, {
+        limit: 10,
+        sortBy: { column: 'updated_at', order: 'desc' },
+      });
+      if (data && data.length > 0) {
+        const { data: urlData } = supabase.storage.from('avatars').getPublicUrl(`${user.id}/${data[0].name}`);
+        setAvatarUrl(urlData.publicUrl + '?t=' + Date.now());
+      }
+    } catch (err) {
+      console.error('Failed to load avatar:', err);
     }
   };
 
@@ -74,22 +81,33 @@ export const ProfileMobile = ({ fontOptions, colorOptions }: ProfileMobileProps)
     const file = e.target.files?.[0];
     if (!file || !user) return;
     if (file.size > 5 * 1024 * 1024) {
-      toast({ title: "File too large", description: "Max 5MB" });
+      toast({ title: "File too large", description: "Maximum size is 5MB", variant: "destructive" });
+      return;
+    }
+    if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
+      toast({ title: "Invalid file type", description: "Please select a JPEG, PNG, or WebP image", variant: "destructive" });
       return;
     }
     setAvatarUploading(true);
     try {
-      const ext = file.name.split('.').pop();
+      const ext = (file.name.split('.').pop() || 'jpg').toLowerCase();
       const path = `${user.id}/avatar.${ext}`;
-      const { error } = await supabase.storage.from('avatars').upload(path, file, { upsert: true });
-      if (error) throw error;
-      const { data } = supabase.storage.from('avatars').getPublicUrl(path);
-      setAvatarUrl(data.publicUrl + '?t=' + Date.now());
-      toast({ title: "Avatar updated" });
+      const { error: uploadError } = await supabase.storage.from('avatars').upload(path, file, {
+        upsert: true,
+        contentType: file.type,
+        cacheControl: '3600',
+      });
+      if (uploadError) throw uploadError;
+      const { data: urlData } = supabase.storage.from('avatars').getPublicUrl(path);
+      setAvatarUrl(urlData.publicUrl + '?t=' + Date.now());
+      toast({ title: "Avatar updated", description: "Your profile picture has been changed" });
     } catch (err: any) {
-      toast({ title: "Upload failed", description: err.message, variant: "destructive" });
+      console.error('Avatar upload error:', err);
+      toast({ title: "Upload failed", description: err?.message || "Please try again", variant: "destructive" });
     } finally {
       setAvatarUploading(false);
+      // Reset input so the same file can be selected again
+      if (e.target) e.target.value = '';
     }
   };
 
