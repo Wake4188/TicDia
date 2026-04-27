@@ -165,7 +165,7 @@ serve(async (req) => {
   } catch (error) {
     console.error('Daily article selection error:', error)
     return new Response(
-      JSON.stringify({ error: (error as Error).message }),
+      JSON.stringify({ error: 'Internal server error during article selection' }),
       {
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
