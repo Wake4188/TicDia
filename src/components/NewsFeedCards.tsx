@@ -1,10 +1,11 @@
 import { useState, useEffect, memo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ExternalLink, Newspaper, Calendar, RefreshCw } from "lucide-react";
+import { ExternalLink, Calendar, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/contexts/LanguageContext";
+import SourceLogo from "@/components/news/SourceLogo";
 
 interface NYTArticle {
   title: string;
@@ -84,9 +85,9 @@ const FeedColumn = memo(({ source, articles, loading, onRefresh }: FeedColumnPro
   return (
     <Card className="bg-card/50 backdrop-blur-sm border-border/50 flex flex-col h-[520px] overflow-hidden">
       <CardHeader className="pb-3 flex-row items-center justify-between space-y-0 border-b border-border/40">
-        <CardTitle className={`text-base font-bold flex items-center gap-2 ${source.accent}`}>
-          <Newspaper className="w-4 h-4" />
-          {source.label}
+        <CardTitle className={`text-base font-bold flex items-center gap-2.5 ${source.accent}`}>
+          <SourceLogo source={source.id} />
+          <span>{source.label}</span>
         </CardTitle>
         <Button
           variant="ghost"
