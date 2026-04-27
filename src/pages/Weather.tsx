@@ -22,7 +22,7 @@ import {
   ChevronDown,
 } from "lucide-react";
 import Navigation from "@/components/Navigation";
-import Footer from "@/components/Footer";
+import { Footer } from "@/components/Footer";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -570,7 +570,8 @@ const Weather = () => {
               {bundle && desc && (
                 <>
                   <div className="flex items-center gap-3 mb-4">
-                    <WeatherIcon name={desc.icon} className="w-10 h-10" style={{ color: palette.accent } as any} />
+                    <WeatherIcon name={desc.icon} className="w-10 h-10" />
+                    <div style={{ color: palette.accent }}>__SENTINEL__</div>
                     <div>
                       <div className="text-3xl font-light leading-none">
                         {Math.round(bundle.current.temperature)}°
