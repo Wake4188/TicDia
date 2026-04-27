@@ -556,6 +556,8 @@ export type Database = {
           highlight_color: string
           id: string
           liquid_glass_mode: boolean | null
+          smoke_effect: boolean
+          text_animation: boolean
           tts_autoplay: boolean
           tts_speed: number | null
           updated_at: string
@@ -572,6 +574,8 @@ export type Database = {
           highlight_color?: string
           id?: string
           liquid_glass_mode?: boolean | null
+          smoke_effect?: boolean
+          text_animation?: boolean
           tts_autoplay?: boolean
           tts_speed?: number | null
           updated_at?: string
@@ -588,6 +592,8 @@ export type Database = {
           highlight_color?: string
           id?: string
           liquid_glass_mode?: boolean | null
+          smoke_effect?: boolean
+          text_animation?: boolean
           tts_autoplay?: boolean
           tts_speed?: number | null
           updated_at?: string
