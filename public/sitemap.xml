@@ -1,40 +1,63 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
-        xmlns:xhtml="http://www.w3.org/1999/xhtml">
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://wiktoc.vercel.app/</loc>
-    <lastmod>2025-01-15</lastmod>
+    <loc>https://ticdia.lovable.app/</loc>
+    <lastmod>2026-04-28</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://wiktoc.vercel.app/today</loc>
-    <lastmod>2025-01-15</lastmod>
+    <loc>https://ticdia.lovable.app/today</loc>
+    <lastmod>2026-04-28</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://wiktoc.vercel.app/discover</loc>
-    <lastmod>2025-01-15</lastmod>
+    <loc>https://ticdia.lovable.app/discover</loc>
+    <lastmod>2026-04-28</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://wiktoc.vercel.app/recap</loc>
-    <lastmod>2025-01-15</lastmod>
-    <changefreq>monthly</changefreq>
+    <loc>https://ticdia.lovable.app/explore</loc>
+    <lastmod>2026-04-28</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://ticdia.lovable.app/on-this-day</loc>
+    <lastmod>2026-04-28</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://ticdia.lovable.app/did-you-know</loc>
+    <lastmod>2026-04-28</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://ticdia.lovable.app/word-feed</loc>
+    <lastmod>2026-04-28</lastmod>
+    <changefreq>daily</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://wiktoc.vercel.app/profile</loc>
-    <lastmod>2025-01-15</lastmod>
-    <changefreq>weekly</changefreq>
+    <loc>https://ticdia.lovable.app/weather</loc>
+    <lastmod>2026-04-28</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://ticdia.lovable.app/recap</loc>
+    <lastmod>2026-04-28</lastmod>
+    <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://wiktoc.vercel.app/auth</loc>
-    <lastmod>2025-01-15</lastmod>
+    <loc>https://ticdia.lovable.app/auth</loc>
+    <lastmod>2026-04-28</lastmod>
     <changefreq>monthly</changefreq>
-    <priority>0.5</priority>
+    <priority>0.4</priority>
   </url>
 </urlset>
