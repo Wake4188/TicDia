@@ -596,7 +596,7 @@ const Weather = () => {
         </Card>
       </section>
 
-      <Footer />
+      </div>
     </div>
   );
 };
