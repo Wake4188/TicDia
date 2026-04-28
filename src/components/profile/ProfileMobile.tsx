@@ -278,6 +278,9 @@ export const ProfileMobile = ({ fontOptions, colorOptions }: ProfileMobileProps)
             {colorOptions.map((color) => (
               <button
                 key={color.value}
+                type="button"
+                aria-label={`Highlight color: ${color.value}`}
+                aria-pressed={userPreferences.highlightColor === color.value}
                 onClick={() => updatePreferences({ highlightColor: color.value })}
                 className={`aspect-square rounded-xl border-2 transition-transform ${
                   userPreferences.highlightColor === color.value ? 'border-foreground scale-110' : 'border-transparent'
