@@ -254,12 +254,16 @@ const Weather = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="h-[100dvh] bg-background text-foreground overflow-hidden">
       <Navigation />
 
+      <div
+        className="h-[100dvh] w-full overflow-y-scroll snap-y snap-mandatory scroll-smooth"
+        style={{ scrollbarWidth: "none" }}
+      >
       {/* SCREEN 1 — HERO */}
       <section
-        className="relative min-h-[100svh] flex flex-col items-center justify-center px-4 pt-20 pb-16 overflow-hidden transition-colors duration-700"
+        className="relative h-[100dvh] w-full snap-start snap-always flex flex-col items-center justify-center px-4 pt-20 pb-16 overflow-hidden transition-colors duration-700"
         style={{
           background: `linear-gradient(160deg, ${palette.from}, ${palette.to})`,
         }}
