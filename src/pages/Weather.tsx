@@ -22,7 +22,7 @@ import {
   ChevronDown,
 } from "lucide-react";
 import Navigation from "@/components/Navigation";
-import { Footer } from "@/components/Footer";
+
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -254,12 +254,16 @@ const Weather = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="h-[100dvh] bg-background text-foreground overflow-hidden">
       <Navigation />
 
+      <div
+        className="h-[100dvh] w-full overflow-y-scroll snap-y snap-mandatory scroll-smooth"
+        style={{ scrollbarWidth: "none" }}
+      >
       {/* SCREEN 1 — HERO */}
       <section
-        className="relative min-h-[100svh] flex flex-col items-center justify-center px-4 pt-20 pb-16 overflow-hidden transition-colors duration-700"
+        className="relative h-[100dvh] w-full snap-start snap-always flex flex-col items-center justify-center px-4 pt-20 pb-16 overflow-hidden transition-colors duration-700"
         style={{
           background: `linear-gradient(160deg, ${palette.from}, ${palette.to})`,
         }}
@@ -276,8 +280,8 @@ const Weather = () => {
           style={{ background: palette.accent }}
         />
 
-        {/* Lang toggle */}
-        <div className="absolute top-20 right-4 sm:right-6 z-10">
+        {/* Lang toggle - positioned to avoid mobile menu button */}
+        <div className="absolute top-20 left-4 sm:left-6 z-10">
           <Button
             variant="secondary"
             size="sm"
@@ -412,7 +416,7 @@ const Weather = () => {
       {/* SCREEN 2 — DATA OVERVIEW */}
       <section
         id="data-overview"
-        className="px-4 sm:px-6 py-16 sm:py-24 max-w-5xl mx-auto"
+        className="snap-start snap-always min-h-[100dvh] px-4 sm:px-6 py-16 sm:py-24 max-w-5xl mx-auto"
       >
         <h2 className="text-2xl sm:text-3xl font-semibold tracking-tight mb-2">
           {t.allData}
@@ -531,7 +535,7 @@ const Weather = () => {
       </section>
 
       {/* SCREEN 3 — MAP */}
-      <section className="px-4 sm:px-6 pb-24 max-w-5xl mx-auto">
+      <section className="snap-start snap-always min-h-[100dvh] px-4 sm:px-6 pt-16 pb-24 max-w-5xl mx-auto">
         <h2 className="text-2xl sm:text-3xl font-semibold tracking-tight mb-2">{t.map}</h2>
         <p className="text-muted-foreground text-sm mb-6">{t.mapHint}</p>
 
@@ -592,7 +596,7 @@ const Weather = () => {
         </Card>
       </section>
 
-      <Footer />
+      </div>
     </div>
   );
 };
