@@ -136,6 +136,10 @@ const SearchModal = ({ isOpen, onClose }: SearchModalProps) => {
                           <img 
                             src={result.image} 
                             alt={result.title}
+                            loading="lazy"
+                            decoding="async"
+                            width={48}
+                            height={48}
                             className="w-12 h-12 rounded-lg object-cover"
                           />
                         )}
