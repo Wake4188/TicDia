@@ -751,6 +751,9 @@ export const ProfileDesktop = ({ fontOptions, colorOptions }: ProfileDesktopProp
                             {colorOptions.map((color) => (
                               <button
                                 key={color.value}
+                                type="button"
+                                aria-label={`Highlight color: ${color.label || color.value}`}
+                                aria-pressed={userPreferences.highlightColor === color.value}
                                 onClick={() => updateUserPrefs({ highlightColor: color.value })}
                                 className={`aspect-square rounded-xl border-2 transition-all hover:scale-110 ${
                                   userPreferences.highlightColor === color.value 

@@ -126,6 +126,9 @@ const FeedColumn = memo(({ source, articles, loading, onRefresh }: FeedColumnPro
                             src={a.image}
                             alt=""
                             loading="lazy"
+                            decoding="async"
+                            width={56}
+                            height={56}
                             className="w-14 h-14 object-cover rounded-md flex-shrink-0 bg-muted"
                             onError={(e) => { e.currentTarget.style.display = 'none'; }}
                           />
