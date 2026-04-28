@@ -535,7 +535,7 @@ const Weather = () => {
       </section>
 
       {/* SCREEN 3 — MAP */}
-      <section className="px-4 sm:px-6 pb-24 max-w-5xl mx-auto">
+      <section className="snap-start snap-always min-h-[100dvh] px-4 sm:px-6 pt-16 pb-24 max-w-5xl mx-auto">
         <h2 className="text-2xl sm:text-3xl font-semibold tracking-tight mb-2">{t.map}</h2>
         <p className="text-muted-foreground text-sm mb-6">{t.mapHint}</p>
 
