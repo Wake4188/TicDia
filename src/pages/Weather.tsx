@@ -416,7 +416,7 @@ const Weather = () => {
       {/* SCREEN 2 — DATA OVERVIEW */}
       <section
         id="data-overview"
-        className="px-4 sm:px-6 py-16 sm:py-24 max-w-5xl mx-auto"
+        className="snap-start snap-always min-h-[100dvh] px-4 sm:px-6 py-16 sm:py-24 max-w-5xl mx-auto"
       >
         <h2 className="text-2xl sm:text-3xl font-semibold tracking-tight mb-2">
           {t.allData}
