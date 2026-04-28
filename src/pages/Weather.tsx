@@ -280,8 +280,8 @@ const Weather = () => {
           style={{ background: palette.accent }}
         />
 
-        {/* Lang toggle */}
-        <div className="absolute top-20 right-4 sm:right-6 z-10">
+        {/* Lang toggle - positioned to avoid mobile menu button */}
+        <div className="absolute top-20 left-4 sm:left-6 z-10">
           <Button
             variant="secondary"
             size="sm"
