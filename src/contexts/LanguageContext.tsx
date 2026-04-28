@@ -47,11 +47,15 @@ export const LanguageProvider: React.FC<LanguageProviderProps> = ({ children }) 
       const foundLanguage = SUPPORTED_LANGUAGES.find(lang => lang.code === savedLanguageCode);
       if (foundLanguage) {
         setCurrentLanguage(foundLanguage);
+        document.documentElement.lang = foundLanguage.code;
+        document.documentElement.dir = foundLanguage.rtl ? 'rtl' : 'ltr';
         loadTranslations(foundLanguage);
         return;
       }
     }
     // Load default language translations
+    document.documentElement.lang = DEFAULT_LANGUAGE.code;
+    document.documentElement.dir = DEFAULT_LANGUAGE.rtl ? 'rtl' : 'ltr';
     loadTranslations(DEFAULT_LANGUAGE);
   }, []);
 
