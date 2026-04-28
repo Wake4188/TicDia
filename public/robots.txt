@@ -3,4 +3,4 @@ Allow: /
 Disallow: /admin
 Disallow: /auth
 
-Sitemap: https://ticdia.lovable.app/sitemap.xml
+Sitemap: https://ticdia.vercel.app/sitemap.xml
