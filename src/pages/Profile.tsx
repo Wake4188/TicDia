@@ -6,6 +6,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { SEO } from "@/components/SEO";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
 import { ArrowLeft, BookMarked, Eye, Trash2, Search, Mail, Lock, Key, BarChart3, Globe, Moon, Sun, Shield, LogOut } from "lucide-react";
@@ -424,11 +425,21 @@ const Profile = () => {
   
   // Desktop: Use modern ProfileDesktop component
   if (!isMobile) {
-    return <ProfileDesktop fontOptions={fontOptions} colorOptions={colorOptions} />;
+    return (
+      <>
+        <SEO title="Your profile — TicDia" description="Manage your TicDia profile, preferences, saved articles, and account settings." path="/profile" noindex />
+        <ProfileDesktop fontOptions={fontOptions} colorOptions={colorOptions} />
+      </>
+    );
   }
 
   // Mobile: Use Apple Settings-style ProfileMobile component
-  return <ProfileMobile fontOptions={fontOptions} colorOptions={colorOptions} />;
+  return (
+    <>
+      <SEO title="Your profile — TicDia" description="Manage your TicDia profile, preferences, saved articles, and account settings." path="/profile" noindex />
+      <ProfileMobile fontOptions={fontOptions} colorOptions={colorOptions} />
+    </>
+  );
 };
 
 export default Profile;

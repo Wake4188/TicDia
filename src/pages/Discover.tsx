@@ -11,6 +11,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { useUserPreferences } from "@/contexts/UserPreferencesContext";
 import { getRandomArticles, WikipediaArticle } from "@/services/wikipediaService";
 import { motion, AnimatePresence } from "framer-motion";
+import { SEO } from "@/components/SEO";
 
 const Discover = () => {
   const [selectedCategory, setSelectedCategory] = useState("All");
@@ -121,6 +122,7 @@ const Discover = () => {
 
   return (
     <div className="min-h-screen bg-background text-foreground pb-20">
+      <SEO title="Discover Wikipedia topics — TicDia" description="Search and browse Wikipedia topics. Trending articles and curated suggestions to fuel your curiosity." path="/discover" type="website" />
       {/* Gradient background */}
       <div className="fixed inset-0 -z-10">
         <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-background to-background" />

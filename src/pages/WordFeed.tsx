@@ -10,6 +10,7 @@ import { getWordOfTheDay, generateWordOfTheDay } from "@/services/wordOfTheDaySe
 import Navigation from "@/components/Navigation";
 import SanitizedHtml from "@/components/SanitizedHtml";
 import { INTERESTING_WORDS, getDailyWordPool, getRandomWordsFromPool } from "@/data/interestingWords";
+import { SEO } from "@/components/SEO";
 
 interface WordEntry {
   word: string;
@@ -287,6 +288,7 @@ const WordFeed = () => {
 
   return (
     <div className="h-screen h-[100dvh] w-screen relative overflow-hidden bg-background">
+      <SEO title="Word Feed — Daily vocabulary on TicDia" description="A scrollable feed of words with definitions and pronunciation. Build your vocabulary one swipe at a time." path="/word-feed" type="website" />
       <Navigation />
       
       {/* Back button and refresh */}

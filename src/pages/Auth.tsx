@@ -8,6 +8,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { LogIn, User, Eye, EyeOff } from "lucide-react";
 import { validateEmail, validatePassword, sanitizeErrorMessage } from "@/utils/security";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { SEO } from "@/components/SEO";
 
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -105,6 +106,7 @@ const Auth = () => {
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center px-4">
+      <SEO title="Sign in to TicDia" description="Sign in or create an account to save articles and personalize your TicDia feed." path="/auth" type="website" />
       {/* Gradient background */}
       <div className="fixed inset-0 -z-10">
         <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-background to-background" />

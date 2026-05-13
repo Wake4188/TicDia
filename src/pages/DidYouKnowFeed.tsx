@@ -7,6 +7,7 @@ import { fetchRandomFacts, type RandomFact } from "@/services/onThisDayService";
 import { useUserPreferences } from "@/contexts/UserPreferencesContext";
 import { useMobileDetection } from "@/hooks/useMobileDetection";
 import Navigation from "@/components/Navigation";
+import { SEO } from "@/components/SEO";
 
 const DidYouKnowFeed = () => {
   const navigate = useNavigate();
@@ -79,6 +80,7 @@ const DidYouKnowFeed = () => {
 
   return (
     <div className="h-screen h-[100dvh] w-screen relative overflow-hidden bg-background">
+      <SEO title="Did You Know — Surprising Wikipedia facts" description="A scrollable feed of surprising facts from Wikipedia. Learn something unexpected every day." path="/did-you-know" type="website" />
       <Navigation />
 
       <div className="fixed top-20 left-4 z-50 flex gap-2">

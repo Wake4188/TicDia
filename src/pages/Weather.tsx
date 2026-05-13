@@ -40,6 +40,7 @@ import {
   describeWeather,
   contextualMessage,
 } from "@/services/weatherService";
+import { SEO } from "@/components/SEO";
 
 // Lazy-load the heavy map (Leaflet)
 const WeatherMap = lazy(() => import("@/components/weather/WeatherMap"));
@@ -255,6 +256,7 @@ const Weather = () => {
 
   return (
     <div className="h-[100dvh] bg-background text-foreground overflow-hidden">
+      <SEO title="Weather Feed — Modern weather on TicDia" description="Scroll-based weather: current conditions, hourly forecast, and an interactive map. French and English." path="/weather" type="website" />
       <Navigation />
 
       <div

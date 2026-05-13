@@ -1,0 +1,20 @@
+# TicDia
+
+> TicDia is a TikTok-style Wikipedia reader: discover articles, on-this-day events, did-you-know facts, words of the day, and weather in a smooth vertical feed. Available in French and English, ad-free, mobile-first.
+
+## Pages
+
+- [Home](/): Vertical Wikipedia article feed.
+- [Today](/today): Today's curated articles.
+- [Discover](/discover): Search and browse Wikipedia topics.
+- [Explore](/explore): Curated explore feed.
+- [On This Day](/on-this-day): Historical events that happened on this date.
+- [Did You Know](/did-you-know): Surprising Wikipedia facts.
+- [Word Feed](/word-feed): Daily vocabulary with definitions.
+- [Weather Feed](/weather): Scroll-based weather feed with map and forecast.
+- [Recap](/recap): Personal reading recap and stats.
+
+## Optional
+
+- [Portfolio](/portfolio): About the project and showcase.
+- [Sign in](/auth): Account access for saved articles and preferences.
