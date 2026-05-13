@@ -78,6 +78,7 @@ export const saveUserPreferences = async (userId: string, preferences: UserPrefe
         smoke_effect: preferences.smokeEffect !== false,
         text_animation: preferences.textAnimation !== false,
         ...(preferences.birthYear !== undefined ? { birth_year: preferences.birthYear } : {}),
+        ...(preferences.avatarUrl !== undefined ? { avatar_url: preferences.avatarUrl } : {}),
         updated_at: new Date().toISOString(),
       } as never, {
         onConflict: 'user_id'
