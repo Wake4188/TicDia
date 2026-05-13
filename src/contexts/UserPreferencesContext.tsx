@@ -30,6 +30,7 @@ export const UserPreferencesProvider = ({ children }: { children: ReactNode }) =
                     textAnimation: prefs.textAnimation !== false,
                     birthYear: prefs.birthYear,
                     allowAdultContent: prefs.allowAdultContent === true,
+                    avatarUrl: prefs.avatarUrl ?? null,
                 };
             }
         } catch (e) {
