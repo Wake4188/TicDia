@@ -91,12 +91,22 @@ export const ProfileDesktop = ({ fontOptions, colorOptions }: ProfileDesktopProp
 
   const loadAvatar = async () => {
     if (!user) return;
+    if (userPreferences.avatarUrl) {
+      setAvatarUrl(userPreferences.avatarUrl);
+      return;
+    }
     const { data } = await supabase.storage.from('avatars').list(`${user.id}/`, { limit: 1 });
     if (data && data.length > 0) {
       const { data: urlData } = supabase.storage.from('avatars').getPublicUrl(`${user.id}/${data[0].name}`);
       setAvatarUrl(urlData.publicUrl + '?t=' + Date.now());
     }
   };
+
+  useEffect(() => {
+    if (userPreferences.avatarUrl) {
+      setAvatarUrl(userPreferences.avatarUrl);
+    }
+  }, [userPreferences.avatarUrl]);
 
   const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -107,17 +117,24 @@ export const ProfileDesktop = ({ fontOptions, colorOptions }: ProfileDesktopProp
     }
     setAvatarUploading(true);
     try {
-      const ext = file.name.split('.').pop();
+      const ext = (file.name.split('.').pop() || 'jpg').toLowerCase();
       const path = `${user.id}/avatar.${ext}`;
-      const { error } = await supabase.storage.from('avatars').upload(path, file, { upsert: true });
+      const { error } = await supabase.storage.from('avatars').upload(path, file, {
+        upsert: true,
+        contentType: file.type,
+        cacheControl: '3600',
+      });
       if (error) throw error;
       const { data } = supabase.storage.from('avatars').getPublicUrl(path);
-      setAvatarUrl(data.publicUrl + '?t=' + Date.now());
+      const finalUrl = data.publicUrl + '?t=' + Date.now();
+      setAvatarUrl(finalUrl);
+      await updatePreferences({ avatarUrl: finalUrl });
       toast({ title: "Avatar updated", description: "Your profile picture has been updated." });
     } catch (err: any) {
       toast({ title: "Upload failed", description: err.message, variant: "destructive" });
     } finally {
       setAvatarUploading(false);
+      if (e.target) e.target.value = '';
     }
   };
 
