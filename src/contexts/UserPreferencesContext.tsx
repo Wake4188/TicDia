@@ -98,6 +98,7 @@ export const UserPreferencesProvider = ({ children }: { children: ReactNode }) =
                     textAnimation: prefs.textAnimation !== false,
                     birthYear: prefs.birthYear,
                     allowAdultContent: prefs.allowAdultContent === true,
+                    avatarUrl: prefs.avatarUrl ?? null,
                 });
                 document.documentElement.style.setProperty('--progress-bar-color', prefs.highlightColor || '#FE2C55');
                 document.documentElement.style.setProperty('--highlight-color', prefs.highlightColor || '#FE2C55');
