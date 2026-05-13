@@ -5,13 +5,13 @@ import { ArrowLeft, Calendar, Lightbulb, Star, Cake, Skull, PartyPopper, Refresh
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { 
-import { SEO } from "@/components/SEO";
   fetchOnThisDay, 
   fetchRandomFacts,
   type OnThisDayResponse,
   type OnThisDayEvent,
   type RandomFact 
 } from "@/services/onThisDayService";
+import { SEO } from "@/components/SEO";
 
 type Tab = 'events' | 'births' | 'deaths' | 'holidays' | 'didyouknow';
 
