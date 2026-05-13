@@ -207,6 +207,7 @@ const Today = () => {
     }
   };
   return <div className="min-h-screen bg-background text-foreground pt-20 pb-10 overflow-x-hidden">
+      <SEO title="Today on TicDia — Daily picks" description="Today's curated Wikipedia articles, hand-picked to keep you learning every day." path="/today" />
       {/* Gradient background matching profile design */}
       <div className="fixed inset-0 -z-10">
         <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-background to-background" />
