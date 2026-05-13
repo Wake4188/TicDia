@@ -128,7 +128,7 @@ export const ProfileDesktop = ({ fontOptions, colorOptions }: ProfileDesktopProp
       const { data } = supabase.storage.from('avatars').getPublicUrl(path);
       const finalUrl = data.publicUrl + '?t=' + Date.now();
       setAvatarUrl(finalUrl);
-      await updatePreferences({ avatarUrl: finalUrl });
+      await updateUserPrefs({ avatarUrl: finalUrl });
       toast({ title: "Avatar updated", description: "Your profile picture has been updated." });
     } catch (err: any) {
       toast({ title: "Upload failed", description: err.message, variant: "destructive" });
