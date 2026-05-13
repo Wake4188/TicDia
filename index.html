@@ -36,7 +36,32 @@
   <meta name="author" content="TicDia" />
   <link rel="manifest" href="/manifest.json" />
   <meta name="robots" content="index, follow" />
-  <link rel="canonical" href="https://ticdia.vercel.app/" />
+  <!-- Canonical is set per-route via react-helmet-async (src/components/SEO.tsx). -->
+
+  <!-- Sitewide structured data -->
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "TicDia",
+      "url": "https://ticdia.vercel.app/",
+      "description": "Discover Wikipedia articles in a modern, engaging TikTok-style format.",
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": "https://ticdia.vercel.app/discover?q={search_term_string}",
+        "query-input": "required name=search_term_string"
+      }
+    }
+  </script>
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "name": "TicDia",
+      "url": "https://ticdia.vercel.app/",
+      "logo": "https://ticdia.vercel.app/icon-512.png"
+    }
+  </script>
 
   <!-- SEO and Social Media -->
   <meta name="keywords"
