@@ -424,11 +424,21 @@ const Profile = () => {
   
   // Desktop: Use modern ProfileDesktop component
   if (!isMobile) {
-    return <ProfileDesktop fontOptions={fontOptions} colorOptions={colorOptions} />;
+    return (
+      <>
+        <SEO title="Your profile — TicDia" description="Manage your TicDia profile, preferences, saved articles, and account settings." path="/profile" noindex />
+        <ProfileDesktop fontOptions={fontOptions} colorOptions={colorOptions} />
+      </>
+    );
   }
 
   // Mobile: Use Apple Settings-style ProfileMobile component
-  return <ProfileMobile fontOptions={fontOptions} colorOptions={colorOptions} />;
+  return (
+    <>
+      <SEO title="Your profile — TicDia" description="Manage your TicDia profile, preferences, saved articles, and account settings." path="/profile" noindex />
+      <ProfileMobile fontOptions={fontOptions} colorOptions={colorOptions} />
+    </>
+  );
 };
 
 export default Profile;
