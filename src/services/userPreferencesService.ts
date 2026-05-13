@@ -14,6 +14,7 @@ export interface UserPreferences {
   textAnimation: boolean;
   birthYear?: number;
   allowAdultContent: boolean;
+  avatarUrl?: string | null;
 }
 
 export const loadUserPreferences = async (userId: string): Promise<UserPreferences> => {
