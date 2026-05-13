@@ -106,6 +106,7 @@ export const getDefaultPreferences = (): UserPreferences => ({
   textAnimation: true,
   birthYear: undefined,
   allowAdultContent: false,
+  avatarUrl: null,
 });
 
 export const updateUserPreferences = async (userId: string, updates: Partial<UserPreferences>): Promise<void> => {
