@@ -46,6 +46,7 @@ export const loadUserPreferences = async (userId: string): Promise<UserPreferenc
       textAnimation: (data as Record<string, unknown>).text_animation !== false,
       birthYear: (data as Record<string, unknown>).birth_year as number | undefined,
       allowAdultContent: (data as Record<string, unknown>).allow_adult_content === true,
+      avatarUrl: ((data as Record<string, unknown>).avatar_url as string | null) ?? null,
     };
   } catch (error) {
     console.error('Error loading user preferences:', sanitizeErrorMessage(error));
