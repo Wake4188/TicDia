@@ -32,7 +32,6 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import {
-import { SEO } from "@/components/SEO";
   type WeatherBundle,
   type GeocodeResult,
   fetchWeather,
@@ -41,6 +40,7 @@ import { SEO } from "@/components/SEO";
   describeWeather,
   contextualMessage,
 } from "@/services/weatherService";
+import { SEO } from "@/components/SEO";
 
 // Lazy-load the heavy map (Leaflet)
 const WeatherMap = lazy(() => import("@/components/weather/WeatherMap"));
