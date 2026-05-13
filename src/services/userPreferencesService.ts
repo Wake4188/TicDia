@@ -14,6 +14,7 @@ export interface UserPreferences {
   textAnimation: boolean;
   birthYear?: number;
   allowAdultContent: boolean;
+  avatarUrl?: string | null;
 }
 
 export const loadUserPreferences = async (userId: string): Promise<UserPreferences> => {
@@ -45,6 +46,7 @@ export const loadUserPreferences = async (userId: string): Promise<UserPreferenc
       textAnimation: (data as Record<string, unknown>).text_animation !== false,
       birthYear: (data as Record<string, unknown>).birth_year as number | undefined,
       allowAdultContent: (data as Record<string, unknown>).allow_adult_content === true,
+      avatarUrl: ((data as Record<string, unknown>).avatar_url as string | null) ?? null,
     };
   } catch (error) {
     console.error('Error loading user preferences:', sanitizeErrorMessage(error));
@@ -76,6 +78,7 @@ export const saveUserPreferences = async (userId: string, preferences: UserPrefe
         smoke_effect: preferences.smokeEffect !== false,
         text_animation: preferences.textAnimation !== false,
         ...(preferences.birthYear !== undefined ? { birth_year: preferences.birthYear } : {}),
+        ...(preferences.avatarUrl !== undefined ? { avatar_url: preferences.avatarUrl } : {}),
         updated_at: new Date().toISOString(),
       } as never, {
         onConflict: 'user_id'
@@ -103,6 +106,7 @@ export const getDefaultPreferences = (): UserPreferences => ({
   textAnimation: true,
   birthYear: undefined,
   allowAdultContent: false,
+  avatarUrl: null,
 });
 
 export const updateUserPreferences = async (userId: string, updates: Partial<UserPreferences>): Promise<void> => {

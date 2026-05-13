@@ -547,6 +547,7 @@ export type Database = {
       user_preferences: {
         Row: {
           allow_adult_content: boolean | null
+          avatar_url: string | null
           background_opacity: number
           birth_year: number | null
           created_at: string
@@ -565,6 +566,7 @@ export type Database = {
         }
         Insert: {
           allow_adult_content?: boolean | null
+          avatar_url?: string | null
           background_opacity?: number
           birth_year?: number | null
           created_at?: string
@@ -583,6 +585,7 @@ export type Database = {
         }
         Update: {
           allow_adult_content?: boolean | null
+          avatar_url?: string | null
           background_opacity?: number
           birth_year?: number | null
           created_at?: string

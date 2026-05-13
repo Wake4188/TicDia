@@ -64,6 +64,11 @@ export const ProfileMobile = ({ fontOptions, colorOptions }: ProfileMobileProps)
   const loadAvatar = async () => {
     if (!user) return;
     try {
+      // Prefer the persisted URL stored in user_preferences
+      if (userPreferences.avatarUrl) {
+        setAvatarUrl(userPreferences.avatarUrl);
+        return;
+      }
       const { data } = await supabase.storage.from('avatars').list(`${user.id}/`, {
         limit: 10,
         sortBy: { column: 'updated_at', order: 'desc' },
@@ -76,6 +81,13 @@ export const ProfileMobile = ({ fontOptions, colorOptions }: ProfileMobileProps)
       console.error('Failed to load avatar:', err);
     }
   };
+
+  // Keep the avatar in sync with the persisted preference
+  useEffect(() => {
+    if (userPreferences.avatarUrl) {
+      setAvatarUrl(userPreferences.avatarUrl);
+    }
+  }, [userPreferences.avatarUrl]);
 
   const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -99,14 +111,16 @@ export const ProfileMobile = ({ fontOptions, colorOptions }: ProfileMobileProps)
       });
       if (uploadError) throw uploadError;
       const { data: urlData } = supabase.storage.from('avatars').getPublicUrl(path);
-      setAvatarUrl(urlData.publicUrl + '?t=' + Date.now());
+      const finalUrl = urlData.publicUrl + '?t=' + Date.now();
+      setAvatarUrl(finalUrl);
+      // Persist to user_preferences (secure, RLS-protected) so it sticks across sessions/devices
+      await updatePreferences({ avatarUrl: finalUrl });
       toast({ title: "Avatar updated", description: "Your profile picture has been changed" });
     } catch (err: any) {
       console.error('Avatar upload error:', err);
       toast({ title: "Upload failed", description: err?.message || "Please try again", variant: "destructive" });
     } finally {
       setAvatarUploading(false);
-      // Reset input so the same file can be selected again
       if (e.target) e.target.value = '';
     }
   };
