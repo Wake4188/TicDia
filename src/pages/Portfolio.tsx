@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { SEO } from "@/components/SEO";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -145,6 +146,7 @@ function SkillBar({ skill, index }: { skill: { name: string; level: number }; in
 
   return (
     <div className="mb-6">
+      <SEO title="TicDia Portfolio — Project showcase" description="About TicDia: the design, motion, and engineering behind a modern Wikipedia reader." path="/portfolio" type="website" />
       <div className="flex justify-between mb-2">
         <span className="text-white font-medium">{skill.name}</span>
         <span className="text-gray-400">{skill.level}%</span>

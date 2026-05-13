@@ -32,6 +32,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import {
+import { SEO } from "@/components/SEO";
   type WeatherBundle,
   type GeocodeResult,
   fetchWeather,
@@ -255,6 +256,7 @@ const Weather = () => {
 
   return (
     <div className="h-[100dvh] bg-background text-foreground overflow-hidden">
+      <SEO title="Weather Feed — Modern weather on TicDia" description="Scroll-based weather: current conditions, hourly forecast, and an interactive map. French and English." path="/weather" type="website" />
       <Navigation />
 
       <div

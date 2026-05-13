@@ -7,6 +7,7 @@ import { fetchOnThisDay, type OnThisDayEvent } from "@/services/onThisDayService
 import { useUserPreferences } from "@/contexts/UserPreferencesContext";
 import { useMobileDetection } from "@/hooks/useMobileDetection";
 import Navigation from "@/components/Navigation";
+import { SEO } from "@/components/SEO";
 
 type TaggedEvent = OnThisDayEvent & { eventType: 'event' | 'birth' | 'death' };
 
@@ -104,6 +105,7 @@ const OnThisDayFeed = () => {
 
   return (
     <div className="h-screen h-[100dvh] w-screen relative overflow-hidden bg-background">
+      <SEO title="On This Day — Historical events on TicDia" description="Discover historical events that happened on this date, in a smooth vertical Wikipedia feed." path="/on-this-day" type="website" />
       <Navigation />
 
       <div className="fixed top-20 left-4 z-50 flex gap-2">

@@ -5,6 +5,7 @@ import { ArrowLeft, Calendar, Lightbulb, Star, Cake, Skull, PartyPopper, Refresh
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { 
+import { SEO } from "@/components/SEO";
   fetchOnThisDay, 
   fetchRandomFacts,
   type OnThisDayResponse,
@@ -176,6 +177,7 @@ const Explore = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEO title="Explore — On This Day & Did You Know — TicDia" description="Curated Wikipedia explore feed: today's history and surprising facts in one place." path="/explore" type="website" />
       {/* Gradient background */}
       <div className="fixed inset-0 -z-10">
         <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-background to-background" />

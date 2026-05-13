@@ -14,6 +14,7 @@ import { useAuth } from "../contexts/AuthContext";
 
 // Eagerly import ArticleViewer - it contains the LCP element (article text)
 import ArticleViewer from "../components/ArticleViewer";
+import { SEO } from "@/components/SEO";
 
 // Lazy load non-LCP components to reduce initial JS payload
 const Navigation = lazy(() => import("../components/Navigation"));
@@ -206,6 +207,7 @@ const Index = () => {
     
     return (
       <Suspense fallback={<ArticleLoadingState />}>
+        <SEO title="TicDia — Discover Wikipedia in TikTok style" description="Scroll a vertical feed of Wikipedia articles. Learn something new every day, ad-free, in French or English." path="/" type="website" />
         <FunErrorScreen
           type={errorType}
           title={searchQuery ? t.noResults : undefined}
