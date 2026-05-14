@@ -168,10 +168,15 @@ export const ProfileDesktop = ({ fontOptions, colorOptions }: ProfileDesktopProp
   };
 
   const fetchSavedArticles = async () => {
+    if (!user) {
+      setLoading(false);
+      return;
+    }
     try {
       const { data, error } = await supabase
         .from('saved_articles')
         .select('*')
+        .eq('user_id', user.id)
         .order('saved_at', { ascending: false });
       if (error) throw error;
       setSavedArticles(data || []);
@@ -279,6 +284,15 @@ export const ProfileDesktop = ({ fontOptions, colorOptions }: ProfileDesktopProp
         >
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-6">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => navigate("/")}
+                aria-label="Back to home"
+                className="rounded-full hover:bg-muted"
+              >
+                <ChevronRight className="w-5 h-5 rotate-180" />
+              </Button>
               <motion.div 
                 className="relative group cursor-pointer"
                 whileHover={{ scale: 1.05 }}
@@ -673,7 +687,7 @@ export const ProfileDesktop = ({ fontOptions, colorOptions }: ProfileDesktopProp
                         </CardContent>
                       </Card>
 
-                      {/* Discover Profiles */}
+                      {/* Discover Profiles - Coming Soon */}
                       <Card className="bg-card/50 backdrop-blur-sm border-border/50">
                         <CardHeader>
                           <CardTitle className="text-xl flex items-center gap-2">
@@ -683,31 +697,13 @@ export const ProfileDesktop = ({ fontOptions, colorOptions }: ProfileDesktopProp
                           <CardDescription>Find people with similar interests</CardDescription>
                         </CardHeader>
                         <CardContent>
-                          <div className="space-y-3">
-                            {[
-                              { name: "BookWorm42", interests: ["History", "Science"], articles: 234 },
-                              { name: "CuriousMind", interests: ["Philosophy", "Art"], articles: 189 },
-                              { name: "TechExplorer", interests: ["Technology", "Space"], articles: 312 },
-                            ].map((profile, i) => (
-                              <div key={i} className="flex items-center justify-between p-3 rounded-xl bg-muted/30 hover:bg-muted/50 transition-colors">
-                                <div className="flex items-center gap-3">
-                                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center">
-                                    <span className="text-sm font-bold text-white">{profile.name.charAt(0)}</span>
-                                  </div>
-                                  <div>
-                                    <p className="font-medium text-foreground">{profile.name}</p>
-                                    <p className="text-xs text-muted-foreground">{profile.interests.join(" • ")} • {profile.articles} articles</p>
-                                  </div>
-                                </div>
-                                <Button variant="ghost" size="sm">
-                                  <Heart className="w-4 h-4" />
-                                </Button>
-                              </div>
-                            ))}
+                          <div className="text-center py-8 px-4 rounded-xl bg-muted/20 border border-dashed border-border">
+                            <Users className="w-10 h-10 mx-auto text-muted-foreground/50 mb-3" />
+                            <p className="text-sm font-medium text-foreground mb-1">Coming soon</p>
+                            <p className="text-xs text-muted-foreground">
+                              We're building a privacy-first way to connect readers. Stay tuned.
+                            </p>
                           </div>
-                          <Button variant="outline" className="w-full mt-4">
-                            Discover More Readers
-                          </Button>
                         </CardContent>
                       </Card>
                     </>

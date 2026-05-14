@@ -140,6 +140,30 @@
     background-color: hsla(0, 0%, 100%, 0.85) !important;
   }
 
+  /* Article reader readability boost in light mode:
+     Wikipedia images behind text can be bright/distracting.
+     Dim them and add a stronger contrast scrim under the text. */
+  body.light .article-section img {
+    filter: brightness(0.72) contrast(1.05) saturate(0.95);
+  }
+  body.light .article-section::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: linear-gradient(
+      to top,
+      rgba(0, 0, 0, 0.6) 0%,
+      rgba(0, 0, 0, 0.3) 45%,
+      rgba(0, 0, 0, 0.12) 100%
+    );
+    z-index: 1;
+  }
+  body.light .article-section > * {
+    position: relative;
+    z-index: 2;
+  }
+
   /* Font loading is handled via Google Fonts in index.html */
 
   /* Prevent layout shift by reserving space for images */

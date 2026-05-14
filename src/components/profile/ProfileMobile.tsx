@@ -140,7 +140,11 @@ export const ProfileMobile = ({ fontOptions, colorOptions }: ProfileMobileProps)
 
   const fetchSavedArticles = async () => {
     if (!user) return;
-    const { data } = await supabase.from('saved_articles').select('*').order('saved_at', { ascending: false });
+    const { data } = await supabase
+      .from('saved_articles')
+      .select('*')
+      .eq('user_id', user.id)
+      .order('saved_at', { ascending: false });
     setSavedArticles(data || []);
   };
 
