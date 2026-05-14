@@ -170,10 +170,15 @@ const Profile = () => {
   }, [savedArticles, searchTerm]);
 
   const fetchSavedArticles = async () => {
+    if (!user) {
+      setLoading(false);
+      return;
+    }
     try {
       const { data, error } = await supabase
         .from('saved_articles')
         .select('*')
+        .eq('user_id', user.id)
         .order('saved_at', { ascending: false });
 
       if (error) throw error;
