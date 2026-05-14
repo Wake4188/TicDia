@@ -279,6 +279,15 @@ export const ProfileDesktop = ({ fontOptions, colorOptions }: ProfileDesktopProp
         >
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-6">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => navigate("/")}
+                aria-label="Back to home"
+                className="rounded-full hover:bg-muted"
+              >
+                <ChevronRight className="w-5 h-5 rotate-180" />
+              </Button>
               <motion.div 
                 className="relative group cursor-pointer"
                 whileHover={{ scale: 1.05 }}
