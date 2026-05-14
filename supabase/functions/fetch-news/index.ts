@@ -130,12 +130,25 @@ serve(async (req) => {
       return html.replace(/<[^>]+>/g, '').trim()
     }
 
+    const pickLink = (item: any): string => {
+      const l = item?.link
+      if (typeof l === 'string') return l
+      if (Array.isArray(l)) {
+        const str = l.find((x: any) => typeof x === 'string')
+        if (str) return str
+        const obj = l.find((x: any) => x && typeof x === 'object' && x.href)
+        if (obj?.href) return obj.href
+      }
+      if (l && typeof l === 'object' && l.href) return l.href
+      return item?.guid && typeof item.guid === 'string' ? item.guid : '#'
+    }
+
     const articles = items.slice(0, 8).map((item: any) => {
       const imageUrl = pickImage(item)
       return {
-        title: item?.title || 'Untitled',
-        abstract: stripTags(item?.description || ''),
-        url: item?.link || '#',
+        title: typeof item?.title === 'string' ? item.title : (item?.title?.['#text'] || 'Untitled'),
+        abstract: stripTags(typeof item?.description === 'string' ? item.description : (item?.description?.['#text'] || '')),
+        url: pickLink(item),
         published_date: item?.pubDate || new Date().toISOString(),
         multimedia: imageUrl
           ? [{ url: imageUrl, format: 'mediumThreeByTwo440', height: 293, width: 440, type: 'image', subtype: 'photo', caption: '' }]
