@@ -96,11 +96,10 @@ const Discover = () => {
   };
 
   const handleArticleClick = (article: WikipediaArticle) => {
-    navigate(`/?q=${encodeURIComponent(article.title)}`, {
-      state: {
-        reorderedResults: [article]
-      }
-    });
+    // Navigate with just the search query so Index can fetch the full
+    // related stream (selected article + similar results) instead of
+    // being locked to a single pre-supplied result.
+    navigate(`/?q=${encodeURIComponent(article.title)}`);
   };
 
   const articles = data?.pages.flat() ?? [];
