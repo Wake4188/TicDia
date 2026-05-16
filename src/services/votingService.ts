@@ -19,13 +19,17 @@ export const voteOnArticle = async (
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error('User not authenticated');
 
+  // Only allow safe http(s) URLs to be stored; drop anything else (e.g. javascript:)
+  const safeUrl =
+    articleUrl && /^https?:\/\//i.test(articleUrl) ? articleUrl : null;
+
   const { data, error } = await supabase
     .from('article_votes')
     .upsert({
       user_id: user.id,
       article_id: articleId,
       article_title: articleTitle,
-      article_url: articleUrl,
+      article_url: safeUrl,
       vote_type: voteType,
     }, {
       onConflict: 'user_id,article_id'
