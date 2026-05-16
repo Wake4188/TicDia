@@ -38,29 +38,29 @@ const refreshCacheIfNeeded = async (): Promise<void> => {
   }
 
   try {
-    // Fetch all rules in parallel
-    const [curationResult, rulesResult, moderationResult] = await Promise.all([
+    // Fetch all rules in parallel via SECURITY DEFINER RPCs so non-admin users
+    // also get moderation/blacklist/hidden-curation applied (without exposing
+    // sensitive admin-only fields like admin_notes or moderated_by).
+    const [pinnedPromotedResult, hiddenDemotedResult, rulesResult, moderationResult] = await Promise.all([
       supabase
         .from('feed_curation')
         .select('article_id, article_title, curation_type, priority')
-        .eq('is_active', true),
-      supabase
-        .from('content_rules')
-        .select('rule_type, target_type, target_value')
-        .eq('is_active', true),
-      supabase
-        .from('content_moderation')
-        .select('content_id, is_hidden')
-        .eq('is_hidden', true)
+        .eq('is_active', true)
+        .in('curation_type', ['pinned', 'promoted']),
+      supabase.rpc('get_hidden_or_demoted_curation' as any),
+      supabase.rpc('get_active_content_rules' as any),
+      supabase.rpc('get_hidden_content_ids' as any),
     ]);
 
-    feedCurationCache = (curationResult.data || []) as FeedCurationRule[];
+    const pinnedPromoted = (pinnedPromotedResult.data || []) as FeedCurationRule[];
+    const hiddenDemoted = (hiddenDemotedResult.data || []) as FeedCurationRule[];
+    feedCurationCache = [...pinnedPromoted, ...hiddenDemoted];
     contentRulesCache = (rulesResult.data || []) as ContentRule[];
-    
+
     // Build moderation map for quick lookup
     moderationCache = new Map();
-    (moderationResult.data || []).forEach((item: ModerationItem) => {
-      moderationCache!.set(item.content_id, item.is_hidden);
+    ((moderationResult.data || []) as { content_id: string }[]).forEach((item) => {
+      moderationCache!.set(item.content_id, true);
     });
 
     cacheTimestamp = now;
