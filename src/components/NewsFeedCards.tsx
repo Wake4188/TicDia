@@ -198,7 +198,7 @@ const NewsFeedCards = () => {
   const loadFi = async () => {
     setLoadingFi(true);
     try {
-      setFi(await fetchRSS('https://www.franceinfo.fr/titres.rss'));
+      setFi(await fetchRSS('https://www.franceinfo.fr/titres.rss', 'France Info'));
     } catch (e) {
       console.error('France Info fetch failed:', e);
     } finally {
