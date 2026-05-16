@@ -187,7 +187,7 @@ const NewsFeedCards = () => {
   const loadBbc = async () => {
     setLoadingBbc(true);
     try {
-      setBbc(await fetchRSS('https://feeds.bbci.co.uk/news/world/rss.xml'));
+      setBbc(await fetchRSS('https://feeds.bbci.co.uk/news/world/rss.xml', 'BBC World'));
     } catch (e) {
       console.error('BBC fetch failed:', e);
     } finally {
