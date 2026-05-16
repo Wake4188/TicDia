@@ -729,9 +729,32 @@ export type Database = {
     }
     Functions: {
       cleanup_old_data: { Args: never; Returns: undefined }
+      get_active_content_rules: {
+        Args: never
+        Returns: {
+          rule_type: string
+          target_type: string
+          target_value: string
+        }[]
+      }
       get_article_vote_count: {
         Args: { p_article_id: string }
         Returns: number
+      }
+      get_hidden_content_ids: {
+        Args: never
+        Returns: {
+          content_id: string
+        }[]
+      }
+      get_hidden_or_demoted_curation: {
+        Args: never
+        Returns: {
+          article_id: string
+          article_title: string
+          curation_type: string
+          priority: number
+        }[]
       }
       get_top_voted_articles: {
         Args: { p_date?: string; p_limit?: number }
