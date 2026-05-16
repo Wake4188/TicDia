@@ -37,30 +37,24 @@ const SOURCES: FeedSource[] = [
   { id: 'franceinfo', label: 'France Info',    accent: 'text-amber-400',  badgeBg: 'bg-amber-500/10 border-amber-500/20' },
 ];
 
-const fetchRSS = async (url: string): Promise<RSSArticle[]> => {
-  const res = await fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`);
-  if (!res.ok) throw new Error('RSS fetch failed');
-  const text = await res.text();
-  const xml = new DOMParser().parseFromString(text, 'application/xml');
-  const items = Array.from(xml.querySelectorAll('item'));
-
-  const getImage = (item: Element) => {
-    const enclosure = item.querySelector('enclosure');
-    if (enclosure?.getAttribute('type')?.startsWith('image/')) return enclosure.getAttribute('url') || undefined;
-    const mediaContent = item.querySelector('media\\:content, content');
-    if (mediaContent?.getAttribute('url')) return mediaContent.getAttribute('url') || undefined;
-    const mediaThumb = item.querySelector('media\\:thumbnail');
-    if (mediaThumb?.getAttribute('url')) return mediaThumb.getAttribute('url') || undefined;
-    const imgInDesc = (item.querySelector('description')?.textContent || '').match(/<img[^>]+src="([^"]+)"/i);
-    return imgInDesc ? imgInDesc[1] : undefined;
-  };
-
-  return items.slice(0, 12).map((item) => ({
-    title: item.querySelector('title')?.textContent || 'Untitled',
-    description: (item.querySelector('description')?.textContent || '').replace(/<[^>]+>/g, '').trim(),
-    link: item.querySelector('link')?.textContent || '#',
-    pubDate: item.querySelector('pubDate')?.textContent || new Date().toISOString(),
-    image: getImage(item),
+const fetchRSS = async (url: string, source: string): Promise<RSSArticle[]> => {
+  const { data, error } = await supabase.functions.invoke('rss-feed', {
+    body: { url, source },
+  });
+  if (error) throw error;
+  const items = (data || []) as Array<{
+    title: string;
+    summary: string;
+    link: string;
+    image?: string;
+    publishedAt: string;
+  }>;
+  return items.slice(0, 12).map((a) => ({
+    title: a.title,
+    description: a.summary,
+    link: a.link,
+    pubDate: a.publishedAt,
+    image: a.image,
   }));
 };
 
