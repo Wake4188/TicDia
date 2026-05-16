@@ -80,7 +80,21 @@ const DidYouKnowFeed = () => {
 
   return (
     <div className="h-screen h-[100dvh] w-screen relative overflow-hidden bg-background">
-      <SEO title="Did You Know — Surprising Wikipedia facts" description="A scrollable feed of surprising facts from Wikipedia. Learn something unexpected every day." path="/did-you-know" type="website" />
+      <SEO
+        title="Did You Know — Surprising Wikipedia facts"
+        description="A scrollable feed of surprising facts from Wikipedia. Learn something unexpected every day."
+        path="/did-you-know"
+        type="article"
+        jsonLd={{
+          "@context": "https://schema.org",
+          "@type": "CollectionPage",
+          "name": "Did You Know — Surprising Wikipedia facts",
+          "headline": "Did You Know — Surprising Wikipedia facts",
+          "url": "https://ticdia.lovable.app/did-you-know",
+          "description": "A scrollable feed of surprising facts from Wikipedia.",
+          "isPartOf": { "@type": "WebSite", "name": "TicDia", "url": "https://ticdia.lovable.app/" },
+        }}
+      />
       <Navigation />
 
       <div className="fixed top-20 left-4 z-50 flex gap-2">

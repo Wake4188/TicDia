@@ -230,6 +230,12 @@ const Index = () => {
 
   return (
     <div className="h-screen w-screen relative overflow-hidden bg-background">
+      <SEO
+        title="TicDia — Discover Wikipedia in TikTok style"
+        description="Scroll a vertical feed of Wikipedia articles. Learn something new every day, ad-free, in French or English."
+        path="/"
+        type="website"
+      />
       <AnalyticsCheck />
       <Suspense fallback={null}>
         <Navigation currentArticle={currentDisplayArticle} />
