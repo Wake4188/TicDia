@@ -1,6 +1,6 @@
 import { Helmet } from "react-helmet-async";
 
-const SITE_URL = "https://ticdia.vercel.app";
+const SITE_URL = "https://ticdia.lovable.app";
 
 interface SEOProps {
   title: string;
