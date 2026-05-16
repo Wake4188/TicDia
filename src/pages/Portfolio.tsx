@@ -146,7 +146,25 @@ function SkillBar({ skill, index }: { skill: { name: string; level: number }; in
 
   return (
     <div className="mb-6">
-      <SEO title="TicDia Portfolio — Project showcase" description="About TicDia: the design, motion, and engineering behind a modern Wikipedia reader." path="/portfolio" type="website" />
+      <SEO
+        title="TicDia Portfolio — Project showcase"
+        description="About TicDia: the design, motion, and engineering behind a modern Wikipedia reader."
+        path="/portfolio"
+        type="website"
+        jsonLd={{
+          "@context": "https://schema.org",
+          "@type": "ProfilePage",
+          "name": "TicDia Portfolio",
+          "url": "https://ticdia.lovable.app/portfolio",
+          "mainEntity": {
+            "@type": "Person",
+            "name": "TicDia Creator",
+            "url": "https://ticdia.lovable.app/portfolio",
+            "jobTitle": "Designer & Developer",
+            "knowsAbout": ["React", "TypeScript", "Supabase", "Motion design", "Computer Vision"],
+          },
+        }}
+      />
       <div className="flex justify-between mb-2">
         <span className="text-white font-medium">{skill.name}</span>
         <span className="text-gray-400">{skill.level}%</span>

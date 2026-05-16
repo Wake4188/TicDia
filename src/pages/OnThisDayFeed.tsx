@@ -105,7 +105,21 @@ const OnThisDayFeed = () => {
 
   return (
     <div className="h-screen h-[100dvh] w-screen relative overflow-hidden bg-background">
-      <SEO title="On This Day — Historical events on TicDia" description="Discover historical events that happened on this date, in a smooth vertical Wikipedia feed." path="/on-this-day" type="website" />
+      <SEO
+        title="On This Day — Historical events on TicDia"
+        description="Discover historical events that happened on this date, in a smooth vertical Wikipedia feed."
+        path="/on-this-day"
+        type="article"
+        jsonLd={{
+          "@context": "https://schema.org",
+          "@type": "CollectionPage",
+          "name": "On This Day — Historical events",
+          "headline": "On This Day — Historical events",
+          "url": "https://ticdia.lovable.app/on-this-day",
+          "description": "Historical events, births, and deaths that happened on this date.",
+          "isPartOf": { "@type": "WebSite", "name": "TicDia", "url": "https://ticdia.lovable.app/" },
+        }}
+      />
       <Navigation />
 
       <div className="fixed top-20 left-4 z-50 flex gap-2">
