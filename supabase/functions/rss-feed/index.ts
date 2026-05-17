@@ -48,11 +48,26 @@ function checkRateLimit(userId: string): boolean {
 const cache = new Map<string, { data: RSSArticle[]; timestamp: number }>();
 const CACHE_TTL = 5 * 60 * 1000;
 
-const ALLOWED_DOMAINS = [
-  'rss.nytimes.com', 'feeds.bbci.co.uk', 'www.france24.com',
-  'feeds.skynews.com', 'feeds.reuters.com', 'feeds.cnn.com',
-  'feeds.theguardian.com', 'rss.cbc.ca', 'rss.app', 'www.franceinfo.fr'
-];
+// Block requests to private / loopback / link-local / reserved IP ranges.
+// Used as the only network-egress guard now that users can supply arbitrary RSS URLs.
+function isPrivateHostname(hostname: string): boolean {
+  const h = hostname.toLowerCase();
+  if (h === 'localhost' || h.endsWith('.localhost') || h.endsWith('.local')) return true;
+  if (h === '0.0.0.0' || h === '::' || h === '::1' || h.startsWith('[::1') || h.startsWith('[fc') || h.startsWith('[fd')) return true;
+  // IPv4 literal checks
+  const m = h.match(/^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/);
+  if (m) {
+    const [a, b] = [parseInt(m[1], 10), parseInt(m[2], 10)];
+    if (a === 10) return true;
+    if (a === 127) return true;
+    if (a === 0) return true;
+    if (a === 169 && b === 254) return true;
+    if (a === 172 && b >= 16 && b <= 31) return true;
+    if (a === 192 && b === 168) return true;
+    if (a >= 224) return true; // multicast / reserved
+  }
+  return false;
+}
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -126,17 +141,9 @@ serve(async (req) => {
         );
       }
 
-      if (!ALLOWED_DOMAINS.includes(urlObj.hostname)) {
+      if (isPrivateHostname(urlObj.hostname)) {
         return new Response(
-          JSON.stringify({ error: 'Domain not allowed. Only whitelisted RSS feeds are supported.' }),
-          { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        );
-      }
-
-      const hostname = urlObj.hostname;
-      if (hostname.startsWith('127.') || hostname.startsWith('10.') || hostname.startsWith('192.168.') || hostname.startsWith('169.254.') || hostname === 'localhost') {
-        return new Response(
-          JSON.stringify({ error: 'Access to private IP ranges is not allowed.' }),
+          JSON.stringify({ error: 'Access to private or reserved hosts is not allowed.' }),
           { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       }
