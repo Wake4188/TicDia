@@ -5,28 +5,41 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 
-  <!-- Google Analytics - Load on user interaction to reduce initial JS -->
+  <!--
+    Google Analytics — GDPR/ePrivacy compliant.
+    Only loads after explicit user consent (CookieConsent banner -> "accepted").
+    Never loads if the user declined or has not decided yet.
+  -->
   <script>
     window.dataLayer = window.dataLayer || [];
     function gtag() { dataLayer.push(arguments); }
 
-    // Defer GA loading until user interacts or after 10 seconds
     var gaLoaded = false;
     function loadGA() {
       if (gaLoaded) return;
+      try {
+        if (localStorage.getItem('cookie-consent') !== 'accepted') return;
+      } catch (e) { return; }
       gaLoaded = true;
       var script = document.createElement('script');
       script.src = 'https://www.googletagmanager.com/gtag/js?id=G-6HFC6Q72F9';
       script.async = true;
       document.head.appendChild(script);
       gtag('js', new Date());
-      gtag('config', 'G-6HFC6Q72F9');
+      gtag('config', 'G-6HFC6Q72F9', { anonymize_ip: true });
     }
+    window.__ticdiaLoadGA = loadGA;
 
-    ['mousedown', 'keydown', 'touchstart', 'scroll'].forEach(function (e) {
-      document.addEventListener(e, loadGA, { once: true, passive: true });
-    });
-    setTimeout(loadGA, 10000);
+    try {
+      if (localStorage.getItem('cookie-consent') === 'accepted') {
+        ['mousedown', 'keydown', 'touchstart', 'scroll'].forEach(function (e) {
+          document.addEventListener(e, loadGA, { once: true, passive: true });
+        });
+        setTimeout(loadGA, 10000);
+      }
+    } catch (e) { /* storage blocked */ }
+
+    window.addEventListener('ticdia:consent-accepted', loadGA);
   </script>
 
   <!-- PWA and App Identity -->
