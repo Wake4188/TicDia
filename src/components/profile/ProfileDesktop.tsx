@@ -57,6 +57,7 @@ export const ProfileDesktop = ({ fontOptions, colorOptions }: ProfileDesktopProp
   const [selectedArticle, setSelectedArticle] = useState<SavedArticle | null>(null);
   const [isSmallTicOpen, setIsSmallTicOpen] = useState(false);
   const [contactOpen, setContactOpen] = useState(false);
+  const [contactPreset, setContactPreset] = useState<{ subject?: string; message?: string }>({});
 
   // Avatar upload
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
@@ -1169,18 +1170,21 @@ export const ProfileDesktop = ({ fontOptions, colorOptions }: ProfileDesktopProp
                       <CardDescription>Get help, report a bug, or share feedback</CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-4">
-                      {[
-                        { title: "General Feedback", desc: "Share your thoughts on TicDia", action: "Send Feedback" },
-                        { title: "Report a Bug", desc: "Found something broken? Let us know", action: "Report Bug" },
-                        { title: "Feature Request", desc: "Suggest a new feature or improvement", action: "Request Feature" },
-                        { title: "Privacy / GDPR Request", desc: "Data access, deletion, or correction requests", action: "Submit Request" },
-                      ].map((item) => (
+                      {([
+                        { title: "General Feedback", desc: "Share your thoughts on TicDia", action: "Send Feedback", subject: "feedback", message: "" },
+                        { title: "Report a Bug", desc: "Found something broken? Let us know", action: "Report Bug", subject: "bug", message: "Steps to reproduce:\n1. \n2. \n\nExpected:\n\nActual:\n\nBrowser / device:\n" },
+                        { title: "Feature Request", desc: "Suggest a new feature or improvement", action: "Request Feature", subject: "feature", message: "I'd love to see:\n\nWhy it would help:\n" },
+                        { title: "Privacy / GDPR Request", desc: "Data access, deletion, or correction requests", action: "Submit Request", subject: "privacy", message: "Type of request (please tick one):\n[ ] Access a copy of my data\n[ ] Delete my account and all associated data\n[ ] Rectify inaccurate data\n[ ] Restrict / object to processing\n[ ] Data portability\n\nAccount email: \nAdditional details: " },
+                      ] as const).map((item) => (
                         <div key={item.title} className="flex items-center justify-between p-4 rounded-xl bg-muted/30 hover:bg-muted/50 transition-colors">
                           <div>
                             <p className="font-medium text-foreground">{item.title}</p>
                             <p className="text-sm text-muted-foreground">{item.desc}</p>
                           </div>
-                          <Button variant="outline" size="sm" onClick={() => setContactOpen(true)}>
+                          <Button variant="outline" size="sm" onClick={() => {
+                            setContactPreset({ subject: item.subject, message: item.message });
+                            setContactOpen(true);
+                          }}>
                             {item.action}
                           </Button>
                         </div>
@@ -1267,7 +1271,12 @@ export const ProfileDesktop = ({ fontOptions, colorOptions }: ProfileDesktopProp
         article={selectedArticle}
         onOpenFull={(title) => navigate(`/?q=${encodeURIComponent(title)}`)}
       />
-      <ContactModal isOpen={contactOpen} onClose={() => setContactOpen(false)} />
+      <ContactModal
+        isOpen={contactOpen}
+        onClose={() => { setContactOpen(false); setContactPreset({}); }}
+        initialSubject={contactPreset.subject}
+        initialMessage={contactPreset.message}
+      />
     </div>
   );
 };

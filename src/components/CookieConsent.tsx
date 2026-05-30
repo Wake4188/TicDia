@@ -10,14 +10,17 @@ export const CookieConsent = () => {
   useEffect(() => {
     const consent = localStorage.getItem("cookie-consent");
     if (!consent) {
-      // Show consent banner after a short delay
       setTimeout(() => setShowConsent(true), 1000);
     }
+    const reopen = () => setShowConsent(true);
+    window.addEventListener("ticdia:open-cookie-consent", reopen);
+    return () => window.removeEventListener("ticdia:open-cookie-consent", reopen);
   }, []);
 
   const handleAccept = () => {
     localStorage.setItem("cookie-consent", "accepted");
     setShowConsent(false);
+    try { window.dispatchEvent(new Event("ticdia:consent-accepted")); } catch {}
   };
 
   const handleDecline = () => {

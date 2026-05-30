@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Send, CheckCircle, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -12,17 +12,27 @@ import { useAuth } from "@/contexts/AuthContext";
 interface ContactModalProps {
   isOpen: boolean;
   onClose: () => void;
+  initialSubject?: string;
+  initialMessage?: string;
 }
 
-export const ContactModal = ({ isOpen, onClose }: ContactModalProps) => {
+export const ContactModal = ({ isOpen, onClose, initialSubject, initialMessage }: ContactModalProps) => {
   const { user } = useAuth();
   const [name, setName] = useState(user?.email?.split('@')[0] || "");
   const [email, setEmail] = useState(user?.email || "");
-  const [subject, setSubject] = useState("");
-  const [message, setMessage] = useState("");
+  const [subject, setSubject] = useState(initialSubject || "");
+  const [message, setMessage] = useState(initialMessage || "");
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
   const [error, setError] = useState("");
+
+  // Sync when parent changes the initial values (e.g., user clicks a different topic button)
+  useEffect(() => {
+    if (isOpen) {
+      if (initialSubject !== undefined) setSubject(initialSubject);
+      if (initialMessage !== undefined) setMessage(initialMessage);
+    }
+  }, [isOpen, initialSubject, initialMessage]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
