@@ -32,6 +32,12 @@ export const Footer = () => {
                 Terms of Service
               </a>
               <button
+                onClick={() => window.dispatchEvent(new Event("ticdia:open-cookie-consent"))}
+                className="text-gray-400 hover:text-[#FE2C55] transition-colors"
+              >
+                Manage cookies
+              </button>
+              <button
                 onClick={() => setContactOpen(true)}
                 className="text-gray-400 hover:text-[#FE2C55] transition-colors"
               >
