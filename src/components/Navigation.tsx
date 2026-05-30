@@ -21,10 +21,11 @@ const Navigation = ({ currentArticle }: NavigationProps) => {
     // Reset any mobile menu state when location changes
   }, [location]);
 
-  // Navigate to fresh feed without full page reload
+  // Force a completely new feed (matches mobile behavior): hard refresh to clear
+  // React Query cache, in-memory state, and re-trigger the random article fetch.
   const handleFreshFeed = useCallback(() => {
-    navigate('/', { state: { freshFeed: true }, replace: false });
-  }, [navigate]);
+    window.location.href = '/?refresh=' + Date.now();
+  }, []);
 
   if (location.pathname === '/auth') return null;
 
