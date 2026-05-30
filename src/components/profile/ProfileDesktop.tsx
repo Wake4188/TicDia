@@ -57,6 +57,7 @@ export const ProfileDesktop = ({ fontOptions, colorOptions }: ProfileDesktopProp
   const [selectedArticle, setSelectedArticle] = useState<SavedArticle | null>(null);
   const [isSmallTicOpen, setIsSmallTicOpen] = useState(false);
   const [contactOpen, setContactOpen] = useState(false);
+  const [contactPreset, setContactPreset] = useState<{ subject?: string; message?: string }>({});
 
   // Avatar upload
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
