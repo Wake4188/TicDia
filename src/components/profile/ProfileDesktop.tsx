@@ -1271,7 +1271,12 @@ export const ProfileDesktop = ({ fontOptions, colorOptions }: ProfileDesktopProp
         article={selectedArticle}
         onOpenFull={(title) => navigate(`/?q=${encodeURIComponent(title)}`)}
       />
-      <ContactModal isOpen={contactOpen} onClose={() => setContactOpen(false)} />
+      <ContactModal
+        isOpen={contactOpen}
+        onClose={() => { setContactOpen(false); setContactPreset({}); }}
+        initialSubject={contactPreset.subject}
+        initialMessage={contactPreset.message}
+      />
     </div>
   );
 };
