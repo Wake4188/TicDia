@@ -67,6 +67,10 @@ const AdminPanel = () => {
           <MetricsDashboard />
         </TabsContent>
 
+        <TabsContent value="messages" className="space-y-6">
+          <MessagesPanel />
+        </TabsContent>
+
         <TabsContent value="killswitch" className="space-y-6">
           <FeatureFlagsPanel />
         </TabsContent>
