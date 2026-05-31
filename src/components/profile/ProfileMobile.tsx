@@ -102,9 +102,11 @@ export const ProfileMobile = ({ fontOptions, colorOptions }: ProfileMobileProps)
     }
     setAvatarUploading(true);
     try {
-      const ext = (file.name.split('.').pop() || 'jpg').toLowerCase();
+      const extMap: Record<string, string> = { 'image/jpeg': 'jpg', 'image/png': 'png', 'image/webp': 'webp' };
+      const ext = extMap[file.type] || 'jpg';
       const path = `${user.id}/avatar.${ext}`;
-      const { error: uploadError } = await supabase.storage.from('avatars').upload(path, file, {
+      const blob = new Blob([await file.arrayBuffer()], { type: file.type });
+      const { error: uploadError } = await supabase.storage.from('avatars').upload(path, blob, {
         upsert: true,
         contentType: file.type,
         cacheControl: '3600',
