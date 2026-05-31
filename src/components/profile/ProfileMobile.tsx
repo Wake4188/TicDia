@@ -371,6 +371,15 @@ export const ProfileMobile = ({ fontOptions, colorOptions }: ProfileMobileProps)
     </div>
   );
 
+  if (subPage === 'privacy') return (
+    <div className="min-h-screen bg-background">
+      <SubPageHeader title="Privacy & Cookies" onBack={() => setSubPage(null)} />
+      <div className="p-4">
+        <CookieSettings />
+      </div>
+    </div>
+  );
+
   if (subPage === 'tts') return (
     <div className="min-h-screen bg-background">
       <SubPageHeader title="TTS Speed" onBack={() => setSubPage(null)} />
