@@ -20,6 +20,7 @@ import { useUserPreferences } from "@/contexts/UserPreferencesContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
 import { SUPPORTED_LANGUAGES } from "@/services/languageConfig";
+import { CookieSettings } from "@/components/profile/CookieSettings";
 
 interface ProfileMobileProps {
   fontOptions: { value: string; label: string }[];
