@@ -602,6 +602,7 @@ export const ProfileMobile = ({ fontOptions, colorOptions }: ProfileMobileProps)
           <SettingsItem icon={Mail} label="Change Email" onClick={() => setSubPage('email')} color="text-blue-500" bgColor="bg-blue-500/10" />
           <SettingsItem icon={Lock} label="Change Password" onClick={() => setSubPage('password')} color="text-slate-500" bgColor="bg-slate-500/10" />
           <SettingsItem icon={MessageCircle} label="Contact & Feedback" onClick={() => setContactOpen(true)} color="text-teal-500" bgColor="bg-teal-500/10" />
+          <SettingsItem icon={Shield} label="Privacy & Cookies" onClick={() => setSubPage('privacy')} color="text-emerald-500" bgColor="bg-emerald-500/10" />
           {isAdmin && (
             <SettingsItem icon={Shield} label="Admin Panel" onClick={() => navigate("/admin")} color="text-amber-500" bgColor="bg-amber-500/10" />
           )}
