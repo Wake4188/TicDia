@@ -170,9 +170,57 @@ serve(async (req) => {
     try {
       const response = await fetch(feedUrl, {
         signal: controller.signal,
-        redirect: 'follow',
+        redirect: 'manual',
         headers: { 'User-Agent': 'Ticdia RSS Feed Reader/1.0' }
       });
+
+      // If the upstream returned a redirect, validate the target hostname
+      // before following it. This prevents SSRF via public→internal redirects
+      // (e.g. AWS metadata at 169.254.169.254).
+      if (response.status >= 300 && response.status < 400) {
+        const location = response.headers.get('location');
+        if (!location) {
+          return new Response(
+            JSON.stringify({ error: 'Redirect response missing Location header' }),
+            { status: 502, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          );
+        }
+        try {
+          const redirectUrl = new URL(location, feedUrl);
+          if (redirectUrl.protocol !== 'http:' && redirectUrl.protocol !== 'https:') {
+            return new Response(
+              JSON.stringify({ error: 'Redirect to non-HTTP(S) protocol blocked' }),
+              { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+            );
+          }
+          if (isPrivateHostname(redirectUrl.hostname)) {
+            return new Response(
+              JSON.stringify({ error: 'Redirect to private or reserved host blocked' }),
+              { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+            );
+          }
+          // Re-fetch the validated redirect target without following further redirects.
+          const redirectResponse = await fetch(redirectUrl.toString(), {
+            signal: controller.signal,
+            redirect: 'error',
+            headers: { 'User-Agent': 'Ticdia RSS Feed Reader/1.0' }
+          });
+          clearTimeout(timeoutId);
+          if (!redirectResponse.ok) {
+            return new Response(
+              JSON.stringify({ error: 'Failed to fetch RSS feed after redirect' }),
+              { status: 502, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+            );
+          }
+          // Replace response variable scope by re-assigning via processing below.
+          return await processFeedResponse(redirectResponse, source, cacheKey);
+        } catch {
+          return new Response(
+            JSON.stringify({ error: 'Invalid redirect target' }),
+            { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          );
+        }
+      }
       clearTimeout(timeoutId);
 
       if (!response.ok) {
