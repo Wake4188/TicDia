@@ -1104,6 +1104,8 @@ export const ProfileDesktop = ({ fontOptions, colorOptions }: ProfileDesktopProp
                       </Button>
                     </CardContent>
                   </Card>
+
+                  <CookieSettings />
                 </motion.div>
               )}
 
