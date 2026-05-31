@@ -26,6 +26,7 @@ import { SUPPORTED_LANGUAGES } from "@/services/languageConfig";
 import { setWordOfTheDay, getWordOfTheDayRecord } from "@/services/wordOfTheDayService";
 import SmallTic from "@/components/SmallTic";
 import { AnalyticsStats } from "@/components/AnalyticsStats";
+import { CookieSettings } from "@/components/profile/CookieSettings";
 
 interface SavedArticle {
   id: string;
