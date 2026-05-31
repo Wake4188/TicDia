@@ -39,6 +39,7 @@ const AdminPanel = () => {
 
   const tabs = [
     { id: 'dashboard', label: 'Dashboard', icon: BarChart3 },
+    { id: 'messages', label: 'Messages', icon: Inbox },
     { id: 'killswitch', label: 'Kill Switch', icon: Power },
     { id: 'announcements', label: 'Announcements', icon: Megaphone },
     { id: 'curation', label: 'Feed Curation', icon: Layers },
