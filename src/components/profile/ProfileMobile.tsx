@@ -20,13 +20,14 @@ import { useUserPreferences } from "@/contexts/UserPreferencesContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
 import { SUPPORTED_LANGUAGES } from "@/services/languageConfig";
+import { CookieSettings } from "@/components/profile/CookieSettings";
 
 interface ProfileMobileProps {
   fontOptions: { value: string; label: string }[];
   colorOptions: { value: string; label: string; color: string }[];
 }
 
-type SubPage = null | 'saved' | 'analytics' | 'social' | 'language' | 'appearance' | 'email' | 'password' | 'tts';
+type SubPage = null | 'saved' | 'analytics' | 'social' | 'language' | 'appearance' | 'email' | 'password' | 'tts' | 'privacy';
 
 export const ProfileMobile = ({ fontOptions, colorOptions }: ProfileMobileProps) => {
   const { user } = useAuth();
@@ -102,9 +103,11 @@ export const ProfileMobile = ({ fontOptions, colorOptions }: ProfileMobileProps)
     }
     setAvatarUploading(true);
     try {
-      const ext = (file.name.split('.').pop() || 'jpg').toLowerCase();
+      const extMap: Record<string, string> = { 'image/jpeg': 'jpg', 'image/png': 'png', 'image/webp': 'webp' };
+      const ext = extMap[file.type] || 'jpg';
       const path = `${user.id}/avatar.${ext}`;
-      const { error: uploadError } = await supabase.storage.from('avatars').upload(path, file, {
+      const blob = new Blob([await file.arrayBuffer()], { type: file.type });
+      const { error: uploadError } = await supabase.storage.from('avatars').upload(path, blob, {
         upsert: true,
         contentType: file.type,
         cacheControl: '3600',
@@ -368,6 +371,15 @@ export const ProfileMobile = ({ fontOptions, colorOptions }: ProfileMobileProps)
     </div>
   );
 
+  if (subPage === 'privacy') return (
+    <div className="min-h-screen bg-background">
+      <SubPageHeader title="Privacy & Cookies" onBack={() => setSubPage(null)} />
+      <div className="p-4">
+        <CookieSettings />
+      </div>
+    </div>
+  );
+
   if (subPage === 'tts') return (
     <div className="min-h-screen bg-background">
       <SubPageHeader title="TTS Speed" onBack={() => setSubPage(null)} />
@@ -590,6 +602,7 @@ export const ProfileMobile = ({ fontOptions, colorOptions }: ProfileMobileProps)
           <SettingsItem icon={Mail} label="Change Email" onClick={() => setSubPage('email')} color="text-blue-500" bgColor="bg-blue-500/10" />
           <SettingsItem icon={Lock} label="Change Password" onClick={() => setSubPage('password')} color="text-slate-500" bgColor="bg-slate-500/10" />
           <SettingsItem icon={MessageCircle} label="Contact & Feedback" onClick={() => setContactOpen(true)} color="text-teal-500" bgColor="bg-teal-500/10" />
+          <SettingsItem icon={Shield} label="Privacy & Cookies" onClick={() => setSubPage('privacy')} color="text-emerald-500" bgColor="bg-emerald-500/10" />
           {isAdmin && (
             <SettingsItem icon={Shield} label="Admin Panel" onClick={() => navigate("/admin")} color="text-amber-500" bgColor="bg-amber-500/10" />
           )}

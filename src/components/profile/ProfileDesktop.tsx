@@ -26,6 +26,7 @@ import { SUPPORTED_LANGUAGES } from "@/services/languageConfig";
 import { setWordOfTheDay, getWordOfTheDayRecord } from "@/services/wordOfTheDayService";
 import SmallTic from "@/components/SmallTic";
 import { AnalyticsStats } from "@/components/AnalyticsStats";
+import { CookieSettings } from "@/components/profile/CookieSettings";
 
 interface SavedArticle {
   id: string;
@@ -123,9 +124,12 @@ export const ProfileDesktop = ({ fontOptions, colorOptions }: ProfileDesktopProp
     }
     setAvatarUploading(true);
     try {
-      const ext = (file.name.split('.').pop() || 'jpg').toLowerCase();
+      const extMap: Record<string, string> = { 'image/jpeg': 'jpg', 'image/png': 'png', 'image/webp': 'webp' };
+      const ext = extMap[file.type] || 'jpg';
       const path = `${user.id}/avatar.${ext}`;
-      const { error } = await supabase.storage.from('avatars').upload(path, file, {
+      // Wrap as a typed Blob to guarantee the correct Content-Type reaches Supabase Storage
+      const blob = new Blob([await file.arrayBuffer()], { type: file.type });
+      const { error } = await supabase.storage.from('avatars').upload(path, blob, {
         upsert: true,
         contentType: file.type,
         cacheControl: '3600',
@@ -1101,6 +1105,8 @@ export const ProfileDesktop = ({ fontOptions, colorOptions }: ProfileDesktopProp
                       </Button>
                     </CardContent>
                   </Card>
+
+                  <CookieSettings />
                 </motion.div>
               )}
 

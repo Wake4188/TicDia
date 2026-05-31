@@ -8,8 +8,9 @@ import { FeedCurationPanel } from '@/components/admin/FeedCurationPanel';
 import { ContentModerationPanel } from '@/components/admin/ContentModerationPanel';
 import { ContentRulesPanel } from '@/components/admin/ContentRulesPanel';
 import { MetricsDashboard } from '@/components/admin/MetricsDashboard';
+import { MessagesPanel } from '@/components/admin/MessagesPanel';
 import { useAdminCheck } from '@/hooks/useAdminCheck';
-import { Power, Megaphone, Layers, Shield, Ban, BarChart3 } from 'lucide-react';
+import { Power, Megaphone, Layers, Shield, Ban, BarChart3, Inbox } from 'lucide-react';
 
 const AdminPanel = () => {
   const { isAdmin, loading, user } = useAdminCheck();
@@ -38,6 +39,7 @@ const AdminPanel = () => {
 
   const tabs = [
     { id: 'dashboard', label: 'Dashboard', icon: BarChart3 },
+    { id: 'messages', label: 'Messages', icon: Inbox },
     { id: 'killswitch', label: 'Kill Switch', icon: Power },
     { id: 'announcements', label: 'Announcements', icon: Megaphone },
     { id: 'curation', label: 'Feed Curation', icon: Layers },
@@ -63,6 +65,10 @@ const AdminPanel = () => {
 
         <TabsContent value="dashboard" className="space-y-6">
           <MetricsDashboard />
+        </TabsContent>
+
+        <TabsContent value="messages" className="space-y-6">
+          <MessagesPanel />
         </TabsContent>
 
         <TabsContent value="killswitch" className="space-y-6">
