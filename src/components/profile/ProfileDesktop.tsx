@@ -112,6 +112,11 @@ export const ProfileDesktop = ({ fontOptions, colorOptions }: ProfileDesktopProp
   const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file || !user) return;
+    if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
+      toast({ title: "Invalid file type", description: "Only JPEG, PNG, or WebP images are allowed.", variant: "destructive" });
+      if (e.target) e.target.value = '';
+      return;
+    }
     if (file.size > 5 * 1024 * 1024) {
       toast({ title: "File too large", description: "Max size is 5MB", variant: "destructive" });
       return;

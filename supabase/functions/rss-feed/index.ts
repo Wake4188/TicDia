@@ -168,11 +168,55 @@ serve(async (req) => {
     const timeoutId = setTimeout(() => controller.abort(), 10000);
 
     try {
-      const response = await fetch(feedUrl, {
+      let response = await fetch(feedUrl, {
         signal: controller.signal,
-        redirect: 'follow',
+        redirect: 'manual',
         headers: { 'User-Agent': 'Ticdia RSS Feed Reader/1.0' }
       });
+
+      // Manually validate redirects to prevent SSRF via public→internal hops
+      // (e.g. AWS metadata at 169.254.169.254). Follow up to 3 hops.
+      let hops = 0;
+      while (response.status >= 300 && response.status < 400 && hops < 3) {
+        hops++;
+        const location = response.headers.get('location');
+        if (!location) {
+          clearTimeout(timeoutId);
+          return new Response(
+            JSON.stringify({ error: 'Redirect response missing Location header' }),
+            { status: 502, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          );
+        }
+        let redirectUrl: URL;
+        try {
+          redirectUrl = new URL(location, feedUrl);
+        } catch {
+          clearTimeout(timeoutId);
+          return new Response(
+            JSON.stringify({ error: 'Invalid redirect target' }),
+            { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          );
+        }
+        if (redirectUrl.protocol !== 'http:' && redirectUrl.protocol !== 'https:') {
+          clearTimeout(timeoutId);
+          return new Response(
+            JSON.stringify({ error: 'Redirect to non-HTTP(S) protocol blocked' }),
+            { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          );
+        }
+        if (isPrivateHostname(redirectUrl.hostname)) {
+          clearTimeout(timeoutId);
+          return new Response(
+            JSON.stringify({ error: 'Redirect to private or reserved host blocked' }),
+            { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          );
+        }
+        response = await fetch(redirectUrl.toString(), {
+          signal: controller.signal,
+          redirect: 'manual',
+          headers: { 'User-Agent': 'Ticdia RSS Feed Reader/1.0' }
+        });
+      }
       clearTimeout(timeoutId);
 
       if (!response.ok) {
