@@ -27,7 +27,7 @@ interface ProfileMobileProps {
   colorOptions: { value: string; label: string; color: string }[];
 }
 
-type SubPage = null | 'saved' | 'analytics' | 'social' | 'language' | 'appearance' | 'email' | 'password' | 'tts';
+type SubPage = null | 'saved' | 'analytics' | 'social' | 'language' | 'appearance' | 'email' | 'password' | 'tts' | 'privacy';
 
 export const ProfileMobile = ({ fontOptions, colorOptions }: ProfileMobileProps) => {
   const { user } = useAuth();
