@@ -8,8 +8,9 @@ import { FeedCurationPanel } from '@/components/admin/FeedCurationPanel';
 import { ContentModerationPanel } from '@/components/admin/ContentModerationPanel';
 import { ContentRulesPanel } from '@/components/admin/ContentRulesPanel';
 import { MetricsDashboard } from '@/components/admin/MetricsDashboard';
+import { MessagesPanel } from '@/components/admin/MessagesPanel';
 import { useAdminCheck } from '@/hooks/useAdminCheck';
-import { Power, Megaphone, Layers, Shield, Ban, BarChart3 } from 'lucide-react';
+import { Power, Megaphone, Layers, Shield, Ban, BarChart3, Inbox } from 'lucide-react';
 
 const AdminPanel = () => {
   const { isAdmin, loading, user } = useAdminCheck();
