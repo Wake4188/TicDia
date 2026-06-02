@@ -8,11 +8,8 @@ const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiO
 // Import the supabase client like this:
 // import { supabase } from "@/integrations/supabase/client";
 
-export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
-    global: {
-        headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json',
-        },
-    },
-});
+// NOTE: Do NOT set a global Content-Type header here. The Supabase JS client
+// reuses these headers for every transport, including Storage uploads — forcing
+// `Content-Type: application/json` corrupts the MIME of uploaded files
+// (e.g. avatars become `application/json` instead of `image/png`).
+export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
