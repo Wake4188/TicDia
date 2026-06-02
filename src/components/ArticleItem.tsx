@@ -1,4 +1,4 @@
-import React, { useState, useCallback, lazy, Suspense } from "react";
+import React, { useState, useCallback, lazy, Suspense, startTransition } from "react";
 import { Sparkles } from "lucide-react";
 import { Progress } from "./ui/progress";
 import { UserPreferences } from "@/services/userPreferencesService";
@@ -41,12 +41,14 @@ const ArticleItem = ({
 
   const handleSwipeRight = useCallback(() => {
     if (isCurrent) {
-      setShowSmartLinks(true);
+      // Defer the lazy SmartLinks mount so the gesture handler returns
+      // immediately — keeps INP well under 200ms.
+      startTransition(() => setShowSmartLinks(true));
     }
   }, [isCurrent]);
 
   const handleSwipeLeft = useCallback(() => {
-    setShowSmartLinks(false);
+    startTransition(() => setShowSmartLinks(false));
   }, []);
 
   const swipeHandlers = useSwipeGesture({
