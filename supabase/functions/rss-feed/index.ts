@@ -1,5 +1,6 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.3'
+import { DOMParser } from 'https://deno.land/x/deno_dom@v0.1.45/deno-dom-wasm.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -171,7 +172,10 @@ serve(async (req) => {
       let response = await fetch(feedUrl, {
         signal: controller.signal,
         redirect: 'manual',
-        headers: { 'User-Agent': 'Ticdia RSS Feed Reader/1.0' }
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (compatible; TicdiaRSS/1.0; +https://ticdia.lovable.app)',
+          'Accept': 'application/rss+xml, application/atom+xml, application/xml, text/xml;q=0.9, */*;q=0.5',
+        },
       });
 
       // Manually validate redirects to prevent SSRF via public→internal hops
@@ -214,7 +218,10 @@ serve(async (req) => {
         response = await fetch(redirectUrl.toString(), {
           signal: controller.signal,
           redirect: 'manual',
-          headers: { 'User-Agent': 'Ticdia RSS Feed Reader/1.0' }
+          headers: {
+            'User-Agent': 'Mozilla/5.0 (compatible; TicdiaRSS/1.0; +https://ticdia.lovable.app)',
+            'Accept': 'application/rss+xml, application/atom+xml, application/xml, text/xml;q=0.9, */*;q=0.5',
+          },
         });
       }
       clearTimeout(timeoutId);
@@ -297,8 +304,9 @@ serve(async (req) => {
     }
 
   } catch (error) {
+    console.error('rss-feed unexpected error:', error);
     return new Response(
-      JSON.stringify({ error: 'Failed to fetch RSS feed' }),
+      JSON.stringify({ error: 'Failed to fetch RSS feed', detail: (error as Error)?.message }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }
