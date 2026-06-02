@@ -235,7 +235,15 @@ serve(async (req) => {
 
       const xmlText = await response.text();
       const parser = new DOMParser();
-      const xmlDoc = parser.parseFromString(xmlText, 'application/xml');
+      // deno_dom only implements text/html. Parse RSS/Atom as HTML — the parser
+      // is lenient and lowercases tag names, which works for our extraction.
+      const xmlDoc = parser.parseFromString(xmlText, 'text/html');
+      if (!xmlDoc) {
+        return new Response(
+          JSON.stringify({ error: 'Failed to parse feed' }),
+          { status: 502, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
 
       const items = Array.from(xmlDoc.querySelectorAll('item, entry')).slice(0, 15);
       const articles: RSSArticle[] = [];
