@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { memo, useEffect, useMemo, useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { getUserAnalytics, UserAnalytics, getDaysSinceFirstVisit } from "@/services/analyticsService";
@@ -7,16 +7,11 @@ import {
   BookOpen, Flame, Clock, Footprints, CalendarDays,
   Headphones, Sparkles, TrendingUp, Tag, BarChart3
 } from "lucide-react";
-import { motion } from "framer-motion";
-import {
-  Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip, CartesianGrid,
-} from "recharts";
 import { Skeleton } from "@/components/ui/skeleton";
 
 /**
- * Reading insights — real data only, no random/mocked fallbacks.
- * Designed to match the TicDia aesthetic: newspaper headers, glass cards,
- * honest empty states instead of fabricated values.
+ * Reading insights — "Snow Panther" build.
+ * Zero recharts, zero framer-motion. Pure CSS bars. Memoized. Fast.
  */
 
 const DAY_ORDER = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
@@ -30,13 +25,59 @@ const formatDuration = (seconds: number) => {
 };
 
 const formatDistance = (px: number) => {
-  // ~3779 px per meter at standard 96 DPI is wildly device-dependent, so we
-  // present a simple km-ish figure (px / 1000) — same convention as before but
-  // clearly labelled.
   const km = (px || 0) / 1000;
   if (km >= 1) return `${km.toFixed(1)} km`;
   return `${Math.round(px || 0)} px`;
 };
+
+type WeekDatum = { day: string; fullDay: string; articles: number };
+
+const WeeklyBars = memo(({ data }: { data: WeekDatum[] }) => {
+  const max = Math.max(1, ...data.map((d) => d.articles));
+  return (
+    <div className="h-[220px] w-full flex items-end justify-between gap-2 px-1">
+      {data.map((d) => {
+        const pct = (d.articles / max) * 100;
+        return (
+          <div key={d.fullDay} className="flex-1 flex flex-col items-center gap-2 h-full">
+            <div className="relative w-full flex-1 flex items-end">
+              <div
+                className="w-full rounded-t-md bg-primary/80 hover:bg-primary transition-colors"
+                style={{ height: `${Math.max(pct, 2)}%` }}
+                title={`${d.fullDay}: ${d.articles} article${d.articles === 1 ? "" : "s"}`}
+              />
+              {d.articles > 0 && (
+                <span className="absolute -top-5 left-1/2 -translate-x-1/2 text-[10px] text-muted-foreground tabular-nums">
+                  {d.articles}
+                </span>
+              )}
+            </div>
+            <span className="text-[11px] text-muted-foreground">{d.day}</span>
+          </div>
+        );
+      })}
+    </div>
+  );
+});
+WeeklyBars.displayName = "WeeklyBars";
+
+const StatTile = memo(({ icon: Icon, value, label, accent }: {
+  icon: any; value: string; label: string; accent?: boolean;
+}) => (
+  <Card className="bg-card/60 backdrop-blur-sm border-border/50 h-full">
+    <CardContent className="p-4 space-y-3">
+      <div className="flex items-center justify-between">
+        <Icon className={`w-4 h-4 ${accent ? "text-primary" : "text-muted-foreground"}`} />
+        {accent ? <span className="w-2 h-2 rounded-full bg-primary" /> : null}
+      </div>
+      <div>
+        <div className="text-2xl font-semibold text-foreground tracking-tight">{value}</div>
+        <div className="text-[11px] uppercase tracking-wide text-muted-foreground mt-0.5">{label}</div>
+      </div>
+    </CardContent>
+  </Card>
+));
+StatTile.displayName = "StatTile";
 
 export const AnalyticsStats = () => {
   const { user } = useAuth();
@@ -45,16 +86,18 @@ export const AnalyticsStats = () => {
 
   useEffect(() => {
     if (!user) { setLoading(false); return; }
+    let cancelled = false;
     (async () => {
       try {
         const data = await getUserAnalytics(user.id);
-        setAnalytics(data);
+        if (!cancelled) setAnalytics(data);
       } catch (err) {
         console.error("Failed to load analytics:", err);
       } finally {
-        setLoading(false);
+        if (!cancelled) setLoading(false);
       }
     })();
+    return () => { cancelled = true; };
   }, [user]);
 
   const derived = useMemo(() => {
@@ -63,7 +106,7 @@ export const AnalyticsStats = () => {
       ? Math.max(1, getDaysSinceFirstVisit(analytics.first_visit_date))
       : 1;
     const articlesPerDay = analytics.articles_viewed / daysActive;
-    const weekData = DAY_ORDER.map((day) => ({
+    const weekData: WeekDatum[] = DAY_ORDER.map((day) => ({
       day: day.slice(0, 3),
       fullDay: day,
       articles: Number(analytics.daily_activity?.[day] || 0),
@@ -113,23 +156,8 @@ export const AnalyticsStats = () => {
   const a = analytics;
   const d = derived!;
 
-  const heroStats = [
-    { label: "Articles read", value: a.articles_viewed.toLocaleString(), icon: BookOpen },
-    { label: "Days with TicDia", value: d.daysActive.toLocaleString(), icon: CalendarDays },
-    { label: "Current streak", value: `${a.current_scroll_streak}d`, icon: Flame, accent: a.current_scroll_streak > 0 },
-    { label: "Listening time", value: formatDuration(a.total_audio_time || 0), icon: Headphones },
-  ];
-
-  const secondaryStats = [
-    { label: "Longest streak", value: `${a.longest_scroll_streak} days`, icon: TrendingUp },
-    { label: "Per day average", value: d.articlesPerDay.toFixed(1), icon: Sparkles },
-    { label: "Audio articles", value: (a.audio_articles_listened || 0).toLocaleString(), icon: Headphones },
-    { label: "Distance scrolled", value: formatDistance(a.total_scroll_distance), icon: Footprints },
-  ];
-
   return (
     <div className="space-y-6">
-      {/* Header */}
       <div className="space-y-1">
         <h2 className="font-newspaper text-3xl text-foreground">Your reading life</h2>
         <p className="text-sm text-muted-foreground">
@@ -138,149 +166,90 @@ export const AnalyticsStats = () => {
         </p>
       </div>
 
-      {/* Hero stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        {heroStats.map((s, i) => (
-          <motion.div
-            key={s.label}
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: i * 0.04, ease: "easeOut" }}
-          >
-            <Card className="bg-card/60 backdrop-blur-sm border-border/50 h-full">
-              <CardContent className="p-4 space-y-3">
-                <div className="flex items-center justify-between">
-                  <s.icon className={`w-4 h-4 ${s.accent ? "text-primary" : "text-muted-foreground"}`} />
-                  {s.accent ? <span className="w-2 h-2 rounded-full bg-primary animate-pulse" /> : null}
-                </div>
-                <div>
-                  <div className="text-2xl font-semibold text-foreground tracking-tight">{s.value}</div>
-                  <div className="text-[11px] uppercase tracking-wide text-muted-foreground mt-0.5">{s.label}</div>
-                </div>
-              </CardContent>
-            </Card>
-          </motion.div>
-        ))}
+        <StatTile icon={BookOpen} value={a.articles_viewed.toLocaleString()} label="Articles read" />
+        <StatTile icon={CalendarDays} value={d.daysActive.toLocaleString()} label="Days with TicDia" />
+        <StatTile icon={Flame} value={`${a.current_scroll_streak}d`} label="Current streak" accent={a.current_scroll_streak > 0} />
+        <StatTile icon={Headphones} value={formatDuration(a.total_audio_time || 0)} label="Listening time" />
       </div>
 
-      {/* Weekly chart + topics */}
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
-        <motion.div
-          className="lg:col-span-3"
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2, ease: "easeOut" }}
-        >
-          <Card className="bg-card/60 backdrop-blur-sm border-border/50 h-full">
-            <CardHeader className="pb-2">
-              <CardTitle className="font-newspaper text-xl flex items-center gap-2">
-                <BarChart3 className="w-4 h-4 text-primary" />
-                This week
-              </CardTitle>
-              <CardDescription>
-                {d.totalWeek > 0
-                  ? `${d.totalWeek} article${d.totalWeek === 1 ? "" : "s"} · busiest on ${d.bestDay.fullDay}`
-                  : "No reading activity recorded this week yet."}
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="h-[240px]">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={d.weekData} margin={{ top: 10, right: 8, left: -16, bottom: 0 }}>
-                    <CartesianGrid vertical={false} strokeDasharray="3 3" className="stroke-border/40" />
-                    <XAxis dataKey="day" tickLine={false} axisLine={false} tickMargin={8}
-                      tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }} />
-                    <YAxis tickLine={false} axisLine={false} allowDecimals={false}
-                      tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }} width={28} />
-                    <Tooltip
-                      cursor={{ fill: "hsl(var(--muted) / 0.3)" }}
-                      content={({ active, payload }) => {
-                        if (!active || !payload?.length) return null;
-                        const p: any = payload[0].payload;
-                        return (
-                          <div className="bg-popover border border-border rounded-md px-3 py-2 shadow-md text-xs">
-                            <div className="font-medium text-popover-foreground">{p.fullDay}</div>
-                            <div className="text-muted-foreground">{p.articles} article{p.articles === 1 ? "" : "s"}</div>
-                          </div>
-                        );
-                      }}
-                    />
-                    <Bar dataKey="articles" fill="hsl(var(--primary))" radius={[6, 6, 0, 0]} maxBarSize={40} />
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-            </CardContent>
-          </Card>
-        </motion.div>
-
-        <motion.div
-          className="lg:col-span-2"
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.25, ease: "easeOut" }}
-        >
-          <Card className="bg-card/60 backdrop-blur-sm border-border/50 h-full">
-            <CardHeader className="pb-2">
-              <CardTitle className="font-newspaper text-xl flex items-center gap-2">
-                <Tag className="w-4 h-4 text-primary" />
-                Topics you explore
-              </CardTitle>
-              <CardDescription>
-                {d.topics.length > 0
-                  ? `${d.topics.length} unique topic${d.topics.length === 1 ? "" : "s"} encountered`
-                  : "Tagged articles will appear here as you read."}
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              {d.topics.length > 0 ? (
-                <div className="flex flex-wrap gap-2">
-                  {d.topics.slice(0, 20).map((topic) => (
-                    <Badge key={topic} variant="secondary" className="text-xs font-normal">
-                      {topic}
-                    </Badge>
-                  ))}
-                </div>
-              ) : (
-                <div className="text-sm text-muted-foreground py-8 text-center">
-                  Read a few more articles to build your topic map.
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </motion.div>
-      </div>
-
-      {/* Secondary stats */}
-      <motion.div
-        initial={{ opacity: 0, y: 12 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.3, ease: "easeOut" }}
-      >
-        <Card className="bg-card/60 backdrop-blur-sm border-border/50">
+        <Card className="bg-card/60 backdrop-blur-sm border-border/50 h-full lg:col-span-3">
           <CardHeader className="pb-2">
             <CardTitle className="font-newspaper text-xl flex items-center gap-2">
-              <Clock className="w-4 h-4 text-primary" />
-              Reading habits
+              <BarChart3 className="w-4 h-4 text-primary" />
+              This week
             </CardTitle>
-            <CardDescription>The longer view of your time on TicDia.</CardDescription>
+            <CardDescription>
+              {d.totalWeek > 0
+                ? `${d.totalWeek.toLocaleString()} article${d.totalWeek === 1 ? "" : "s"} · busiest on ${d.bestDay.fullDay}`
+                : "No reading activity recorded this week yet."}
+            </CardDescription>
           </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-              {secondaryStats.map((s) => (
-                <div key={s.label} className="flex items-start gap-3">
-                  <div className="p-2 rounded-md bg-muted/40 border border-border/40">
-                    <s.icon className="w-4 h-4 text-muted-foreground" />
-                  </div>
-                  <div className="min-w-0">
-                    <div className="text-lg font-semibold text-foreground truncate">{s.value}</div>
-                    <div className="text-[11px] uppercase tracking-wide text-muted-foreground">{s.label}</div>
-                  </div>
-                </div>
-              ))}
-            </div>
+          <CardContent className="pt-4">
+            <WeeklyBars data={d.weekData} />
           </CardContent>
         </Card>
-      </motion.div>
+
+        <Card className="bg-card/60 backdrop-blur-sm border-border/50 h-full lg:col-span-2">
+          <CardHeader className="pb-2">
+            <CardTitle className="font-newspaper text-xl flex items-center gap-2">
+              <Tag className="w-4 h-4 text-primary" />
+              Topics you explore
+            </CardTitle>
+            <CardDescription>
+              {d.topics.length > 0
+                ? `${d.topics.length} unique topic${d.topics.length === 1 ? "" : "s"} encountered`
+                : "Tagged articles will appear here as you read."}
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            {d.topics.length > 0 ? (
+              <div className="flex flex-wrap gap-2">
+                {d.topics.slice(0, 20).map((topic) => (
+                  <Badge key={topic} variant="secondary" className="text-xs font-normal">
+                    {topic}
+                  </Badge>
+                ))}
+              </div>
+            ) : (
+              <div className="text-sm text-muted-foreground py-8 text-center">
+                Read a few more articles to build your topic map.
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+
+      <Card className="bg-card/60 backdrop-blur-sm border-border/50">
+        <CardHeader className="pb-2">
+          <CardTitle className="font-newspaper text-xl flex items-center gap-2">
+            <Clock className="w-4 h-4 text-primary" />
+            Reading habits
+          </CardTitle>
+          <CardDescription>The longer view of your time on TicDia.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            {[
+              { label: "Longest streak", value: `${a.longest_scroll_streak} days`, icon: TrendingUp },
+              { label: "Per day average", value: d.articlesPerDay.toFixed(1), icon: Sparkles },
+              { label: "Audio articles", value: (a.audio_articles_listened || 0).toLocaleString(), icon: Headphones },
+              { label: "Distance scrolled", value: formatDistance(a.total_scroll_distance), icon: Footprints },
+            ].map((s) => (
+              <div key={s.label} className="flex items-start gap-3">
+                <div className="p-2 rounded-md bg-muted/40 border border-border/40">
+                  <s.icon className="w-4 h-4 text-muted-foreground" />
+                </div>
+                <div className="min-w-0">
+                  <div className="text-lg font-semibold text-foreground truncate">{s.value}</div>
+                  <div className="text-[11px] uppercase tracking-wide text-muted-foreground">{s.label}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
 
       <p className="text-[11px] text-muted-foreground/70 text-center">
         Stats are stored privately under your account and never shared with third parties.
