@@ -44,7 +44,7 @@ export const fetchWikipediaContent = async (titles: string[], language: Language
       action: 'query',
       format: 'json',
       origin: '*',
-      prop: 'extracts|pageimages|categories|links|images|info',
+      prop: 'extracts|pageimages|categories|info',
       titles: titlesString,
       exintro: '1',
       explaintext: '1',

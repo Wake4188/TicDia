@@ -1,6 +1,5 @@
 
 import { WikipediaPage, WikipediaArticle } from './types';
-import { getPageViews } from './wikipediaApi';
 import { getArticleImage } from './imageService';
 import { Language } from './languageConfig';
 
@@ -85,16 +84,10 @@ export const transformToArticle = async (
     return null;
   }
 
-  // Fetch pageviews in background - don't block article loading
-  // Use a random estimate initially for instant display, then update async
+  // Use an estimated view count for instant display (Wikimedia pageview API
+  // round-trips were previously fired N times and the result discarded — that
+  // background load is now removed).
   const estimatedViews = Math.floor(Math.random() * 50000) + 1000;
-  
-  // Start async pageview fetch but don't await it for initial load
-  getPageViews(page.title, language).then(views => {
-    // Views will be available for subsequent renders
-  }).catch(() => {
-    // Silently fail - views are not critical
-  });
   
   return {
     id: page.pageid,

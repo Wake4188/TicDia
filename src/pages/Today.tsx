@@ -182,31 +182,7 @@ const Today = () => {
   const handleOpenFull = (title: string) => {
     navigate(`/?q=${encodeURIComponent(title)}`);
   };
-  const containerVariants = {
-    hidden: {
-      opacity: 0
-    },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.1
-      }
-    }
-  };
-  const itemVariants = {
-    hidden: {
-      y: 20,
-      opacity: 0
-    },
-    visible: {
-      y: 0,
-      opacity: 1,
-      transition: {
-        type: "spring",
-        stiffness: 100
-      }
-    }
-  };
+  // Variants live below at module scope (TODAY_CONTAINER_VARIANTS / TODAY_ITEM_VARIANTS)
   return <div className="min-h-screen bg-background text-foreground pt-20 pb-10 overflow-x-hidden">
       <SEO title="Today on TicDia — Daily picks" description="Today's curated Wikipedia articles, hand-picked to keep you learning every day." path="/today" />
       {/* Gradient background matching profile design */}

@@ -98,21 +98,30 @@ export const useImprovedArticleIntersection = ({
     }
   }, [articles.length]); // Only articles.length dependency now!
 
+  // Use a ref to track which elements are already observed so that infinite-
+  // scroll loads only observe NEW article sections (was O(n) every load).
+  const observedElements = useRef<WeakSet<Element>>(new WeakSet());
+
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
 
     const observer = new IntersectionObserver(handleIntersection, {
-      threshold: [0.5, 0.9], // Reduced from 3 thresholds to 2 for better performance
+      threshold: [0.5, 0.9],
       root: null,
     });
 
     const articleElements = container.querySelectorAll(".article-section");
-    articleElements.forEach((article) => observer.observe(article));
+    articleElements.forEach((article) => {
+      if (!observedElements.current.has(article)) {
+        observer.observe(article);
+        observedElements.current.add(article);
+      }
+    });
 
     return () => {
-      articleElements.forEach((article) => observer.unobserve(article));
-      // Clean up all timers
+      observer.disconnect();
+      observedElements.current = new WeakSet();
       viewTimers.current.forEach(timer => clearTimeout(timer));
       viewTimers.current.clear();
     };

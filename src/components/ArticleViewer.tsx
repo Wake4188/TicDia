@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { memo, useEffect, useState } from "react";
 import ArticleItem from "./ArticleItem";
 import ArticleLoadingState from "./ArticleLoadingState";
 import { useArticleManagement } from "../hooks/useArticleManagement";
@@ -95,4 +95,4 @@ const ArticleViewer = ({ articles, onArticleChange, onArticleView }: ArticleView
   );
 };
 
-export default ArticleViewer;
+export default memo(ArticleViewer);

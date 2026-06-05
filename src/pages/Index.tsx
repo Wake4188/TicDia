@@ -8,7 +8,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { useLanguage } from "../contexts/LanguageContext";
 import { useAnalyticsTracking } from "../hooks/useAnalyticsTracking";
 import { useChallengeTracking } from "../hooks/useChallengeTracking";
-import { AnalyticsCheck } from "../components/AnalyticsCheck";
+const AnalyticsCheck = lazy(() => import("../components/AnalyticsCheck").then(m => ({ default: m.AnalyticsCheck })));
 import { useUserPreferences } from "../contexts/UserPreferencesContext";
 import { useAuth } from "../contexts/AuthContext";
 
@@ -236,7 +236,7 @@ const Index = () => {
         path="/"
         type="website"
       />
-      <AnalyticsCheck />
+      <Suspense fallback={null}><AnalyticsCheck /></Suspense>
       <Suspense fallback={null}>
         <Navigation currentArticle={currentDisplayArticle} />
       </Suspense>

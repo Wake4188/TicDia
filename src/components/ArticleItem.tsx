@@ -1,16 +1,17 @@
-import React, { useState, useCallback, lazy, Suspense, startTransition } from "react";
+import React, { useState, useCallback, useMemo, lazy, Suspense, startTransition } from "react";
 import { Sparkles } from "lucide-react";
 import { Progress } from "./ui/progress";
 import { UserPreferences } from "@/services/userPreferencesService";
 import InlineAudioButton from "./InlineAudioButton";
 import { useAuth } from "@/contexts/AuthContext";
-import { ExportMenu } from "./ExportMenu";
 import HighlightedText from "./HighlightedText";
 import { useSwipeGesture } from "@/hooks/useSwipeGesture";
 import { useNavigate } from "react-router-dom";
 
-// Lazy load SmartLinks to reduce initial bundle
+// Lazy load SmartLinks AND ExportMenu — ExportMenu pulls in jsPDF+html2canvas
+// transitively via exportService; keep them out of the home-page bundle.
 const SmartLinks = lazy(() => import("./SmartLinks"));
+const ExportMenu = lazy(() => import("./ExportMenu").then(m => ({ default: m.ExportMenu })));
 
 interface ArticleItemProps {
   article: any;
@@ -56,10 +57,18 @@ const ArticleItem = ({
     onSwipeLeft: handleSwipeLeft,
   });
 
-  const handleNavigateToArticle = (title: string) => {
+  const handleNavigateToArticle = useCallback((title: string) => {
     setShowSmartLinks(false);
     navigate(`/?q=${encodeURIComponent(title)}`);
-  };
+  }, [navigate]);
+
+  const exportArticle = useMemo(() => ({
+    id: article.id?.toString() || article.title,
+    title: article.title,
+    content: article.content,
+    image: article.image,
+    url: article.url,
+  }), [article.id, article.title, article.content, article.image, article.url]);
 
   return (
     <div
@@ -122,16 +131,12 @@ const ArticleItem = ({
         />
       </div>
 
-      {/* Export Menu - positioned in top-right corner */}
+      {/* Export Menu - lazy-loaded to keep PDF deps out of initial bundle */}
       {isCurrent && (
         <div className="absolute top-20 right-4 z-20">
-          <ExportMenu article={{
-            id: article.id?.toString() || article.title,
-            title: article.title,
-            content: article.content,
-            image: article.image,
-            url: article.url
-          }} />
+          <Suspense fallback={null}>
+            <ExportMenu article={exportArticle} />
+          </Suspense>
         </div>
       )}
 
