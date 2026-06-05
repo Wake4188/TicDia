@@ -222,6 +222,11 @@ const NewsFeedCards = () => {
     badgeBg: 'bg-amber-500/10 border-amber-500/20',
   }), [customFeed.label]);
 
+  const refreshCustom = useCallback(() => {
+    // loadCustom is defined below; reference via closure on customFeed only
+    loadCustomRef.current?.(customFeed);
+  }, [customFeed]);
+
   const loadNyt = async () => {
     setLoadingNyt(true);
     try {
