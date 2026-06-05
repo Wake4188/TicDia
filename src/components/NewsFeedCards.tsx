@@ -324,7 +324,7 @@ const NewsFeedCards = () => {
           source={customSource}
           articles={custom}
           loading={loadingCustom}
-          onRefresh={() => loadCustom(customFeed)}
+          onRefresh={useCallback(() => loadCustom(customFeed), [customFeed])}
           onEdit={openEditor}
         />
       </div>
