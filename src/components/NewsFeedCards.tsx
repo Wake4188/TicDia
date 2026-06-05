@@ -222,11 +222,6 @@ const NewsFeedCards = () => {
     badgeBg: 'bg-amber-500/10 border-amber-500/20',
   }), [customFeed.label]);
 
-  const refreshCustom = useCallback(() => {
-    // loadCustom is defined below; reference via closure on customFeed only
-    loadCustomRef.current?.(customFeed);
-  }, [customFeed]);
-
   const loadNyt = async () => {
     setLoadingNyt(true);
     try {
@@ -275,6 +270,8 @@ const NewsFeedCards = () => {
       setLoadingCustom(false);
     }
   };
+
+  const refreshCustom = useCallback(() => loadCustom(customFeed), [customFeed]);
 
   useEffect(() => {
     loadNyt();
@@ -329,7 +326,7 @@ const NewsFeedCards = () => {
           source={customSource}
           articles={custom}
           loading={loadingCustom}
-          onRefresh={useCallback(() => loadCustom(customFeed), [customFeed])}
+          onRefresh={refreshCustom}
           onEdit={openEditor}
         />
       </div>
