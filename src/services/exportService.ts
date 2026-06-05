@@ -1,5 +1,6 @@
-import jsPDF from 'jspdf';
-import html2canvas from 'html2canvas';
+// jsPDF and html2canvas are loaded lazily inside exportToPDF to keep them
+// out of the initial bundle (~360KB gzip combined).
+type JsPDFInstance = InstanceType<typeof import('jspdf').default>;
 import { fetchTTSBlob } from './textToSpeechService';
 
 export interface Article {
