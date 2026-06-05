@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { memo, useEffect, useMemo, useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { getUserAnalytics, UserAnalytics, getDaysSinceFirstVisit } from "@/services/analyticsService";
@@ -7,10 +7,6 @@ import {
   BookOpen, Flame, Clock, Footprints, CalendarDays,
   Headphones, Sparkles, TrendingUp, Tag, BarChart3
 } from "lucide-react";
-import { motion } from "framer-motion";
-import {
-  Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip, CartesianGrid,
-} from "recharts";
 import { Skeleton } from "@/components/ui/skeleton";
 
 /**
