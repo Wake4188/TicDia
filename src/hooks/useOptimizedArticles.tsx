@@ -13,16 +13,16 @@ export const useOptimizedArticles = ({
   initialCount = 2 
 }: UseOptimizedArticlesOptions = {}) => {
   const { currentLanguage, isLoading: languageLoading } = useLanguage();
-  const { userPreferences } = useUserPreferences();
+  const { userPreferences: { allowAdultContent } } = useUserPreferences();
 
   return useQuery({
-    queryKey: ['articles', searchQuery, currentLanguage.code, initialCount, userPreferences.allowAdultContent],
+    queryKey: ['articles', searchQuery, currentLanguage.code, initialCount, allowAdultContent],
     queryFn: async () => {
       if (searchQuery) {
-        const results = await searchArticles(searchQuery, currentLanguage, userPreferences.allowAdultContent);
+        const results = await searchArticles(searchQuery, currentLanguage, allowAdultContent);
         return results.slice(0, initialCount);
       }
-      return getRandomArticles(initialCount, undefined, currentLanguage, userPreferences.allowAdultContent);
+      return getRandomArticles(initialCount, undefined, currentLanguage, allowAdultContent);
     },
     enabled: !languageLoading,
     staleTime: 10 * 60 * 1000, // 10 minutes

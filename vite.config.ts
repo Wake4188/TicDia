@@ -98,9 +98,28 @@ export default defineConfig(({ mode }) => ({
           if (id.includes('@tanstack')) {
             return 'query';
           }
-          // UI components - can load after initial render
-          if (id.includes('@radix-ui') || id.includes('lucide-react')) {
-            return 'ui';
+          // Charts (recharts/d3) — lazy admin only
+          if (id.includes('recharts') || id.includes('victory') || id.includes('d3-')) {
+            return 'charts';
+          }
+          // 3D — never on critical path
+          if (id.includes('three') || id.includes('@react-three')) {
+            return 'three';
+          }
+          // Maps — only weather page
+          if (id.includes('leaflet')) {
+            return 'maps';
+          }
+          // PDF export — only ExportMenu (now lazy)
+          if (id.includes('html2canvas') || id.includes('jspdf')) {
+            return 'export';
+          }
+          // Icons — separate cache lane from radix primitives
+          if (id.includes('lucide-react')) {
+            return 'icons';
+          }
+          if (id.includes('@radix-ui')) {
+            return 'radix';
           }
         },
       },
@@ -112,5 +131,10 @@ export default defineConfig(({ mode }) => ({
     minify: 'esbuild',
 
     chunkSizeWarningLimit: 1000,
+  },
+
+  // Strip console.* and debugger statements in production builds
+  esbuild: {
+    drop: mode === 'production' ? ['console', 'debugger'] : [],
   },
 }));

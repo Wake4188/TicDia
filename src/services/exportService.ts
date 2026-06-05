@@ -1,5 +1,5 @@
-import jsPDF from 'jspdf';
-import html2canvas from 'html2canvas';
+// jsPDF and html2canvas are loaded lazily inside exportToPDF to keep them
+// out of the initial bundle (~360KB gzip combined).
 import { fetchTTSBlob } from './textToSpeechService';
 
 export interface Article {
@@ -15,6 +15,7 @@ export interface Article {
  */
 export const exportToPDF = async (article: Article, includeImage: boolean = true): Promise<void> => {
     try {
+        const { default: jsPDF } = await import('jspdf');
         const pdf = new jsPDF('p', 'mm', 'a4');
         const pageWidth = pdf.internal.pageSize.getWidth();
         const pageHeight = pdf.internal.pageSize.getHeight();

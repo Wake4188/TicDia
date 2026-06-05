@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { createUserAnalytics, getUserAnalytics, incrementArticleView, updateScrollDistance } from '@/services/analyticsService';
 
@@ -43,7 +43,7 @@ export const useAnalyticsTracking = () => {
     };
 
     const throttledScroll = throttle(handleScroll, 100);
-    window.addEventListener('scroll', throttledScroll);
+    window.addEventListener('scroll', throttledScroll, { passive: true });
 
     return () => {
       window.removeEventListener('scroll', throttledScroll);
@@ -54,10 +54,10 @@ export const useAnalyticsTracking = () => {
     };
   }, [user]);
 
-  const trackArticleView = (articleTags?: string[]) => {
+  const trackArticleView = useCallback((articleTags?: string[]) => {
     if (!user) return;
     incrementArticleView(user.id, articleTags);
-  };
+  }, [user]);
 
   return {
     trackArticleView

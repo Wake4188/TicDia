@@ -1,4 +1,4 @@
-import { useState, useEffect, memo } from "react";
+import { useState, useEffect, useCallback, useMemo, memo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ExternalLink, Calendar, RefreshCw, Settings2, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -39,6 +39,9 @@ const STATIC_SOURCES: FeedSource[] = [
   { id: 'nyt', label: 'New York Times', accent: 'text-rose-400', badgeBg: 'bg-rose-500/10 border-rose-500/20' },
   { id: 'bbc', label: 'BBC World',      accent: 'text-red-400',  badgeBg: 'bg-red-500/10 border-red-500/20' },
 ];
+
+// Skeleton row template — allocated once at module scope
+const SKELETON_ITEMS = Array.from({ length: 5 });
 
 // Default custom slot = France Info (preserves prior behavior)
 const DEFAULT_CUSTOM = {
@@ -141,7 +144,7 @@ const FeedColumn = memo(({ source, articles, loading, onRefresh, onEdit }: FeedC
         <ScrollArea className="h-full">
           <ul className="divide-y divide-border/30">
             {loading && articles.length === 0
-              ? Array.from({ length: 5 }).map((_, i) => (
+              ? SKELETON_ITEMS.map((_, i) => (
                   <li key={i} className="p-3 animate-pulse">
                     <div className="h-3 bg-muted rounded w-3/4 mb-2" />
                     <div className="h-2 bg-muted rounded w-1/2" />
@@ -212,12 +215,12 @@ const NewsFeedCards = () => {
   const [draftUrl, setDraftUrl] = useState(customFeed.url);
   const [draftLabel, setDraftLabel] = useState(customFeed.label);
 
-  const customSource: FeedSource = {
+  const customSource = useMemo<FeedSource>(() => ({
     id: 'custom',
     label: customFeed.label || 'Custom Feed',
     accent: 'text-amber-400',
     badgeBg: 'bg-amber-500/10 border-amber-500/20',
-  };
+  }), [customFeed.label]);
 
   const loadNyt = async () => {
     setLoadingNyt(true);
@@ -267,6 +270,8 @@ const NewsFeedCards = () => {
       setLoadingCustom(false);
     }
   };
+
+  const refreshCustom = useCallback(() => loadCustom(customFeed), [customFeed]);
 
   useEffect(() => {
     loadNyt();
@@ -321,7 +326,7 @@ const NewsFeedCards = () => {
           source={customSource}
           articles={custom}
           loading={loadingCustom}
-          onRefresh={() => loadCustom(customFeed)}
+          onRefresh={refreshCustom}
           onEdit={openEditor}
         />
       </div>
