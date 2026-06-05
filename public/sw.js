@@ -1,11 +1,12 @@
 // Service Worker for caching and offline functionality
-const CACHE_NAME = 'wikitok-v2';
-const STATIC_CACHE = 'static-v2';
+const CACHE_NAME = 'ticdia-v3';
+const STATIC_CACHE = 'ticdia-static-v3';
+const ASSET_CACHE = 'ticdia-assets-v3';
 
 // Files to cache immediately
 const STATIC_ASSETS = [
   '/manifest.json',
-  '/favicon.ico'
+  '/favicon.ico',
 ];
 
 // API endpoints to cache with stale-while-revalidate strategy
@@ -14,10 +15,9 @@ const API_CACHE_PATTERNS = [
   /\/api\/tts/,
   /wikipedia\.org/,
   /nytimes\.com/,
-  /newsapi\.org/
+  /newsapi\.org/,
 ];
 
-// Install event - cache static assets
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(STATIC_CACHE)
@@ -26,13 +26,12 @@ self.addEventListener('install', (event) => {
   );
 });
 
-// Activate event - clean up old caches
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then(cacheNames => {
       return Promise.all(
         cacheNames.map(cacheName => {
-          if (cacheName !== CACHE_NAME && cacheName !== STATIC_CACHE) {
+          if (![CACHE_NAME, STATIC_CACHE, ASSET_CACHE].includes(cacheName)) {
             return caches.delete(cacheName);
           }
         })
@@ -41,19 +40,29 @@ self.addEventListener('activate', (event) => {
   );
 });
 
-// Fetch event - implement caching strategies
 self.addEventListener('fetch', (event) => {
   const { request } = event;
   const url = new URL(request.url);
 
-  // Skip non-GET requests
   if (request.method !== 'GET') return;
 
-  // Static assets - cache first
+  // Vite-built, content-hashed assets — cache-first forever (the hash changes on rebuild)
+  if (url.origin === self.location.origin && url.pathname.startsWith('/assets/')) {
+    event.respondWith(
+      caches.open(ASSET_CACHE).then(cache =>
+        cache.match(request).then(hit => hit || fetch(request).then(res => {
+          if (res.status === 200) cache.put(request, res.clone());
+          return res;
+        }))
+      )
+    );
+    return;
+  }
+
+  // Static one-off files
   if (STATIC_ASSETS.some(asset => url.pathname === asset)) {
     event.respondWith(
-      caches.match(request)
-        .then(response => response || fetch(request))
+      caches.match(request).then(response => response || fetch(request))
     );
     return;
   }
@@ -64,14 +73,11 @@ self.addEventListener('fetch', (event) => {
       caches.open(CACHE_NAME).then(cache => {
         return cache.match(request).then(cachedResponse => {
           const fetchPromise = fetch(request).then(networkResponse => {
-            // Only cache successful responses
             if (networkResponse.status === 200) {
               cache.put(request, networkResponse.clone());
             }
             return networkResponse;
-          });
-
-          // Return cached response immediately, fetch in background
+          }).catch(() => cachedResponse);
           return cachedResponse || fetchPromise;
         });
       })
@@ -79,7 +85,7 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Everything else - network first
+  // Everything else - network with cache fallback
   event.respondWith(
     fetch(request).catch(() => caches.match(request))
   );
