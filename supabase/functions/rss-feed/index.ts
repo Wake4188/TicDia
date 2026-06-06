@@ -314,7 +314,7 @@ serve(async (req) => {
   } catch (error) {
     console.error('rss-feed unexpected error:', error);
     return new Response(
-      JSON.stringify({ error: 'Failed to fetch RSS feed', detail: (error as Error)?.message }),
+      JSON.stringify({ error: 'Failed to fetch RSS feed' }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }
